@@ -167,7 +167,7 @@ otbcli_TensorflowModelServe -source1.il spot6pms.tif -source1.placeholder x1 -so
 Who has never dreamed to use classic classifiers performing on deep learning features?
 This is possible thank to two new applications that uses the existing training/classification applications of OTB:
 
- - TrainClassifierFromDeepFeatures: is a composite application that wire the **TensorflowModelServe** application output into the existing official **TrainImagesClassifier** application. 
+**TrainClassifierFromDeepFeatures**: is a composite application that wire the **TensorflowModelServe** application output into the existing official **TrainImagesClassifier** application. 
 ```
 This is the TrainClassifierFromDeepFeatures (TrainClassifierFromDeepFeatures) application, version 6.5.0
 
@@ -259,8 +259,10 @@ MISSING -out                         <string>         Output model  (mandatory)
 
 Use -help param1 [... paramN] to see detailed documentation of those parameters.
 ```
- - ImageClassifierFromDeepFeatures: same thing using the official **ImageClassifier**.
- ```
+
+**ImageClassifierFromDeepFeatures** same approach with the official **ImageClassifier**.
+
+```
  This is the ImageClassifierFromDeepFeatures (ImageClassifierFromDeepFeatures) application, version 6.5.0
 
 Classify image using features from a deep net and an OTB machine learning classification model
