@@ -2,20 +2,8 @@ import sys
 import os
 import numpy as np
 import math
-from operator import itemgetter, attrgetter, methodcaller
-import tensorflow as tf
-#from tensorflow.contrib import rnn
-#from tensorflow.contrib.rnn import DropoutWrapper
-import random
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import precision_recall_fscore_support
-from sklearn.metrics import f1_score
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.utils import shuffle
-from sklearn.metrics import confusion_matrix
 import time
 import otbApplication
-import shutil
 
 def flatten_nparray(np_arr):
   """ Returns a 1D numpy array retulting from the flatten of the input
@@ -80,42 +68,6 @@ def read_samples(fn):
   
   print("Returned numpy array shape: "+str(outimg.shape))
   return np.copy(outimg)
-
-def conv_reduce_mean(input_tensor, shape, strides=[1,1,1,1]):
-	"""
-	This function replaces the tf.reduce_mean with a 2D convolution, to enable the network to perform full convolution
-
-	Example:
-		# "y" is a -1x3x3x128 tensor, and we want a -1x128 tensor of means of all 3x3 slices of y in dimension [1,2] :
-		# We can do :
-		features = tf.reduce_mean(y ,[1,2])
-
-		# But to enable the full convolution, we can do:
-		features = conv_reduce_mean(y, [3,3,128,1])
-	
-	"""
-	filt = tf.fill(shape, 1.0 / (shape[0] * shape[1]))
-	features = tf.nn.depthwise_conv2d(input_tensor, filt, strides=strides, padding="VALID")
-	return tf.reshape(features, [-1, shape[2]])
-
-
-def conv_reduce_max(input_tensor, ksize, nfeat):
-	"""
-	This function replaces the tf.reduce_max with a 2D max pooling, to enable the network to perform full convolution
-
-	Example:
-		# "y" is a -1x3x3x128 tensor, and we want a -1x128 tensor of maximum values of all 3x3 slices of y in dimension [1,2] :
-		# We can do :
-		features = tf.reduce_max(y ,[1,2])
-
-		# But to enable the full convolution, we can do:
-		features = conv_reduce_max(y, [1,3,3,1], 128)
-	
-	"""
-	features = tf.nn.max_pool(input_tensor, ksize, strides=[1, 1, 1, 1], padding="VALID")
-
-	return tf.reshape(features, [-1, nfeat])
-
 
 def getBatch(X, Y, i, batch_size):
 	start_id = i*batch_size
