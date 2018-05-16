@@ -73,7 +73,7 @@ The important thing here is to know the following parameters for your **placehol
  --Expression field
  --Scale factor
 
-![alt text](shema.png "Figure 1")
+![Schema](schema.png)
 
 Here the scale factor is related to one of the model inputs. It tells if your model perform a physical change of spacing of the output (e.g. introduced by non unitary strides in pooling or convolution operators). For each output, it must be expressed relatively to one single input called the reference input.
 Additionally, you will need to remember the **target nodes** (e.g. optimizers, ...) used for training and every other placeholder that are important, especially user placeholders that are used only for training without default value (e.g. "dropout value").
