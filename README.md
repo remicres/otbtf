@@ -40,6 +40,9 @@ This application performs the extraction of patches in images from a vector data
 We denote input source an input image, or a stack of input image (of the same size !). The user can set the **OTB_TF_NSOURCES** environment variable to select the number of input sources that he wants. For example, if she wants to sample a time series of Sentinel or Landsat, and in addition a very high resolution image like Spot-7 or Rapideye, she needs 2 sources (1 for the TS and 1 for the VHRS). The sampled patches will be extracted at each positions designed by the points, if they are entirely inside all input images. For each image source, patches sizes must be provided.
 For each source, the application export all sampled patches as a single multiband raster, stacked in rows. For instance, if you have a number *n* of samples of size *16 x 16* in a *4* channels source image, the output image will be a raster of size *16 x 16n* with *4* channels. 
 An optional output is an image of size *1 x n* containing the value of one specific field of the input vector data. Typically, the *class* field can be used to generate a dataset suitable for a model that performs pixel wise classification. 
+
+![Schema](doc/patches_extraction.png)
+
 ```
 This application extracts patches in multiple input images. Change the OTB_TF_NSOURCES environment variable to set the number of sources.
 Parameters: 
@@ -74,7 +77,7 @@ The important thing here is to know the following parameters for your **placehol
  --Expression field
  --Scale factor
 
-![Schema](schema.png)
+![Schema](doc/schema.png)
 
 Here the scale factor is related to one of the model inputs. It tells if your model perform a physical change of spacing of the output (e.g. introduced by non unitary strides in pooling or convolution operators). For each output, it must be expressed relatively to one single input called the reference input.
 Additionally, you will need to remember the **target nodes** (e.g. optimizers, ...) used for training and every other placeholder that are important, especially user placeholders that are used only for training without default value (e.g. "dropout value").
@@ -82,6 +85,9 @@ Additionally, you will need to remember the **target nodes** (e.g. optimizers, .
 ## Train your Tensorflow model
 Here we assume that you have produced patches using the **PatchesExtraction** application, and that you have a model stored in a directory somewhere on your filesystem. The **TensorflowModelTrain** performs the training, validation (against test dataset, and against validation dataset) providing the usual metrics that machine learning frameworks provide (confusion matrix, recall, precision, f-score, ...).
 Set you input data for training and for validation. The validation against test data is performed on the same data as for training, and the validation against the validation data, well, is performed on the dataset that you give to the application. You can set also batches sizes, and custom placeholders for single valued tensors for both training and validation. The last is useful if you have a model that behaves differently depending the given placeholder. Let's take the example of dropout: it's nice for training, but you have to disable it to use the model. Hence you will pass a placeholder with dropout=0.3 for training and dropout=0.0 for validation. 
+
+![Schema](doc/model_training.png)
+
 ```
 This is the  (TensorflowModelTrain) application, version 6.5.0
 
@@ -130,6 +136,10 @@ As you can note, there is `$OTB_TF_NSOURCES` + 1 sources for practical purpose: 
 The **TensorflowModelServe** application perform model serving, it can be used to produce output raster with the desired tensors. Thanks to the streaming mechanism, very large images can be produced. The application uses the `TensorflowModelFilter` and a `StreamingFilter` to force the streaming of output. This last can be optionally disabled by the user, if he prefers using the extended filenames to deal with chunk sizes. however, it's still very useful when the application is used in other composites applications, or just without extended filename magic. Some models can consume a lot of memory. In addition, the native tiling strategy of OTB consists in strips but this might not always the best. For Constitutional Neural Networks for instance, square tiles are more interesting because the padding required to perform the computation of one single strip of pixels induces to input a lot more pixels that to process the computation of one single tile of pixels.
 So, this application takes in input one or multiple images (remember that you can change the number of inputs by setting the `OTB_TF_NSOURCES` to the desired number) and produce one output of the specified tensors.
 Like it was said before, the user is responsible of giving the *perceptive field* and *name* of input placeholders, as well as the *expression field*, *scale factor* and *name* of the output tensors. The user can ask for multiple tensors, that will be stack along the channel dimension of the output raster. However, if the sizes of those output tensors are not consistent (e.g. a different number of (x,y) elements), an exception will be thrown.
+
+![Schema](doc/classif_map.png)
+
+
 ```
 This is the  (TensorflowModelServe) application, version 6.5.0
 
