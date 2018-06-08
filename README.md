@@ -313,16 +313,16 @@ Here we will try to provide a simple example of doing a classification using a d
 Our data set consists in one Spot-7 image, *spot7.tif*, and a training vector data, *terrain_truth.shp* that qualifies two classes that are forest / non-forest.
 First, we **compute statistics** of the vector data : how many points can we sample inside objects, and how many objects in each class.
 ```
-otbcli_PolygonClassStatistics -vec terrain_truth.shp -in spot7.tif -out vec_stats.xml
+otbcli_PolygonClassStatistics -vec terrain_truth.shp -field class -in spot7.tif -out vec_stats.xml
 ```
 Then, we will select some samples with the **SampleSelection** application of the existing machine learning framework of OTB.
 ```
-otbcli_SampleSelection -in spot7.tif -vec terrain_truth.shp -instats stats.xml -field class -out points.shp
+otbcli_SampleSelection -in spot7.tif -vec terrain_truth.shp -instats vec_stats.xml -field class -out points.shp
 ```
 Ok. Now, let's use our **PatchesExtraction** application. Out model has a perceptive field of 16x16 pixels. 
 We want to produce one image of patches, and one image for the corresponding labels.
 ```
-otbcli_PatchesExtraction -in spot7.tif -patchsizex 16 -patchsizey 16 -vec samplespos.shp -field class -outlabels samp_labels.tif -outpatches samp_patches.tif
+otbcli_PatchesExtraction -source1.il spot7.tif -source1.patchsizex 16 -source1.patchsizey 16 -vec points.shp -field class -source1.out samp_labels.tif -outpatches samp_patches.tif
 ```
 That's it. Now we have two images for patches and labels. If we wanna, we can split them to distinguish test/validation groups (with the **ExtractROI** application for instance). But here, we will just perform some fine tuning of our model, located in the `outmodel` directory. Our model is quite basic. It has two input placeholders, **x1** and **y1** respectively for input patches (with size 16x16) and input reference labels (with size 1x1). We named **prediction** the tensor that predict the labels and the optimizer that perform the stochastic gradient descent is an operator named **optimizer**. We perform the fine tuning and we export the new model variables in the `newvars` folder.
 Let's use our **TensorflowModelTrain** application to perform the training of this existing model.
