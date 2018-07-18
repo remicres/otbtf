@@ -30,3 +30,7 @@ OTB_CREATE_APPLICATION(NAME LabelImageSampleSelection
 	SOURCES otbLabelImageSampleSelection.cxx
 	LINK_LIBRARIES ${OTBCOMMON_LIBRARIES}
 )
+OTB_CREATE_APPLICATION(NAME DensePolygonClassStatistics
+	SOURCES otbDensePolygonClassStatistics.cxx
+	LINK_LIBRARIES ${OTBCOMMON_LIBRARIES}
+)
