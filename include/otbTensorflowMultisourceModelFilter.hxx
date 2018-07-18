@@ -258,32 +258,12 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   unsigned int outputPixelSize = 0;
   for (auto& protoShape: this->GetOutputTensorsShapes())
     {
+    // The number of components per pixel is the last dimension of the tensor
     int dim_size = protoShape.dim_size();
-    unsigned int nComponents = 0;
-    if (dim_size == 1)
+    unsigned int nComponents = 1;
+    if (1 < dim_size && dim_size <= 4)
       {
-      // 1x1@1
-      // (1 component per pixel)
-      // dim(0) = -1
-      nComponents = 1;
-      }
-    else if (dim_size == 2)
-      {
-      // 1x1@N
-      // (N component per pixel)
-      // dim(0) = -1
-      // dim(1) = N
-      nComponents = protoShape.dim(1).size();
-      }
-    else if (dim_size == 4)
-      {
-      // LxC@N
-      // (LxC patch, N component per pixel)
-      // dim(0) = -1
-      // dim(1) = Y
-      // dim(2) = X
-      // dim(3) = N
-      nComponents = protoShape.dim(3).size();
+      nComponents = protoShape.dim(dim_size-1).size();
       }
     else
       {
