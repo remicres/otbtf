@@ -183,7 +183,8 @@ void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, const typename T
     itkGenericExceptionMacro("Number of elements in the tensor is " << nElmT <<
         " but image outputRegion has " << nElmI <<
         " values to fill.\nBuffer region:\n" << bufferRegion <<
-        "Tensor shape:\n " << PrintTensorShape(tensor.shape()) <<
+        "\nNumber of components: " << outputDimSize_C <<
+        "\nTensor shape:\n " << PrintTensorShape(tensor.shape()) <<
         "\nPlease check the input(s) field of view (FOV), " <<
         "the output field of expression (FOE), and the  " <<
         "output spacing scale if you run the model in fully " <<
