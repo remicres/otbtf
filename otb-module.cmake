@@ -9,6 +9,9 @@ otb_module(OTBTensorflow
 		OTBExtendedFilename
 		OTBImageIO
 		OTBSupervised
+    OTBIOXML
+    OTBConversion
+    OTBStatistics
 	TEST_DEPENDS
 		OTBTestKernel
 		OTBCommandLine
