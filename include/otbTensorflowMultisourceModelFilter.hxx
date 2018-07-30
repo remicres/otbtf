@@ -261,11 +261,11 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     // The number of components per pixel is the last dimension of the tensor
     int dim_size = protoShape.dim_size();
     unsigned int nComponents = 1;
-    if (0 < dim_size && dim_size <= 4)
+    if (1 < dim_size && dim_size <= 4)
       {
       nComponents = protoShape.dim(dim_size-1).size();
       }
-    else
+    else if (dim_size > 4)
       {
       itkExceptionMacro("Dim_size=" << dim_size << " currently not supported.");
       }
