@@ -19,7 +19,11 @@ namespace tf {
 template<class Type>
 tensorflow::DataType GetTensorflowDataType()
 {
-  if (typeid(Type) == typeid(char))
+  if (typeid(Type) == typeid(bool))
+  {
+    return tensorflow::DT_BOOL;
+  }
+  else if (typeid(Type) == typeid(char))
   {
     return tensorflow::DT_INT8;
   }
