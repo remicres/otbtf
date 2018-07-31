@@ -429,7 +429,7 @@ public:
     // Train the model
     for (int epoch = 0 ; epoch < GetParameterInt("training.epochs") ; epoch++)
       {
-      AddProcess(m_TrainModelFilter, "Training epoch #" + std::to_string(epoch));
+      AddProcess(m_TrainModelFilter, "Training epoch #" + std::to_string(epoch+1));
       m_TrainModelFilter->Update();
       }
 
