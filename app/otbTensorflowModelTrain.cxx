@@ -453,10 +453,10 @@ public:
       m_ValidateModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
       m_ValidateModelFilter->SetUserPlaceholders(GetUserPlaceholders("validation.userplaceholders"));
 
-      // Test
-      for (unsigned int i = 0 ; i < m_InputSourcesForTraining.size() ; i++)
+      // Evaluate the metrics against the learning data (test)
+      for (unsigned int i = 0 ; i < m_InputSourcesForTest.size() ; i++)
         {
-        m_TrainModelFilter->PushBackInputBundle(m_InputPlaceholdersForValidation[i],
+        m_ValidateModelFilter->PushBackInputBundle(m_InputPlaceholdersForValidation[i],
             m_InputPatchesSizeForValidation[i], m_InputSourcesForTest[i]);
         }
       for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
@@ -475,10 +475,10 @@ public:
         PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
         }
 
-      // Validation
-      for (unsigned int i = 0 ; i < m_InputSourcesForTest.size() ; i++)
+      // Evaluate the metrics against the validation data
+      for (unsigned int i = 0 ; i < m_InputSourcesForValidation.size() ; i++)
         {
-        m_ValidateModelFilter->SetInput(i, m_InputSourcesForTest[i]);
+        m_ValidateModelFilter->SetInput(i, m_InputSourcesForValidation[i]);
         }
       m_ValidateModelFilter->ClearInputReferences();
       for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
