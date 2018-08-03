@@ -97,16 +97,17 @@ TensorflowMultisourceModelValidate<TInputImage>
     {
     itkExceptionMacro("No reference is set");
     }
-  if (nbOfRefs != m_OutputFOESizes.size())
+  SizeListType outputEFSizes = this->GetOutputFOESizes();
+  if (nbOfRefs != outputEFSizes.size())
     {
     itkExceptionMacro("There is " << nbOfRefs << " but only " <<
-                      m_OutputFOESizes.size() << " field of expression sizes");
+                      outputEFSizes.size() << " field of expression sizes");
     }
 
   // Check reference image infos
   for (unsigned int i = 0 ;i < nbOfRefs ; i++)
     {
-    const SizeType outputFOESize = m_OutputFOESizes[i];
+    const SizeType outputFOESize = outputEFSizes[i];
     const RegionType refRegion = m_References[i]->GetLargestPossibleRegion();
     if (refRegion.GetSize(0) != outputFOESize[0])
       {
@@ -143,14 +144,13 @@ TensorflowMultisourceModelValidate<TInputImage>
 template<class TInputImage>
 void
 TensorflowMultisourceModelValidate<TInputImage>
-::PushBackInputReference(const ImageType *input, SizeType fieldOfExpression)
+::SetInputReferences(ImageListType input)
  {
-  m_References.push_back(const_cast<ImageType*>(input));
-  m_OutputFOESizes.push_back(fieldOfExpression);
+  m_References = input;
  }
 
 template<class TInputImage>
-const TInputImage*
+typename TensorflowMultisourceModelValidate<TInputImage>::ImagePointerType
 TensorflowMultisourceModelValidate<TInputImage>
 ::GetInputReference(unsigned int index)
  {
@@ -159,16 +159,7 @@ TensorflowMultisourceModelValidate<TInputImage>
     itkExceptionMacro("There is no input reference #" << index);
     }
 
-  return static_cast<const ImageType*>(m_References[index]);
- }
-
-template <class TInputImage>
-void
-TensorflowMultisourceModelValidate<TInputImage>
-::ClearInputReferences()
- {
-  m_References.clear();
-  m_OutputFOESizes.clear();
+  return m_References[index];
  }
 
 /**
@@ -257,11 +248,11 @@ TensorflowMultisourceModelValidate<TInputImage>
       itkWarningMacro("There is " << outputs.size() << " outputs returned after session run, " <<
                       "but only " << m_References.size() << " reference(s) set");
       }
-
+    SizeListType outputEFSizes = this->GetOutputFOESizes();
     for (unsigned int refIdx = 0 ; refIdx < outputs.size() ; refIdx++)
       {
       // Recopy the chunk
-      const SizeType outputFOESize = m_OutputFOESizes[refIdx];
+      const SizeType outputFOESize = outputEFSizes[refIdx];
       IndexType cpyStart;
       cpyStart.Fill(0);
       IndexType refRegStart;

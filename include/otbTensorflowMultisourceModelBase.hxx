@@ -25,10 +25,10 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 template <class TInputImage, class TOutputImage>
 void
 TensorflowMultisourceModelBase<TInputImage, TOutputImage>
-::PushBackInputBundle(std::string placeholder, SizeType fieldOfView, ImagePointerType image)
+::PushBackInputBundle(std::string placeholder, SizeType receptiveField, ImagePointerType image)
  {
   Superclass::PushBackInput(image);
-  m_InputFOVSizes.push_back(fieldOfView);
+  m_InputFOVSizes.push_back(receptiveField);
   m_InputPlaceholdersNames.push_back(placeholder);
  }
 

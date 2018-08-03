@@ -240,10 +240,10 @@ public:
   //   -Placeholders
   //   -PatchSize
   //   -ImageSource
-  // 2.Validation/Test
+  // 2.Learning/Validation
   //   -Placeholders (if input) or Tensor name (if target)
   //   -PatchSize (which is the same as for training)
-  //   -ImageSource (depending if it's for test or validation)
+  //   -ImageSource (depending if it's for learning or validation)
   //
   // TODO: a bit of refactoring. We could simply rely on m_Bundles
   //       if we can keep trace of indices of sources for
@@ -262,12 +262,12 @@ public:
 
     // Clear bundles
     m_InputSourcesForTraining.clear();
-    m_InputSourcesForTest.clear();
-    m_InputSourcesForValidation.clear();
+    m_InputSourcesForEvaluationAgainstLearningData.clear();
+    m_InputSourcesForEvaluationAgainstValidationData.clear();
 
     m_TargetTensorsNames.clear();
-    m_InputTargetsForValidation.clear();
-    m_InputTargetsForTest.clear();
+    m_InputTargetsForEvaluationAgainstValidationData.clear();
+    m_InputTargetsForEvaluationAgainstLearningData.clear();
 
 
     // Prepare the bundles
@@ -314,8 +314,8 @@ public:
         if (placeholderForValidation.compare(placeholderForTraining) == 0)
           {
           // Source
-          m_InputSourcesForValidation.push_back(bundle.tfSourceForValidation.Get());
-          m_InputSourcesForTest.push_back(bundle.tfSource.Get());
+          m_InputSourcesForEvaluationAgainstValidationData.push_back(bundle.tfSourceForValidation.Get());
+          m_InputSourcesForEvaluationAgainstLearningData.push_back(bundle.tfSource.Get());
 
           // Placeholder
           m_InputPlaceholdersForValidation.push_back(placeholderForValidation);
@@ -330,8 +330,8 @@ public:
         else
           {
           // Source
-          m_InputTargetsForValidation.push_back(bundle.tfSourceForValidation.Get());
-          m_InputTargetsForTest.push_back(bundle.tfSource.Get());
+          m_InputTargetsForEvaluationAgainstValidationData.push_back(bundle.tfSourceForValidation.Get());
+          m_InputTargetsForEvaluationAgainstLearningData.push_back(bundle.tfSource.Get());
 
           // Placeholder
           m_TargetTensorsNames.push_back(placeholderForValidation);
@@ -422,8 +422,10 @@ public:
     // Set input bundles
     for (unsigned int i = 0 ; i < m_InputSourcesForTraining.size() ; i++)
       {
-      m_TrainModelFilter->PushBackInputBundle(m_InputPlaceholdersForTraining[i],
-          m_InputPatchesSizeForTraining[i], m_InputSourcesForTraining[i]);
+      m_TrainModelFilter->PushBackInputBundle(
+          m_InputPlaceholdersForTraining[i],
+          m_InputPatchesSizeForTraining[i],
+          m_InputSourcesForTraining[i]);
       }
 
     // Train the model
@@ -449,26 +451,24 @@ public:
       m_ValidateModelFilter = ValidateModelFilterType::New();
       m_ValidateModelFilter->SetGraph(m_SavedModel.meta_graph_def.graph_def());
       m_ValidateModelFilter->SetSession(m_SavedModel.session.get());
-      m_ValidateModelFilter->SetOutputTensorsNames(m_TargetTensorsNames);
       m_ValidateModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
       m_ValidateModelFilter->SetUserPlaceholders(GetUserPlaceholders("validation.userplaceholders"));
 
-      // Evaluate the metrics against the learning data (test)
-      for (unsigned int i = 0 ; i < m_InputSourcesForTest.size() ; i++)
+      // Evaluate the metrics against the learning data
+      for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstLearningData.size() ; i++)
         {
-        m_ValidateModelFilter->PushBackInputBundle(m_InputPlaceholdersForValidation[i],
-            m_InputPatchesSizeForValidation[i], m_InputSourcesForTest[i]);
+        m_ValidateModelFilter->PushBackInputBundle(
+            m_InputPlaceholdersForValidation[i],
+            m_InputPatchesSizeForValidation[i],
+            m_InputSourcesForEvaluationAgainstLearningData[i]);
         }
-      for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
-        {
-        m_ValidateModelFilter->PushBackInputReference(m_InputTargetsForTest[i], m_TargetPatchesSize[i]);
-        }
-
-      // Evaluate the model (test)
-      AddProcess(m_ValidateModelFilter, "Evaluate model (Test)");
+      m_ValidateModelFilter->SetOutputTensorsNames(m_TargetTensorsNames);
+      m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstLearningData);
+      m_ValidateModelFilter->SetOutputFOESizes(m_TargetPatchesSize);
+      AddProcess(m_ValidateModelFilter, "Evaluate model (Learning data)");
       m_ValidateModelFilter->Update();
 
-      // Print some metrics
+      // Print metrics
       for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
         {
         otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
@@ -476,27 +476,20 @@ public:
         }
 
       // Evaluate the metrics against the validation data
-      for (unsigned int i = 0 ; i < m_InputSourcesForValidation.size() ; i++)
+      for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstValidationData.size() ; i++)
         {
-        m_ValidateModelFilter->SetInput(i, m_InputSourcesForValidation[i]);
+        m_ValidateModelFilter->SetInput(i, m_InputSourcesForEvaluationAgainstValidationData[i]);
         }
-      m_ValidateModelFilter->ClearInputReferences();
-      for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
-        {
-        m_ValidateModelFilter->PushBackInputReference(m_InputTargetsForValidation[i], m_TargetPatchesSize[i]);
-        }
-
-      // Evaluate the model (validation)
-      AddProcess(m_ValidateModelFilter, "Evaluate model (Validation)");
+      m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstValidationData);
+      AddProcess(m_ValidateModelFilter, "Evaluate model (Validation data)");
       m_ValidateModelFilter->Update();
 
-      // Print some metrics
+      // Print metrics
       for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
         {
         otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
         PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
         }
-
 
       }
     else if (GetParameterInt("validation.mode")==2) // rmse)
@@ -516,17 +509,23 @@ private:
   tensorflow::SavedModelBundle     m_SavedModel; // must be alive during all the execution of the application !
 
   BundleList m_Bundles;
+
+  // Patches size
   SizeList   m_InputPatchesSizeForTraining;
   SizeList   m_InputPatchesSizeForValidation;
   SizeList   m_TargetPatchesSize;
+
+  // Placeholders and Tensors names
   StringList m_InputPlaceholdersForTraining;
   StringList m_InputPlaceholdersForValidation;
   StringList m_TargetTensorsNames;
+
+  // Image sources
   std::vector<FloatVectorImageType::Pointer> m_InputSourcesForTraining;
-  std::vector<FloatVectorImageType::Pointer> m_InputSourcesForTest;
-  std::vector<FloatVectorImageType::Pointer> m_InputTargetsForTest;
-  std::vector<FloatVectorImageType::Pointer> m_InputSourcesForValidation;
-  std::vector<FloatVectorImageType::Pointer> m_InputTargetsForValidation;
+  std::vector<FloatVectorImageType::Pointer> m_InputSourcesForEvaluationAgainstLearningData;
+  std::vector<FloatVectorImageType::Pointer> m_InputSourcesForEvaluationAgainstValidationData;
+  std::vector<FloatVectorImageType::Pointer> m_InputTargetsForEvaluationAgainstLearningData;
+  std::vector<FloatVectorImageType::Pointer> m_InputTargetsForEvaluationAgainstValidationData;
 
 }; // end of class
 

@@ -84,15 +84,29 @@ public:
   tensorflow::Session * GetSession()             { return m_Session;    }
 
   /** Model parameters */
-  void PushBackInputBundle(std::string placeholder, SizeType fieldOfView, ImagePointerType image);
-  itkSetMacro(InputPlaceholdersNames, StringList);
+  void PushBackInputBundle(std::string placeholder, SizeType receptiveField, ImagePointerType image);
+
+//  /** Input placeholders names */
+//  itkSetMacro(InputPlaceholdersNames, StringList);
   itkGetMacro(InputPlaceholdersNames, StringList);
-  itkSetMacro(InputFOVSizes, SizeListType);
+//
+//  /** Receptive field */
+//  itkSetMacro(InputFOVSizes, SizeListType);
   itkGetMacro(InputFOVSizes, SizeListType);
-  void SetUserPlaceholders(DictListType dict) { m_UserPlaceholders = dict; }
-  DictListType GetUserPlaceholders()          { return m_UserPlaceholders; }
+
+  /** Output tensors names */
   itkSetMacro(OutputTensorsNames, StringList);
   itkGetMacro(OutputTensorsNames, StringList);
+
+  /** Expression field */
+  itkSetMacro(OutputFOESizes, SizeListType);
+  itkGetMacro(OutputFOESizes, SizeListType);
+
+  /** User placeholders */
+  void SetUserPlaceholders(DictListType dict) { m_UserPlaceholders = dict; }
+  DictListType GetUserPlaceholders()          { return m_UserPlaceholders; }
+
+  /** Target nodes names */
   itkSetMacro(TargetNodesNames, StringList);
   itkGetMacro(TargetNodesNames, StringList);
 
@@ -123,6 +137,7 @@ private:
   // Model parameters
   StringList                 m_InputPlaceholdersNames;  // Input placeholders names
   SizeListType               m_InputFOVSizes;           // Input tensors field of view (FOV) sizes
+  SizeListType               m_OutputFOESizes;          // Output tensors field of expression (FOE) sizes
   DictListType               m_UserPlaceholders;        // User placeholders
   StringList                 m_OutputTensorsNames;      // User tensors
   StringList                 m_TargetNodesNames;        // User target tensors
