@@ -63,6 +63,7 @@ public:
   typedef typename Superclass::RegionType        RegionType;
   typedef typename Superclass::SizeType          SizeType;
   typedef typename Superclass::IndexType         IndexType;
+  typedef std::vector<ImagePointerType>          ImageListType;
 
   /* Typedefs for parameters */
   typedef typename Superclass::DictType          DictType;
@@ -90,9 +91,8 @@ public:
 
   virtual void GenerateInputRequestedRegion();
 
-  virtual void PushBackInputReference(const ImageType *input, SizeType foe);
-  const TInputImage* GetInputReference(unsigned int index);
-  void ClearInputReferences();
+  virtual void SetInputReferences(ImageListType input);
+  ImagePointerType GetInputReference(unsigned int index);
 
   virtual void GenerateData();
 
@@ -108,8 +108,7 @@ private:
   void operator=(const Self&); //purposely not implemented
 
   unsigned int               m_BatchSize;               // Batch size
-  SizeListType               m_OutputFOESizes;          // Output tensors field of expression (FOE) sizes
-  std::vector<ImageType *>   m_References;              // The references images
+  ImageListType              m_References;              // The references images
 
   // Read only
   unsigned int               m_NumberOfSamples;         // Number of samples
