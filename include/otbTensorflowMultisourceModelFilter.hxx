@@ -454,7 +454,18 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     // The offset (i.e. the starting index of the channel for the output tensor) is updated
     // during this call
     // TODO: implement a generic strategy enabling FOE copy in patch-based mode (see tf::CopyTensorToImageRegion)
-    tf::CopyTensorToImageRegion<TOutputImage> (outputs[i], outputAlignedReqRegion, outputPtr, outputReqRegion, bandOffset);
+    try
+      {
+      tf::CopyTensorToImageRegion<TOutputImage> (outputs[i],
+          outputAlignedReqRegion, outputPtr, outputReqRegion, bandOffset);
+      }
+    catch( itk::ExceptionObject & err )
+      {
+      std::stringstream debugMsg = this->GenerateDebugReport(inputs, outputs);
+      itkExceptionMacro("Error occured during tensor to image conversion.\n"
+          << "Context: " << debugMsg.str()
+          << "Error:" << err);
+      }
     }
 
  }

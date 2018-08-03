@@ -33,6 +33,40 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
  }
 
 template <class TInputImage, class TOutputImage>
+std::stringstream
+TensorflowMultisourceModelBase<TInputImage, TOutputImage>
+::GenerateDebugReport(DictListType & inputs, TensorListType & outputs)
+ {
+  // Create a debug report
+  std::stringstream debugReport;
+
+  // Describe the output buffered region
+  ImagePointerType outputPtr = this->GetOutput();
+  const RegionType outputReqRegion = outputPtr->GetRequestedRegion();
+  debugReport << "Output image buffered region: " << outputReqRegion << "\n";
+
+  // Describe inputs
+  for (unsigned int i = 0 ; i < this->GetNumberOfInputs() ; i++)
+    {
+    const ImagePointerType inputPtr = const_cast<TInputImage*>(this->GetInput(i));
+    const RegionType reqRegion = inputPtr->GetRequestedRegion();
+    debugReport << "Input #" << i << ":\n";
+    debugReport << "Requested region: " << reqRegion << "\n";
+    debugReport << "Tensor shape (\"" << inputs[i].first << "\": " << tf::PrintTensorShape(inputs[i].second.shape()) << "\n";
+    }
+
+  // Show user placeholders
+  debugReport << "User placeholders:\n" ;
+  for (auto& dict: this->GetUserPlaceholders())
+    {
+    debugReport << dict.first << " " << tf::PrintTensorInfos(dict.second) << "\n" << std::endl;
+    }
+
+  return debugReport;
+ }
+
+
+template <class TInputImage, class TOutputImage>
 void
 TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 ::RunSession(DictListType & inputs, TensorListType & outputs)
@@ -52,29 +86,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   if (!status.ok()) {
 
     // Create a debug report
-    std::stringstream debugReport;
-
-    // Describe the output buffered region
-    ImagePointerType outputPtr = this->GetOutput();
-    const RegionType outputReqRegion = outputPtr->GetRequestedRegion();
-    debugReport << "Output image buffered region: " << outputReqRegion << "\n";
-
-    // Describe inputs
-    for (unsigned int i = 0 ; i < this->GetNumberOfInputs() ; i++)
-      {
-      const ImagePointerType inputPtr = const_cast<TInputImage*>(this->GetInput(i));
-      const RegionType reqRegion = inputPtr->GetRequestedRegion();
-      debugReport << "Input #" << i << ":\n";
-      debugReport << "Requested region: " << reqRegion << "\n";
-      debugReport << "Tensor shape (\"" << inputs[i].first << "\": " << tf::PrintTensorShape(inputs[i].second.shape()) << "\n";
-      }
-
-    // Show user placeholders
-    debugReport << "User placeholders:\n" ;
-    for (auto& dict: this->GetUserPlaceholders())
-      {
-      debugReport << dict.first << " " << tf::PrintTensorInfos(dict.second) << "\n" << std::endl;
-      }
+    std::stringstream debugReport = GenerateDebugReport(inputs, outputs);
 
     // Throw an exception with the report
     itkExceptionMacro("Can't run the tensorflow session !\n" <<
