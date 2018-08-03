@@ -21,6 +21,7 @@ TensorflowMultisourceModelTrain<TInputImage>
 ::TensorflowMultisourceModelTrain()
  {
   m_BatchSize = 100;
+  m_NumberOfSamples = 0;
  }
 
 
@@ -40,7 +41,6 @@ TensorflowMultisourceModelTrain<TInputImage>
   //////////////////////////////////////////////////////////////////////////////////////////
   //                               Check the number of samples
   //////////////////////////////////////////////////////////////////////////////////////////
-
 
   m_NumberOfSamples = 0;
   for (unsigned int i = 0 ; i < this->GetNumberOfInputs() ; i++)

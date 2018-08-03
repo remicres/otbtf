@@ -419,7 +419,7 @@ public:
     m_TrainModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
     m_TrainModelFilter->SetUserPlaceholders(GetUserPlaceholders("training.userplaceholders"));
 
-    // Set input bundles
+    // Set inputs
     for (unsigned int i = 0 ; i < m_InputSourcesForTraining.size() ; i++)
       {
       m_TrainModelFilter->PushBackInputBundle(
@@ -454,7 +454,8 @@ public:
       m_ValidateModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
       m_ValidateModelFilter->SetUserPlaceholders(GetUserPlaceholders("validation.userplaceholders"));
 
-      // Evaluate the metrics against the learning data
+      // 1. Evaluate the metrics against the learning data
+
       for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstLearningData.size() ; i++)
         {
         m_ValidateModelFilter->PushBackInputBundle(
@@ -465,26 +466,30 @@ public:
       m_ValidateModelFilter->SetOutputTensorsNames(m_TargetTensorsNames);
       m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstLearningData);
       m_ValidateModelFilter->SetOutputFOESizes(m_TargetPatchesSize);
+
+      // Update
       AddProcess(m_ValidateModelFilter, "Evaluate model (Learning data)");
       m_ValidateModelFilter->Update();
 
-      // Print metrics
       for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
         {
         otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
         PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
         }
 
-      // Evaluate the metrics against the validation data
+      // 2. Evaluate the metrics against the validation data
+
+      // Here we just change the input sources and references
       for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstValidationData.size() ; i++)
         {
         m_ValidateModelFilter->SetInput(i, m_InputSourcesForEvaluationAgainstValidationData[i]);
         }
       m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstValidationData);
+
+      // Update
       AddProcess(m_ValidateModelFilter, "Evaluate model (Validation data)");
       m_ValidateModelFilter->Update();
 
-      // Print metrics
       for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
         {
         otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");

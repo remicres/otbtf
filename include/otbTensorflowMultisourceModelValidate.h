@@ -36,6 +36,7 @@ namespace otb
  * Names of input placeholders must be specified using the
  * SetInputPlaceholdersNames method
  *
+ * TODO: Add an option to disable streaming
  *
  * \ingroup OTBTensorflow
  */
@@ -83,20 +84,27 @@ public:
   typedef std::vector<ConfMatType>                 ConfMatListType;
   typedef itk::ImageRegionConstIterator<ImageType> IteratorType;
 
+  /* Set and Get the batch size
   itkSetMacro(BatchSize, unsigned int);
   itkGetMacro(BatchSize, unsigned int);
+
+  /** Get the number of samples */
   itkGetMacro(NumberOfSamples, unsigned int);
 
   virtual void GenerateOutputInformation(void);
 
   virtual void GenerateInputRequestedRegion();
 
+  /** Set and Get the input references */
   virtual void SetInputReferences(ImageListType input);
   ImagePointerType GetInputReference(unsigned int index);
 
   virtual void GenerateData();
 
+  /** Get the confusion matrix */
   const ConfMatType GetConfusionMatrix(unsigned int target);
+
+  /** Get the map of classes matrix */
   const MapOfClassesType GetMapOfClasses(unsigned int target);
 
 protected:

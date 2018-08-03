@@ -36,6 +36,9 @@ namespace otb
  * Names of input placeholders must be specified using the
  * SetInputPlaceholdersNames method
  *
+ * TODO:
+ *   Replace FOV (Field Of View) --> RF (Receptive Field)
+ *   Replace FEO (Field Of Expr) --> EF (Expression Field)
  *
  * \ingroup OTBTensorflow
  */
