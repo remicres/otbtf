@@ -108,6 +108,8 @@ protected:
   TensorflowMultisourceModelBase();
   virtual ~TensorflowMultisourceModelBase() {};
 
+  virtual std::stringstream GenerateDebugReport(DictListType & inputs, TensorListType & outputs);
+
   virtual void RunSession(DictListType & inputs, TensorListType & outputs);
 
 private:
