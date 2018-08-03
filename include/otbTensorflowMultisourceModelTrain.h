@@ -34,6 +34,7 @@ namespace otb
  * Names of input placeholders must be specified using the
  * SetInputPlaceholdersNames method
  *
+ * TODO: Add an option to disable streaming
  *
  * \ingroup OTBTensorflow
  */

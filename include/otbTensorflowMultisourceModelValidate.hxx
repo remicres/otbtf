@@ -21,6 +21,7 @@ TensorflowMultisourceModelValidate<TInputImage>
 ::TensorflowMultisourceModelValidate()
  {
   m_BatchSize = 100;
+  m_NumberOfSamples = 0;
  }
 
 
@@ -141,6 +142,9 @@ TensorflowMultisourceModelValidate<TInputImage>
 
  }
 
+/*
+ * Set the references images
+ */
 template<class TInputImage>
 void
 TensorflowMultisourceModelValidate<TInputImage>
@@ -149,6 +153,10 @@ TensorflowMultisourceModelValidate<TInputImage>
   m_References = input;
  }
 
+/*
+ * Retrieve the i-th reference image
+ * An exception is thrown if it doesn't exist.
+ */
 template<class TInputImage>
 typename TensorflowMultisourceModelValidate<TInputImage>::ImagePointerType
 TensorflowMultisourceModelValidate<TInputImage>
@@ -164,6 +172,9 @@ TensorflowMultisourceModelValidate<TInputImage>
 
 /**
  * Perform the validation
+ * The session is ran over the entire set of batches.
+ * Output is then validated agains the references images,
+ * and a confusion matrix is built.
  */
 template <class TInputImage>
 void
@@ -346,6 +357,10 @@ TensorflowMultisourceModelValidate<TInputImage>
 
  }
 
+/*
+ * Get the confusion matrix
+ * If the target is not in the map, an exception is thrown.
+ */
 template <class TInputImage>
 const typename TensorflowMultisourceModelValidate<TInputImage>::ConfMatType
 TensorflowMultisourceModelValidate<TInputImage>
@@ -360,6 +375,10 @@ TensorflowMultisourceModelValidate<TInputImage>
   return m_ConfusionMatrices[target];
  }
 
+/*
+ * Get the map of classes
+ * If the target is not in the map, an exception is thrown.
+ */
 template <class TInputImage>
 const typename TensorflowMultisourceModelValidate<TInputImage>::MapOfClassesType
 TensorflowMultisourceModelValidate<TInputImage>
