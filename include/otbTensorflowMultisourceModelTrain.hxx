@@ -102,7 +102,9 @@ TensorflowMultisourceModelTrain<TInputImage>
     {
     RegionType nullRegion;
     ImageType * inputImage = static_cast<ImageType * >( Superclass::ProcessObject::GetInput(i) );
-    inputImage->SetRequestedRegion(nullRegion);
+// TODO: streaming mode on/off
+//    inputImage->SetRequestedRegion(nullRegion);
+    inputImage->SetRequestedRegion(inputImage->GetLargestPossibleRegion());
     } // next image
  }
 
@@ -170,7 +172,8 @@ TensorflowMultisourceModelTrain<TInputImage>
         start[0] = 0;
         start[1] = randPos * sz_y;
         RegionType patchRegion(start, inputPatchSize);
-        tf::PropagateRequestedRegion<TInputImage>(inputPtr, patchRegion);
+// TODO: streaming mode on/off
+//        tf::PropagateRequestedRegion<TInputImage>(inputPtr, patchRegion);
         tf::RecopyImageRegionToTensorWithCast<TInputImage>(inputPtr, patchRegion, inputTensor, elem );
         }
 
