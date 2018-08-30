@@ -16,7 +16,7 @@
 #include "itkSimpleDataObjectDecorator.h"
 
 // Base
-#include "otbTensorflowMultisourceModelBase.h"
+#include "otbTensorflowMultisourceModelLearningBase.h"
 
 // Shuffle
 #include <random>
@@ -31,67 +31,47 @@ namespace otb
  * \brief This filter train a TensorFlow model over multiple input images.
  *
  * The filter takes N input images and feed the TensorFlow model.
- * Names of input placeholders must be specified using the
- * SetInputPlaceholdersNames method
  *
- * TODO: Add an option to disable streaming
  *
  * \ingroup OTBTensorflow
  */
 template <class TInputImage>
 class ITK_EXPORT TensorflowMultisourceModelTrain :
-public TensorflowMultisourceModelBase<TInputImage>
+public TensorflowMultisourceModelLearningBase<TInputImage>
 {
 public:
 
   /** Standard class typedefs. */
-  typedef TensorflowMultisourceModelTrain                    Self;
-  typedef TensorflowMultisourceModelBase<TInputImage>        Superclass;
-  typedef itk::SmartPointer<Self>                            Pointer;
-  typedef itk::SmartPointer<const Self>                      ConstPointer;
+  typedef TensorflowMultisourceModelTrain                     Self;
+  typedef TensorflowMultisourceModelLearningBase<TInputImage> Superclass;
+  typedef itk::SmartPointer<Self>                             Pointer;
+  typedef itk::SmartPointer<const Self>                       ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
 
   /** Run-time type information (and related methods). */
-  itkTypeMacro(TensorflowMultisourceModelTrain, TensorflowMultisourceModelBase);
+  itkTypeMacro(TensorflowMultisourceModelTrain, TensorflowMultisourceModelLearningBase);
 
-  /** Images typedefs */
-  typedef typename Superclass::ImageType         ImageType;
-  typedef typename Superclass::ImagePointerType  ImagePointerType;
-  typedef typename Superclass::RegionType        RegionType;
-  typedef typename Superclass::SizeType          SizeType;
-  typedef typename Superclass::IndexType         IndexType;
-
-  /* Typedefs for parameters */
-  typedef typename Superclass::DictType          DictType;
-  typedef typename Superclass::StringList        StringList;
-  typedef typename Superclass::SizeListType      SizeListType;
-  typedef typename Superclass::DictListType      DictListType;
+  /** Superclass typedefs */
+  typedef typename Superclass::IndexValueType    IndexValueType;
   typedef typename Superclass::TensorListType    TensorListType;
+  typedef typename Superclass::IndexListType     IndexListType;
 
-  itkSetMacro(BatchSize, unsigned int);
-  itkGetMacro(BatchSize, unsigned int);
-  itkGetMacro(NumberOfSamples, unsigned int);
-
-  virtual void GenerateOutputInformation(void);
-
-  virtual void GenerateInputRequestedRegion();
-
-  virtual void GenerateData();
 
 protected:
   TensorflowMultisourceModelTrain();
   virtual ~TensorflowMultisourceModelTrain() {};
 
+  void GenerateData();
+  void ProcessBatch(TensorListType & inputs, const IndexValueType & sampleStart,
+      const IndexValueType & batchSize);
+
 private:
   TensorflowMultisourceModelTrain(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
 
-  unsigned int               m_BatchSize;               // Batch size
-
-  // Read only
-  unsigned int               m_NumberOfSamples;         // Number of samples
+  IndexListType     m_RandomIndices;           // Reordered indices
 
 }; // end class
 

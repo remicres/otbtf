@@ -216,7 +216,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
 
     // Update output image extent
     PointType currentInputImageExtentInf, currentInputImageExtentSup;
-    ImageToExtent(currentImage, currentInputImageExtentInf, currentInputImageExtentSup, this->GetInputFOVSizes()[imageIndex]);
+    ImageToExtent(currentImage, currentInputImageExtentInf, currentInputImageExtentSup, this->GetInputReceptiveFields()[imageIndex]);
     for(unsigned int dim = 0; dim<ImageType::ImageDimension; ++dim)
       {
       extentInf[dim] = vnl_math_max(currentInputImageExtentInf[dim], extentInf[dim]);
@@ -236,7 +236,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   if (!m_ForceOutputGridSize)
     {
     // Default is the output field of expression
-    m_OutputGridSize = m_OutputFOESize;
+    m_OutputGridSize = this->GetOutputExpressionFields().at(0);
     }
 
   // Resize the largestPossibleRegion to be a multiple of the grid size
@@ -315,9 +315,9 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
       }
 
     // Compute the FOV-scale*FOE radius to pad
-    SizeType toPad(this->GetInputFOVSizes().at(i));
-    toPad[0] -= 1 + (m_OutputFOESize[0] - 1) * m_OutputSpacingScale;
-    toPad[1] -= 1 + (m_OutputFOESize[1] - 1) * m_OutputSpacingScale;
+    SizeType toPad(this->GetInputReceptiveFields().at(i));
+    toPad[0] -= 1 + (this->GetOutputExpressionFields().at(0)[0] - 1) * m_OutputSpacingScale;
+    toPad[1] -= 1 + (this->GetOutputExpressionFields().at(0)[1] - 1) * m_OutputSpacingScale;
 
     // Pad with radius
     SmartPad(inRegion, toPad);
@@ -365,7 +365,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   const unsigned int nInputs = this->GetNumberOfInputs();
 
   // Create input tensors list
-  DictListType inputs;
+  DictType inputs;
 
   // Populate input tensors
   for (unsigned int i = 0 ; i < nInputs ; i++)
@@ -374,7 +374,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     const ImagePointerType inputPtr = const_cast<TInputImage*>(this->GetInput(i));
 
     // Patch size of tensor #i
-    const SizeType inputPatchSize = this->GetInputFOVSizes().at(i);
+    const SizeType inputPatchSize = this->GetInputReceptiveFields().at(i);
 
     // Input image requested region
     const RegionType reqRegion = inputPtr->GetRequestedRegion();
@@ -395,7 +395,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
       tf::RecopyImageRegionToTensorWithCast<TInputImage>(inputPtr, reqRegion, inputTensor, 0);
 
       // Input #1 : the tensor of patches (aka the batch)
-      DictType input1 = { this->GetInputPlaceholdersNames()[i], inputTensor };
+      DictElementType input1 = { this->GetInputPlaceholdersNames()[i], inputTensor };
       inputs.push_back(input1);
       }
     else
@@ -429,7 +429,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
         }
 
       // Input #1 : the tensor of patches (aka the batch)
-      DictType input1 = { this->GetInputPlaceholdersNames()[i], inputTensor };
+      DictElementType input1 = { this->GetInputPlaceholdersNames()[i], inputTensor };
       inputs.push_back(input1);
       } // mode is not full convolutional
 
