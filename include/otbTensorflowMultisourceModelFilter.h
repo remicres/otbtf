@@ -30,27 +30,26 @@ namespace otb
  *
  * The filter takes N input images and feed the TensorFlow model to produce
  * one output image of desired TF op results.
- * Names of input/output placeholders/tensors must be specified using the
- * SetInputPlaceholdersNames/SetOutputTensorNames.
+ * Names of input placeholders and output tensors must be specified using the
+ * SetPlaceholders() and SetTensors() methods.
  *
- * Example: we have a tensorflow model which runs the input images "x1" and "x2"
+ * Example: we have a TensorFlow model which runs the input images "x1" and "x2"
  *          and produces the output image "y".
- *          "x1" and "x2" are two TF placeholders, we set InputTensorNames={"x1","x2"}
- *          "y1" corresponds to one TF op output, we set OutputTensorNames={"y1"}
+ *          "x1" and "x2" are two TF placeholders, we set InputPlaceholder={"x1","x2"}
+ *          "y1" corresponds to one TF op output, we set OutputTensors={"y1"}
  *
  * The reference grid for the output image is the same as the first input image.
  * This grid can be scaled by setting the OutputSpacingScale value.
  * This can be used to run models which downsize the output image spacing
- * (typically fully convolutional model with strides) or to produce the result
+ * (e.g. fully convolutional model with strides) or to produce the result
  * of a patch-based network at regular intervals.
  *
- * For each input, input field of view (FOV) must be set.
+ * For each input (resp. output), receptive field (resp. expression field) must be set.
  * If the number of values in the output tensors (produced by the model) don't
- * fit with the output image region, exception will be thrown.
+ * fit with the output image region, an exception will be thrown.
  *
- *
- * The tensorflow Graph is passed using the SetGraph() method
- * The tensorflow Session is passed using the SetSession() method
+ * The TensorFlow Graph is passed using the SetGraph() method
+ * The TensorFlow Session is passed using the SetSession() method
  *
  * \ingroup OTBTensorflow
  */
@@ -94,6 +93,7 @@ public:
   typedef typename itk::ImageRegionConstIterator<TInputImage>              InputConstIteratorType;
 
   /* Typedefs for parameters */
+  typedef typename Superclass::DictElementType     DictElementType;
   typedef typename Superclass::DictType            DictType;
   typedef typename Superclass::StringList          StringList;
   typedef typename Superclass::SizeListType        SizeListType;
@@ -101,8 +101,6 @@ public:
   typedef typename Superclass::TensorListType      TensorListType;
   typedef std::vector<float>                       ScaleListType;
 
-  itkSetMacro(OutputFOESize, SizeType);
-  itkGetMacro(OutputFOESize, SizeType);
   itkSetMacro(OutputGridSize, SizeType);
   itkGetMacro(OutputGridSize, SizeType);
   itkSetMacro(ForceOutputGridSize, bool);
@@ -132,7 +130,6 @@ private:
   TensorflowMultisourceModelFilter(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
 
-  SizeType                   m_OutputFOESize;        // Output tensors field of expression (FOE) sizes
   SizeType                   m_OutputGridSize;       // Output grid size
   bool                       m_ForceOutputGridSize;  // Force output grid size
   bool                       m_FullyConvolutional;   // Convolution mode

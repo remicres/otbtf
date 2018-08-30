@@ -72,10 +72,10 @@ public:
   typedef typename TInputImage::RegionType           RegionType;
 
   /** Typedefs for parameters */
-  typedef std::pair<std::string, tensorflow::Tensor> DictType;
+  typedef std::pair<std::string, tensorflow::Tensor> DictElementType;
   typedef std::vector<std::string>                   StringList;
   typedef std::vector<SizeType>                      SizeListType;
-  typedef std::vector<DictType>                      DictListType;
+  typedef std::vector<DictElementType>               DictType;
   typedef std::vector<tensorflow::DataType>          DataTypeListType;
   typedef std::vector<tensorflow::TensorShapeProto>  TensorShapeProtoList;
   typedef std::vector<tensorflow::Tensor>            TensorListType;
@@ -87,27 +87,28 @@ public:
   tensorflow::Session * GetSession()             { return m_Session;    }
 
   /** Model parameters */
-  void PushBackInputBundle(std::string placeholder, SizeType receptiveField, ImagePointerType image);
+  void PushBackInputTensorBundle(std::string name, SizeType receptiveField, ImagePointerType image);
+  void PushBackOuputTensorBundle(std::string name, SizeType expressionField);
 
-//  /** Input placeholders names */
-//  itkSetMacro(InputPlaceholdersNames, StringList);
-  itkGetMacro(InputPlaceholdersNames, StringList);
-//
-//  /** Receptive field */
-//  itkSetMacro(InputFOVSizes, SizeListType);
-  itkGetMacro(InputFOVSizes, SizeListType);
+  /** Input placeholders names */
+  itkSetMacro(InputPlaceholders, StringList);
+  itkGetMacro(InputPlaceholders, StringList);
+
+  /** Receptive field */
+  itkSetMacro(InputReceptiveFields, SizeListType);
+  itkGetMacro(InputReceptiveFields, SizeListType);
 
   /** Output tensors names */
-  itkSetMacro(OutputTensorsNames, StringList);
-  itkGetMacro(OutputTensorsNames, StringList);
+  itkSetMacro(OutputTensors, StringList);
+  itkGetMacro(OutputTensors, StringList);
 
   /** Expression field */
-  itkSetMacro(OutputFOESizes, SizeListType);
-  itkGetMacro(OutputFOESizes, SizeListType);
+  itkSetMacro(OutputExpressionFields, SizeListType);
+  itkGetMacro(OutputExpressionFields, SizeListType);
 
   /** User placeholders */
-  void SetUserPlaceholders(DictListType dict) { m_UserPlaceholders = dict; }
-  DictListType GetUserPlaceholders()          { return m_UserPlaceholders; }
+  void SetUserPlaceholders(DictType dict) { m_UserPlaceholders = dict; }
+  DictType GetUserPlaceholders()          { return m_UserPlaceholders; }
 
   /** Target nodes names */
   itkSetMacro(TargetNodesNames, StringList);
@@ -125,9 +126,9 @@ protected:
   TensorflowMultisourceModelBase();
   virtual ~TensorflowMultisourceModelBase() {};
 
-  virtual std::stringstream GenerateDebugReport(DictListType & inputs, TensorListType & outputs);
+  virtual std::stringstream GenerateDebugReport(DictType & inputs);
 
-  virtual void RunSession(DictListType & inputs, TensorListType & outputs);
+  virtual void RunSession(DictType & inputs, TensorListType & outputs);
 
 private:
   TensorflowMultisourceModelBase(const Self&); //purposely not implemented
@@ -138,11 +139,11 @@ private:
   tensorflow::Session *      m_Session;                 // The tensorflow session
 
   // Model parameters
-  StringList                 m_InputPlaceholdersNames;  // Input placeholders names
-  SizeListType               m_InputFOVSizes;           // Input tensors field of view (FOV) sizes
-  SizeListType               m_OutputFOESizes;          // Output tensors field of expression (FOE) sizes
-  DictListType               m_UserPlaceholders;        // User placeholders
-  StringList                 m_OutputTensorsNames;      // User tensors
+  StringList                 m_InputPlaceholders;       // Input placeholders names
+  SizeListType               m_InputReceptiveFields;    // Input receptive fields
+  StringList                 m_OutputTensors;           // Output tensors names
+  SizeListType               m_OutputExpressionFields;  // Output expression fields
+  DictType                   m_UserPlaceholders;        // User placeholders
   StringList                 m_TargetNodesNames;        // User target tensors
 
   // Read-only
