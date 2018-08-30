@@ -53,7 +53,7 @@ public:
   itkNewMacro(Self);
   itkTypeMacro(TensorflowModelTrain, Application);
 
-  /** Typedefs for tensorflow */
+  /** Typedefs for TensorFlow */
   typedef otb::TensorflowMultisourceModelTrain<FloatVectorImageType>    TrainModelFilterType;
   typedef otb::TensorflowMultisourceModelValidate<FloatVectorImageType> ValidateModelFilterType;
   typedef otb::TensorflowSource<FloatVectorImageType>                   TFSource;
@@ -75,8 +75,8 @@ public:
     // Parameters keys
     std::string m_KeyInForTrain;     // Key of input image list (training)
     std::string m_KeyInForValid;     // Key of input image list (validation)
-    std::string m_KeyPHNameForTrain; // Key for placeholder name in the tensorflow model (training)
-    std::string m_KeyPHNameForValid; // Key for placeholder name in the tensorflow model (validation)
+    std::string m_KeyPHNameForTrain; // Key for placeholder name in the TensorFlow model (training)
+    std::string m_KeyPHNameForValid; // Key for placeholder name in the TensorFlow model (validation)
     std::string m_KeyPszX;   // Key for samples sizes X
     std::string m_KeyPszY;   // Key for samples sizes Y
   };
@@ -194,10 +194,10 @@ public:
     AddParameter(ParameterType_StringList,  "training.userplaceholders",
                  "Additional single-valued placeholders for training. Supported types: int, float, bool.");
     MandatoryOff                           ("training.userplaceholders");
-    AddParameter(ParameterType_StringList,  "training.targetnodesnames",    "Names of the target nodes");
-    MandatoryOn                            ("training.targetnodesnames");
-    AddParameter(ParameterType_StringList,  "training.outputtensorsnames",  "Names of the output tensors to display");
-    MandatoryOff                           ("training.outputtensorsnames");
+    AddParameter(ParameterType_StringList,  "training.targetnodes",    "Names of the target nodes");
+    MandatoryOn                            ("training.targetnodes");
+    AddParameter(ParameterType_StringList,  "training.outputtensors",  "Names of the output tensors to display");
+    MandatoryOff                           ("training.outputtensors");
 
     // Metrics
     AddParameter(ParameterType_Group,       "validation",            "Validation parameters");
@@ -228,7 +228,7 @@ public:
     SetDocExampleParameterValue("source2.fovy",              "1");
     SetDocExampleParameterValue("model.dir",                 "/tmp/my_saved_model/");
     SetDocExampleParameterValue("training.userplaceholders", "is_training=true dropout=0.2");
-    SetDocExampleParameterValue("training.targetnodenames",  "optimizer");
+    SetDocExampleParameterValue("training.targetnodes",      "optimizer");
     SetDocExampleParameterValue("model.saveto",              "/tmp/my_saved_model_vars1");
 
   }
@@ -350,13 +350,13 @@ public:
   //
   // Get user placeholders
   //
-  TrainModelFilterType::DictListType GetUserPlaceholders(const std::string key)
+  TrainModelFilterType::DictType GetUserPlaceholders(const std::string key)
   {
-    TrainModelFilterType::DictListType dict;
+    TrainModelFilterType::DictType dict;
     TrainModelFilterType::StringList expressions = GetParameterStringList(key);
     for (auto& exp: expressions)
       {
-      TrainModelFilterType::DictType entry = tf::ExpressionToTensor(exp);
+      TrainModelFilterType::DictElementType entry = tf::ExpressionToTensor(exp);
       dict.push_back(entry);
 
       otbAppLogINFO("Using placeholder " << entry.first << " with " << tf::PrintTensorInfos(entry.second));
@@ -414,15 +414,15 @@ public:
     m_TrainModelFilter = TrainModelFilterType::New();
     m_TrainModelFilter->SetGraph(m_SavedModel.meta_graph_def.graph_def());
     m_TrainModelFilter->SetSession(m_SavedModel.session.get());
-    m_TrainModelFilter->SetOutputTensorsNames(GetParameterStringList("training.outputtensorsnames"));
-    m_TrainModelFilter->SetTargetNodesNames(GetParameterStringList("training.targetnodesnames"));
+    m_TrainModelFilter->SetOutputTensors(GetParameterStringList("training.outputtensors"));
+    m_TrainModelFilter->SetTargetNodesNames(GetParameterStringList("training.targetnodes"));
     m_TrainModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
     m_TrainModelFilter->SetUserPlaceholders(GetUserPlaceholders("training.userplaceholders"));
 
     // Set inputs
     for (unsigned int i = 0 ; i < m_InputSourcesForTraining.size() ; i++)
       {
-      m_TrainModelFilter->PushBackInputBundle(
+      m_TrainModelFilter->PushBackInputTensorBundle(
           m_InputPlaceholdersForTraining[i],
           m_InputPatchesSizeForTraining[i],
           m_InputSourcesForTraining[i]);
@@ -458,14 +458,14 @@ public:
 
       for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstLearningData.size() ; i++)
         {
-        m_ValidateModelFilter->PushBackInputBundle(
+        m_ValidateModelFilter->PushBackInputTensorBundle(
             m_InputPlaceholdersForValidation[i],
             m_InputPatchesSizeForValidation[i],
             m_InputSourcesForEvaluationAgainstLearningData[i]);
         }
-      m_ValidateModelFilter->SetOutputTensorsNames(m_TargetTensorsNames);
+      m_ValidateModelFilter->SetOutputTensors(m_TargetTensorsNames);
       m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstLearningData);
-      m_ValidateModelFilter->SetOutputFOESizes(m_TargetPatchesSize);
+      m_ValidateModelFilter->SetOutputExpressionFields(m_TargetPatchesSize);
 
       // Update
       AddProcess(m_ValidateModelFilter, "Evaluate model (Learning data)");
@@ -509,10 +509,13 @@ public:
 
 private:
 
-  TrainModelFilterType::Pointer    m_TrainModelFilter;
-  ValidateModelFilterType::Pointer m_ValidateModelFilter;
   tensorflow::SavedModelBundle     m_SavedModel; // must be alive during all the execution of the application !
 
+  // Filters
+  TrainModelFilterType::Pointer    m_TrainModelFilter;
+  ValidateModelFilterType::Pointer m_ValidateModelFilter;
+
+  // Inputs
   BundleList m_Bundles;
 
   // Patches size

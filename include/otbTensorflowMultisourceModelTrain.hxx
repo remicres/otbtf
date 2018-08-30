@@ -45,11 +45,11 @@ TensorflowMultisourceModelTrain<TInputImage>
 template <class TInputImage>
 void
 TensorflowMultisourceModelTrain<TInputImage>
-::ProcessBatch(TensorListType & inputs, const IndexValueType & sampleStart,
+::ProcessBatch(DictType & inputs, const IndexValueType & sampleStart,
     const IndexValueType & batchSize)
  {
   // Populate input tensors
-  PopulateInputTensor(inputs, sampleStart, batchSize, m_RandomIndices);
+  this->PopulateInputTensors(inputs, sampleStart, batchSize, m_RandomIndices);
 
   // Run the TF session here
   TensorListType outputs;

@@ -110,24 +110,24 @@ TensorflowMultisourceModelValidate<TInputImage>
   // Temporary images for outputs
   m_ConfusionMatrices.clear();
   m_MapsOfClasses.clear();
-  std::vector<MatMapType> confMatMaps;
+  m_ConfMatMaps.clear();
   for (auto const& ref: m_References)
     {
     (void) ref;
 
     // New confusion matrix
     MatMapType mat;
-    confMatMaps.push_back(mat);
+    m_ConfMatMaps.push_back(mat);
     }
 
   // Run all the batches
   Superclass::GenerateData();
 
   // Compute confusion matrices
-  for (unsigned int i = 0 ; i < confMatMaps.size() ; i++)
+  for (unsigned int i = 0 ; i < m_ConfMatMaps.size() ; i++)
     {
     // Confusion matrix (map) for current target
-    MatMapType mat = confMatMaps[i];
+    MatMapType mat = m_ConfMatMaps[i];
 
     // List all values
     MapOfClassesType values;
@@ -159,10 +159,6 @@ TensorflowMultisourceModelValidate<TInputImage>
     m_ConfusionMatrices.push_back(matrix);
     m_MapsOfClasses.push_back(values);
 
-
-
-
-
     }
 
  }
@@ -171,11 +167,12 @@ TensorflowMultisourceModelValidate<TInputImage>
 template <class TInputImage>
 void
 TensorflowMultisourceModelValidate<TInputImage>
-::ProcessBatch(TensorListType & inputs, const IndexValueType & sampleStart,
+::ProcessBatch(DictType & inputs, const IndexValueType & sampleStart,
     const IndexValueType & batchSize)
  {
   // Populate input tensors
-  PopulateInputTensor(inputs, sampleStart, batchSize);
+  IndexListType empty;
+  this->PopulateInputTensors(inputs, sampleStart, batchSize, empty);
 
   // Run the TF session here
   TensorListType outputs;
@@ -223,21 +220,21 @@ TensorflowMultisourceModelValidate<TInputImage>
       const int classIn = static_cast<LabelValueType>(inIt.Get()[0]);
       const int classRef = static_cast<LabelValueType>(refIt.Get()[0]);
 
-      if (confMatMaps[refIdx].count(classRef) == 0)
+      if (m_ConfMatMaps[refIdx].count(classRef) == 0)
         {
         MapType newMap;
         newMap[classIn] = 1;
-        confMatMaps[refIdx][classRef] = newMap;
+        m_ConfMatMaps[refIdx][classRef] = newMap;
         }
       else
         {
-        if (confMatMaps[refIdx][classRef].count(classIn) == 0)
+        if (m_ConfMatMaps[refIdx][classRef].count(classIn) == 0)
           {
-          confMatMaps[refIdx][classRef][classIn] = 1;
+          m_ConfMatMaps[refIdx][classRef][classIn] = 1;
           }
         else
           {
-          confMatMaps[refIdx][classRef][classIn]++;
+          m_ConfMatMaps[refIdx][classRef][classIn]++;
           }
         }
       }

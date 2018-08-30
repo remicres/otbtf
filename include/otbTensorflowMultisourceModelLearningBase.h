@@ -18,11 +18,6 @@
 // Base
 #include "otbTensorflowMultisourceModelBase.h"
 
-// Shuffle
-#include <random>
-#include <algorithm>
-#include <iterator>
-
 namespace otb
 {
 
@@ -86,10 +81,10 @@ protected:
 
   virtual void GenerateData();
 
-  virtual void PopulateInputTensors(TensorListType & inputs, const IndexValueType & sampleStart,
-      const IndexValueType & batchSize, const IndexListType & order = IndexListType());
+  virtual void PopulateInputTensors(DictType & inputs, const IndexValueType & sampleStart,
+      const IndexValueType & batchSize, const IndexListType & order);
 
-  virtual void ProcessBatch(TensorListType & inputs, const IndexValueType & sampleStart,
+  virtual void ProcessBatch(DictType & inputs, const IndexValueType & sampleStart,
       const IndexValueType & batchSize) = 0;
 
 private:

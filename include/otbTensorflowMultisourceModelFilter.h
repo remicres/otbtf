@@ -97,7 +97,6 @@ public:
   typedef typename Superclass::DictType            DictType;
   typedef typename Superclass::StringList          StringList;
   typedef typename Superclass::SizeListType        SizeListType;
-  typedef typename Superclass::DictListType        DictListType;
   typedef typename Superclass::TensorListType      TensorListType;
   typedef std::vector<float>                       ScaleListType;
 
@@ -139,6 +138,7 @@ private:
   SpacingType                m_OutputSpacing;     // Output image spacing
   PointType                  m_OutputOrigin;      // Output image origin
   SizeType                   m_OutputSize;        // Output image size
+  PixelType                  m_NullPixel;         // Pixel filled with zeros
 
 }; // end class
 

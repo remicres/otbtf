@@ -19,7 +19,7 @@ namespace otb
 template <class TInputImage>
 TensorflowMultisourceModelLearningBase<TInputImage>
 ::TensorflowMultisourceModelLearningBase(): m_BatchSize(100),
- m_NumberOfSamples(0), m_UseStreaming(false)
+m_UseStreaming(false), m_NumberOfSamples(0)
  {
  }
 
@@ -31,6 +31,7 @@ TensorflowMultisourceModelLearningBase<TInputImage>
  {
   Superclass::GenerateOutputInformation();
 
+  // Set an empty output buffered region
   ImageType * outputPtr = this->GetOutput();
   RegionType nullRegion;
   nullRegion.GetModifiableSize().Fill(1);
@@ -72,7 +73,7 @@ TensorflowMultisourceModelLearningBase<TInputImage>
           << " rows but patch size Y is " <<  inputPatchSize[1] << " for input " << i);
 
     // Get the batch size
-    const tensorflow::uint64 currNumberOfSamples = reqRegion.GetSize(1) / inputPatchSize[1];
+    const IndexValueType currNumberOfSamples = reqRegion.GetSize(1) / inputPatchSize[1];
 
     // Check the consistency with other inputs
     if (m_NumberOfSamples == 0)
@@ -95,21 +96,21 @@ TensorflowMultisourceModelLearningBase<TInputImage>
  {
   Superclass::GenerateInputRequestedRegion();
 
-  // For each image, set no image region
+  // For each image, set the requested region
+  RegionType nullRegion;
   for(unsigned int i = 0; i < this->GetNumberOfInputs(); ++i)
     {
-    RegionType nullRegion;
     ImageType * inputImage = static_cast<ImageType * >( Superclass::ProcessObject::GetInput(i) );
 
     // If the streaming is enabled, we don't read the full image
     if (m_UseStreaming)
-    {
+      {
       inputImage->SetRequestedRegion(nullRegion);
-    }
+      }
     else
-    {
+      {
       inputImage->SetRequestedRegion(inputImage->GetLargestPossibleRegion());
-    }
+      }
     } // next image
  }
 
@@ -131,8 +132,8 @@ TensorflowMultisourceModelLearningBase<TInputImage>
   for (IndexValueType batch = 0 ; batch < nBatches ; batch++)
     {
 
-    // Create input tensors list
-    TensorListType inputs;
+    // Feed dict
+    DictType inputs;
 
     // Batch start and size
     const IndexValueType sampleStart = batch * m_BatchSize;
@@ -143,7 +144,7 @@ TensorflowMultisourceModelLearningBase<TInputImage>
     }
 
     // Process the batch
-    ProcessBatch(inputs, sampleStart, batchSize);
+    this->ProcessBatch(inputs, sampleStart, batchSize);
 
     progress.CompletedPixel();
     } // Next batch
@@ -153,7 +154,7 @@ TensorflowMultisourceModelLearningBase<TInputImage>
 template <class TInputImage>
 void
 TensorflowMultisourceModelLearningBase<TInputImage>
-::PopulateInputTensors(TensorListType & inputs, const IndexValueType & sampleStart,
+::PopulateInputTensors(DictType & inputs, const IndexValueType & sampleStart,
     const IndexValueType & batchSize, const IndexListType & order)
  {
   const bool reorder = order.size();
@@ -176,7 +177,7 @@ TensorflowMultisourceModelLearningBase<TInputImage>
     tensorflow::Tensor inputTensor(this->GetInputTensorsDataTypes()[i], inputTensorShape);
 
     // Populate the tensor
-    for (tensorflow::uint64 elem = 0 ; elem < batchSize ; elem++)
+    for (IndexValueType elem = 0 ; elem < batchSize ; elem++)
       {
       const tensorflow::uint64 samplePos = sampleStart + elem;
       IndexType start;
@@ -199,8 +200,8 @@ TensorflowMultisourceModelLearningBase<TInputImage>
       }
 
     // Input #i : the tensor of patches (aka the batch)
-    DictElementType input1 = { this->GetInputPlaceholdersNames()[i], inputTensor };
-    inputs.push_back(input1);
+    DictElementType input = { this->GetInputPlaceholders()[i], inputTensor };
+    inputs.push_back(input);
     } // next input tensor
  }
 
