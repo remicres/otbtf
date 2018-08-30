@@ -54,8 +54,9 @@ public:
   itkTypeMacro(TensorflowMultisourceModelTrain, TensorflowMultisourceModelLearningBase);
 
   /** Superclass typedefs */
-  typedef typename Superclass::IndexValueType    IndexValueType;
+  typedef typename Superclass::DictType          DictType;
   typedef typename Superclass::TensorListType    TensorListType;
+  typedef typename Superclass::IndexValueType    IndexValueType;
   typedef typename Superclass::IndexListType     IndexListType;
 
 
@@ -63,8 +64,8 @@ protected:
   TensorflowMultisourceModelTrain();
   virtual ~TensorflowMultisourceModelTrain() {};
 
-  void GenerateData();
-  void ProcessBatch(TensorListType & inputs, const IndexValueType & sampleStart,
+  virtual void GenerateData();
+  virtual void ProcessBatch(DictType & inputs, const IndexValueType & sampleStart,
       const IndexValueType & batchSize);
 
 private:

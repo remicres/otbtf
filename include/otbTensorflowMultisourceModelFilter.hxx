@@ -284,6 +284,10 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   outputPtr->SetSignedSpacing        ( m_OutputSpacing      );
   outputPtr->SetLargestPossibleRegion( largestPossibleRegion);
 
+  // Set null pixel
+  m_NullPixel.SetSize(outputPtr->GetNumberOfComponentsPerPixel());
+  m_NullPixel.Fill(0);
+
  }
 
 template <class TInputImage, class TOutputImage>
@@ -395,13 +399,12 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
       tf::RecopyImageRegionToTensorWithCast<TInputImage>(inputPtr, reqRegion, inputTensor, 0);
 
       // Input #1 : the tensor of patches (aka the batch)
-      DictElementType input1 = { this->GetInputPlaceholdersNames()[i], inputTensor };
-      inputs.push_back(input1);
+      DictElementType input = { this->GetInputPlaceholders()[i], inputTensor };
+      inputs.push_back(input);
       }
     else
       {
-      // Preparing patches (not very optimized ! )
-      // It would be better to perform the loop inside the TF session using TF operators
+      // Preparing patches
       // Shape of input tensor #i
       tensorflow::int64 sz_n = outputReqRegion.GetNumberOfPixels();
       tensorflow::int64 sz_y = inputPatchSize[1];
@@ -429,8 +432,9 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
         }
 
       // Input #1 : the tensor of patches (aka the batch)
-      DictElementType input1 = { this->GetInputPlaceholdersNames()[i], inputTensor };
-      inputs.push_back(input1);
+      DictElementType input = { this->GetInputPlaceholders()[i], inputTensor };
+      inputs.push_back(input);
+
       } // mode is not full convolutional
 
     } // next input tensor
@@ -442,10 +446,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   // Fill the output buffer with zero value
   outputPtr->SetBufferedRegion(outputReqRegion);
   outputPtr->Allocate();
-  OutputPixelType nullpix;
-  nullpix.SetSize(outputPtr->GetNumberOfComponentsPerPixel());
-  nullpix.Fill(0);
-  outputPtr->FillBuffer(nullpix);
+  outputPtr->FillBuffer(m_NullPixel);
 
   // Get output tensors
   int bandOffset = 0;
@@ -453,7 +454,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     {
     // The offset (i.e. the starting index of the channel for the output tensor) is updated
     // during this call
-    // TODO: implement a generic strategy enabling FOE copy in patch-based mode (see tf::CopyTensorToImageRegion)
+    // TODO: implement a generic strategy enabling expression field copy in patch-based mode (see tf::CopyTensorToImageRegion)
     try
       {
       tf::CopyTensorToImageRegion<TOutputImage> (outputs[i],
@@ -461,7 +462,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
       }
     catch( itk::ExceptionObject & err )
       {
-      std::stringstream debugMsg = this->GenerateDebugReport(inputs, outputs);
+      std::stringstream debugMsg = this->GenerateDebugReport(inputs);
       itkExceptionMacro("Error occured during tensor to image conversion.\n"
           << "Context: " << debugMsg.str()
           << "Error:" << err);

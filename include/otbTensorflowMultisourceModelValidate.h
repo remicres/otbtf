@@ -43,10 +43,10 @@ public TensorflowMultisourceModelLearningBase<TInputImage>
 public:
 
   /** Standard class typedefs. */
-  typedef TensorflowMultisourceModelValidate                    Self;
-  typedef TensorflowMultisourceModelBase<TInputImage>        Superclass;
-  typedef itk::SmartPointer<Self>                            Pointer;
-  typedef itk::SmartPointer<const Self>                      ConstPointer;
+  typedef TensorflowMultisourceModelValidate                  Self;
+  typedef TensorflowMultisourceModelLearningBase<TInputImage> Superclass;
+  typedef itk::SmartPointer<Self>                             Pointer;
+  typedef itk::SmartPointer<const Self>                       ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -68,6 +68,7 @@ public:
   typedef typename Superclass::SizeListType      SizeListType;
   typedef typename Superclass::TensorListType    TensorListType;
   typedef typename Superclass::IndexValueType    IndexValueType;
+  typedef typename Superclass::IndexListType     IndexListType;
 
   /* Typedefs for validation */
   typedef unsigned long                            CountValueType;
@@ -97,7 +98,7 @@ protected:
 
   void GenerateOutputInformation(void);
   void GenerateData();
-  void ProcessBatch(TensorListType & inputs, const IndexValueType & sampleStart,
+  void ProcessBatch(DictType & inputs, const IndexValueType & sampleStart,
       const IndexValueType & batchSize);
 
 private:
@@ -109,6 +110,9 @@ private:
   // Read only
   ConfMatListType            m_ConfusionMatrices;       // Confusion matrix
   MapOfClassesListType       m_MapsOfClasses;           // Maps of classes
+
+  // Internal
+  std::vector<MatMapType>    m_ConfMatMaps;             // Accumulators
 
 }; // end class
 

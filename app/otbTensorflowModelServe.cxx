@@ -248,16 +248,16 @@ public:
     m_TFFilter = TFModelFilterType::New();
     m_TFFilter->SetGraph(m_SavedModel.meta_graph_def.graph_def());
     m_TFFilter->SetSession(m_SavedModel.session.get());
-    m_TFFilter->SetOutputTensorsNames(GetParameterStringList("output.names"));
+    m_TFFilter->SetOutputTensors(GetParameterStringList("output.names"));
     m_TFFilter->SetOutputSpacingScale(GetParameterFloat("output.spcscale"));
     otbAppLogINFO("Output spacing ratio: " << m_TFFilter->GetOutputSpacingScale());
 
     // Get user placeholders
-    TFModelFilterType::DictListType dict;
     TFModelFilterType::StringList expressions = GetParameterStringList("model.userplaceholders");
+    TFModelFilterType::DictType dict;
     for (auto& exp: expressions)
     {
-      TFModelFilterType::DictType entry = tf::ExpressionToTensor(exp);
+      TFModelFilterType::DictElementType entry = tf::ExpressionToTensor(exp);
       dict.push_back(entry);
 
       otbAppLogINFO("Using placeholder " << entry.first << " with " << tf::PrintTensorInfos(entry.second));
@@ -267,7 +267,7 @@ public:
     // Input sources
     for (auto& bundle: m_Bundles)
     {
-      m_TFFilter->PushBackInputBundle(bundle.m_Placeholder, bundle.m_PatchSize, bundle.m_ImageSource.Get());
+      m_TFFilter->PushBackInputTensorBundle(bundle.m_Placeholder, bundle.m_PatchSize, bundle.m_ImageSource.Get());
     }
 
     // Fully convolutional mode on/off
@@ -281,9 +281,9 @@ public:
     FloatVectorImageType::SizeType foe;
     foe[0] = GetParameterInt("output.foex");
     foe[1] = GetParameterInt("output.foey");
-    m_TFFilter->SetOutputFOESize(foe);
+    m_TFFilter->SetOutputExpressionFields({foe});
 
-    otbAppLogINFO("Output field of expression: " << m_TFFilter->GetOutputFOESize());
+    otbAppLogINFO("Output field of expression: " << m_TFFilter->GetOutputExpressionFields()[0]);
 
     // Streaming
     if (GetParameterInt("finetuning.disabletiling")!=1)
