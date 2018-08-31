@@ -106,14 +106,14 @@ public:
 
     // Parameter group keys
     ss_key_in      << ss_key_group.str() << ".il";
-    ss_key_dims_x  << ss_key_group.str() << ".fovx";
-    ss_key_dims_y  << ss_key_group.str() << ".fovy";
+    ss_key_dims_x  << ss_key_group.str() << ".rfieldx";
+    ss_key_dims_y  << ss_key_group.str() << ".rfieldy";
     ss_key_ph      << ss_key_group.str() << ".placeholder";
 
     // Parameter group descriptions
     ss_desc_in     << "Input image (or list to stack) for source #" << inputNumber;
-    ss_desc_dims_x << "Field of view width for source #"            << inputNumber;
-    ss_desc_dims_y << "Field of view height for source #"           << inputNumber;
+    ss_desc_dims_x << "Input receptive field (width) for source #"  << inputNumber;
+    ss_desc_dims_y << "Input receptive field (height) for source #" << inputNumber;
     ss_desc_ph     << "Name of the input placeholder for source #"  << inputNumber;
 
     // Populate group
@@ -182,22 +182,22 @@ public:
     MandatoryOn                              ("output.names");
 
     // Output Field of Expression
-    AddParameter(ParameterType_Int,           "output.foex", "The output field of expression (x)");
-    SetMinimumParameterIntValue              ("output.foex", 1);
-    SetDefaultParameterInt                   ("output.foex", 1);
-    MandatoryOn                              ("output.foex");
-    AddParameter(ParameterType_Int,           "output.foey", "The output field of expression (y)");
-    SetMinimumParameterIntValue              ("output.foey", 1);
-    SetDefaultParameterInt                   ("output.foey", 1);
-    MandatoryOn                              ("output.foey");
+    AddParameter(ParameterType_Int,           "output.efieldx", "The output expression field (width)");
+    SetMinimumParameterIntValue              ("output.efieldx", 1);
+    SetDefaultParameterInt                   ("output.efieldx", 1);
+    MandatoryOn                              ("output.efieldx");
+    AddParameter(ParameterType_Int,           "output.efieldy", "The output expression field (height)");
+    SetMinimumParameterIntValue              ("output.efieldy", 1);
+    SetDefaultParameterInt                   ("output.efieldy", 1);
+    MandatoryOn                              ("output.efieldy");
 
     // Fine tuning
-    AddParameter(ParameterType_Group,         "finetuning" , "Fine tuning performance or consistency parameters");
-    AddParameter(ParameterType_Bool,          "finetuning.disabletiling", "Disable tiling");
-    MandatoryOff                             ("finetuning.disabletiling");
-    AddParameter(ParameterType_Int,           "finetuning.tilesize", "Tile width used to stream the filter output");
-    SetMinimumParameterIntValue              ("finetuning.tilesize", 1);
-    SetDefaultParameterInt                   ("finetuning.tilesize", 16);
+    AddParameter(ParameterType_Group,         "optim" , "This group of parameters allows optimization of processing time");
+    AddParameter(ParameterType_Bool,          "optim.disabletiling", "Disable tiling");
+    MandatoryOff                             ("optim.disabletiling");
+    AddParameter(ParameterType_Int,           "optim.tilesize", "Tile width used to stream the filter output");
+    SetMinimumParameterIntValue              ("optim.tilesize", 1);
+    SetDefaultParameterInt                   ("optim.tilesize", 16);
 
     // Output image
     AddParameter(ParameterType_OutputImage, "out", "output image");
@@ -205,8 +205,8 @@ public:
     // Example
     SetDocExampleParameterValue("source1.il",             "spot6pms.tif");
     SetDocExampleParameterValue("source1.placeholder",    "x1");
-    SetDocExampleParameterValue("source1.fovx",           "16");
-    SetDocExampleParameterValue("source1.fovy",           "16");
+    SetDocExampleParameterValue("source1.rfieldx",        "16");
+    SetDocExampleParameterValue("source1.rfieldy",        "16");
     SetDocExampleParameterValue("model.dir",              "/tmp/my_saved_model/");
     SetDocExampleParameterValue("model.userplaceholders", "is_training=false dropout=0.0");
     SetDocExampleParameterValue("output.names",           "out_predict1 out_proba1");
@@ -286,10 +286,10 @@ public:
     otbAppLogINFO("Output field of expression: " << m_TFFilter->GetOutputExpressionFields()[0]);
 
     // Streaming
-    if (GetParameterInt("finetuning.disabletiling")!=1)
+    if (GetParameterInt("optim.disabletiling")!=1)
     {
       // Get the tile size
-      const unsigned int tileSize = GetParameterInt("finetuning.tilesize");
+      const unsigned int tileSize = GetParameterInt("optim.tilesize");
       otbAppLogINFO("Force tiling with squared tiles of " << tileSize)
 
       // Update the TF filter to get the output image size
