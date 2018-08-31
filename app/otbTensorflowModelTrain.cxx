@@ -122,10 +122,10 @@ public:
     // Parameter group keys
     ss_key_tr_in   << ss_key_tr_group.str()  << ".il";
     ss_key_val_in  << ss_key_val_group.str() << ".il";
-    ss_key_dims_x  << ss_key_tr_group.str()  << ".fovx";
-    ss_key_dims_y  << ss_key_tr_group.str()  << ".fovy";
+    ss_key_dims_x  << ss_key_tr_group.str()  << ".patchsizex";
+    ss_key_dims_y  << ss_key_tr_group.str()  << ".patchsizey";
     ss_key_tr_ph   << ss_key_tr_group.str()  << ".placeholder";
-    ss_key_val_ph  << ss_key_val_group.str() << ".placeholder";
+    ss_key_val_ph  << ss_key_val_group.str() << ".name";
 
     // Parameter group descriptions
     ss_desc_tr_in  << "Input image (or list to stack) for source #" << inputNumber << " (training)";
@@ -133,7 +133,8 @@ public:
     ss_desc_dims_x << "Field of view width for source #"            << inputNumber;
     ss_desc_dims_y << "Field of view height for source #"           << inputNumber;
     ss_desc_tr_ph  << "Name of the input placeholder for source #"  << inputNumber << " (training)";
-    ss_desc_val_ph << "Name of the input placeholder for source #"  << inputNumber << " (validation)";
+    ss_desc_val_ph << "Name of the input placeholder "
+        "or output tensor for source #"                             << inputNumber << " (validation)";
 
     // Populate group
     AddParameter(ParameterType_Group,          ss_key_tr_group.str(),  ss_desc_tr_group.str());
@@ -224,12 +225,12 @@ public:
     // Example
     SetDocExampleParameterValue("source1.il",                "spot6pms.tif");
     SetDocExampleParameterValue("source1.placeholder",       "x1");
-    SetDocExampleParameterValue("source1.fovx",              "16");
-    SetDocExampleParameterValue("source1.fovy",              "16");
+    SetDocExampleParameterValue("source1.patchsizex",        "16");
+    SetDocExampleParameterValue("source1.patchsizey",        "16");
     SetDocExampleParameterValue("source2.il",                "labels.tif");
     SetDocExampleParameterValue("source2.placeholder",       "y1");
-    SetDocExampleParameterValue("source2.fovx",              "1");
-    SetDocExampleParameterValue("source2.fovy",              "1");
+    SetDocExampleParameterValue("source2.patchsizex",        "1");
+    SetDocExampleParameterValue("source2.patchsizex",        "1");
     SetDocExampleParameterValue("model.dir",                 "/tmp/my_saved_model/");
     SetDocExampleParameterValue("training.userplaceholders", "is_training=true dropout=0.2");
     SetDocExampleParameterValue("training.targetnodes",      "optimizer");
@@ -293,7 +294,7 @@ public:
       m_InputPatchesSizeForTraining.push_back(patchSize);
 
       otbAppLogINFO("New source:");
-      otbAppLogINFO("Field of view            : "<< patchSize);
+      otbAppLogINFO("Patch size               : "<< patchSize);
       otbAppLogINFO("Placeholder (training)   : "<< placeholderForTraining);
 
       // Prepare validation sources
