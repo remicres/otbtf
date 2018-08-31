@@ -30,36 +30,35 @@ TensorflowMultisourceModelValidate<TInputImage>
  {
   Superclass::GenerateOutputInformation();
 
-  //////////////////////////////////////////////////////////////////////////////////////////
-  //                               Check the references
-  //////////////////////////////////////////////////////////////////////////////////////////
-
+  // Check that there is some reference
   const unsigned int nbOfRefs = m_References.size();
   if (nbOfRefs == 0)
     {
     itkExceptionMacro("No reference is set");
     }
-  SizeListType outputEFSizes = this->GetOutputExpressionFields();
-  if (nbOfRefs != outputEFSizes.size())
+
+  // Check the number of references
+  SizeListType outputPatchSizes = this->GetOutputExpressionFields();
+  if (nbOfRefs != outputPatchSizes.size())
     {
-    itkExceptionMacro("There is " << nbOfRefs << " but only " <<
-                      outputEFSizes.size() << " field of expression sizes");
+    itkExceptionMacro("There is " << nbOfRefs << " references but only " <<
+                      outputPatchSizes.size() << " output patch sizes");
     }
 
   // Check reference image infos
-  for (unsigned int i = 0 ;i < nbOfRefs ; i++)
+  for (unsigned int i = 0 ; i < nbOfRefs ; i++)
     {
-    const SizeType outputFOESize = outputEFSizes[i];
+    const SizeType outputPatchSize = outputPatchSizes[i];
     const RegionType refRegion = m_References[i]->GetLargestPossibleRegion();
-    if (refRegion.GetSize(0) != outputFOESize[0])
+    if (refRegion.GetSize(0) != outputPatchSize[0])
       {
       itkExceptionMacro("Reference image " << i << " width is " << refRegion.GetSize(0) <<
-                        " but field of expression width is " << outputFOESize[0]);
+                        " but patch size (x) is " << outputPatchSize[0]);
       }
-    if (refRegion.GetSize(1) / outputFOESize[1] != this->GetNumberOfSamples())
+    if (refRegion.GetSize(1) != this->GetNumberOfSamples() * outputPatchSize[1])
       {
       itkExceptionMacro("Reference image " << i << " height is " << refRegion.GetSize(1) <<
-                        " but field of expression width is " << outputFOESize[1] <<
+                        " but patch size (y) is " << outputPatchSize[1] <<
                         " which is not consistent with the number of samples (" << this->GetNumberOfSamples() << ")");
       }
     }

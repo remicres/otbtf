@@ -130,8 +130,8 @@ public:
     // Parameter group descriptions
     ss_desc_tr_in  << "Input image (or list to stack) for source #" << inputNumber << " (training)";
     ss_desc_val_in << "Input image (or list to stack) for source #" << inputNumber << " (validation)";
-    ss_desc_dims_x << "Field of view width for source #"            << inputNumber;
-    ss_desc_dims_y << "Field of view height for source #"           << inputNumber;
+    ss_desc_dims_x << "Patch size (x) for source #"                 << inputNumber;
+    ss_desc_dims_y << "Patch size (y) for source #"                 << inputNumber;
     ss_desc_tr_ph  << "Name of the input placeholder for source #"  << inputNumber << " (training)";
     ss_desc_val_ph << "Name of the input placeholder "
         "or output tensor for source #"                             << inputNumber << " (validation)";
