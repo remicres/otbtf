@@ -141,23 +141,21 @@ public:
 
     // Documentation
     SetName("TensorflowModelServe");
-    SetDescription("Multisource deep learning classifier using Tensorflow. Change "
-        "the " + tf::ENV_VAR_NAME_NSOURCES + " environment variable to set the number of "
-        "sources.");
-    SetDocLongDescription("The application run a Tensorflow model over multiple data sources. "
-        "The number of input sources can be changed at runtime by setting the "
-        "system environment variable " + tf::ENV_VAR_NAME_NSOURCES + ". "
-        "For each source, you have to set (1) the tensor placeholder name, as named in "
-        "the tensorflow model, (2) the patch size and (3) the image(s) source. "
-        "The output is a multiband image, stacking all outputs "
-        "tensors together: you have to specify the names of the output tensors, as "
-        "named in the tensorflow model (typically, an operator's output). The output "
-        "tensors values will be stacked in the same order as they appear in the "
-        "\"model.output\" parameter (you can use a space separator between names). "
-        "Last but not least, consider using extended filename to bypass the automatic "
-        "memory footprint calculator of the otb application engine, and set a good "
-        "splitting strategy (I would recommend using small square tiles) or use the "
-        "finetuning parameter group to impose your squared tiles sizes");
+    SetDescription("Multisource deep learning classifier using TensorFlow. Change the "
+        + tf::ENV_VAR_NAME_NSOURCES + " environment variable to set the number of sources.");
+    SetDocLongDescription("The application run a TensorFlow model over multiple data sources. "
+        "The number of input sources can be changed at runtime by setting the system "
+        "environment variable " + tf::ENV_VAR_NAME_NSOURCES + ". For each source, you have to "
+        "set (1) the placeholder name, as named in the TensorFlow model, (2) the receptive "
+        "field and (3) the image(s) source. The output is a multiband image, stacking all "
+        "outputs tensors together: you have to specify (1) the names of the output tensors, as "
+        "named in the TensorFlow model (typically, an operator's output) and (2) the expression "
+        "field of each output tensor. The output tensors values will be stacked in the same "
+        "order as they appear in the \"model.output\" parameter (you can use a space separator "
+        "between names). You might consider to use extended filename to bypass the automatic "
+        "memory footprint calculator of the otb application engine, and set a good splitting "
+        "strategy (Square tiles is good for convolutional networks) or use the \"optim\" "
+        "parameter group to impose your squared tiles sizes");
     SetDocAuthors("Remi Cresson");
 
     // Input/output images
@@ -167,17 +165,21 @@ public:
 
     // Input model
     AddParameter(ParameterType_Group,         "model",           "model parameters");
-    AddParameter(ParameterType_Directory,     "model.dir",       "Tensorflow model_save directory");
+    AddParameter(ParameterType_Directory,     "model.dir",       "TensorFlow model_save directory");
     MandatoryOn                              ("model.dir");
+    SetParameterDescription                  ("model.dir", "The model directory should contains the model Google Protobuf (.pb) and variables");
+
     AddParameter(ParameterType_StringList,    "model.userplaceholders",    "Additional single-valued placeholders. Supported types: int, float, bool.");
     MandatoryOff                             ("model.userplaceholders");
+    SetParameterDescription                  ("model.userplaceholders", "Syntax to use is \"placeholder_1=value_1 ... placeholder_N=value_N\"");
     AddParameter(ParameterType_Bool,          "model.fullyconv", "Fully convolutional");
     MandatoryOff                             ("model.fullyconv");
 
     // Output tensors parameters
     AddParameter(ParameterType_Group,         "output",          "Output tensors parameters");
-    AddParameter(ParameterType_Float,         "output.spcscale", "The output spacing scale");
+    AddParameter(ParameterType_Float,         "output.spcscale", "The output spacing scale, related to the first input");
     SetDefaultParameterFloat                 ("output.spcscale", 1.0);
+    SetParameterDescription                  ("output.spcscale", "The output image size/scale and spacing*scale where size and spacing corresponds to the first input");
     AddParameter(ParameterType_StringList,    "output.names",    "Names of the output tensors");
     MandatoryOn                              ("output.names");
 
@@ -195,6 +197,7 @@ public:
     AddParameter(ParameterType_Group,         "optim" , "This group of parameters allows optimization of processing time");
     AddParameter(ParameterType_Bool,          "optim.disabletiling", "Disable tiling");
     MandatoryOff                             ("optim.disabletiling");
+    SetParameterDescription                  ("optim.disabletiling", "Tiling avoids to process a too large subset of image, but sometimes it can be useful to disable it");
     AddParameter(ParameterType_Int,           "optim.tilesize", "Tile width used to stream the filter output");
     SetMinimumParameterIntValue              ("optim.tilesize", 1);
     SetDefaultParameterInt                   ("optim.tilesize", 16);
@@ -230,8 +233,8 @@ public:
       bundle.m_PatchSize[1] = GetParameterInt(bundle.m_KeyPszY);
 
       otbAppLogINFO("Source info :");
-      otbAppLogINFO("Field of view : " << bundle.m_PatchSize  );
-      otbAppLogINFO("Placeholder   : " << bundle.m_Placeholder);
+      otbAppLogINFO("Receptive field  : " << bundle.m_PatchSize  );
+      otbAppLogINFO("Placeholder name : " << bundle.m_Placeholder);
     }
   }
 
@@ -273,7 +276,7 @@ public:
     // Fully convolutional mode on/off
     if (GetParameterInt("model.fullyconv")==1)
     {
-      otbAppLogINFO("The tensorflow model is used in fully convolutional mode");
+      otbAppLogINFO("The TensorFlow model is used in fully convolutional mode");
       m_TFFilter->SetFullyConvolutional(true);
     }
 
@@ -292,7 +295,7 @@ public:
       const unsigned int tileSize = GetParameterInt("optim.tilesize");
       otbAppLogINFO("Force tiling with squared tiles of " << tileSize)
 
-      // Update the TF filter to get the output image size
+      // Update the TensorFlow filter output information to get the output image size
       m_TFFilter->UpdateOutputInformation();
 
       // Splitting using square tiles
@@ -301,7 +304,7 @@ public:
       unsigned int nbDesiredTiles = itk::Math::Ceil<unsigned int>(
           double(m_TFFilter->GetOutput()->GetLargestPossibleRegion().GetNumberOfPixels() ) / (tileSize * tileSize) );
 
-      // Use an itk::StreamingImageFilter to force the computation on tiles
+      // Use an itk::StreamingImageFilter to force the computation tile by tile
       m_StreamFilter = StreamingFilterType::New();
       m_StreamFilter->SetRegionSplitter(splitter);
       m_StreamFilter->SetNumberOfStreamDivisions(nbDesiredTiles);
@@ -313,7 +316,6 @@ public:
     {
       otbAppLogINFO("Tiling disabled");
       SetParameterOutputImage("out", m_TFFilter->GetOutput());
-
     }
   }
 
