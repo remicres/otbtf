@@ -63,7 +63,6 @@ private:
 
   }
 
-
   void DoInit()
   {
 
@@ -91,7 +90,7 @@ private:
   }
   ShareParameter("model", "tfmodel.model", "Deep net model parameters", "Deep net model parameters");
   ShareParameter("output", "tfmodel.output", "Deep net outputs parameters", "Deep net outputs parameters");
-  ShareParameter("finetuning", "tfmodel.finetuning", "Deep net fine tuning parameters", "Deep net fine tuning parameters");
+  ShareParameter("optim", "tfmodel.optim", "This group of parameters allows optimization of processing time", "This group of parameters allows optimization of processing time");
 
   // Train shared parameters
   ShareParameter("vd"  , "train.io.vd"      , "Input vector data list"      , "Input vector data list" );
