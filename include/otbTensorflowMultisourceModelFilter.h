@@ -26,17 +26,38 @@ namespace otb
 
 /**
  * \class TensorflowMultisourceModelFilter
- * \brief This filter apply a TensorFlow model over multiple input images.
+ * \brief This filter apply a TensorFlow model over multiple input images and
+ * generates one output image corresponding to outputs of the model.
  *
  * The filter takes N input images and feed the TensorFlow model to produce
- * one output image of desired TF op results.
+ * one output image corresponding to the desired results of the TensorFlow model.
  * Names of input placeholders and output tensors must be specified using the
  * SetPlaceholders() and SetTensors() methods.
  *
  * Example: we have a TensorFlow model which runs the input images "x1" and "x2"
  *          and produces the output image "y".
- *          "x1" and "x2" are two TF placeholders, we set InputPlaceholder={"x1","x2"}
- *          "y1" corresponds to one TF op output, we set OutputTensors={"y1"}
+ *          "x1" and "x2" are two placeholders, we set InputPlaceholder={"x1","x2"}
+ *          "y1" corresponds to one output tensor, we set OutputTensors={"y1"}
+ *
+ * The filter can work in two modes:
+ *
+ * 1.Patch-based mode:
+ *    Extract and process patches independently at regular intervals.
+ *    Patches sizes are equal to the perceptive field sizes of inputs. For each input,
+ *    a tensor with a number of elements equal to the number of patches is fed to the
+ *    TensorFlow model.
+ *
+ * 2.Fully-convolutional:
+ *    Unlike patch-based mode, it allows the processing of an entire requested region.
+ *    For each input, a tensor composed of one single element, corresponding to the input
+ *    requested region, is fed to the TF model. This mode requires that perceptive fields,
+ *    expression fields and scale factors are consistent with operators implemented in the
+ *    TensorFlow model, input images physical spacing and alignment.
+ *    The filter produces output blocks avoiding any blocking artifact in fully-convolutional
+ *    mode. This is done in computing input images regions that are aligned to the expression
+ *    field sizes of the model (eventually, input requested regions are enlarged, but still
+ *    aligned), and keeping only the subset of the output corresponding to the requested
+ *    output region.
  *
  * The reference grid for the output image is the same as the first input image.
  * This grid can be scaled by setting the OutputSpacingScale value.
@@ -48,8 +69,10 @@ namespace otb
  * If the number of values in the output tensors (produced by the model) don't
  * fit with the output image region, an exception will be thrown.
  *
- * The TensorFlow Graph is passed using the SetGraph() method
- * The TensorFlow Session is passed using the SetSession() method
+ *
+ * TODO: the filter must be able to output multiple images eventually at different
+ * resolutions/sizes/origins.
+ *
  *
  * \ingroup OTBTensorflow
  */

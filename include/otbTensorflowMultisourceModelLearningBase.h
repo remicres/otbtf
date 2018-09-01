@@ -23,7 +23,22 @@ namespace otb
 
 /**
  * \class TensorflowMultisourceModelLearningBase
- * \brief This filter is the base class for learning filters.
+ * \brief This filter is the base class for all learning filters.
+ *
+ * The batch size can be set using the SetBatchSize() method.
+ * The streaming can be activated to allow the processing of huge datasets.
+ * However, it should be noted that the process is significantly slower due to
+ * multiple read of input patches. When streaming is deactivated, the whole
+ * patches images are read and kept in memory, guaranteeing fast patches access.
+ *
+ * The GenerateData() implements a loop over batches, that call the ProcessBatch()
+ * method for each one.
+ * The ProcessBatch() function is a pure virtual method that must be implemented in
+ * child classes.
+ *
+ * The PopulateInputTensors() method converts input patches images into placeholders
+ * that will be fed to the model. It is a common method to learning filters, and
+ * is intended to be used in child classes, as a kind of helper.
  *
  * \ingroup OTBTensorflow
  */

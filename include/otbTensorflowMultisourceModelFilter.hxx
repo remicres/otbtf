@@ -279,10 +279,10 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   // Set output image origin/spacing/size/projection
   ImageType * outputPtr = this->GetOutput();
   outputPtr->SetNumberOfComponentsPerPixel(outputPixelSize);
-  outputPtr->SetProjectionRef        ( projectionRef      );
-  outputPtr->SetOrigin               ( m_OutputOrigin       );
-  outputPtr->SetSignedSpacing        ( m_OutputSpacing      );
-  outputPtr->SetLargestPossibleRegion( largestPossibleRegion);
+  outputPtr->SetProjectionRef        ( projectionRef );
+  outputPtr->SetOrigin               ( m_OutputOrigin );
+  outputPtr->SetSignedSpacing        ( m_OutputSpacing );
+  outputPtr->SetLargestPossibleRegion( largestPossibleRegion );
 
   // Set null pixel
   m_NullPixel.SetSize(outputPtr->GetNumberOfComponentsPerPixel());
@@ -329,7 +329,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     // We need to avoid some extrapolation when mode is patch-based.
     // The reason is that, when some input have a lower spacing than the
     // reference image, the requested region of this lower res input image
-    // can be one pixel larger when the input image regions are not physicaly
+    // can be one pixel larger when the input image regions are not physically
     // aligned.
     if (!m_FullyConvolutional)
       {
@@ -340,8 +340,6 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
 
     // Update the requested region
     inputImage->SetRequestedRegion(inRegion);
-
-    //    std::cout << "Input #" << i << " region starts at " << inRegion.GetIndex() << " with size " << inRegion.GetSize() << std::endl;
 
     } // next image
 
@@ -398,7 +396,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
       // Recopy the whole input
       tf::RecopyImageRegionToTensorWithCast<TInputImage>(inputPtr, reqRegion, inputTensor, 0);
 
-      // Input #1 : the tensor of patches (aka the batch)
+      // Input is the tensor representing the subset of image
       DictElementType input = { this->GetInputPlaceholders()[i], inputTensor };
       inputs.push_back(input);
       }
@@ -431,7 +429,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
         elemIndex++;
         }
 
-      // Input #1 : the tensor of patches (aka the batch)
+      // Input is the tensor of patches (aka the batch)
       DictElementType input = { this->GetInputPlaceholders()[i], inputTensor };
       inputs.push_back(input);
 

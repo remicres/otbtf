@@ -30,9 +30,6 @@ namespace otb
  * \class TensorflowMultisourceModelTrain
  * \brief This filter train a TensorFlow model over multiple input images.
  *
- * The filter takes N input images and feed the TensorFlow model.
- *
- *
  * \ingroup OTBTensorflow
  */
 template <class TInputImage>
