@@ -105,7 +105,9 @@ void GetTensorAttributes(const tensorflow::GraphDef & graph, std::vector<std::st
       if (node.name().compare((*nameIt)) == 0)
       {
         found = true;
-        tensorflow::DataType ts_dt;
+
+        // Set default to DT_FLOAT
+        tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
 
         // Default (input?) tensor type
         auto test_is_output = node.attr().find("T");
