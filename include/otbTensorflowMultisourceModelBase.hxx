@@ -105,15 +105,24 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
  {
 
   // Check that the number of the following is the same
-  // - placeholders names
-  // - patches sizes
-  // - input image
+  // - input placeholders names
+  // - input receptive fields
+  // - input images
   const unsigned int nbInputs = this->GetNumberOfInputs();
   if (nbInputs != m_InputReceptiveFields.size() || nbInputs != m_InputPlaceholders.size())
     {
     itkExceptionMacro("Number of input images is " << nbInputs <<
                       " but the number of input patches size is " << m_InputReceptiveFields.size() <<
                       " and the number of input tensors names is " << m_InputPlaceholders.size());
+    }
+
+  // Check that the number of the following is the same
+  // - output tensors names
+  // - output expression fields
+  if (m_OutputExpressionFields.size() != m_OutputTensors.size())
+    {
+    itkExceptionMacro("Number of output tensors names is " << m_OutputTensors.size() <<
+                      " but the number of output fields of expression is " << m_OutputExpressionFields.size());
     }
 
   //////////////////////////////////////////////////////////////////////////////////////////

@@ -32,7 +32,11 @@ namespace otb
  * \class TensorflowMultisourceModelValidate
  * \brief This filter validates a TensorFlow model over multiple input images.
  *
- * The filter takes N input images and feed the TensorFlow model.
+ * This filter computes confusion matrices for each output tensor.
+ * The references (i.e. ground truth for validation) must be set using the
+ * SetReferences() method. References must be provided in the same order as
+ * their related output tensors (i.e. names and patch sizes). If the number of
+ * references is not the same as output tensors, an exception is thrown.
  *
  * \ingroup OTBTensorflow
  */
@@ -80,7 +84,6 @@ public:
   typedef itk::VariableSizeMatrix<CountValueType>  ConfMatType;
   typedef std::vector<ConfMatType>                 ConfMatListType;
   typedef itk::ImageRegionConstIterator<ImageType> IteratorType;
-
 
   /** Set and Get the input references */
   virtual void SetInputReferences(ImageListType input);

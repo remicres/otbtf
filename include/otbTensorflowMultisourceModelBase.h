@@ -30,15 +30,36 @@ namespace otb
 
 /**
  * \class TensorflowMultisourceModelBase
- * \brief This filter is base for TensorFlow model over multiple input images.
+ * \brief This filter is the base class for all TensorFlow model filters.
  *
- * The filter takes N input images and feed the TensorFlow model.
- * Names of input placeholders must be specified using the
- * SetInputPlaceholdersNames method
+ * This abstract class implements a number of generic methods that are used in
+ * filters that use the TensorFlow engine.
  *
- * TODO:
- *   Replace FOV (Field Of View) --> RF (Receptive Field)
- *   Replace FEO (Field Of Expr) --> EF (Expression Field)
+ * The filter has N input images (Input), each one corresponding to a placeholder
+ * that will fed the TensorFlow model. For each input, the name of the
+ * placeholder (InputPlaceholders, a std::vector of std::string) and the
+ * receptive field (InputReceptiveFields, a std::vector of SizeType) i.e. the
+ * input space that the model will "see", must be provided. Hence the number of
+ * input images, and the size of InputPlaceholders and InputReceptiveFields must
+ * be the same. If not, an exception will be thrown during the method
+ * GenerateOutputInformation().
+ *
+ * The TensorFlow graph and session must be set using the SetGraph() and
+ * SetSession() methods.
+ *
+ * Target nodes names of the TensorFlow graph that must be triggered can be set
+ * with the SetTargetNodesNames.
+ *
+ * The OutputTensorNames consists in a strd::vector of std::string, and
+ * corresponds to the names of tensors that will be computed during the session.
+ * As for input placeholders, output tensors field of expression
+ * (OutputExpressionFields, a std::vector of SizeType), i.e. the output
+ * space that the TensorFlow model will "generate", must be provided.
+ *
+ * Finally, a list of scalar placeholders can be fed in the form of std::vector
+ * of std::string, each one expressing the assigment of a signle valued
+ * placeholder, e.g. "drop_rate=0.5 learning_rate=0.002 toto=true".
+ * See otb::tf::ExpressionToTensor() to know more about syntax.
  *
  * \ingroup OTBTensorflow
  */
@@ -135,8 +156,8 @@ private:
   void operator=(const Self&); //purposely not implemented
 
   // Tensorflow graph and session
-  tensorflow::GraphDef       m_Graph;                   // The tensorflow graph
-  tensorflow::Session *      m_Session;                 // The tensorflow session
+  tensorflow::GraphDef       m_Graph;                   // The TensorFlow graph
+  tensorflow::Session *      m_Session;                 // The TensorFlow session
 
   // Model parameters
   StringList                 m_InputPlaceholders;       // Input placeholders names
@@ -144,9 +165,9 @@ private:
   StringList                 m_OutputTensors;           // Output tensors names
   SizeListType               m_OutputExpressionFields;  // Output expression fields
   DictType                   m_UserPlaceholders;        // User placeholders
-  StringList                 m_TargetNodesNames;        // User target tensors
+  StringList                 m_TargetNodesNames;        // User nodes target
 
-  // Read-only
+  // Internal, read-only
   DataTypeListType           m_InputTensorsDataTypes;   // Input tensors datatype
   DataTypeListType           m_OutputTensorsDataTypes;  // Output tensors datatype
   TensorShapeProtoList       m_InputTensorsShapes;      // Input tensors shapes
