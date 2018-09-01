@@ -26,31 +26,53 @@ namespace otb
 
 /**
  * \class TensorflowMultisourceModelFilter
- * \brief This filter apply a TensorFlow model over multiple input images.
+ * \brief This filter apply a TensorFlow model over multiple input images and
+ * generates one output image corresponding to outputs of the model.
  *
  * The filter takes N input images and feed the TensorFlow model to produce
- * one output image of desired TF op results.
- * Names of input/output placeholders/tensors must be specified using the
- * SetInputPlaceholdersNames/SetOutputTensorNames.
+ * one output image corresponding to the desired results of the TensorFlow model.
+ * Names of input placeholders and output tensors must be specified using the
+ * SetPlaceholders() and SetTensors() methods.
  *
- * Example: we have a tensorflow model which runs the input images "x1" and "x2"
+ * Example: we have a TensorFlow model which runs the input images "x1" and "x2"
  *          and produces the output image "y".
- *          "x1" and "x2" are two TF placeholders, we set InputTensorNames={"x1","x2"}
- *          "y1" corresponds to one TF op output, we set OutputTensorNames={"y1"}
+ *          "x1" and "x2" are two placeholders, we set InputPlaceholder={"x1","x2"}
+ *          "y1" corresponds to one output tensor, we set OutputTensors={"y1"}
+ *
+ * The filter can work in two modes:
+ *
+ * 1.Patch-based mode:
+ *    Extract and process patches independently at regular intervals.
+ *    Patches sizes are equal to the perceptive field sizes of inputs. For each input,
+ *    a tensor with a number of elements equal to the number of patches is fed to the
+ *    TensorFlow model.
+ *
+ * 2.Fully-convolutional:
+ *    Unlike patch-based mode, it allows the processing of an entire requested region.
+ *    For each input, a tensor composed of one single element, corresponding to the input
+ *    requested region, is fed to the TF model. This mode requires that perceptive fields,
+ *    expression fields and scale factors are consistent with operators implemented in the
+ *    TensorFlow model, input images physical spacing and alignment.
+ *    The filter produces output blocks avoiding any blocking artifact in fully-convolutional
+ *    mode. This is done in computing input images regions that are aligned to the expression
+ *    field sizes of the model (eventually, input requested regions are enlarged, but still
+ *    aligned), and keeping only the subset of the output corresponding to the requested
+ *    output region.
  *
  * The reference grid for the output image is the same as the first input image.
  * This grid can be scaled by setting the OutputSpacingScale value.
  * This can be used to run models which downsize the output image spacing
- * (typically fully convolutional model with strides) or to produce the result
+ * (e.g. fully convolutional model with strides) or to produce the result
  * of a patch-based network at regular intervals.
  *
- * For each input, input field of view (FOV) must be set.
+ * For each input (resp. output), receptive field (resp. expression field) must be set.
  * If the number of values in the output tensors (produced by the model) don't
- * fit with the output image region, exception will be thrown.
+ * fit with the output image region, an exception will be thrown.
  *
  *
- * The tensorflow Graph is passed using the SetGraph() method
- * The tensorflow Session is passed using the SetSession() method
+ * TODO: the filter must be able to output multiple images eventually at different
+ * resolutions/sizes/origins.
+ *
  *
  * \ingroup OTBTensorflow
  */
@@ -94,15 +116,13 @@ public:
   typedef typename itk::ImageRegionConstIterator<TInputImage>              InputConstIteratorType;
 
   /* Typedefs for parameters */
+  typedef typename Superclass::DictElementType     DictElementType;
   typedef typename Superclass::DictType            DictType;
   typedef typename Superclass::StringList          StringList;
   typedef typename Superclass::SizeListType        SizeListType;
-  typedef typename Superclass::DictListType        DictListType;
   typedef typename Superclass::TensorListType      TensorListType;
   typedef std::vector<float>                       ScaleListType;
 
-  itkSetMacro(OutputFOESize, SizeType);
-  itkGetMacro(OutputFOESize, SizeType);
   itkSetMacro(OutputGridSize, SizeType);
   itkGetMacro(OutputGridSize, SizeType);
   itkSetMacro(ForceOutputGridSize, bool);
@@ -132,7 +152,6 @@ private:
   TensorflowMultisourceModelFilter(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
 
-  SizeType                   m_OutputFOESize;        // Output tensors field of expression (FOE) sizes
   SizeType                   m_OutputGridSize;       // Output grid size
   bool                       m_ForceOutputGridSize;  // Force output grid size
   bool                       m_FullyConvolutional;   // Convolution mode
@@ -142,6 +161,7 @@ private:
   SpacingType                m_OutputSpacing;     // Output image spacing
   PointType                  m_OutputOrigin;      // Output image origin
   SizeType                   m_OutputSize;        // Output image size
+  PixelType                  m_NullPixel;         // Pixel filled with zeros
 
 }; // end class
 
