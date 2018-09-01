@@ -32,31 +32,31 @@ namespace otb
  * \class TensorflowMultisourceModelValidate
  * \brief This filter validates a TensorFlow model over multiple input images.
  *
- * The filter takes N input images and feed the TensorFlow model.
- * Names of input placeholders must be specified using the
- * SetInputPlaceholdersNames method
- *
- * TODO: Add an option to disable streaming
+ * This filter computes confusion matrices for each output tensor.
+ * The references (i.e. ground truth for validation) must be set using the
+ * SetReferences() method. References must be provided in the same order as
+ * their related output tensors (i.e. names and patch sizes). If the number of
+ * references is not the same as output tensors, an exception is thrown.
  *
  * \ingroup OTBTensorflow
  */
 template <class TInputImage>
 class ITK_EXPORT TensorflowMultisourceModelValidate :
-public TensorflowMultisourceModelBase<TInputImage>
+public TensorflowMultisourceModelLearningBase<TInputImage>
 {
 public:
 
   /** Standard class typedefs. */
-  typedef TensorflowMultisourceModelValidate                    Self;
-  typedef TensorflowMultisourceModelBase<TInputImage>        Superclass;
-  typedef itk::SmartPointer<Self>                            Pointer;
-  typedef itk::SmartPointer<const Self>                      ConstPointer;
+  typedef TensorflowMultisourceModelValidate                  Self;
+  typedef TensorflowMultisourceModelLearningBase<TInputImage> Superclass;
+  typedef itk::SmartPointer<Self>                             Pointer;
+  typedef itk::SmartPointer<const Self>                       ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
 
   /** Run-time type information (and related methods). */
-  itkTypeMacro(TensorflowMultisourceModelValidate, TensorflowMultisourceModelBase);
+  itkTypeMacro(TensorflowMultisourceModelValidate, TensorflowMultisourceModelLearningBase);
 
   /** Images typedefs */
   typedef typename Superclass::ImageType         ImageType;
@@ -70,8 +70,9 @@ public:
   typedef typename Superclass::DictType          DictType;
   typedef typename Superclass::StringList        StringList;
   typedef typename Superclass::SizeListType      SizeListType;
-  typedef typename Superclass::DictListType      DictListType;
   typedef typename Superclass::TensorListType    TensorListType;
+  typedef typename Superclass::IndexValueType    IndexValueType;
+  typedef typename Superclass::IndexListType     IndexListType;
 
   /* Typedefs for validation */
   typedef unsigned long                            CountValueType;
@@ -84,22 +85,9 @@ public:
   typedef std::vector<ConfMatType>                 ConfMatListType;
   typedef itk::ImageRegionConstIterator<ImageType> IteratorType;
 
-  /* Set and Get the batch size
-  itkSetMacro(BatchSize, unsigned int);
-  itkGetMacro(BatchSize, unsigned int);
-
-  /** Get the number of samples */
-  itkGetMacro(NumberOfSamples, unsigned int);
-
-  virtual void GenerateOutputInformation(void);
-
-  virtual void GenerateInputRequestedRegion();
-
   /** Set and Get the input references */
   virtual void SetInputReferences(ImageListType input);
   ImagePointerType GetInputReference(unsigned int index);
-
-  virtual void GenerateData();
 
   /** Get the confusion matrix */
   const ConfMatType GetConfusionMatrix(unsigned int target);
@@ -111,17 +99,23 @@ protected:
   TensorflowMultisourceModelValidate();
   virtual ~TensorflowMultisourceModelValidate() {};
 
+  void GenerateOutputInformation(void);
+  void GenerateData();
+  void ProcessBatch(DictType & inputs, const IndexValueType & sampleStart,
+      const IndexValueType & batchSize);
+
 private:
   TensorflowMultisourceModelValidate(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
 
-  unsigned int               m_BatchSize;               // Batch size
   ImageListType              m_References;              // The references images
 
   // Read only
-  unsigned int               m_NumberOfSamples;         // Number of samples
   ConfMatListType            m_ConfusionMatrices;       // Confusion matrix
   MapOfClassesListType       m_MapsOfClasses;           // Maps of classes
+
+  // Internal
+  std::vector<MatMapType>    m_ConfMatMaps;             // Accumulators
 
 }; // end class
 
