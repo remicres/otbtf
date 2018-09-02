@@ -21,6 +21,10 @@
 #include "otbTensorflowDataTypeBridge.h"
 #include "otbTensorflowCopyUtils.h"
 
+// Tile hint
+#include "itkMetaDataObject.h"
+#include "otbMetaDataKey.h"
+
 namespace otb
 {
 
