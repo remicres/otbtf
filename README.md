@@ -135,7 +135,7 @@ As you can note, there is `$OTB_TF_NSOURCES` + 1 sources for practical purpose: 
 ## Serve the model
 The **TensorflowModelServe** application perform model serving, it can be used to produce output raster with the desired tensors. Thanks to the streaming mechanism, very large images can be produced. The application uses the `TensorflowModelFilter` and a `StreamingFilter` to force the streaming of output. This last can be optionally disabled by the user, if he prefers using the extended filenames to deal with chunk sizes. however, it's still very useful when the application is used in other composites applications, or just without extended filename magic. Some models can consume a lot of memory. In addition, the native tiling strategy of OTB consists in strips but this might not always the best. For Convolutional Neural Networks for instance, square tiles are more interesting because the padding required to perform the computation of one single strip of pixels induces to input a lot more pixels that to process the computation of one single tile of pixels.
 So, this application takes in input one or multiple images (remember that you can change the number of inputs by setting the `OTB_TF_NSOURCES` to the desired number) and produce one output of the specified tensors.
-Like it was said before, the user is responsible of giving the *perceptive field* and *name* of input placeholders, as well as the *expression field*, *scale factor* and *name* of the output tensors. The user can ask for multiple tensors, that will be stack along the channel dimension of the output raster. However, if the sizes of those output tensors are not consistent (e.g. a different number of (x,y) elements), an exception will be thrown.
+Like it was said before, the user is responsible of giving the *receptive field* and *name* of input placeholders, as well as the *expression field*, *scale factor* and *name* of the output tensors. The user can ask for multiple tensors, that will be stack along the channel dimension of the output raster. However, if the sizes of those output tensors are not consistent (e.g. a different number of (x,y) elements), an exception will be thrown.
 
 ![Schema](doc/classif_map.png)
 
@@ -313,7 +313,7 @@ Then, we will select some samples with the **SampleSelection** application of th
 ```
 otbcli_SampleSelection -in spot7.tif -vec terrain_truth.shp -instats vec_stats.xml -field class -out points.shp
 ```
-Ok. Now, let's use our **PatchesExtraction** application. Out model has a perceptive field of 16x16 pixels. 
+Ok. Now, let's use our **PatchesExtraction** application. Out model has a receptive field of 16x16 pixels. 
 We want to produce one image of patches, and one image for the corresponding labels.
 ```
 otbcli_PatchesExtraction -source1.il spot7.tif -source1.patchsizex 16 -source1.patchsizey 16 -vec points.shp -field class -source1.out samp_labels.tif -outpatches samp_patches.tif
