@@ -47,14 +47,14 @@ namespace otb
  *
  * 1.Patch-based mode:
  *    Extract and process patches independently at regular intervals.
- *    Patches sizes are equal to the perceptive field sizes of inputs. For each input,
+ *    Patches sizes are equal to the receptive field sizes of inputs. For each input,
  *    a tensor with a number of elements equal to the number of patches is fed to the
  *    TensorFlow model.
  *
  * 2.Fully-convolutional:
  *    Unlike patch-based mode, it allows the processing of an entire requested region.
  *    For each input, a tensor composed of one single element, corresponding to the input
- *    requested region, is fed to the TF model. This mode requires that perceptive fields,
+ *    requested region, is fed to the TF model. This mode requires that receptive fields,
  *    expression fields and scale factors are consistent with operators implemented in the
  *    TensorFlow model, input images physical spacing and alignment.
  *    The filter produces output blocks avoiding any blocking artifact in fully-convolutional
