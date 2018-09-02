@@ -289,7 +289,7 @@ public:
     otbAppLogINFO("Output field of expression: " << m_TFFilter->GetOutputExpressionFields()[0]);
 
     // Streaming
-    if (GetParameterInt("optim.disabletiling")!=1)
+    if (GetParameterInt("optim.disabletiling") != 1)
     {
       // Get the tile size
       const unsigned int tileSize = GetParameterInt("optim.tilesize");
