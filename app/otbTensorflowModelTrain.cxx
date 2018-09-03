@@ -191,7 +191,7 @@ public:
     SetDefaultParameterInt                 ("training.batchsize", 100);
     AddParameter(ParameterType_Int,         "training.epochs",    "Number of epochs");
     SetMinimumParameterIntValue            ("training.epochs",    1);
-    SetDefaultParameterInt                 ("training.epochs",    10);
+    SetDefaultParameterInt                 ("training.epochs",    100);
     AddParameter(ParameterType_StringList,  "training.userplaceholders",
                  "Additional single-valued placeholders for training. Supported types: int, float, bool.");
     MandatoryOff                           ("training.userplaceholders");
@@ -205,6 +205,9 @@ public:
     // Metrics
     AddParameter(ParameterType_Group,       "validation",              "Validation parameters");
     MandatoryOff                           ("validation");
+    AddParameter(ParameterType_Int,         "validation.step",         "Perform the validation every Nth epochs");
+    SetMinimumParameterIntValue            ("validation.step",         1);
+    SetDefaultParameterInt                 ("validation.step",         10);
     AddParameter(ParameterType_Choice,      "validation.mode",         "Metrics to compute");
     AddChoice                              ("validation.mode.none",    "No validation step");
     AddChoice                              ("validation.mode.class",   "Classification metrics");
@@ -415,7 +418,7 @@ public:
     // Prepare inputs
     PrepareInputs();
 
-    // Setup filter
+    // Setup training filter
     m_TrainModelFilter = TrainModelFilterType::New();
     m_TrainModelFilter->SetGraph(m_SavedModel.meta_graph_def.graph_def());
     m_TrainModelFilter->SetSession(m_SavedModel.session.get());
@@ -434,21 +437,6 @@ public:
           m_InputSourcesForTraining[i]);
       }
 
-    // Train the model
-    for (int epoch = 0 ; epoch < GetParameterInt("training.epochs") ; epoch++)
-      {
-      AddProcess(m_TrainModelFilter, "Training epoch #" + std::to_string(epoch+1));
-      m_TrainModelFilter->Update();
-      }
-
-    // Check if we have to save variables to somewhere
-    if (HasValue("model.saveto"))
-      {
-      const std::string path = GetParameterAsString("model.saveto");
-      otbAppLogINFO("Saving model to " + path);
-      tf::SaveModel(path, m_SavedModel);
-      }
-
     // Setup the validation filter
     if (GetParameterInt("validation.mode")==1) // class
       {
@@ -459,60 +447,79 @@ public:
       m_ValidateModelFilter->SetSession(m_SavedModel.session.get());
       m_ValidateModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
       m_ValidateModelFilter->SetUserPlaceholders(GetUserPlaceholders("validation.userplaceholders"));
-
-      // AS we use the learning data here, it's rational to use the same option as streaming during training
-      m_ValidateModelFilter->SetUseStreaming(GetParameterInt("training.usestreaming"));
-
-      // 1. Evaluate the metrics against the learning data
-
-      for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstLearningData.size() ; i++)
-        {
-        m_ValidateModelFilter->PushBackInputTensorBundle(
-            m_InputPlaceholdersForValidation[i],
-            m_InputPatchesSizeForValidation[i],
-            m_InputSourcesForEvaluationAgainstLearningData[i]);
-        }
+      m_ValidateModelFilter->SetInputPlaceholders(m_InputPlaceholdersForValidation);
+      m_ValidateModelFilter->SetInputReceptiveFields(m_InputPatchesSizeForValidation);
       m_ValidateModelFilter->SetOutputTensors(m_TargetTensorsNames);
-      m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstLearningData);
       m_ValidateModelFilter->SetOutputExpressionFields(m_TargetPatchesSize);
-
-      // Update
-      AddProcess(m_ValidateModelFilter, "Evaluate model (Learning data)");
-      m_ValidateModelFilter->Update();
-
-      for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
-        {
-        otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
-        PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
-        }
-
-      // 2. Evaluate the metrics against the validation data
-
-      // Here we just change the input sources and references
-      for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstValidationData.size() ; i++)
-        {
-        m_ValidateModelFilter->SetInput(i, m_InputSourcesForEvaluationAgainstValidationData[i]);
-        }
-      m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstValidationData);
-      m_ValidateModelFilter->SetUseStreaming(GetParameterInt("validation.usestreaming"));
-
-      // Update
-      AddProcess(m_ValidateModelFilter, "Evaluate model (Validation data)");
-      m_ValidateModelFilter->Update();
-
-      for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
-        {
-        otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
-        PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
-        }
-
       }
     else if (GetParameterInt("validation.mode")==2) // rmse)
       {
       otbAppLogINFO("Set validation mode to classification RMSE evaluation");
+      otbAppLogFATAL("Not implemented yet !"); // XD
 
       // TODO
+      }
 
+    // Epoch
+    for (int epoch = 1 ; epoch <= GetParameterInt("training.epochs") ; epoch++)
+      {
+      // Train the model
+      AddProcess(m_TrainModelFilter, "Training epoch #" + std::to_string(epoch));
+      m_TrainModelFilter->Update();
+
+      // Validate the model
+      if (epoch % GetParameterInt("validation.step") == 0)
+        {
+        // 1. Evaluate the metrics against the learning data
+
+        for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstLearningData.size() ; i++)
+          {
+          m_ValidateModelFilter->SetInput(i, m_InputSourcesForEvaluationAgainstLearningData[i]);
+          }
+        m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstLearningData);
+
+        // As we use the learning data here, it's rational to use the same option as streaming during training
+        m_ValidateModelFilter->SetUseStreaming(GetParameterInt("training.usestreaming"));
+
+        // Update
+        AddProcess(m_ValidateModelFilter, "Evaluate model (Learning data)");
+        m_ValidateModelFilter->Update();
+
+        for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
+          {
+          otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
+          PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
+          }
+
+        // 2. Evaluate the metrics against the validation data
+
+        // Here we just change the input sources and references
+        for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstValidationData.size() ; i++)
+          {
+          m_ValidateModelFilter->SetInput(i, m_InputSourcesForEvaluationAgainstValidationData[i]);
+          }
+        m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstValidationData);
+        m_ValidateModelFilter->SetUseStreaming(GetParameterInt("validation.usestreaming"));
+
+        // Update
+        AddProcess(m_ValidateModelFilter, "Evaluate model (Validation data)");
+        m_ValidateModelFilter->Update();
+
+        for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
+          {
+          otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
+          PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
+          }
+        } // Step is OK to perform validation
+
+      } // Next epoch
+
+    // Check if we have to save variables to somewhere
+    if (HasValue("model.saveto"))
+      {
+      const std::string path = GetParameterAsString("model.saveto");
+      otbAppLogINFO("Saving model to " + path);
+      tf::SaveModel(path, m_SavedModel);
       }
 
   }
