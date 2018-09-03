@@ -79,8 +79,8 @@ private:
   ClearApplications();
 
   // Add applications
-  AddApplication("TrainImagesClassifier",  "train"  , "Train images classifier" );
-  AddApplication("TensorflowModelServe" ,  "tfmodel", "Serve the TF model"      );
+  AddApplication("TrainImagesClassifier",  "train",   "Train images classifier");
+  AddApplication("TensorflowModelServe",   "tfmodel", "Serve the TF model");
 
   // Model shared parameters
   AddAnInputImage();
@@ -88,21 +88,21 @@ private:
   {
     AddAnInputImage(i);
   }
-  ShareParameter("model", "tfmodel.model", "Deep net model parameters", "Deep net model parameters");
-  ShareParameter("output", "tfmodel.output", "Deep net outputs parameters", "Deep net outputs parameters");
-  ShareParameter("optim", "tfmodel.optim", "This group of parameters allows optimization of processing time", "This group of parameters allows optimization of processing time");
+  ShareParameter("model",      "tfmodel.model",       "Deep net inputs parameters",   "Parameters of the deep net inputs: placeholder names, receptive fields, etc.");
+  ShareParameter("output",     "tfmodel.output",      "Deep net outputs parameters",  "Parameters of the deep net outputs: tensors names, expression fields, etc.");
+  ShareParameter("optim",      "tfmodel.optim",       "Processing time optimization", "This group of parameters allows optimization of processing time");
 
   // Train shared parameters
-  ShareParameter("vd"  , "train.io.vd"      , "Input vector data list"      , "Input vector data list" );
-  ShareParameter("valid" , "train.io.valid"        , "Validation vector data list" , "Validation vector data list"          );
-  ShareParameter("out"    , "train.io.out" , "Output model" , "Output model"   );
-  ShareParameter("confmatout"    , "train.io.confmatout" , "Output model confusion matrix"  , "Output model confusion matrix"    );
+  ShareParameter("vd",         "train.io.vd",         "Vector data for training",     "Input vector data for training");
+  ShareParameter("valid",      "train.io.valid",      "Vector data for validation",   "Input vector data for validation");
+  ShareParameter("out",        "train.io.out",        "Output classification model",  "Output classification model");
+  ShareParameter("confmatout", "train.io.confmatout", "Output confusion matrix",      "Output confusion matrix of the classification model");
 
   // Shared parameter groups
-  ShareParameter("sample"    , "train.sample"       , "Training and validation samples parameters" , "Training and validation samples parameters" );
-  ShareParameter("elev"    , "train.elev"       , "Elevation management" , "Elevation management" );
-  ShareParameter("classifier"    , "train.classifier"       , "Classifier" , "Classifier" );
-  ShareParameter("rand"    , "train.rand"       , "User defined rand seed" , "User defined rand seed" );
+  ShareParameter("sample",     "train.sample",        "Sampling parameters" ,         "Training and validation samples parameters" );
+  ShareParameter("elev",       "train.elev",          "Elevation parameters",         "Elevation parameters" );
+  ShareParameter("classifier", "train.classifier",    "Classifier parameters",        "Classifier parameters" );
+  ShareParameter("rand",       "train.rand",          "User defined random seed",     "User defined random seed" );
 
   }
 
@@ -126,7 +126,7 @@ private:
   }
 
 };
-}
-}
+} // namespace Wrapper
+} // namespace otb
 
 OTB_APPLICATION_EXPORT( otb::Wrapper::TrainClassifierFromDeepFeatures )

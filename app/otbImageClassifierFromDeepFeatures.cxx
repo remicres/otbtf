@@ -127,7 +127,7 @@ private:
     // Nothing to do
   }
 };
-}
-}
+} // namespace Wrapper
+} // namespace otb
 
 OTB_APPLICATION_EXPORT( otb::Wrapper::ImageClassifierFromDeepFeatures )

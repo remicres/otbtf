@@ -288,6 +288,13 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   m_NullPixel.SetSize(outputPtr->GetNumberOfComponentsPerPixel());
   m_NullPixel.Fill(0);
 
+  //////////////////////////////////////////////////////////////////////////////////////////
+  //                        Set the tiling layout hint in metadata
+  //////////////////////////////////////////////////////////////////////////////////////////
+
+  itk::EncapsulateMetaData(outputPtr->GetMetaDataDictionary(), MetaDataKey::TileHintX, m_OutputGridSize[0]);
+  itk::EncapsulateMetaData(outputPtr->GetMetaDataDictionary(), MetaDataKey::TileHintY, m_OutputGridSize[1]);
+
  }
 
 template <class TInputImage, class TOutputImage>
