@@ -282,8 +282,8 @@ public:
 
     // Output field of expression
     FloatVectorImageType::SizeType foe;
-    foe[0] = GetParameterInt("output.foex");
-    foe[1] = GetParameterInt("output.foey");
+    foe[0] = GetParameterInt("output.efieldx");
+    foe[1] = GetParameterInt("output.efieldy");
     m_TFFilter->SetOutputExpressionFields({foe});
 
     otbAppLogINFO("Output field of expression: " << m_TFFilter->GetOutputExpressionFields()[0]);
