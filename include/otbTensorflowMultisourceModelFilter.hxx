@@ -368,9 +368,6 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   RegionType outputAlignedReqRegion(outputReqRegion);
   EnlargeToAlignedRegion(outputAlignedReqRegion);
 
-  // Add a progress reporter
-  itk::ProgressReporter progress(this, 0, outputReqRegion.GetNumberOfPixels());
-
   const unsigned int nInputs = this->GetNumberOfInputs();
 
   // Create input tensors list
