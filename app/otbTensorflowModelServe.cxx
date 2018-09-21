@@ -30,8 +30,7 @@
 #include "otbTensorflowSource.h"
 
 // Streaming
-#include "otbImageRegionSquareTileSplitter.h"
-#include "itkStreamingImageFilter.h"
+#include "otbTensorflowStreamerFilter.h"
 
 namespace otb
 {
@@ -58,7 +57,7 @@ public:
 
   /** Typedef for streaming */
   typedef otb::ImageRegionSquareTileSplitter<FloatVectorImageType::ImageDimension> TileSplitterType;
-  typedef itk::StreamingImageFilter<FloatVectorImageType, FloatVectorImageType> StreamingFilterType;
+  typedef otb::TensorflowStreamerFilter<FloatVectorImageType, FloatVectorImageType> StreamingFilterType;
 
   /** Typedefs for images */
   typedef FloatVectorImageType::SizeType SizeType;
@@ -198,9 +197,12 @@ public:
     AddParameter(ParameterType_Bool,          "optim.disabletiling", "Disable tiling");
     MandatoryOff                             ("optim.disabletiling");
     SetParameterDescription                  ("optim.disabletiling", "Tiling avoids to process a too large subset of image, but sometimes it can be useful to disable it");
-    AddParameter(ParameterType_Int,           "optim.tilesize", "Tile width used to stream the filter output");
-    SetMinimumParameterIntValue              ("optim.tilesize", 1);
-    SetDefaultParameterInt                   ("optim.tilesize", 16);
+    AddParameter(ParameterType_Int,           "optim.tilesizex", "Tile width used to stream the filter output");
+    SetMinimumParameterIntValue              ("optim.tilesizex", 1);
+    SetDefaultParameterInt                   ("optim.tilesizex", 16);
+    AddParameter(ParameterType_Int,           "optim.tilesizey", "Tile height used to stream the filter output");
+    SetMinimumParameterIntValue              ("optim.tilesizey", 1);
+    SetDefaultParameterInt                   ("optim.tilesizey", 16);
 
     // Output image
     AddParameter(ParameterType_OutputImage, "out", "output image");
@@ -292,22 +294,15 @@ public:
     if (GetParameterInt("optim.disabletiling") != 1)
     {
       // Get the tile size
-      const unsigned int tileSize = GetParameterInt("optim.tilesize");
-      otbAppLogINFO("Force tiling with squared tiles of " << tileSize)
+      SizeType gridSize;
+      gridSize[0] = GetParameterInt("optim.tilesizex");
+      gridSize[1] = GetParameterInt("optim.tilesizey");
 
-      // Update the TensorFlow filter output information to get the output image size
-      m_TFFilter->UpdateOutputInformation();
+      otbAppLogINFO("Force tiling with squared tiles of " << gridSize)
 
-      // Splitting using square tiles
-      TileSplitterType::Pointer splitter = TileSplitterType::New();
-      splitter->SetTileSizeAlignment(tileSize);
-      unsigned int nbDesiredTiles = itk::Math::Ceil<unsigned int>(
-          double(m_TFFilter->GetOutput()->GetLargestPossibleRegion().GetNumberOfPixels() ) / (tileSize * tileSize) );
-
-      // Use an itk::StreamingImageFilter to force the computation tile by tile
+      // Force the computation tile by tile
       m_StreamFilter = StreamingFilterType::New();
-      m_StreamFilter->SetRegionSplitter(splitter);
-      m_StreamFilter->SetNumberOfStreamDivisions(nbDesiredTiles);
+      m_StreamFilter->SetOutputGridSize(gridSize);
       m_StreamFilter->SetInput(m_TFFilter->GetOutput());
 
       SetParameterOutputImage("out", m_StreamFilter->GetOutput());
