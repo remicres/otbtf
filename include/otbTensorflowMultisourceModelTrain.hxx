@@ -58,7 +58,7 @@ TensorflowMultisourceModelTrain<TInputImage>
   // Display outputs tensors
   for (auto& o: outputs)
   {
-    // TODO
+    tf::PrintTensorInfos(o);
   }
 
  }
