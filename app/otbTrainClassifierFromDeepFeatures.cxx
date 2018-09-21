@@ -93,6 +93,7 @@ private:
   ShareParameter("optim",      "tfmodel.optim",       "Processing time optimization", "This group of parameters allows optimization of processing time");
 
   // Train shared parameters
+  ShareParameter("ram",        "train.ram",           "Available RAM (Mb)",           "Available RAM (Mb)");
   ShareParameter("vd",         "train.io.vd",         "Vector data for training",     "Input vector data for training");
   ShareParameter("valid",      "train.io.valid",      "Vector data for validation",   "Input vector data for validation");
   ShareParameter("out",        "train.io.out",        "Output classification model",  "Output classification model");
