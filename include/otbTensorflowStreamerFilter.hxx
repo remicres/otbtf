@@ -24,18 +24,6 @@ TensorflowStreamerFilter<TInputImage, TOutputImage>
   m_OutputGridSize.Fill(1);
  }
 
-
-template <class TInputImage, class TOutputImage>
-void
-TensorflowStreamerFilter<TInputImage, TOutputImage>
-::GenerateInputRequestedRegion()
- {
-  // We intentionally break the pipeline
-  ImageType * inputImage = static_cast<ImageType * >(  Superclass::ProcessObject::GetInput(0) );
-  RegionType nullRegion;
-  inputImage->SetRequestedRegion(nullRegion);
- }
-
 /**
  * Compute the output image
  */
@@ -47,7 +35,7 @@ TensorflowStreamerFilter<TInputImage, TOutputImage>
   // Output pointer and requested region
   OutputImageType * outputPtr = this->GetOutput();
   const RegionType outputReqRegion = outputPtr->GetRequestedRegion();
-  outputPtr->SetRegions(outputReqRegion);
+  outputPtr->SetBufferedRegion(outputReqRegion);
   outputPtr->Allocate();
 
   // Compute the aligned region
@@ -106,7 +94,6 @@ TensorflowStreamerFilter<TInputImage, TOutputImage>
       progress.CompletedPixel();
     }
   }
-
  }
 
 
