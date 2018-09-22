@@ -59,7 +59,7 @@ protected:
   TensorflowStreamerFilter();
   virtual ~TensorflowStreamerFilter() {};
 
-  virtual void GenerateInputRequestedRegion(void);
+  virtual void UpdateOutputData(itk::DataObject *output){(void) output; this->GenerateData();}
 
   virtual void GenerateData();
 
