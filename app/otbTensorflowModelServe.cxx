@@ -294,15 +294,28 @@ public:
     if (GetParameterInt("optim.disabletiling") != 1)
     {
       // Get the tile size
-      SizeType gridSize;
-      gridSize[0] = GetParameterInt("optim.tilesizex");
-      gridSize[1] = GetParameterInt("optim.tilesizey");
+      SizeType tileSize;
+      tileSize[0] = GetParameterInt("optim.tilesizex");
+      tileSize[1] = GetParameterInt("optim.tilesizey");
 
-      otbAppLogINFO("Force tiling with squared tiles of " << gridSize)
+      // Check that the tile size is aligned to the field of expression
+      for (unsigned int i = 0 ; i < FloatVectorImageType::ImageDimension ; i++)
+        if (tileSize[i] % foe[i] != 0)
+          {
+          SizeType::SizeValueType newSize = 1 + std::floor(tileSize[i] / foe[i]);
+          newSize *= foe[i];
+
+          otbAppLogWARNING("Aligning the tiling to the output expression field "
+              << "for better performances (dim " << i << "). New value set to " << newSize)
+
+          tileSize[i] = newSize;
+          }
+
+      otbAppLogINFO("Force tiling with squared tiles of " << tileSize)
 
       // Force the computation tile by tile
       m_StreamFilter = StreamingFilterType::New();
-      m_StreamFilter->SetOutputGridSize(gridSize);
+      m_StreamFilter->SetOutputGridSize(tileSize);
       m_StreamFilter->SetInput(m_TFFilter->GetOutput());
 
       SetParameterOutputImage("out", m_StreamFilter->GetOutput());
