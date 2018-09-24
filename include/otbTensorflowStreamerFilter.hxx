@@ -82,13 +82,17 @@ TensorflowStreamerFilter<TInputImage, TOutputImage>
     {
       // Update the input subregion
       subRegion.SetIndex(0, tx*m_OutputGridSize[0] + region.GetIndex(0));
-      inputImage->SetRequestedRegion(subRegion);
+
+      // The actual region to copy
+      RegionType cpyRegion(subRegion);
+      cpyRegion.Crop(outputReqRegion);
+
+      // Propagate region
+      inputImage->SetRequestedRegion(cpyRegion);
       inputImage->PropagateRequestedRegion();
       inputImage->UpdateOutputData();
 
       // Copy the subregion to output
-      RegionType cpyRegion(subRegion);
-      cpyRegion.Crop(outputReqRegion);
       itk::ImageAlgorithm::Copy( inputImage, outputPtr, cpyRegion, cpyRegion );
 
       progress.CompletedPixel();
