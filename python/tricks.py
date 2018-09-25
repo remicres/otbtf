@@ -114,13 +114,9 @@ def CreateSavedModel(sess, inputs, outputs, directory):
     directory: the output path for the SavedModel
   """
 
-  directory += "/SavedModel"
   print("Create a SavedModel in " + directory)
 
-  # Delete the directory if it already exists
-  if os.path.exists(directory):
-    shutil.rmtree(directory)
-  
+      
   # Get graph
   graph = tf.get_default_graph()
   
