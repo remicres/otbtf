@@ -55,6 +55,12 @@ TensorflowMultisourceModelTrain<TInputImage>
   TensorListType outputs;
   this->RunSession(inputs, outputs);
 
+  // Display outputs tensors
+  for (auto& o: outputs)
+  {
+    tf::PrintTensorInfos(o);
+  }
+
  }
 
 

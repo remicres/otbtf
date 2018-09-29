@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+#==========================================================================
+#
+#   Copyright Remi Cresson (IRSTEA)
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#          http://www.apache.org/licenses/LICENSE-2.0.txt
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+#==========================================================================*/
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -89,12 +107,11 @@ def main(unused_argv):
 
   # check number of arguments
   if len(sys.argv) != 4:
-    print("Usage : <patches> <labels> <output_model_dir>")
+    print("Usage : <patches> <labels> <export_dir>")
     sys.exit(1)
 
   # Export dir
-  log_dir = sys.argv[3] + '/model_checkpoints/'
-  export_dir = sys.argv[3] + '/model_export/'
+  export_dir = sys.argv[3]
 
   print("loading dataset")
 
@@ -272,13 +289,9 @@ def main(unused_argv):
         if step % 10 == 0:
           # Print status to stdout.
           print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
-          #print('Step %d: (%.3f sec)' % (step, duration))
-
 
       # Save a checkpoint and evaluate the model periodically.
       if (curr_epoch + 1) % 1 == 0:
-        checkpoint_file = os.path.join(log_dir, 'model.ckpt')
-        saver.save(sess, checkpoint_file, global_step=step)
         # Evaluate against the training set.
         print('Training Data Eval:')
         do_eval2(sess,
@@ -301,16 +314,7 @@ def main(unused_argv):
                 batch_size)
                 
         # Let's export a SavedModel
-        shutil.rmtree(export_dir)
-        builder = tf.saved_model.builder.SavedModelBuilder(export_dir)
-        signature_def_map= {
-        "model": tf.saved_model.signature_def_utils.predict_signature_def(
-            inputs= {"x1": xs_placeholder},
-            outputs= {"prediction": testPrediction})
-        }
-        builder.add_meta_graph_and_variables(sess, [tf.saved_model.tag_constants.TRAINING], signature_def_map)
-        builder.add_meta_graph([tf.saved_model.tag_constants.SERVING])
-        builder.save()
+        CreateSavedModel(sess, ["x1:0"], ["prediction:0"], export_dir)
 
   quit()
   
