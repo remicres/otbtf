@@ -48,12 +48,12 @@ This application extracts patches in multiple input images. Change the OTB_TF_NS
 Parameters: 
         -source1            <group>          Parameters for source 1 
 MISSING -source1.il         <string list>    Input image(s) 1  (mandatory)
-MISSING -source1.out        <string> [pixel] Output patches for image 1  [pixel=uint8/uint16/int16/uint32/int32/float/double] (default value is float) (mandatory)
+MISSING -source1.out        <string> [pixel] Output patches for image 1  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is float) (mandatory)
 MISSING -source1.patchsizex <int32>          X patch size for image 1  (mandatory)
 MISSING -source1.patchsizey <int32>          Y patch size for image 1  (mandatory)
 MISSING -vec                <string>         Positions of the samples (must be in the same projection as input image)  (mandatory)
-        -outlabels          <string> [pixel] output labels  [pixel=uint8/uint16/int16/uint32/int32/float/double] (default value is uint8) (optional, off by default)
-        -field              <string>         field of class in the vector data  (mandatory)
+        -outlabels          <string> [pixel] output labels  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is uint8) (optional, off by default)
+MISSING -field              <string>         field of class in the vector data  (mandatory)
         -inxml              <string>         Load otb application from xml file  (optional, off by default)
         -progress           <boolean>        Report progress 
         -help               <string list>    Display long help (empty list), or help for given parameters keys
@@ -62,8 +62,8 @@ Use -help param1 [... paramN] to see detailed documentation of those parameters.
 
 Examples: 
 otbcli_PatchesExtraction -vec points.sqlite -source1.il $s2_list -source1.patchsizex 16 -source1.patchsizey 16 -field class -source1.out outpatches_16x16.tif -outlabels outlabels.tif
-
 ```
+
 ## Build your Tensorflow model
 You can build your Tensorflow model as shown in the `otb/Modules/Remote/otbtensorflow/python` directory. The high-level Python API of Tensorflow is used here to explort a *SavedModel* that applications of this remote module can read.
 Python purists can even train their own models, thank to Python bindings of OTB: to get patches as 4D numpy arrays, just read the patches images with OTB (**ExtractROI** application for instance) and get the output float vector image as numpy array. Then, simply do a np.reshape to the dimensions that you want ! 
@@ -97,7 +97,7 @@ MISSING -model.dir                    <string>         Tensorflow model_save dir
         -model.saveto                 <string>         Save model to path  (optional, off by default)
         -training                     <group>          Training parameters 
         -training.batchsize           <int32>          Batch size  (mandatory, default value is 100)
-        -training.epochs              <int32>          Number of epochs  (mandatory, default value is 10)
+        -training.epochs              <int32>          Number of epochs  (mandatory, default value is 100)
         -training.userplaceholders    <string list>    Additional single-valued placeholders for training. Supported types: int, float, bool.  (optional, off by default)
 MISSING -training.targetnodes         <string list>    Names of the target nodes  (mandatory)
         -training.outputtensors       <string list>    Names of the output tensors to display  (optional, off by default)
@@ -113,6 +113,7 @@ MISSING -training.source2.patchsizex  <int32>          Patch size (x) for source
 MISSING -training.source2.patchsizey  <int32>          Patch size (y) for source #2  (mandatory)
 MISSING -training.source2.placeholder <string>         Name of the input placeholder for source #2 (training)  (mandatory)
         -validation                   <group>          Validation parameters 
+        -validation.step              <int32>          Perform the validation every Nth epochs  (mandatory, default value is 10)
         -validation.mode              <string>         Metrics to compute [none/class/rmse] (mandatory, default value is none)
         -validation.userplaceholders  <string list>    Additional single-valued placeholders for validation. Supported types: int, float, bool.  (optional, off by default)
         -validation.usestreaming      <boolean>        Use the streaming through patches (slower but can process big dataset)  (optional, off by default, default value is false)
@@ -131,6 +132,7 @@ Use -help param1 [... paramN] to see detailed documentation of those parameters.
 Examples: 
 otbcli_TensorflowModelTrain -source1.il spot6pms.tif -source1.placeholder x1 -source1.patchsizex 16 -source1.patchsizey 16 -source2.il labels.tif -source2.placeholder y1 -source2.patchsizex 1 -source2.patchsizex 1 -model.dir /tmp/my_saved_model/ -training.userplaceholders is_training=true dropout=0.2 -training.targetnodes optimizer -model.saveto /tmp/my_saved_model_vars1
 ```
+
 As you can note, there is `$OTB_TF_NSOURCES` + 1 sources for practical purpose: because we need at least 1 source for input data, and 1 source for the truth.
 ## Serve the model
 The **TensorflowModelServe** application perform model serving, it can be used to produce output raster with the desired tensors. Thanks to the streaming mechanism, very large images can be produced. The application uses the `TensorflowModelFilter` and a `StreamingFilter` to force the streaming of output. This last can be optionally disabled by the user, if he prefers using the extended filenames to deal with chunk sizes. however, it's still very useful when the application is used in other composites applications, or just without extended filename magic. Some models can consume a lot of memory. In addition, the native tiling strategy of OTB consists in strips but this might not always the best. For Convolutional Neural Networks for instance, square tiles are more interesting because the padding required to perform the computation of one single strip of pixels induces to input a lot more pixels that to process the computation of one single tile of pixels.
@@ -141,7 +143,7 @@ Like it was said before, the user is responsible of giving the *receptive field*
 
 
 ```
-Multisource deep learning classifier using Tensorflow. Change the OTB_TF_NSOURCES environment variable to set the number of sources.
+Multisource deep learning classifier using TensorFlow. Change the OTB_TF_NSOURCES environment variable to set the number of sources.
 Parameters: 
         -source1                <group>          Parameters for source #1 
 MISSING -source1.il             <string list>    Input image (or list to stack) for source #1  (mandatory)
@@ -149,17 +151,18 @@ MISSING -source1.rfieldx        <int32>          Input receptive field (width) f
 MISSING -source1.rfieldy        <int32>          Input receptive field (height) for source #1  (mandatory)
 MISSING -source1.placeholder    <string>         Name of the input placeholder for source #1  (mandatory)
         -model                  <group>          model parameters 
-MISSING -model.dir              <string>         Tensorflow model_save directory  (mandatory)
+MISSING -model.dir              <string>         TensorFlow model_save directory  (mandatory)
         -model.userplaceholders <string list>    Additional single-valued placeholders. Supported types: int, float, bool.  (optional, off by default)
         -model.fullyconv        <boolean>        Fully convolutional  (optional, off by default, default value is false)
         -output                 <group>          Output tensors parameters 
-        -output.spcscale        <float>          The output spacing scale  (mandatory, default value is 1)
+        -output.spcscale        <float>          The output spacing scale, related to the first input  (mandatory, default value is 1)
 MISSING -output.names           <string list>    Names of the output tensors  (mandatory)
         -output.efieldx         <int32>          The output expression field (width)  (mandatory, default value is 1)
         -output.efieldy         <int32>          The output expression field (height)  (mandatory, default value is 1)
         -optim                  <group>          This group of parameters allows optimization of processing time 
         -optim.disabletiling    <boolean>        Disable tiling  (optional, off by default, default value is false)
-        -optim.tilesize         <int32>          Tile width used to stream the filter output  (mandatory, default value is 16)
+        -optim.tilesizex        <int32>          Tile width used to stream the filter output  (mandatory, default value is 16)
+        -optim.tilesizey        <int32>          Tile height used to stream the filter output  (mandatory, default value is 16)
 MISSING -out                    <string> [pixel] output image  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is float) (mandatory)
         -inxml                  <string>         Load otb application from xml file  (optional, off by default)
         -progress               <boolean>        Report progress 
@@ -169,8 +172,8 @@ Use -help param1 [... paramN] to see detailed documentation of those parameters.
 
 Examples: 
 otbcli_TensorflowModelServe -source1.il spot6pms.tif -source1.placeholder x1 -source1.rfieldx 16 -source1.rfieldy 16 -model.dir /tmp/my_saved_model/ -model.userplaceholders is_training=false dropout=0.0 -output.names out_predict1 out_proba1 -out "classif128tgt.tif?&streaming:type=tiled&streaming:sizemode=height&streaming:sizevalue=256"
-
 ```
+
 ## Composite applications for classification
 Who has never dreamed to use classic classifiers performing on deep learning features?
 This is possible thank to two new applications that uses the existing training/classification applications of OTB:
@@ -184,33 +187,35 @@ MISSING -source1.il                  <string list>    Input image (or list to st
 MISSING -source1.rfieldx             <int32>          Input receptive field (width) for source #1  (mandatory)
 MISSING -source1.rfieldy             <int32>          Input receptive field (height) for source #1  (mandatory)
 MISSING -source1.placeholder         <string>         Name of the input placeholder for source #1  (mandatory)
-        -model                       <group>          Deep net model parameters 
-MISSING -model.dir                   <string>         Tensorflow model_save directory  (mandatory)
+        -model                       <group>          Deep net inputs parameters 
+MISSING -model.dir                   <string>         TensorFlow model_save directory  (mandatory)
         -model.userplaceholders      <string list>    Additional single-valued placeholders. Supported types: int, float, bool.  (optional, off by default)
         -model.fullyconv             <boolean>        Fully convolutional  (optional, off by default, default value is false)
         -output                      <group>          Deep net outputs parameters 
-        -output.spcscale             <float>          The output spacing scale  (mandatory, default value is 1)
+        -output.spcscale             <float>          The output spacing scale, related to the first input  (mandatory, default value is 1)
 MISSING -output.names                <string list>    Names of the output tensors  (mandatory)
         -output.efieldx              <int32>          The output expression field (width)  (mandatory, default value is 1)
         -output.efieldy              <int32>          The output expression field (height)  (mandatory, default value is 1)
-        -optim                       <group>          This group of parameters allows optimization of processing time 
+        -optim                       <group>          Processing time optimization 
         -optim.disabletiling         <boolean>        Disable tiling  (optional, off by default, default value is false)
-        -optim.tilesize              <int32>          Tile width used to stream the filter output  (mandatory, default value is 16)
-MISSING -vd                          <string list>    Input vector data list  (mandatory)
-        -valid                       <string list>    Validation vector data list  (optional, off by default)
-MISSING -out                         <string>         Output model  (mandatory)
-        -confmatout                  <string>         Output model confusion matrix  (optional, off by default)
-        -sample                      <group>          Training and validation samples parameters 
+        -optim.tilesizex             <int32>          Tile width used to stream the filter output  (mandatory, default value is 16)
+        -optim.tilesizey             <int32>          Tile height used to stream the filter output  (mandatory, default value is 16)
+        -ram                         <int32>          Available RAM (Mb)  (optional, off by default, default value is 128)
+MISSING -vd                          <string list>    Vector data for training  (mandatory)
+        -valid                       <string list>    Vector data for validation  (optional, off by default)
+MISSING -out                         <string>         Output classification model  (mandatory)
+        -confmatout                  <string>         Output confusion matrix  (optional, off by default)
+        -sample                      <group>          Sampling parameters 
         -sample.mt                   <int32>          Maximum training sample size per class  (mandatory, default value is 1000)
         -sample.mv                   <int32>          Maximum validation sample size per class  (mandatory, default value is 1000)
         -sample.bm                   <int32>          Bound sample number by minimum  (mandatory, default value is 1)
         -sample.vtr                  <float>          Training and validation sample ratio  (mandatory, default value is 0.5)
         -sample.vfn                  <string>         Field containing the class integer label for supervision  (mandatory, no default value)
-        -elev                        <group>          Elevation management 
+        -elev                        <group>          Elevation parameters 
         -elev.dem                    <string>         DEM directory  (optional, off by default)
         -elev.geoid                  <string>         Geoid File  (optional, off by default)
         -elev.default                <float>          Default elevation  (mandatory, default value is 0)
-        -classifier                  <string>         Classifier [libsvm/boost/dt/gbt/ann/bayes/rf/knn/sharkrf/sharkkm] (mandatory, default value is libsvm)
+        -classifier                  <string>         Classifier parameters [libsvm/boost/dt/gbt/ann/bayes/rf/knn/sharkrf/sharkkm] (mandatory, default value is libsvm)
         -classifier.libsvm.k         <string>         SVM Kernel Type [linear/rbf/poly/sigmoid] (mandatory, default value is linear)
         -classifier.libsvm.m         <string>         SVM Model Type [csvc/nusvc/oneclass] (mandatory, default value is csvc)
         -classifier.libsvm.c         <float>          Cost parameter C  (mandatory, default value is 1)
@@ -258,12 +263,15 @@ MISSING -out                         <string>         Output model  (mandatory)
         -classifier.sharkrf.oobr     <float>          Out of bound ratio  (mandatory, default value is 0.66)
         -classifier.sharkkm.maxiter  <int32>          Maximum number of iteration for the kmeans algorithm.  (mandatory, default value is 10)
         -classifier.sharkkm.k        <int32>          The number of class used for the kmeans algorithm.  (mandatory, default value is 2)
-        -rand                        <int32>          User defined rand seed  (optional, off by default)
+        -rand                        <int32>          User defined random seed  (optional, off by default)
         -inxml                       <string>         Load otb application from xml file  (optional, off by default)
         -progress                    <boolean>        Report progress 
         -help                        <string list>    Display long help (empty list), or help for given parameters keys
 
 Use -help param1 [... paramN] to see detailed documentation of those parameters.
+
+Examples: 
+None
 ```
 
 **ImageClassifierFromDeepFeatures** same approach with the official **ImageClassifier**.
@@ -277,17 +285,18 @@ MISSING -source1.rfieldx            <int32>          Input receptive field (widt
 MISSING -source1.rfieldy            <int32>          Input receptive field (height) for source #1  (mandatory)
 MISSING -source1.placeholder        <string>         Name of the input placeholder for source #1  (mandatory)
         -deepmodel                  <group>          Deep net model parameters 
-MISSING -deepmodel.dir              <string>         Tensorflow model_save directory  (mandatory)
+MISSING -deepmodel.dir              <string>         TensorFlow model_save directory  (mandatory)
         -deepmodel.userplaceholders <string list>    Additional single-valued placeholders. Supported types: int, float, bool.  (optional, off by default)
         -deepmodel.fullyconv        <boolean>        Fully convolutional  (optional, off by default, default value is false)
         -output                     <group>          Deep net outputs parameters 
-        -output.spcscale            <float>          The output spacing scale  (mandatory, default value is 1)
+        -output.spcscale            <float>          The output spacing scale, related to the first input  (mandatory, default value is 1)
 MISSING -output.names               <string list>    Names of the output tensors  (mandatory)
         -output.efieldx             <int32>          The output expression field (width)  (mandatory, default value is 1)
         -output.efieldy             <int32>          The output expression field (height)  (mandatory, default value is 1)
         -optim                      <group>          This group of parameters allows optimization of processing time 
         -optim.disabletiling        <boolean>        Disable tiling  (optional, off by default, default value is false)
-        -optim.tilesize             <int32>          Tile width used to stream the filter output  (mandatory, default value is 16)
+        -optim.tilesizex            <int32>          Tile width used to stream the filter output  (mandatory, default value is 16)
+        -optim.tilesizey            <int32>          Tile height used to stream the filter output  (mandatory, default value is 16)
 MISSING -model                      <string>         Model file  (mandatory)
         -imstat                     <string>         Statistics file  (optional, off by default)
         -nodatalabel                <int32>          Label mask value  (optional, off by default, default value is 0)
@@ -299,7 +308,11 @@ MISSING -out                        <string> [pixel] Output image  [pixel=uint8/
         -help                       <string list>    Display long help (empty list), or help for given parameters keys
 
 Use -help param1 [... paramN] to see detailed documentation of those parameters.
+
+Examples: 
+None
 ```
+
 Note that you can still set the `OTB_TF_NSOURCES` environment variable.
 Some examples and tutorial are coming soon for this part :)
 # Practice
