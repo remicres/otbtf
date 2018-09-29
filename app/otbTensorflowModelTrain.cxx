@@ -438,6 +438,7 @@ public:
       }
 
     // Setup the validation filter
+    const bool do_validation = HasUserValue("validation.mode");
     if (GetParameterInt("validation.mode")==1) // class
       {
       otbAppLogINFO("Set validation mode to classification validation");
@@ -467,50 +468,53 @@ public:
       AddProcess(m_TrainModelFilter, "Training epoch #" + std::to_string(epoch));
       m_TrainModelFilter->Update();
 
-      // Validate the model
-      if (epoch % GetParameterInt("validation.step") == 0)
+      if (do_validation)
+      {
+        // Validate the model
+        if (epoch % GetParameterInt("validation.step") == 0)
         {
-        // 1. Evaluate the metrics against the learning data
+          // 1. Evaluate the metrics against the learning data
 
-        for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstLearningData.size() ; i++)
+          for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstLearningData.size() ; i++)
           {
-          m_ValidateModelFilter->SetInput(i, m_InputSourcesForEvaluationAgainstLearningData[i]);
+            m_ValidateModelFilter->SetInput(i, m_InputSourcesForEvaluationAgainstLearningData[i]);
           }
-        m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstLearningData);
+          m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstLearningData);
 
-        // As we use the learning data here, it's rational to use the same option as streaming during training
-        m_ValidateModelFilter->SetUseStreaming(GetParameterInt("training.usestreaming"));
+          // As we use the learning data here, it's rational to use the same option as streaming during training
+          m_ValidateModelFilter->SetUseStreaming(GetParameterInt("training.usestreaming"));
 
-        // Update
-        AddProcess(m_ValidateModelFilter, "Evaluate model (Learning data)");
-        m_ValidateModelFilter->Update();
+          // Update
+          AddProcess(m_ValidateModelFilter, "Evaluate model (Learning data)");
+          m_ValidateModelFilter->Update();
 
-        for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
+          for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
           {
-          otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
-          PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
+            otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
+            PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
           }
 
-        // 2. Evaluate the metrics against the validation data
+          // 2. Evaluate the metrics against the validation data
 
-        // Here we just change the input sources and references
-        for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstValidationData.size() ; i++)
+          // Here we just change the input sources and references
+          for (unsigned int i = 0 ; i < m_InputSourcesForEvaluationAgainstValidationData.size() ; i++)
           {
-          m_ValidateModelFilter->SetInput(i, m_InputSourcesForEvaluationAgainstValidationData[i]);
+            m_ValidateModelFilter->SetInput(i, m_InputSourcesForEvaluationAgainstValidationData[i]);
           }
-        m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstValidationData);
-        m_ValidateModelFilter->SetUseStreaming(GetParameterInt("validation.usestreaming"));
+          m_ValidateModelFilter->SetInputReferences(m_InputTargetsForEvaluationAgainstValidationData);
+          m_ValidateModelFilter->SetUseStreaming(GetParameterInt("validation.usestreaming"));
 
-        // Update
-        AddProcess(m_ValidateModelFilter, "Evaluate model (Validation data)");
-        m_ValidateModelFilter->Update();
+          // Update
+          AddProcess(m_ValidateModelFilter, "Evaluate model (Validation data)");
+          m_ValidateModelFilter->Update();
 
-        for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
+          for (unsigned int i = 0 ; i < m_TargetTensorsNames.size() ; i++)
           {
-          otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
-          PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
+            otbAppLogINFO("Metrics for target \"" << m_TargetTensorsNames[i] << "\":");
+            PrintClassificationMetrics(m_ValidateModelFilter->GetConfusionMatrix(i), m_ValidateModelFilter->GetMapOfClasses(i));
           }
         } // Step is OK to perform validation
+      } // Do the validation against the validation data
 
       } // Next epoch
 
