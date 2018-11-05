@@ -138,7 +138,7 @@ TensorflowMultisourceModelLearningBase<TInputImage>
     // Batch start and size
     const IndexValueType sampleStart = batch * m_BatchSize;
     IndexValueType batchSize = m_BatchSize;
-    if (rest != 0)
+    if (rest != 0 && batch == nBatches - 1)
     {
       batchSize = rest;
     }
