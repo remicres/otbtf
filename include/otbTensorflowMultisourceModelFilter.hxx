@@ -57,10 +57,9 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   for(unsigned int dim = 0; dim<OutputImageType::ImageDimension; ++dim)
     {
     const SizeValueType psz = patchSize[dim];
-    const SizeValueType rval = 0.5 * psz;
-    const SizeValueType lval = psz - rval;
+    const SizeValueType lval = 0.5 * psz;
     region.GetModifiableIndex()[dim] += lval;
-    region.GetModifiableSize()[dim] -= psz;
+    region.GetModifiableSize()[dim] -= psz - 1;
     }
  }
 
