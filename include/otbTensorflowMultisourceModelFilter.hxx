@@ -326,8 +326,19 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
 
     // Compute the FOV-scale*FOE radius to pad
     SizeType toPad(this->GetInputReceptiveFields().at(i));
-    toPad[0] -= 1 + (this->GetOutputExpressionFields().at(0)[0] - 1) * m_OutputSpacingScale;
-    toPad[1] -= 1 + (this->GetOutputExpressionFields().at(0)[1] - 1) * m_OutputSpacingScale;
+    for(unsigned int dim = 0; dim<ImageType::ImageDimension; ++dim)
+      {
+      int valToPad = 1 + (this->GetOutputExpressionFields().at(0)[dim] - 1) * m_OutputSpacingScale * this->GetInput(0)->GetSpacing()[dim] / this->GetInput(i)->GetSpacing()[dim] ;
+      if (valToPad > toPad[dim])
+        itkExceptionMacro("The input requested region of source #" << i << " is not consistent (dim "<< dim<< ")." <<
+                          "Please check RF, EF, SF vs physical spacing of your image!" <<
+                          "\nReceptive field: " << this->GetInputReceptiveFields().at(i)[dim] <<
+                          "\nExpression field: " << this->GetOutputExpressionFields().at(0)[dim] <<
+                          "\nScale factor: " << m_OutputSpacingScale <<
+                          "\nReference image spacing: " << this->GetInput(0)->GetSpacing()[dim] <<
+                          "\nImage " << i << " spacing: " << this->GetInput(i)->GetSpacing()[dim]);
+      toPad[dim] -= valToPad;
+      }
 
     // Pad with radius
     SmartPad(inRegion, toPad);
