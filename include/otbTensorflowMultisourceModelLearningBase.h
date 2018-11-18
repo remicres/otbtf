@@ -23,7 +23,15 @@ namespace otb
 
 /**
  * \class TensorflowMultisourceModelLearningBase
- * \brief This filter is the base class for all learning filters.
+ * \brief This filter is the base class for all filters that input patches images.
+ *
+ * One input patches image consist in an image of size (pszx, pszy*n, nbands) where:
+ * -pszx   : is the width of one patch
+ * -pszy   : is the height of one patch
+ * -n      : is the number of patches in the patches image
+ * -nbands : is the number of channels in the patches image
+ *
+ * This filter verify that every patches images are consistent.
  *
  * The batch size can be set using the SetBatchSize() method.
  * The streaming can be activated to allow the processing of huge datasets.
