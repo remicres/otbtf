@@ -61,9 +61,6 @@ public:
 
     SetDocAuthors("Remi Cresson");
 
-    // Input image
-    AddParameter(ParameterType_InputImage, "in", "input patches image");
-
     // Patches size
     AddParameter(ParameterType_Group, "patches", "grid settings");
     AddParameter(ParameterType_Int, "patches.sizex", "Patch size X");
@@ -75,8 +72,8 @@ public:
 
     // Operation
     AddParameter(ParameterType_Choice, "op", "Operation");
-    AddChoice("op.merge", "Merge two patches images into one");
-    AddParameter(ParameterType_InputImage, "op.merge.in", "patches image to merge");
+    AddChoice("op.merge", "Merge multiple patches images into one");
+    AddParameter(ParameterType_InputImageList, "op.merge.il", "patches images to merge");
 
     // Output
     AddParameter(ParameterType_OutputImage, "out", "Output patches image");
@@ -85,11 +82,8 @@ public:
 
   }
 
-  void CheckPatchesDimensions(std::string key)
+  void CheckPatchesDimensions(FloatVectorImageType::Pointer in1, FloatVectorImageType::Pointer in2)
   {
-    FloatVectorImageType::Pointer in1 = GetParameterFloatVectorImage("in");
-    FloatVectorImageType::Pointer in2 = GetParameterFloatVectorImage(key);
-
     FloatVectorImageType::SizeType size1 = in1->GetLargestPossibleRegion().GetSize();
     FloatVectorImageType::SizeType size2 = in2->GetLargestPossibleRegion().GetSize();
     unsigned int nbands1 = in1->GetNumberOfComponentsPerPixel();
@@ -125,42 +119,56 @@ public:
    */
   void MergePatches()
   {
-    std::string key = "op.merge.in";
+    std::string key = "op.merge.il";
 
-    // Check patches consistency
-    CheckPatchesDimensions(key);
+    FloatVectorImageListType::Pointer imagesList = this->GetParameterImageList(key);
+    unsigned int nImgs = imagesList->Size();
 
-    // Get images pointers
-    FloatVectorImageType::Pointer in = GetParameterFloatVectorImage("in");
-    FloatVectorImageType::Pointer in2 = GetParameterFloatVectorImage(key);
+    otbAppLogINFO("Number of patches images: " << nImgs);
 
-    FloatVectorImageType::RegionType in1Region = in->GetLargestPossibleRegion();
-    FloatVectorImageType::RegionType in2Region = in2->GetLargestPossibleRegion();
+    // Check patches consistency and count rows
+    FloatVectorImageType::IndexValueType nrows = imagesList->GetNthElement(0)->GetLargestPossibleRegion().GetSize(1);
+    FloatVectorImageType::Pointer img0 = imagesList->GetNthElement(0);
+    for (unsigned int i = 1; i < nImgs ; i++)
+    {
+      FloatVectorImageType::Pointer img = imagesList->GetNthElement(i);
+      CheckPatchesDimensions(img0, img);
+      nrows += img->GetLargestPossibleRegion().GetSize(1);
+    }
 
     // Allocate output image
     FloatVectorImageType::RegionType outRegion;
     outRegion.GetModifiableIndex().Fill(0);
     outRegion.GetModifiableSize()[0] = GetParameterInt("patches.sizex");
-    outRegion.GetModifiableSize()[1] = in1Region.GetSize(1) + in2Region.GetSize(1);
+    outRegion.GetModifiableSize()[1] = nrows;
     m_Out = FloatVectorImageType::New();
     m_Out->SetRegions(outRegion);
-    m_Out->SetNumberOfComponentsPerPixel(in->GetNumberOfComponentsPerPixel());
+    m_Out->SetNumberOfComponentsPerPixel(img0->GetNumberOfComponentsPerPixel());
+
+    otbAppLogINFO("Allocating output image of " << outRegion.GetSize() <<
+        " pixels with " << img0->GetNumberOfComponentsPerPixel() << " channels");
+
     m_Out->Allocate();
 
     // Read input images
-    otbAppLogINFO("Reading input images...")
-    tf::PropagateRequestedRegion<FloatVectorImageType>(in, in1Region);
-    tf::PropagateRequestedRegion<FloatVectorImageType>(in2, in2Region);
-
-    // Recopy
-    otbAppLogINFO("Merging...")
     itk::ImageRegionIterator<FloatVectorImageType> outIt(m_Out, outRegion);
-    itk::ImageRegionConstIterator<FloatVectorImageType> inIt(in, in1Region);
-    for (inIt.GoToBegin(); !inIt.IsAtEnd(); ++inIt, ++outIt)
-      outIt.Set(inIt.Get());
-    itk::ImageRegionConstIterator<FloatVectorImageType> inIt2(in2, in2Region);
-    for (inIt2.GoToBegin(); !inIt2.IsAtEnd(); ++inIt2, ++outIt)
-      outIt.Set(inIt2.Get());
+    outIt.GoToBegin();
+    for (unsigned int i = 0; i < nImgs ; i++)
+    {
+      // Get current image
+      FloatVectorImageType::Pointer img = imagesList->GetNthElement(i);
+      FloatVectorImageType::RegionType region = img->GetLargestPossibleRegion();
+      otbAppLogINFO("Processing input image " << (i+1) << "/" << nImgs);
+
+      // Recopy
+      tf::PropagateRequestedRegion<FloatVectorImageType>(img, region);
+      itk::ImageRegionConstIterator<FloatVectorImageType> inIt(img, region);
+      for (inIt.GoToBegin(); !inIt.IsAtEnd(); ++inIt, ++outIt)
+        outIt.Set(inIt.Get());
+
+      // Release data bulk
+      img->PrepareForNewData();
+    }
 
     SetParameterOutputImage("out", m_Out);
   }
