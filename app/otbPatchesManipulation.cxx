@@ -104,12 +104,6 @@ public:
     if (size2[0] != size1[0])
       otbAppLogFATAL("Input patches images must have the same width!");
 
-    unsigned int pszy1 = size1[1] / GetParameterInt("patches.sizey");
-    unsigned int pszy2 = size2[1] / GetParameterInt("patches.sizey");
-
-    if (pszy1 != pszy2)
-      otbAppLogFATAL("Patches must have the same height!");
-
   }
 
   /*
