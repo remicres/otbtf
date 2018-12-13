@@ -363,6 +363,8 @@ public:
 
     // 2. Seed = spatially random samples
 
+    otbAppLogINFO("Spatial sampling proportion " << GetParameterFloat("strategy.balanced.sp"));
+
     const float samplingStep = 1.0 / std::sqrt(GetParameterFloat("strategy.balanced.sp"));
     float step = 0;
     std::vector<SampleBundle> seed;
@@ -373,7 +375,7 @@ public:
       if (step >= samplingStep)
       {
         seed.push_back(d);
-        step = fmod(step, samplingStep);
+        step = fmod(step, 1.0);
       }
       else
       {
