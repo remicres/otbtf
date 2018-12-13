@@ -408,10 +408,11 @@ public:
 
     otbAppLogINFO("Balance seed candidates size: " << candidates.size());
 
-    // Lambda for sorting
+    // Sort by cos
     auto comparator = [&seedDist](const SampleBundle & a, const SampleBundle & b) -> bool{
       return a.GetDistribution().Cosinus(seedDist) > b.GetDistribution().Cosinus(seedDist);
     };
+    sort(candidates.begin(), candidates.end(), comparator);
 
     DistributionType idealDist(nbOfClasses, 1.0 / std::sqrt(static_cast<float>(nbOfClasses)));
     float minCos = 0;
@@ -419,9 +420,6 @@ public:
     seed.resize(seed.size()+candidates.size(), SampleBundle(nbOfClasses));
     while(candidates.size() > 0)
     {
-      // Sort by cos
-      sort(candidates.begin(), candidates.end(), comparator);
-
       // Get the less correlated sample
       SampleBundle candidate = candidates.back();
 
