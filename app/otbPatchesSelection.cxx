@@ -156,7 +156,9 @@ public:
     SampleBundle(unsigned int nClasses){
       dist = DistributionType(nClasses);
       id = 0;
+      (void) point;
       black = true;
+      (void) index;
     }
     ~SampleBundle(){}
 
@@ -165,6 +167,7 @@ public:
       id = other.GetSampleID();
       point = other.GetPosition();
       black = other.GetBlack();
+      index = other.GetIndex();
     }
 
     DistributionType GetDistribution() const
@@ -207,12 +210,23 @@ public:
       return black;
     }
 
+    UInt8ImageType::IndexType& GetModifiableIndex()
+    {
+      return index;
+    }
+
+    UInt8ImageType::IndexType GetIndex() const
+    {
+      return index;
+    }
+
   private:
 
     DistributionType dist;
     unsigned int id;
     DataNodePointType point;
     bool black;
+    UInt8ImageType::IndexType index;
   };
 
   /*
@@ -319,6 +333,7 @@ public:
       bundles[count].GetModifiableSampleID() = count;
       bundles[count].GetModifiablePosition() = geo;
       bundles[count].GetModifiableBlack() = black;
+      bundles[count].GetModifiableIndex() = pos;
       count++;
     };
 
@@ -352,6 +367,7 @@ public:
         bundles[count].GetModifiableSampleID() = count;
         bundles[count].GetModifiablePosition() = geo;
         bundles[count].GetModifiableBlack() = ((pos[0] + pos[1]) % 2 == 0);
+        bundles[count].GetModifiableIndex() = pos;
         count++;
       }
     };
@@ -365,7 +381,7 @@ public:
 
     otbAppLogINFO("Spatial sampling proportion " << GetParameterFloat("strategy.balanced.sp"));
 
-    const float samplingStep = 1.0 / GetParameterFloat("strategy.balanced.sp");
+    const int samplingStep = static_cast<int>(1.0 / std::sqrt(GetParameterFloat("strategy.balanced.sp")));
 
     otbAppLogINFO("Spatial sampling step " << samplingStep);
 
@@ -377,10 +393,9 @@ public:
     unsigned int candidatesCount = 0;
     for (auto& d: bundles)
     {
-      if (step >= samplingStep)
+      if (d.GetIndex()[0] % samplingStep + d.GetIndex()[1] % samplingStep == 0)
       {
         seed[seedCount] = d;
-        step = fmod(step, samplingStep);
         seedCount++;
       }
       else
@@ -390,8 +405,33 @@ public:
       }
       step++;
     }
+
     seed.resize(seedCount);
     candidates.resize(candidatesCount);
+
+    otbAppLogINFO("Spatial seed has " << seedCount << " samples");
+
+    unsigned int nbToRemove = static_cast<unsigned int>(seedCount - GetParameterFloat("strategy.balanced.sp") * count);
+
+    otbAppLogINFO("Adjust spatial seed removing " << nbToRemove << " samples");
+
+    float removalRate = static_cast<float>(seedCount) / static_cast<float>(nbToRemove);
+    float removalStep = 0;
+    auto removeSamples = [&removalStep, &removalRate](SampleBundle & b) -> bool {
+      (void) b;
+      bool ret = false;
+      if (removalStep >= removalRate)
+        {
+        removalStep = fmod(removalStep, removalRate);
+        ret = true;
+        }
+      else
+        ret = false;
+      removalStep++;
+      return ret;;
+    };
+    auto iterator = std::remove_if(seed.begin(), seed.end(), removeSamples);
+    seed.erase(iterator, seed.end());
 
     otbAppLogINFO("Spatial seed size : " << seed.size());
 
