@@ -370,22 +370,28 @@ public:
     otbAppLogINFO("Spatial sampling step " << samplingStep);
 
     float step = 0;
-    std::vector<SampleBundle> seed;
-    std::vector<SampleBundle> candidates;
+    std::vector<SampleBundle> seed(count);
+    std::vector<SampleBundle> candidates(count);
 
+    unsigned int seedCount = 0;
+    unsigned int candidatesCount = 0;
     for (auto& d: bundles)
     {
       if (step >= samplingStep)
       {
-        seed.push_back(d);
+        seed[seedCount] = d;
         step = fmod(step, samplingStep);
+        seedCount++;
       }
       else
       {
-        candidates.push_back(d);
+        candidates[candidatesCount] = d;
+        candidatesCount++;
       }
       step++;
     }
+    seed.resize(seedCount);
+    candidates.resize(candidatesCount);
 
     otbAppLogINFO("Spatial seed size : " << seed.size());
 
@@ -410,6 +416,7 @@ public:
     DistributionType idealDist(nbOfClasses, 1.0 / std::sqrt(static_cast<float>(nbOfClasses)));
     float minCos = 0;
     unsigned int samplesAdded = 0;
+    seed.resize(seed.size()+candidates.size(), SampleBundle(nbOfClasses));
     while(candidates.size() > 0)
     {
       // Sort by cos
@@ -426,7 +433,8 @@ public:
       if (idealCos > minCos)
       {
         minCos = idealCos;
-        seed.push_back(candidate);
+        seed[seedCount] = candidate;
+        seedCount++;
         candidates.pop_back();
         samplesAdded++;
       }
@@ -435,6 +443,7 @@ public:
         break;
       }
     }
+    seed.resize(seedCount);
 
     otbAppLogINFO("Final samples number: " << seed.size() << " (" << samplesAdded << " samples added)");
     otbAppLogINFO("Final samples distribution: " << seedDist.ToString());
