@@ -365,7 +365,10 @@ public:
 
     otbAppLogINFO("Spatial sampling proportion " << GetParameterFloat("strategy.balanced.sp"));
 
-    const float samplingStep = 1.0 / std::sqrt(GetParameterFloat("strategy.balanced.sp"));
+    const float samplingStep = 1.0 / GetParameterFloat("strategy.balanced.sp");
+
+    otbAppLogINFO("Spatial sampling step " << samplingStep);
+
     float step = 0;
     std::vector<SampleBundle> seed;
     std::vector<SampleBundle> candidates;
@@ -375,13 +378,13 @@ public:
       if (step >= samplingStep)
       {
         seed.push_back(d);
-        step = fmod(step, 1.0);
+        step = fmod(step, samplingStep);
       }
       else
       {
         candidates.push_back(d);
-        step++;
       }
+      step++;
     }
 
     otbAppLogINFO("Spatial seed size : " << seed.size());
