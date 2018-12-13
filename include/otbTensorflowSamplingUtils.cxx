@@ -1,10 +1,13 @@
-/*
- * otbTensorflowSamplingUtils.cxx
- *
- *  Created on: 12 déc. 2018
- *      Author: remi
- */
+/*=========================================================================
 
+  Copyright (c) Remi Cresson (IRSTEA). All rights reserved.
+
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
 #include "otbTensorflowSamplingUtils.h"
 
 namespace otb
@@ -20,7 +23,7 @@ bool UpdateDistributionFromPatch(const typename TImage::Pointer inPtr,
     typename TImage::PointType point, typename TImage::SizeType patchSize,
     TDistribution & dist)
 {
-  typename TImage::IndexType index, outIndex;
+  typename TImage::IndexType index;
   bool canTransform = inPtr->TransformPhysicalPointToIndex(point, index);
   if (canTransform)
   {
@@ -39,7 +42,6 @@ bool UpdateDistributionFromPatch(const typename TImage::Pointer inPtr,
       {
         dist.Update(inIt.Get());
       }
-
       return true;
     }
   }
