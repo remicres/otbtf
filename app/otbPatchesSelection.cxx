@@ -315,6 +315,20 @@ public:
     return bundles;
   }
 
+  void SetBlackOrWhiteBundle(SampleBundle & bundle, unsigned int & count,
+      const UInt8ImageType::IndexType & pos, const UInt8ImageType::PointType & geo)
+  {
+    // Black or white
+    bool black = ((pos[0] + pos[1]) % 2 == 0);
+
+    bundle.GetModifiableSampleID() = count;
+    bundle.GetModifiablePosition() = geo;
+    bundle.GetModifiableBlack() = black;
+    bundle.GetModifiableIndex() = pos;
+    count++;
+
+  }
+
   /*
    * Samples are placed at regular intervals
    */
@@ -324,17 +338,9 @@ public:
     std::vector<SampleBundle> bundles = AllocateSamples();
 
     unsigned int count = 0;
-    auto lambda = [&count, &bundles]
+    auto lambda = [this, &count, &bundles]
                    (const UInt8ImageType::IndexType & pos, const UInt8ImageType::PointType & geo) {
-
-      // Black or white
-      bool black = ((pos[0] + pos[1]) % 2 == 0);
-
-      bundles[count].GetModifiableSampleID() = count;
-      bundles[count].GetModifiablePosition() = geo;
-      bundles[count].GetModifiableBlack() = black;
-      bundles[count].GetModifiableIndex() = pos;
-      count++;
+      SetBlackOrWhiteBundle(bundles[count], count, pos, geo);
     };
 
     Apply(lambda);
@@ -364,11 +370,7 @@ public:
       if (tf::UpdateDistributionFromPatch<UInt8ImageType>(GetParameterUInt8Image("strategy.balanced.labelimage"),
           geo, patchSize, bundles[count].GetModifiableDistribution()))
       {
-        bundles[count].GetModifiableSampleID() = count;
-        bundles[count].GetModifiablePosition() = geo;
-        bundles[count].GetModifiableBlack() = ((pos[0] + pos[1]) % 2 == 0);
-        bundles[count].GetModifiableIndex() = pos;
-        count++;
+        SetBlackOrWhiteBundle(bundles[count], count, pos, geo);
       }
     };
 
@@ -530,6 +532,9 @@ public:
 
   void DoExecute()
   {
+    otbAppLogINFO("Grid step : " << this->GetParameterInt("grid.step"));
+    otbAppLogINFO("Patch size : " << this->GetParameterInt("grid.psize"));
+
 
     // Compute no-data mask
     m_NoDataFilter = IsNoDataFilterType::New();
