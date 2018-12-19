@@ -297,7 +297,7 @@ public:
    * Allocate a std::vector of sample bundle
    */
   std::vector<SampleBundle>
-  AllocateSamples()
+  AllocateSamples(unsigned int nbOfClasses = 2)
   {
     // Nb of samples (maximum)
     const UInt8ImageType::RegionType entireRegion = m_MorphoFilter->GetOutput()->GetLargestPossibleRegion();
@@ -308,7 +308,6 @@ public:
     maxNbOfSamples *= maxNbOfRows;
 
     // Nb of classes
-    const unsigned int nbOfClasses = GetParameterInt("strategy.balanced.nclasses");
     SampleBundle initSB(nbOfClasses);
     std::vector<SampleBundle> bundles(maxNbOfSamples, initSB);
 
@@ -357,7 +356,7 @@ public:
 
     otbAppLogINFO("Computing samples distribution...");
 
-    std::vector<SampleBundle> bundles = AllocateSamples();
+    std::vector<SampleBundle> bundles = AllocateSamples(GetParameterInt("strategy.balanced.nclasses"));
 
     // Patch size
     UInt8ImageType::SizeType patchSize;
