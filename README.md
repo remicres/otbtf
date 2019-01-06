@@ -491,7 +491,8 @@ Then, we use the **TensorflowModelServe** application to produce the **predictio
 ```
 otbcli_TensorflowModelServe -source1.il spot7.tif -source1.placeholder x1 -source1.rfieldx 16 -source1.rfieldy 16 -model.dir /tmp/my_new_model -output.names prediction -out map.tif uint8
 ```
-
+# Tutorial
+A complete tutorial is available at [MDL4EO's blog](https://mdl4eo.irstea.fr/2019/01/04/an-introduction-to-deep-learning-on-remote-sensing-images-tutorial/)
 # Contact
 You can contact Rémi Cresson if you have any issues with this remote module at remi [dot] cresson [at] irstea [dot] fr
 
