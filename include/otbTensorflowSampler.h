@@ -21,6 +21,9 @@
 // TF common
 #include "otbTensorflowCommon.h"
 
+// Tree iterator
+#include "itkPreOrderTreeIterator.h"
+
 namespace otb
 {
 
