@@ -11,8 +11,8 @@
 #ifndef otbTensorflowStreamerFilter_h
 #define otbTensorflowStreamerFilter_h
 
-// Image2image
 #include "itkImageToImageFilter.h"
+#include "itkProgressReporter.h"
 
 namespace otb
 {
