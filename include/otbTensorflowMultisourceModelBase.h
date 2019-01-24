@@ -50,14 +50,14 @@ namespace otb
  * Target nodes names of the TensorFlow graph that must be triggered can be set
  * with the SetTargetNodesNames.
  *
- * The OutputTensorNames consists in a strd::vector of std::string, and
+ * The OutputTensorNames consists in a std::vector of std::string, and
  * corresponds to the names of tensors that will be computed during the session.
  * As for input placeholders, output tensors field of expression
  * (OutputExpressionFields, a std::vector of SizeType), i.e. the output
  * space that the TensorFlow model will "generate", must be provided.
  *
  * Finally, a list of scalar placeholders can be fed in the form of std::vector
- * of std::string, each one expressing the assigment of a signle valued
+ * of std::string, each one expressing the assignment of a single valued
  * placeholder, e.g. "drop_rate=0.5 learning_rate=0.002 toto=true".
  * See otb::tf::ExpressionToTensor() to know more about syntax.
  *
