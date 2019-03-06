@@ -135,7 +135,7 @@ def CreateSavedModel(sess, inputs, outputs, directory):
   builder.add_meta_graph([tf.saved_model.tag_constants.SERVING])
   builder.save()
 
-def CheckpointToSavedModel(ckpt_path, inputs, outputs, savedmodel_path):
+def CheckpointToSavedModel(ckpt_path, inputs, outputs, savedmodel_path, clear_devices=False):
   """
   Read a Checkpoint and build a SavedModel
   
@@ -149,7 +149,7 @@ def CheckpointToSavedModel(ckpt_path, inputs, outputs, savedmodel_path):
   with tf.Session() as sess:
     
     # Restore variables from disk.
-    model_saver = tf.train.import_meta_graph(ckpt_path+".meta")
+    model_saver = tf.train.import_meta_graph(ckpt_path+".meta", clear_devices=clear_devices)
     model_saver.restore(sess, ckpt_path)
     
     # Create a SavedModel
