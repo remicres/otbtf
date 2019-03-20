@@ -116,12 +116,7 @@ make install -j $(grep -c ^processor /proc/cpuinfo)
 ```
 Then, build NSync
 ```
-mkdir /tmp/proto
-cd /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/protobuf/
-./autogen.sh
-./configure --prefix=/tmp/proto/
-make -j $(grep -c ^processor /proc/cpuinfo)
-make install
+/work/tf/tensorflow/tensorflow/contrib/makefile/compile_nsync.sh
 ```
 Then, build absl
 ```
