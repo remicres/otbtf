@@ -153,4 +153,9 @@ def CheckpointToSavedModel(ckpt_path, inputs, outputs, savedmodel_path, clear_de
     model_saver.restore(sess, ckpt_path)
     
     # Create a SavedModel
-    CreateSavedModel(sess, inputs, outputs, savedmodel_path)
+    #CreateSavedModel(sess, inputs, outputs, savedmodel_path)
+    graph = tf.get_default_graph()
+    tf.saved_model.simple_save(sess,
+            savedmodel_path,
+            inputs={ i : graph.get_tensor_by_name(i) for i in inputs },
+            outputs={ o : graph.get_tensor_by_name(o) for o in outputs })
