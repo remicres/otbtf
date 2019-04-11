@@ -13,6 +13,7 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
 <figure>
 <div style="text-align:center">
     <img src ="doc/pix2pix.png" />
+<legend align="center">Legend</legend>
     <figcaption align="center">Transform a Spot-7 image into a Wikimedia Map (pix2pix)</figcaption>
 </div>
 </figure>
