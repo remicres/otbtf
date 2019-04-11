@@ -10,6 +10,7 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
  - Serving models with support of OTB streaming mechanism. Meaning (1) not limited by images sizes, (2) can be used as a "lego" in any OTB pipeline and preserve streaming, (3) MPI support available (use multiple processing unit to generate one single output image)
 
 *Portfolio*
+
 Below are some screen captures of deep learning applications performed at large scale with OTBTF.
 <figure>
     <img src ="doc/pix2pix.png" />
