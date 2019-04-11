@@ -228,12 +228,12 @@ Python purists can even train their own models, thank to Python bindings of OTB:
 However, you can use any deep net available on the web, or use an existing gui application to create your own Tensorflow models.
 The important thing here is to know the following parameters for your **placeholders** (the inputs of your model) and **output tensors** (the outputs of your model).
  - For each **input placeholder**:
- -- Name
- -- Receptive field
+   - Name
+   - Receptive field
  - For each **output tensor**:
- -- Name 
- -- Expression field
- -- Scale factor
+   - Name 
+   - Expression field
+   - Scale factor
 
 ![Schema](doc/schema.png)
 
