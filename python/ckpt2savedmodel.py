@@ -21,10 +21,7 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-from tricks import *
-
-# Logging
-tf.logging.set_verbosity(tf.logging.INFO)
+from tricks import CheckpointToSavedModel
 
 # Parser
 parser = argparse.ArgumentParser()
@@ -32,10 +29,12 @@ parser.add_argument("--ckpt",    help="checkpoint file prefix",   required=True)
 parser.add_argument("--inputs",  help="input placeholder names",  required=True, nargs='+')
 parser.add_argument("--outputs", help="output placeholder names", required=True, nargs='+')
 parser.add_argument("--model",   help="output SavedModel",        required=True)
+parser.add_argument('--clear_devices', dest='clear_devices', action='store_true')
+parser.set_defaults(clear_devices=False)
 params = parser.parse_args()
 
 if __name__ == "__main__":
 
-  CheckpointToSavedModel(params.ckpt, params.inputs, params.outputs, params.model)
+  CheckpointToSavedModel(params.ckpt, params.inputs, params.outputs, params.model, params.clear_devices)
   
   quit()
