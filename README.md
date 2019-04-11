@@ -504,8 +504,5 @@ otbcli_TensorflowModelServe -source1.il spot7.tif -source1.placeholder x1 -sourc
 # Tutorial
 A complete tutorial is available at [MDL4EO's blog](https://mdl4eo.irstea.fr/2019/01/04/an-introduction-to-deep-learning-on-remote-sensing-images-tutorial/)
 # Contact
-You can contact R��mi Cresson if you have any issues with this remote module at remi [dot] cresson [at] irstea [dot] fr
-
-
-
+You can contact Remi Cresson if you have any issues with this remote module at remi [dot] cresson [at] irstea [dot] fr
 
