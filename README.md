@@ -12,14 +12,12 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
 *Portfolio*
 
 Below are some screen captures of deep learning applications performed at large scale with OTBTF.
-<figure>
-    <img src ="doc/pix2pix.png" />
-    <legend text-align: center>Image to image translation (Spot-7 image --> Wikimedia Map using CGAN)</legend>
-    <img src ="doc/landcover.png" />
-    <legend text-align: center>Landcover mapping (Spot-7 images --> Building map using semantic segmentation)</legend>
-    <img src ="doc/supresol.png" />
-    <legend text-align: center>Image enhancement (Enhancement of Sentinel-2 images at 1.5m  using SRGAN)</legend>
-</figure>
+ - Image to image translation (Spot-7 image --> Wikimedia Map using CGAN)
+<img src ="doc/pix2pix.png" />
+ - Landcover mapping (Spot-7 images --> Building map using semantic segmentation)
+<img src ="doc/landcover.png" />
+ - Image enhancement (Enhancement of Sentinel-2 images at 1.5m  using SRGAN)
+<img src ="doc/supresol.png" />
 You can read more details about these applications on [this blog](https://mdl4eo.irstea.fr/2019/)
 
 # How to install
