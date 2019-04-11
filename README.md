@@ -11,8 +11,8 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
 
 *Examples*
 <figure>
-<div style="text-align:center"><img src ="doc/pix2pix.png" />
-    <img src="doc/pix2pix.png" alt="Image translation (pix2pix)" />
+<div style="text-align:center">
+    <img src ="doc/pix2pix.png" />
     <figcaption align="center">Transform a Spot-7 image into a Wikimedia Map (pix2pix)</figcaption>
 </div>
 </figure>
