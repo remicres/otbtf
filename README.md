@@ -1,16 +1,30 @@
 # OTBTensorflow
 
-This remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org) (OTB) aims to provide a deep learning framework targeting remote sensing images processing.
+This remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org) provides a generic, multi purpose deep learning framework, targeting remote sensing images processing.
 It contains a set of new process objects that internally invoke [Tensorflow](https://www.tensorflow.org/), and a bunch of user-oriented applications to perform deep learning with real-world remote sensing images.
+Applications can be used to build OTB pipelines from Python or C++ APIs. 
 
 *Main highlights*
  - Sampling,
  - Training, supporting save/restore/import operations (a model can be trained from scratch or fine-tuned),
- - Serving models with support of OTB streaming mechanism 
+ - Serving models with support of OTB streaming mechanism. Meaning (1) not limited by images sizes, (2) can be used as a "lego" in any OTB pipeline and preserve streaming, (3) MPI support available (use multiple processing unit to generate one single output image)
 
+*Portfolio*
+
+Below are some screen captures of deep learning applications performed at large scale with OTBTF.
+ - Image to image translation (Spot-7 image --> Wikimedia Map using CGAN)
+<img src ="doc/pix2pix.png" />
+
+ - Landcover mapping (Spot-7 images --> Building map using semantic segmentation)
+<img src ="doc/landcover.png" />
+
+ - Image enhancement (Enhancement of Sentinel-2 images at 1.5m  using SRGAN)
+<img src ="doc/supresol.png" />
+
+You can read more details about these applications on [this blog](https://mdl4eo.irstea.fr/2019/)
 
 # How to install
-This remote module has been tested successfully on Ubuntu 18 and CentOs 7 with CUDA drivers.
+This remote module has been tested successfully on Ubuntu 18 and CentOs 7 with last CUDA drivers.
 
 ## Build OTB
 First, **build the latest *develop* branch of OTB from sources**. You can check the [OTB documentation](https://www.orfeo-toolbox.org/SoftwareGuide/SoftwareGuidech2.html) which details all the steps, if fact it is quite easy thank to the SuperBuild.
@@ -116,12 +130,7 @@ make install -j $(grep -c ^processor /proc/cpuinfo)
 ```
 Then, build NSync
 ```
-mkdir /tmp/proto
-cd /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/protobuf/
-./autogen.sh
-./configure --prefix=/tmp/proto/
-make -j $(grep -c ^processor /proc/cpuinfo)
-make install
+/work/tf/tensorflow/tensorflow/contrib/makefile/compile_nsync.sh
 ```
 Then, build absl
 ```
@@ -155,7 +164,8 @@ cp -r /work/tf/tensorflow/third_party /work/tf/installdir/include
 cp -r /tmp/proto/include/* /work/tf/installdir/include
 cp -r /tmp/eigen/include/eigen3/* /work/tf/installdir/include
 cp /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/nsync/public/* /work/tf/installdir/include/
-find /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/absl/absl/ -name '*.h' -exec cp --parents \{\} /work/tf/installdir/include/ \;
+# the goal of the following command line is to put the absl headers in /work/tf/installdir/include/absl and preserving the folders structure
+find /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/absl/absl/ -name '*.h' -exec cp --parents \{\} /work/tf/installdir/include/ \; 
 
 # Cleaning
 find /work/tf/installdir/ -name "*.cc" -type f -delete
@@ -494,7 +504,5 @@ otbcli_TensorflowModelServe -source1.il spot7.tif -source1.placeholder x1 -sourc
 # Tutorial
 A complete tutorial is available at [MDL4EO's blog](https://mdl4eo.irstea.fr/2019/01/04/an-introduction-to-deep-learning-on-remote-sensing-images-tutorial/)
 # Contact
-You can contact Rémi Cresson if you have any issues with this remote module at remi [dot] cresson [at] irstea [dot] fr
-
-
+You can contact Remi Cresson if you have any issues with this remote module at remi [dot] cresson [at] irstea [dot] fr
 

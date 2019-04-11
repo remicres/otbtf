@@ -145,6 +145,7 @@ TensorflowSampler<TInputImage, TVectorData>
   {
     ImagePointerType newImage;
     AllocateImage(newImage, m_PatchSizes[i], nTotal, GetInput(i)->GetNumberOfComponentsPerPixel());
+    newImage->SetSignedSpacing(this->GetInput(i)->GetSignedSpacing());
     m_OutputPatchImages.push_back(newImage);
   }
 
