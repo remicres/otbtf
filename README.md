@@ -9,11 +9,17 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
  - Training, supporting save/restore/import operations (a model can be trained from scratch or fine-tuned),
  - Serving models with support of OTB streaming mechanism. Meaning (1) not limited by images sizes, (2) can be used as a "lego" in any OTB pipeline and preserve streaming, (3) MPI support available (use multiple processing unit to generate one single output image)
 
-*Examples*
+*Portfolio*
+Below are some screen captures of deep learning applications performed at large scale with OTBTF.
 <figure>
     <img src ="doc/pix2pix.png" />
-    <legend text-align: center>Transform a Spot-7 image into a Wikimedia Map (pix2pix)</legend>
+    <legend text-align: center>Image to image translation (Spot-7 image --> Wikimedia Map using CGAN)</legend>
+    <img src ="doc/landcover.png" />
+    <legend text-align: center>Landcover mapping (Spot-7 images --> Building map using semantic segmentation)</legend>
+    <img src ="doc/supresol.png" />
+    <legend text-align: center>Image enhancement (Enhancement of Sentinel-2 images at 1.5m  using SRGAN)</legend>
 </figure>
+You can read more details about these applications on [this blog](https://mdl4eo.irstea.fr/2019/)
 
 # How to install
 This remote module has been tested successfully on Ubuntu 18 and CentOs 7 with last CUDA drivers.
