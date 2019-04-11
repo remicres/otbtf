@@ -10,12 +10,12 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
  - Serving models with support of OTB streaming mechanism. Meaning (1) not limited by images sizes, (2) can be used as a "lego" in any OTB pipeline and preserve streaming, (3) MPI support available (use multiple processing unit to generate one single output image)
 
 *Examples*
-<div style="text-align:center"><img src ="doc/pix2pix.png" />
 <figure>
+<div style="text-align:center"><img src ="doc/pix2pix.png" />
     <img src="doc/pix2pix.png" alt="Image translation (pix2pix)" />
     <figcaption>Transform a Spot-7 image into a Wikimedia Map (pix2pix)</figcaption>
-</figure>
 </div>
+</figure>
 
 # How to install
 This remote module has been tested successfully on Ubuntu 18 and CentOs 7 with last CUDA drivers.
