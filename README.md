@@ -30,12 +30,12 @@ This remote module has been tested successfully on Ubuntu 18 and CentOs 7 with l
 First, **build the latest *develop* branch of OTB from sources**. You can check the [OTB documentation](https://www.orfeo-toolbox.org/SoftwareGuide/SoftwareGuidech2.html) which details all the steps, if fact it is quite easy thank to the SuperBuild.
 
 Basically, you have to create a folder for OTB, clone sources, configure OTB SuperBuild, and build it.
-The following has been validated with an OTB 6.6.0.
+The following has been validated with an OTB 6.7.0.
 ```
 sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get install aptitude
-sudo aptitude install make cmake-curses-gui build-essential libtool automake git libbz2-dev python-dev libboost-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev zlib1g-dev libcurl4-gnutls-dev swig
+sudo aptitude install make cmake-curses-gui build-essential libtool automake git libbz2-dev python-dev libboost-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev zlib1g-dev libcurl4-gnutls-dev swig libkml-dev
 sudo mkdir /work
 sudo chown $USER /work
 mkdir /work/otb
@@ -44,13 +44,17 @@ mkdir build
 git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git OTB
 cd build
 ccmake /work/otb/OTB/SuperBuild
+```
+From here you can tell the SuperBuild to use system boost, curl, zlib, libkml for instance.
+
+Then you can build it:
+```
 make -j $(grep -c ^processor /proc/cpuinfo)
 ```
 
 ## Build TensorFlow with shared libraries
 During this step, you have to **build Tensorflow from source** except if you want to use only the sampling applications of OTBTensorflow (in this case, skip this section).
-The following has been validated with TensorFlow r1.12
-First, I advise you to use GCC 6 rather than 5 or 7 to compile TensorFlow from sources (I encountered several problem with other GCC versions).
+The following has been validated with TensorFlow r1.14 and gcc 5.3.1.
 
 ### Bazel
 First, install Bazel.
@@ -67,9 +71,14 @@ If you fail to install properly Bazel, you can read the beginning of [the instru
 ### Required packages
 There is a few required packages that you need to install:
 ```
-sudo apt install python-dev python-pip python3-dev python3-pip
+sudo apt install python-dev python-pip python3-dev python3-pip python3-mock
 sudo pip install pip six numpy wheel mock keras
 sudo pip3 install pip six numpy wheel mock keras
+```
+
+For a pure python3 install, you might need to workaround a bazel bug the following way:
+```
+sudo ln -s /usr/bin/python3 /usr/bin/python
 ```
 
 ### Build TensorFlow the right way
@@ -89,7 +98,7 @@ Now configure the project. If you have CUDA and other NVIDIA stuff installed in 
 cd tensorflow
 ./configure
 ```
-Then, you have to build TensorFlow with the most important instructions sets of your CPU (For instance here is AVX, AVX2, FMA, SSE4.1, SSE4.2 that play fine on a modern intel CPU). You have to tell Bazel to build:
+Then, you have to build TensorFlow with the instructions sets supported by your CPU (For instance here is AVX, AVX2, FMA, SSE4.1, SSE4.2 that play fine on a modern intel CPU). You have to tell Bazel to build:
 
  1. The TensorFlow python pip package
  2. The libtensorflow_cc.so library
@@ -97,6 +106,9 @@ Then, you have to build TensorFlow with the most important instructions sets of 
 ```
 bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.1 --copt=-msse4.2 //tensorflow:libtensorflow_framework.so //tensorflow:libtensorflow_cc.so //tensorflow:libtensorflow.so //tensorflow/tools/pip_package:build_pip_package
 ```
+
+*You might fail this step (e.g. missing packages). In this case, it's recommended to clear the bazel cache, using something like `rm $HOME/.cache/bazel/* -rf` before configuring and building everything!*
+
 ### Prepare the right stuff to use TensorFlow in external (cmake) projects
 This is the most important!
 First, build and deploy the pip package.
@@ -154,6 +166,8 @@ cp /work/tf/tensorflow/bazel-bin/tensorflow/libtensorflow_cc.so /work/tf/install
 cp /work/tf/tensorflow/bazel-bin/tensorflow/libtensorflow_framework.so /work/tf/installdir/lib/
 cp /tmp/proto/lib/libprotobuf.a /work/tf/installdir/lib/
 cp /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/nsync/builds/default.linux.c++11/*.a /work/tf/installdir/lib/
+ln -s /work/tf/installdir/lib/libtensorflow_framework.so /work/tf/installdir/lib/libtensorflow_framework.so.1
+ln -s /work/tf/installdir/lib/libtensorflow_cc.so /work/tf/installdir/lib/libtensorflow_cc.so.1
 
 # Copy headers
 mkdir /work/tf/installdir/include/tensorflow
@@ -164,8 +178,9 @@ cp -r /work/tf/tensorflow/third_party /work/tf/installdir/include
 cp -r /tmp/proto/include/* /work/tf/installdir/include
 cp -r /tmp/eigen/include/eigen3/* /work/tf/installdir/include
 cp /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/nsync/public/* /work/tf/installdir/include/
-# the goal of the following command line is to put the absl headers in /work/tf/installdir/include/absl and preserving the folders structure
-find /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/absl/absl/ -name '*.h' -exec cp --parents \{\} /work/tf/installdir/include/ \; 
+cd /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/absl
+find absl/ -name '*.h' -exec cp --parents \{\} /work/tf/installdir/include/ \; 
+find absl/ -name '*.inc' -exec cp --parents \{\} /work/tf/installdir/include/ \; 
 
 # Cleaning
 find /work/tf/installdir/ -name "*.cc" -type f -delete
@@ -489,7 +504,7 @@ We want to produce one image of patches, and one image for the corresponding lab
 ```
 otbcli_PatchesExtraction -source1.il spot7.tif -source1.patchsizex 16 -source1.patchsizey 16 -vec points.shp -field class -source1.out samp_labels.tif -outpatches samp_patches.tif
 ```
-That's it. Now we have two images for patches and labels. If we wanna, we can split them to distinguish test/validation groups (with the **ExtractROI** application for instance). But here, we will just perform some fine tuning of our model, located in the `outmodel` directory. Our model is quite basic. It has two input placeholders, **x1** and **y1** respectively for input patches (with size 16x16) and input reference labels (with size 1x1). We named **prediction** the tensor that predict the labels and the optimizer that perform the stochastic gradient descent is an operator named **optimizer**. We perform the fine tuning and we export the new model variables in the `newvars` folder.
+That's it. Now we have two images for patches and labels. We can split them to distinguish test/validation groups (with the **ExtractROI** application for instance). But here, we will just perform some fine tuning of our model, located in the `outmodel` directory. Our model is quite basic. It has two input placeholders, **x1** and **y1** respectively for input patches (with size 16x16) and input reference labels (with size 1x1). We named **prediction** the tensor that predict the labels and the optimizer that perform the stochastic gradient descent is an operator named **optimizer**. We perform the fine tuning and we export the new model variables in the `newvars` folder.
 Let's use our **TensorflowModelTrain** application to perform the training of this existing model.
 ```
 otbcli_TensorflowModelTrain -model.dir /path/to/oursavedmodel -training.targetnodesnames optimizer -training.source1.il samp_patches.tif -training.source1.patchsizex 16 -training.source1.patchsizey 16 -training.source1.placeholder x1 -training.source2.il samp_labels.tif -training.source2.patchsizex 1 -training.source2.patchsizey 1 -training.source2.placeholder y1 -model.saveto newvars
