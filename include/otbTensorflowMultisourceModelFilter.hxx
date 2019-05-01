@@ -224,8 +224,8 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     }
 
   // Set final size
-  m_OutputSize[0] = vcl_floor( (extentSup[0] - extentInf[0]) / vcl_abs(m_OutputSpacing[0]) ) + 1;
-  m_OutputSize[1] = vcl_floor( (extentSup[1] - extentInf[1]) / vcl_abs(m_OutputSpacing[1]) ) + 1;
+  m_OutputSize[0] = std::floor( (extentSup[0] - extentInf[0]) / std::abs(m_OutputSpacing[0]) ) + 1;
+  m_OutputSize[1] = std::floor( (extentSup[1] - extentInf[1]) / std::abs(m_OutputSpacing[1]) ) + 1;
 
   // Set final origin
   m_OutputOrigin[0] =  extentInf[0];
