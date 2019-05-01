@@ -14,6 +14,7 @@
 #include "itkProcessObject.h"
 #include "itkNumericTraits.h"
 #include "itkSimpleDataObjectDecorator.h"
+#include <algorithm>
 
 // Base
 #include "otbTensorflowMultisourceModelBase.h"
