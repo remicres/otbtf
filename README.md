@@ -23,8 +23,22 @@ Below are some screen captures of deep learning applications performed at large 
 
 You can read more details about these applications on [this blog](https://mdl4eo.irstea.fr/2019/)
 
-# How to install
-This remote module has been tested successfully on Ubuntu 18 and CentOs 7 with last CUDA drivers.
+# Docker image
+You can build a docker image using the provided dockerfile.
+Warning: TensorFlow and OTB are built with the minimal optimization flags, no CUDA/OpenCL enabled, no AVX and such for CPU.
+The dockerfiles are located in `tools/dockerfiles/`. 
+
+To build your docker image, just enter the following from the directory containing the `Dockerfile` you chose.
+```
+# Build the docker image (troubleshooting: if any downloading operation fails, just re-run the command since it's incremental)
+docker build --tag otbtf_image .
+# Want export it?
+docker save -o ../otbtf_image.tar otbtf_image:latest
+```
+Feel free to contribute to this, adding more Dockerfiles!
+
+# Build from sources
+This remote module has been tested successfully on Ubuntu 18 and CentOs 7 with last CUDA drivers, TensorFlow r1.14 and OTB develop (0df44b312d64d6c3890b65d3790d4a17d0fd5f23).
 
 ## Build OTB
 First, **build the latest *develop* branch of OTB from sources**. You can check the [OTB documentation](https://www.orfeo-toolbox.org/SoftwareGuide/SoftwareGuidech2.html) which details all the steps, if fact it is quite easy thank to the SuperBuild.
