@@ -22,6 +22,7 @@
 
 // image utils
 #include "otbTensorflowCommon.h"
+#include <algorithm>
 
 namespace otb
 {
@@ -211,7 +212,7 @@ public:
     // Check the smallest number of samples amongst classes
     IndexValueType min_elem_in_class = itk::NumericTraits<IndexValueType>::max();
     for (LabelImageType::InternalPixelType classIdx = 0 ; classIdx < number_of_classes ; classIdx++)
-      min_elem_in_class = vcl_min(min_elem_in_class, number_of_samples[classIdx]);
+      min_elem_in_class = std::min(min_elem_in_class, number_of_samples[classIdx]);
 
     // If one class is empty, throw an error
     if (min_elem_in_class == 0)
