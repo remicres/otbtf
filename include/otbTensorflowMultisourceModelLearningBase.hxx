@@ -124,7 +124,7 @@ TensorflowMultisourceModelLearningBase<TInputImage>
  {
 
   // Batches loop
-  const IndexValueType nBatches = vcl_ceil(m_NumberOfSamples / m_BatchSize);
+  const IndexValueType nBatches = std::ceil(m_NumberOfSamples / m_BatchSize);
   const IndexValueType rest = m_NumberOfSamples % m_BatchSize;
 
   itk::ProgressReporter progress(this, 0, nBatches);
