@@ -70,7 +70,6 @@ private:
   SetDescription("Train a classifier from deep net based features of an image and training vector data.");
 
   // Documentation
-  SetDocName("TrainClassifierFromDeepFeatures");
   SetDocLongDescription("See TrainImagesClassifier application");
   SetDocLimitations("None");
   SetDocAuthors("Remi Cresson");
