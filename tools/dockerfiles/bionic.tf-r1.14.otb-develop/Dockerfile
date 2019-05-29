@@ -72,7 +72,7 @@ RUN apt-get update -y \
         qttools5-dev-tools \
  && rm -rf /var/lib/apt/lists/* \
  && ln -s /usr/bin/python3 /usr/bin/python \
- && pip3 install pip six numpy wheel mock keras
+ && pip3 install pip six numpy wheel mock keras future
 
 # ----------------------------------------------------------------------------
 # Build TensorFlow
