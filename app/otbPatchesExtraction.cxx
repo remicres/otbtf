@@ -135,7 +135,6 @@ public:
 
     // Documentation
     SetName("PatchesExtraction");
-    SetDocName("PatchesExtraction");
     SetDescription("This application extracts patches in multiple input images. Change "
         "the " + tf::ENV_VAR_NAME_NSOURCES + " environment variable to set the number of "
         "sources.");

@@ -79,7 +79,6 @@ public:
 
     // Documentation
     SetName("LabelImageSampleSelection");
-    SetDocName("LabelImageSampleSelection");
     SetDescription("This application extracts points from an input label image. "
         "This application is like \"SampleSelection\", but uses an input label "
         "image, rather than an input vector data.");
