@@ -79,7 +79,6 @@ private:
     SetDescription("Computes statistics on a training polygon set.");
 
     // Documentation
-    SetDocName("Fast Polygon Class Statistics");
     SetDocLongDescription("The application processes a dense set of polygons "
       "intended for training (they should have a field giving the associated "
       "class). The geometries are analyzed against a support image to compute "
