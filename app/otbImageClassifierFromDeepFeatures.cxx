@@ -71,7 +71,6 @@ private:
     SetDescription("Classify image using features from a deep net and an OTB machine learning classification model");
 
     // Documentation
-    SetDocName("ImageClassifierFromDeepFeatures");
     SetDocLongDescription("See ImageClassifier application");
     SetDocLimitations("None");
     SetDocAuthors("Remi Cresson");
