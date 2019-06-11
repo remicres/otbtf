@@ -176,3 +176,4 @@ RUN mkdir -p /work/otb/build \
 ENV PATH "$PATH:/work/otb/superbuild_install/bin/"
 ENV LD_LIBRARY_PATH "$LD_LIBRARY_PATH:/work/otb/superbuild_install/lib/:/work/tf/installdir/lib/"
 ENV PYTHONPATH "$PYTHONPATH:/work/otb/superbuild_install/lib/otb/python/"
+ENV PATH "$PATH:/work/otb/superbuild_install/bin/"
