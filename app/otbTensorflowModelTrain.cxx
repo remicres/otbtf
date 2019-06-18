@@ -175,6 +175,8 @@ public:
         "the tensorflow model, (2) the patch size and (3) the image(s) source. ");
     SetDocAuthors("Remi Cresson");
 
+    AddDocTag(Tags::Learning);
+
     // Input model
     AddParameter(ParameterType_Group,       "model",              "Model parameters");
     AddParameter(ParameterType_Directory,   "model.dir",          "Tensorflow model_save directory");
