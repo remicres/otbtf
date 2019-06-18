@@ -153,6 +153,8 @@ public:
 
     SetDocAuthors("Remi Cresson");
 
+    AddDocTag(Tags::Learning);
+
     // Input/output images
     AddAnInputImage();
     for (int i = 1; i < tf::GetNumberOfSources() ; i++)

@@ -75,6 +75,8 @@ private:
   SetDocAuthors("Remi Cresson");
   SetDocSeeAlso(" ");
 
+  AddDocTag(Tags::Learning);
+
   ClearApplications();
 
   // Add applications
