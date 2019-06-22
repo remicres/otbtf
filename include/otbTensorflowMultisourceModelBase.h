@@ -72,7 +72,7 @@ public:
 
   /** Standard class typedefs. */
   typedef TensorflowMultisourceModelBase             Self;
-  typedef itk::ProcessObject                         Superclass;
+  typedef itk::ImageToImageFilter<TInputImage, TOutputImage> Superclass;
   typedef itk::SmartPointer<Self>                    Pointer;
   typedef itk::SmartPointer<const Self>              ConstPointer;
 
