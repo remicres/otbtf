@@ -21,6 +21,8 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 ::TensorflowMultisourceModelBase()
  {
   m_Session = nullptr;
+  Superclass::SetCoordinateTolerance(itk::NumericTraits<double>::max() );
+  Superclass::SetDirectionTolerance(itk::NumericTraits<double>::max() );
  }
 
 template <class TInputImage, class TOutputImage>
