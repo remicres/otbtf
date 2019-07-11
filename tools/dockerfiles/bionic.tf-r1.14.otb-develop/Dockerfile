@@ -5,6 +5,7 @@ MAINTAINER Remi Cresson <remi.cresson[at]irstea[dot]fr>
 RUN apt-get update -y \
  && apt-get upgrade -y \
  && apt-get install -y --no-install-recommends \
+		sudo \
         ca-certificates \
         curl \
         make \
@@ -159,10 +160,12 @@ RUN mkdir -p /work/otb/build \
         -DUSE_SYSTEM_QWT=ON \
         -DUSE_SYSTEM_TINYXML=ON \
         -DUSE_SYSTEM_ZLIB=ON \
+		-DUSE_SYSTEM_SWIG=OFF \
  && cd /work/otb/otb/Modules/Remote \
  && git clone https://github.com/remicres/otbtf.git \
  && cd /work/otb/build/OTB/build \
  && cmake /work/otb/otb \
+        -DOTB_WRAP_PYTHON=ON \
         -DModule_Mosaic=ON \
         -DModule_OTBTensorflow=ON \
         -DOTB_USE_TENSORFLOW=ON \
@@ -173,7 +176,44 @@ RUN mkdir -p /work/otb/build \
  && cd /work/otb/build/ \
  && make -j $(grep -c ^processor /proc/cpuinfo)
 
+# ----------------------------------------------------------------------------
+# Install GDAL
+# ----------------------------------------------------------------------------
+RUN apt-get update -y \
+#  && apt-get upgrade -y \
+  && apt -y install \
+	software-properties-common \
+	dirmngr \
+	apt-transport-https \
+	lsb-release \
+  && add-apt-repository ppa:ubuntugis/ppa \
+  && apt-get update \
+  && apt-get install -y gdal-bin \
+  && rm -rf /var/lib/apt/lists/*
+
+# ----------------------------------------------------------------------------
+# Add user otbuser # Replace 1001 with your user / group id
+# ----------------------------------------------------------------------------
+
+RUN export uid=1001 gid=1001 && \
+    mkdir -p /home/otbuser && \
+    echo "otbuser:x:${uid}:${gid}:otbuser,,,:/home/otbuser:/bin/bash" >> /etc/passwd && \
+    echo "otbuser:x:${uid}:" >> /etc/group && \
+    echo "otbuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/otbuser && \
+    chmod 0440 /etc/sudoers.d/otbuser && \
+    chown ${uid}:${gid} -R /home/otbuser
+
+USER /home/otbuser
+ENV HOME /home/otbuser
+ENV OTB_MAX_RAM_HINT=512
 ENV PATH "$PATH:/work/otb/superbuild_install/bin/"
+ENV PYTHONPATH="/work/otb/superbuild_install/lib/otb/python:$PYTHONPATH"
+ENV OTB_APPLICATION_PATH="/work/otb/superbuild_install/lib/otb/applications"
 ENV LD_LIBRARY_PATH "$LD_LIBRARY_PATH:/work/otb/superbuild_install/lib/:/work/tf/installdir/lib/"
-ENV PYTHONPATH "$PYTHONPATH:/work/otb/superbuild_install/lib/otb/python/"
-ENV PATH "$PATH:/work/otb/superbuild_install/bin/"
+WORKDIR /home/otbuser
+
+# ----------------------------------------------------------------------------
+# Exemple :
+# docker run -v $(pwd):/home/otbuser otbtf otbcli_ExtractROI -h
+# docker run -ti -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY -v $(pwd):/home/otbuser otbtf otbgui_ExtractROI
+# ----------------------------------------------------------------------------
