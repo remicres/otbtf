@@ -180,15 +180,12 @@ RUN mkdir -p /work/otb/build \
 # Install GDAL
 # ----------------------------------------------------------------------------
 RUN apt-get update -y \
-#  && apt-get upgrade -y \
   && apt -y install \
 	software-properties-common \
 	dirmngr \
 	apt-transport-https \
 	lsb-release \
-  && add-apt-repository ppa:ubuntugis/ppa \
-  && apt-get update \
-  && apt-get install -y gdal-bin \
+        gdal-bin \
   && rm -rf /var/lib/apt/lists/*
 
 # ----------------------------------------------------------------------------
