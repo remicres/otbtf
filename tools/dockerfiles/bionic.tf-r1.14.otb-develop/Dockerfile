@@ -5,7 +5,7 @@ MAINTAINER Remi Cresson <remi.cresson[at]irstea[dot]fr>
 RUN apt-get update -y \
  && apt-get upgrade -y \
  && apt-get install -y --no-install-recommends \
-		sudo \
+        sudo \
         ca-certificates \
         curl \
         make \
@@ -69,6 +69,7 @@ RUN apt-get update -y \
         libxmu-dev \
         libxi-dev \
         qttools5-dev-tools \
+        bison \
  && rm -rf /var/lib/apt/lists/*
 
 # ----------------------------------------------------------------------------
