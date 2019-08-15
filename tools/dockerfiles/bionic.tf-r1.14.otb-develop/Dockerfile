@@ -212,6 +212,7 @@ WORKDIR /home/otbuser
 
 # ----------------------------------------------------------------------------
 # Exemple :
-# docker run -v $(pwd):/home/otbuser otbtf otbcli_ExtractROI -h
-# docker run -ti -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY -v $(pwd):/home/otbuser otbtf otbgui_ExtractROI
+# docker build --tag otbtf_image
+# docker run -u otbuser -v $(pwd):/home/otbuser otbtf_image otbcli_ExtractROI
+# docker run -u otbuser -ti -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY -v $(pwd):/home/otbuser otbtf_image otbgui_ExtractROI
 # ----------------------------------------------------------------------------
