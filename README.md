@@ -31,7 +31,7 @@ For now you have two options: either use the existing *docker image*, or build e
 Use the latest image from dockerhub:
 ```
 docker pull mdl4eo/otbtf1.6
-docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf1.6 otbcli_PatchesExtraction --help
+docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf1.6 otbcli_PatchesExtraction -help
 ```
 Please note that for now, TensorFlow and OTB are built with the minimal optimization flags, no CUDA/OpenCL enabled, no AVX and such for CPU. 
 *Feel free to contribute, adding your own Dockerfile with CUDA support, etc!*
