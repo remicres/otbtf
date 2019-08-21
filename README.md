@@ -1,4 +1,4 @@
-# OTBTensorflow
+# OTBTF
 
 This remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org) provides a generic, multi purpose deep learning framework, targeting remote sensing images processing.
 It contains a set of new process objects that internally invoke [Tensorflow](https://www.tensorflow.org/), and a bunch of user-oriented applications to perform deep learning with real-world remote sensing images.
@@ -23,19 +23,20 @@ Below are some screen captures of deep learning applications performed at large 
 
 You can read more details about these applications on [this blog](https://mdl4eo.irstea.fr/2019/)
 
-# Docker image
-You can build a docker image using the provided dockerfile.
-Warning: TensorFlow and OTB are built with the minimal optimization flags, no CUDA/OpenCL enabled, no AVX and such for CPU.
-The dockerfiles are located in `tools/dockerfiles/`. 
+# How to install
 
-To build your docker image, just enter the following from the directory containing the `Dockerfile` you chose.
+For now you have two options: either use the existing *docker image*, or build everything yourself *from source*.
+
+# Docker
+Use the latest image from dockerhub:
 ```
-# Build the docker image (troubleshooting: if any downloading operation fails, just re-run the command since it's incremental)
-docker build --tag otbtf_image .
-# Want export it?
-docker save -o ../otbtf_image.tar otbtf_image:latest
+docker pull mdl4eo/otbtf1.6
+docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf1.6 otbcli_PatchesExtraction --help
 ```
-Feel free to contribute to this, adding more Dockerfiles!
+Please note that for now, TensorFlow and OTB are built with the minimal optimization flags, no CUDA/OpenCL enabled, no AVX and such for CPU. 
+*Feel free to contribute, adding your own Dockerfile with CUDA support, etc!*
+
+The dockerfiles corresponding to the images available on dockerhub are provided in the `tools/dockerfiles/` path of this repository.
 
 # Build from sources
 This remote module has been tested successfully on Ubuntu 18 and CentOs 7 with last CUDA drivers, TensorFlow r1.14 and OTB develop (0df44b312d64d6c3890b65d3790d4a17d0fd5f23).
