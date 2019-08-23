@@ -131,8 +131,8 @@ def CreateSavedModel(sess, inputs, outputs, directory):
     input_dict,
     output_dict)
   }
-  builder.add_meta_graph_and_variables(sess,[tf.saved_model.tag_constants.TRAINING],signature_def_map)
-  builder.add_meta_graph([tf.saved_model.tag_constants.SERVING])
+  builder.add_meta_graph_and_variables(sess,[tf.saved_model.TRAINING],signature_def_map)
+  builder.add_meta_graph([tf.saved_model.SERVING])
   builder.save()
 
 def CheckpointToSavedModel(ckpt_path, inputs, outputs, savedmodel_path, clear_devices=False):
