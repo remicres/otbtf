@@ -4,13 +4,13 @@ Some examples of ready-to-use deep learning architectures built with the TensorF
 All models used are provided in this directory.
 
 **Table of Contents**
-1. [Simple CNN](#Simple-CNN)
-2. [Fully convolutional network](#Fully-convolutional-network)
-3. [M3Fusion Model](#M3Fusion-Model)
-4. [Maggiori model](#Maggiori-model)
-5. [Fully convolutional network with separate Pan/MS channels](#Fully-convolutional-network-with-separate-Pan/MS-channels)
+1. [Simple CNN](#part1)
+2. [Fully convolutional network](#part2)
+3. [M3Fusion Model](#part3)
+4. [Maggiori model](#part4)
+5. [Fully convolutional network with separate Pan/MS channels](#part5)
 
-## Simple CNN
+## Simple CNN <a name="part1"></a>
 
 This simple model estimates the class of an input patch of image.
 This model consists in successive convolutions/pooling/relu of the input (*x* placeholder).
@@ -99,7 +99,7 @@ otbcli_TensorflowModelServe \
 -out $output_classif_fcn
 ```
 
-## Fully convolutional network
+## Fully convolutional network <a name="part2"></a>
 
 The `create_savedmodel_simple_fcn.py` script enables you to create a fully convolutional model which does not use any stride.
 
@@ -122,7 +122,7 @@ otbcli_TensorflowModelServe \
 -out $output_classif
 ```
 
-## M3Fusion Model
+## M3Fusion Model <a name="part3"></a>
 
 The M3Fusion model (stands for MultiScale/Multimodal/Multitemporal satellite data fusion) is a model designed to input time series and very high resolution images.
 
@@ -191,7 +191,7 @@ otbcli_TensorflowModelServe \
 -output.names "prediction" -out $output_classif
 ```
 
-## Maggiori model
+## Maggiori model <a name="part4"></a>
 
 This architecture was one of the first to introduce a fully convolutional model suited for large scale remote sensing images.
 
@@ -242,7 +242,7 @@ otbcli_TensorflowModelServe \
 -out $output_classif
 ```
 
-## Fully convolutional network with separate Pan/MS channels
+## Fully convolutional network with separate Pan/MS channels <a name="part5"></a>
 
 It's common that very high resolution products are composed with a panchromatic channel at high-resolution (Pan), and a multispectral image generally at lower resolution (MS).
 This model inputs separately the two sources (Pan and MS) separately.
