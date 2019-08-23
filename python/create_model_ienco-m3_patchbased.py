@@ -16,54 +16,30 @@
 #   limitations under the License.
 #
 #==========================================================================*/
-import sys
-import os
-import numpy as np
-import math
-from operator import itemgetter, attrgetter, methodcaller
-import tensorflow as tf
-from tensorflow.contrib import rnn
-import random
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import precision_recall_fscore_support
-from sklearn.metrics import f1_score
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.utils import shuffle
-from sklearn.metrics import confusion_matrix
+
+# Reference:
+#
+# Benedetti, P., Ienco, D., Gaetano, R., Ose, K., Pensa, R. G., & Dupuy, S. (2018)
+# M3Fusion: A Deep Learning Architecture for Multiscale Multimodal Multitemporal 
+# Satellite Data Fusion. IEEE Journal of Selected Topics in Applied Earth 
+# Observations and Remote Sensing, 11(12), 4939-4949.
+
 from tricks import *
-  
-def checkTest(ts_data, vhsr_data, batchsz, label_test):
-  tot_pred = []
-#  gt_test = []
-  iterations = ts_data.shape[0] / batchsz
+from tensorflow.contrib import rnn
+import argparse
 
-  if ts_data.shape[0] % batchsz != 0:
-      iterations+=1
+parser = argparse.ArgumentParser()
+parser.add_argument("--nunits",        type=int,   default=1024,   help="number of units")
+parser.add_argument("--n_levels_lstm", type=int,   default=1,      help="number of lstm levels")
+parser.add_argument("--hm_epochs",     type=int,   default=400,    help="hm epochs")
+parser.add_argument("--n_timestamps",  type=int,   default=37,     help="number of images in timeseries")
+parser.add_argument("--n_dims",        type=int,   default=16,     help="number of channels in timeseries images")
+parser.add_argument("--patch_window",  type=int,   default=25,     help="patch size for the high-res image")
+parser.add_argument("--n_channels",    type=int,   default=4,      help="number of channels in the high-res image")
+parser.add_argument("--nclasses",      type=int,   default=8,      help="number of classes")
+parser.add_argument("--outdir", help="Output directory for SavedModel", required=True)
+params = parser.parse_args()
 
-  for ibatch in range(iterations):
-    batch_rnn_x, _ = getBatch(ts_data, label_test, ibatch, batchsz)
-    
-    batch_cnn_x, batch_y = getBatch(vhsr_data, label_test, ibatch, batchsz)
-
-    pred_temp = sess.run(testPrediction,feed_dict={x_rnn:batch_rnn_x,
-                             is_training_ph:True,
-                             dropout:0.0,
-                             x_cnn:batch_cnn_x})
-
-    for el in pred_temp:
-      tot_pred.append( el )
-
-  print_histo(np.asarray(tot_pred),"prediction distrib")
-  print_histo(label_test,"test distrib")
-
-  # flatten the classes_test
-  label_test = flatten_nparray(label_test)
-
-  print "TEST F-Measure: %f" % f1_score(label_test, tot_pred, average='weighted')
-  print f1_score(label_test, tot_pred, average=None)
-  print "TEST Accuracy: %f" % accuracy_score(label_test, tot_pred)
-  sys.stdout.flush()  
-  return accuracy_score(label_test, tot_pred)
 
 def RnnAttention(x, nunits, nlayer, n_dims, n_timetamps, is_training_ph):
 
@@ -169,13 +145,6 @@ def CNN(x, nunits):
   tensor_shape = cnn.get_shape()
 
   return cnn, tensor_shape[1].value
-  
-def getBatch(X, Y, i, batch_size):
-    start_id = i*batch_size
-    end_id = min( (i+1) * batch_size, X.shape[0])
-    batch_x = X[start_id:end_id]
-    batch_y = Y[start_id:end_id]
-    return batch_x, batch_y
 
 def getPrediction(x_rnn, x_cnn, nunits, nlayer, nclasses, dropout, is_training, n_dims, n_timetamps):
   features_learnt = None
@@ -187,22 +156,16 @@ def getPrediction(x_rnn, x_cnn, nunits, nlayer, nclasses, dropout, is_training, 
   first_dim = cnn_dim + nunits
   
   #Classifier1 #RNN Branch
-  print "RNN Features:"
-  print vec_rnn.get_shape()
   outb1 = tf.Variable(tf.truncated_normal([nclasses]),name='B1')
   outw1 = tf.Variable(tf.truncated_normal([nunits,nclasses]),name='W1')  
   pred_c1 = tf.matmul(vec_rnn,outw1)+outb1
   
   #Classifier2 #CNN Branch
-  print "CNN Features:"
-  print vec_cnn.get_shape()
   outb2 = tf.Variable(tf.truncated_normal([nclasses]),name='B2')
   outw2 = tf.Variable(tf.truncated_normal([cnn_dim,nclasses]),name='W2')  
   pred_c2 = tf.matmul(vec_cnn,outw2)+outb2
   
   #ClassifierFull
-  print "FULL features_learnt:"
-  print features_learnt.get_shape()
   outb = tf.Variable(tf.truncated_normal([nclasses]),name='B')
   outw = tf.Variable(tf.truncated_normal([first_dim,nclasses]),name='W')  
   pred_full = tf.matmul(features_learnt,outw)+outb
@@ -211,112 +174,49 @@ def getPrediction(x_rnn, x_cnn, nunits, nlayer, nclasses, dropout, is_training, 
 
 ###############################################################################
 
-#Model parameters
-nunits = 1024
-batchsz = 64
-hm_epochs = 400
-n_levels_lstm = 1
-#dropout = 0.2
+""" Main """
 
-#Data INformation
-n_timestamps = 37
-n_dims       = 16
-patch_window = 25
-n_channels   = 4
-nclasses     = 8
-
-# check number of arguments
-if len(sys.argv) != 8:
-  print("Usage : <ts_train> <vhs_train> <label_train> <ts_valid> <vhs_valid> <label_valid> <export_dir>")
-  sys.exit(1)
-
-ts_train    = read_samples(sys.argv[1])
-vhsr_train  = read_samples(sys.argv[2])
-label_train = read_samples(sys.argv[3])
-label_train = np.int32(label_train)
-print_histo(label_train, "label_train")
-
-ts_test     = read_samples(sys.argv[4])
-vhsr_test   = read_samples(sys.argv[5])
-label_test  = read_samples(sys.argv[6])
-label_test = np.int32(label_test)
-print_histo(label_test, "label_test")
-
-export_dir = read_samples(sys.argv[7])
-
-x_rnn = tf.placeholder(tf.float32,[None, 1, 1, n_dims*n_timestamps],name="x_rnn")
-x_cnn = tf.placeholder(tf.float32,[None, patch_window, patch_window, n_channels],name="x_cnn")
-y     = tf.placeholder(tf.int32,[None, 1, 1, 1],name="y")
-
-learning_rate  = tf.placeholder(tf.float32, shape=(), name="learning_rate")
-is_training_ph = tf.placeholder(tf.bool,    shape=(), name="is_training")
-dropout        = tf.placeholder(tf.float32, shape=(), name="drop_rate")
-
-sess = tf.InteractiveSession()
-
-pred_c1, pred_c2, pred_full, features_learnt = getPrediction(x_rnn, 
-                                                             x_cnn,
-                                                             nunits, 
-                                                             n_levels_lstm, 
-                                                             nclasses, 
-                                                             dropout, 
-                                                             is_training_ph,
-                                                             n_dims,
-                                                             n_timestamps)
-
-testPrediction = tf.argmax(pred_full, 1, name="prediction")
-
-loss_full = tf.losses.sparse_softmax_cross_entropy(labels=tf.reshape(y, [-1, 1]), logits=tf.reshape(pred_full, [-1, nclasses]))
-loss_c1 = tf.losses.sparse_softmax_cross_entropy(labels=tf.reshape(y, [-1, 1]), logits=tf.reshape(pred_c1, [-1, nclasses]))
-loss_c2 = tf.losses.sparse_softmax_cross_entropy(labels=tf.reshape(y, [-1, 1]), logits=tf.reshape(pred_c2, [-1, nclasses]))
-
-cost = loss_full + (0.3 * loss_c1) + (0.3 * loss_c2)
-
-optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate, name="optimizer").minimize(cost)
-
-correct = tf.equal(tf.argmax(pred_full,1),tf.argmax(y,1))
-accuracy = tf.reduce_mean(tf.cast(correct,tf.float64))
-
-tf.global_variables_initializer().run()
-
-# Add ops to save and restore all the variables.
-saver = tf.train.Saver()
-
-iterations = ts_train.shape[0] / batchsz
-
-if ts_train.shape[0] % batchsz != 0:
-    iterations+=1
-
-best_loss = sys.float_info.max
-
-for e in range(hm_epochs):
-  lossi = 0
-  accS = 0
-  
-  ts_train, vhsr_train, label_train = shuffle(ts_train, vhsr_train, label_train, random_state=0)
-  print "shuffle DONE"
-  
-  
-  for ibatch in range(iterations):
-    #BATCH_X BATCH_Y: i-th batches of train_indices_x and train_y
-    batch_rnn_x, _ = getBatch(ts_train, label_train, ibatch, batchsz)
-    batch_cnn_x, batch_y = getBatch(vhsr_train, label_train, ibatch, batchsz)
-
-    acc,_,loss = sess.run([accuracy,optimizer,cost],feed_dict={x_rnn:batch_rnn_x,
-                                  x_cnn:batch_cnn_x,
-                                  y:batch_y,
-                                  is_training_ph:True,
-                                  dropout:0.2,
-                                  learning_rate:0.0002})    
-    lossi+=loss
-    accS+=acc
+# Create the TensorFlow graph
+with tf.Graph().as_default():
     
-  print "Epoch:",e,"Train loss:",lossi/iterations,"| accuracy:",accS/iterations
+  x_rnn = tf.placeholder(tf.float32, [None, 1, 1, params.n_dims*params.n_timestamps], name="x_rnn")
+  x_cnn = tf.placeholder(tf.float32, [None, params.patch_window, params.patch_window, params.n_channels], name="x_cnn")
+  y     = tf.placeholder(tf.int32,   [None, 1, 1, 1], name="y")
   
-  c_loss = lossi/iterations
+  learning_rate  = tf.placeholder_with_default(tf.constant(0.0002, dtype=tf.float32, shape=[]), shape=[], name="learning_rate")
+  is_training_ph = tf.placeholder_with_default(tf.constant(False, dtype=tf.bool, shape=[]), shape=[], name="is_training")
+  dropout        = tf.placeholder_with_default(tf.constant(0.5, dtype=tf.float32, shape=[]), shape=[], name="drop_rate")
   
-  if c_loss < best_loss:
-    best_loss = c_loss
-    CreateSavedModel(sess, ["x_cnn:0","x_rnn:0","is_training:0"], ["prediction:0"], export_dir)
-
-  test_acc = checkTest(ts_test, vhsr_test, 1024, label_test)
+  pred_c1, pred_c2, pred_full, features_learnt = getPrediction(x_rnn, 
+                                                               x_cnn,
+                                                               params.nunits, 
+                                                               params.n_levels_lstm, 
+                                                               params.nclasses, 
+                                                               dropout, 
+                                                               is_training_ph,
+                                                               params.n_dims,
+                                                               params.n_timestamps)
+  
+  testPrediction = tf.argmax(pred_full, 1, name="prediction")
+  
+  loss_full = tf.losses.sparse_softmax_cross_entropy(labels=tf.reshape(y, [-1, 1]), 
+                                                     logits=tf.reshape(pred_full, [-1, params.nclasses]))
+  loss_c1   = tf.losses.sparse_softmax_cross_entropy(labels=tf.reshape(y, [-1, 1]), 
+                                                     logits=tf.reshape(pred_c1, [-1, params.nclasses]))
+  loss_c2   = tf.losses.sparse_softmax_cross_entropy(labels=tf.reshape(y, [-1, 1]), 
+                                                     logits=tf.reshape(pred_c2, [-1, params.nclasses]))
+  
+  cost = loss_full + (0.3 * loss_c1) + (0.3 * loss_c2)
+  
+  optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate, name="optimizer").minimize(cost)
+  
+  correct = tf.equal(tf.argmax(pred_full,1),tf.argmax(y,1))
+  accuracy = tf.reduce_mean(tf.cast(correct,tf.float64))
+  
+  # Initializer, saver, session
+  init = tf.global_variables_initializer()
+  saver = tf.train.Saver( max_to_keep=20 )
+  sess = tf.Session()
+  sess.run(init)
+  
+  CreateSavedModel(sess, ["x_cnn:0","x_rnn:0","y:0"], ["prediction:0"], params.outdir)

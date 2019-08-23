@@ -1,8 +1,28 @@
+# -*- coding: utf-8 -*-
+#==========================================================================
+#
+#   Copyright Remi Cresson (IRSTEA)
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#          http://www.apache.org/licenses/LICENSE-2.0.txt
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+#==========================================================================*/
 from tricks import *
-import sys
-import os
+import argparse
 
-nclasses=8
+parser = argparse.ArgumentParser()
+parser.add_argument("--nclasses",  type=int, default=8,  help="number of classes")
+parser.add_argument("--outdir", help="Output directory for SavedModel", required=True)
+params = parser.parse_args()
 
 def myModel(x1,x2):
   
@@ -33,17 +53,11 @@ def myModel(x1,x2):
                         shape=[-1, 128], name="features")
   
   # 8 neurons for 8 classes
-  estimated = tf.layers.dense(inputs=features, units=nclasses, activation=None)
+  estimated = tf.layers.dense(inputs=features, units=params.nclasses, activation=None)
   estimated_label = tf.argmax(estimated, 1, name="prediction")
   
   return estimated, estimated_label
  
-""" Main """
-# check number of arguments
-if len(sys.argv) != 2:
-  print("Usage : <output directory for SavedModel>")
-  sys.exit(1)
-
 # Create the graph
 with tf.Graph().as_default():
   
@@ -59,7 +73,7 @@ with tf.Graph().as_default():
   
   # Loss function
   cost = tf.losses.sparse_softmax_cross_entropy(labels=tf.reshape(y, [-1, 1]), 
-                                                logits=tf.reshape(y_estimated, [-1, nclasses]))
+                                                logits=tf.reshape(y_estimated, [-1, params.nclasses]))
   
   # Optimizer
   optimizer = tf.train.AdamOptimizer(learning_rate=lr, name="optimizer").minimize(cost)
@@ -71,4 +85,4 @@ with tf.Graph().as_default():
   sess.run(init)
 
   # Create a SavedModel
-  CreateSavedModel(sess, ["x1:0", "x2:0", "y:0"], ["features:0", "prediction:0"], sys.argv[1])
+  CreateSavedModel(sess, ["x1:0", "x2:0", "y:0"], ["features:0", "prediction:0"], params.outdir)
