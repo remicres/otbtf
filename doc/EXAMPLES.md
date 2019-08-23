@@ -129,11 +129,11 @@ The output class estimation is performed at pixel level.
 ### Generate the model
 
 ```
-python create_model_ienco-m3_patchbased.py --outdir $modeldir
+python create_savedmodel_ienco-m3_patchbased.py --outdir $modeldir
 ```
 
 Note that you can adjust the number of classes for the model with the `--nclasses` option.
-Type `python create_model_ienco-m3_patchbased.py --help` to see the other available parameters.
+Type `python create_savedmodel_ienco-m3_patchbased.py --help` to see the other available parameters.
 
 ### Train the model
 
@@ -197,7 +197,7 @@ This fully convolutional model performs binary semantic segmentation of large sc
 ### Generate the model
 
 ```
-python create_model_maggiori17_fullyconv.py --outdir $modeldir
+python create_savedmodel_maggiori17_fullyconv.py --outdir $modeldir
 ```
 
 You can change the number of spectral bands of the input image that is processed with the model, using the `--n_channels` option.

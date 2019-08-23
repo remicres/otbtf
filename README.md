@@ -362,10 +362,13 @@ Then, we use the **TensorflowModelServe** application to produce the **predictio
 otbcli_TensorflowModelServe -source1.il spot7.tif -source1.placeholder x1 -source1.rfieldx 16 -source1.rfieldy 16 -model.dir /tmp/my_new_model -output.names prediction -out map.tif uint8
 ```
 
-## Models
+## Begin with provided models
 
 In the `python` folder are provided some ready-to-use deep networks, with documentation and scientific references. 
+See [here](doc/EXAMPLES.md) to see how to use the provided models.
+
 Feel free to contribute with your own architecture!
 
 ## Tutorial
+
 A tutorial is available at [MDL4EO's blog](https://mdl4eo.irstea.fr/2019/01/04/an-introduction-to-deep-learning-on-remote-sensing-images-tutorial/)
