@@ -43,7 +43,7 @@ otbcli_TensorflowModelTrain \
 ```
 
 Type `otbcli_TensorflowModelTrain --help` to display the help.
-For instance, you can change the number of epochs to 50 with `-training.epochs 50` or you can change the batch size to 8 with `-training.batchsize` 8.
+For instance, you can change the number of epochs to 50 with `-training.epochs 50` or you can change the batch size to 8 with `-training.batchsize 8`.
 In addition, it is possible to feed some scalar values to scalar placeholder of the model (currently, bool, int and float are supported).
 For instance, our model has a placeholder called *lr* that controls the learning rate of the optimizer.
 We can change this value at runtime using `-training.userplaceholders "lr=0.0002"`
@@ -94,6 +94,7 @@ otbcli_TensorflowModelServe \
 ## Fully convolutional network
 
 The `create_savedmodel_simple_fcn.py` script enables you to create a fully convolutional model which does not use any stride.
+<img src ="../doc/savedmodel_simple_fcnn.png" />
 Thank to that, once trained this model can be applied on the image to produce a landcover map at the same resolution as the input image, in a fully convolutional (i.e. fast) manner.
 The main difference with the model described in the previous section is the *spcscale* parameter that must be let to default (i.e. unitary).
 
