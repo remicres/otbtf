@@ -301,7 +301,7 @@ otbcli_TensorflowModelServe \
 -out $output_classif
 ```
 
-Note that we could also have set the Pan image as the first source, and tell the application to use a *spcscale* of 0.25.
+Note that we could also have set the MS image as the first source, and tell the application to use a *spcscale* of 0.25.
 
 ```
 otbcli_TensorflowModelServe \
