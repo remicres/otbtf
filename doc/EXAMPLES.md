@@ -3,6 +3,13 @@
 Some examples of ready-to-use deep learning architectures built with the TensorFlow API from python.
 All models used are provided in this directory.
 
+**Table of Contents**
+1. [Simple CNN](#Simple-CNN)
+2. [Fully convolutional network](#Fully-convolutional-network)
+3. [M3Fusion Model](#M3Fusion-Model)
+4. [Maggiori model](#Maggiori-model)
+5. [Fully convolutional network with separate Pan/MS channels](#Fully-convolutional-network-with-separate-Pan/MS-channels)
+
 ## Simple CNN
 
 This simple model estimates the class of an input patch of image.
@@ -115,9 +122,9 @@ otbcli_TensorflowModelServe \
 -out $output_classif
 ```
 
-## M3 Model
+## M3Fusion Model
 
-The M3 model (stands for MultiScale/Multimodal/Multitemporal satellite data fusion) is a model designed to input time series and very high resolution images.
+The M3Fusion model (stands for MultiScale/Multimodal/Multitemporal satellite data fusion) is a model designed to input time series and very high resolution images.
 
 Benedetti, P., Ienco, D., Gaetano, R., Ose, K., Pensa, R. G., & Dupuy, S. (2018). _M3Fusion: A Deep Learning Architecture for Multiscale Multimodal Multitemporal Satellite Data Fusion_. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, 11(12), 4939-4949.
 
