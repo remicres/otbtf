@@ -25,7 +25,7 @@ You can read more details about these applications on [this blog](https://mdl4eo
 
 # How to install
 
-For now you have two options: either use the existing *docker image*, or build everything yourself *from source*.
+For now you have two options: either use the existing **docker image**, or build everything yourself **from source**.
 
 # Docker image
 
@@ -42,7 +42,7 @@ The dockerfiles corresponding to the images available on dockerhub are provided 
 
 # Build from sources
 
-See [here](docs/HOWTOBUILD.md) to see how to build the remote module from sources.
+See [here](doc/HOWTOBUILD.md) to see how to build the remote module from sources.
 
 # New applications
 
