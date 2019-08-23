@@ -121,7 +121,7 @@ The M3 model (stands for MultiScale/Multimodal/Multitemporal satellite data fusi
 
 Benedetti, P., Ienco, D., Gaetano, R., Ose, K., Pensa, R. G., & Dupuy, S. (2018). _M3Fusion: A Deep Learning Architecture for Multiscale Multimodal Multitemporal Satellite Data Fusion_. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, 11(12), 4939-4949.
 
-See the original paper (here)[https://arxiv.org/pdf/1803.01945].
+See the original paper [here](https://arxiv.org/pdf/1803.01945).
 
 The M3 model is patch-based, and process two input sources simultaneously: (i) time series, and (ii) a very high resolution image.
 The output class estimation is performed at pixel level.
@@ -190,7 +190,7 @@ This architecture was one of the first to introduce a fully convolutional model 
 
 Maggiori, E., Tarabalka, Y., Charpiat, G., & Alliez, P. (2016). _Convolutional neural networks for large-scale remote-sensing image classification_. IEEE Transactions on Geoscience and Remote Sensing, 55(2), 645-657.
 
-See the original paper (here)[https://hal.inria.fr/hal-01350706/document].
+See the original paper [here](https://hal.inria.fr/hal-01350706/document).
 
 This fully convolutional model performs binary semantic segmentation of large scale images without any blocking artifacts.
 
