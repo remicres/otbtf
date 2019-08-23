@@ -43,6 +43,7 @@ otbcli_TensorflowModelTrain \
 ```
 
 Type `otbcli_TensorflowModelTrain --help` to display the help.
+
 For instance, you can change the number of epochs to 50 with `-training.epochs 50` or you can change the batch size to 8 with `-training.batchsize 8`.
 In addition, it is possible to feed some scalar values to scalar placeholder of the model (currently, bool, int and float are supported).
 For instance, our model has a placeholder called *lr* that controls the learning rate of the optimizer.
@@ -94,7 +95,9 @@ otbcli_TensorflowModelServe \
 ## Fully convolutional network
 
 The `create_savedmodel_simple_fcn.py` script enables you to create a fully convolutional model which does not use any stride.
+
 <img src ="../doc/savedmodel_simple_fcnn.png" />
+
 Thank to that, once trained this model can be applied on the image to produce a landcover map at the same resolution as the input image, in a fully convolutional (i.e. fast) manner.
 The main difference with the model described in the previous section is the *spcscale* parameter that must be let to default (i.e. unitary).
 
@@ -115,8 +118,11 @@ otbcli_TensorflowModelServe \
 ## M3 Model
 
 The M3 model (stands for MultiScale/Multimodal/Multitemporal satellite data fusion) is a model designed to input time series and very high resolution images.
+
 Benedetti, P., Ienco, D., Gaetano, R., Ose, K., Pensa, R. G., & Dupuy, S. (2018). _M3Fusion: A Deep Learning Architecture for Multiscale Multimodal Multitemporal Satellite Data Fusion_. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, 11(12), 4939-4949.
-See the original paper (here)[https://arxiv.org/pdf/1803.01945]
+
+See the original paper (here)[https://arxiv.org/pdf/1803.01945].
+
 The M3 model is patch-based, and process two input sources simultaneously: (i) time series, and (ii) a very high resolution image.
 The output class estimation is performed at pixel level.
 
@@ -142,6 +148,7 @@ export OTB_TF_NSOURCES=2
 ```
 
 Run the *TensorflowModelTrain* application of OTBTF.
+
 Note that for time series we could also have provided a list of images rather that a single big images stack (since "sourceX.il" is an input image list parameter).
 
 ```
@@ -166,6 +173,7 @@ Let's produce a land cover map using the M3 model from time series (TS) and Very
 <img src ="../doc/classif_map.png" />
 
 Since we provide time series as the reference source (*source1*), the output classes are estimated at the same resolution.
+
 This model can be run in patch-based mode only.
 
 ```
@@ -179,8 +187,11 @@ otbcli_TensorflowModelServe \
 ## Maggiori model
 
 This architecture was one of the first to introduce a fully convolutional model suited for large scale remote sensing images.
+
 Maggiori, E., Tarabalka, Y., Charpiat, G., & Alliez, P. (2016). _Convolutional neural networks for large-scale remote-sensing image classification_. IEEE Transactions on Geoscience and Remote Sensing, 55(2), 645-657.
-See the original paper (here)[https://hal.inria.fr/hal-01350706/document]
+
+See the original paper (here)[https://hal.inria.fr/hal-01350706/document].
+
 This fully convolutional model performs binary semantic segmentation of large scale images without any blocking artifacts.
 
 ### Generate the model
@@ -232,6 +243,7 @@ This model inputs separately the two sources (Pan and MS) separately.
 <img src ="../doc/savedmodel_simple_pxs_fcn.png" />
 
 Use `create_savedmodel_pxs_fcn.py` to generate this model.
+
 During training, the *x1* and *x2* placeholders must be fed respectively with patches of size 8x8 and 32x32.
 You can use this model in a fully convolutional way with receptive field of size 32 (for the Pan image) and 8 (for the MS image) and an unitary expression field (i.e. equal to 1).
 Don't forget to tell OTBTF that we want two sources: one for Ms image + one for Pan image
