@@ -364,10 +364,8 @@ otbcli_TensorflowModelServe -source1.il spot7.tif -source1.placeholder x1 -sourc
 
 ## Begin with provided models
 
-In the `python` folder are provided some ready-to-use deep networks, with documentation and scientific references. 
-See [here](doc/EXAMPLES.md) to see how to use the provided models.
-
-Feel free to contribute with your own architecture!
+In the `python` folder are provided some [ready-to-use deep networks, with documentation and scientific references](doc/EXAMPLES.md).
+**Feel free to contribute with your own architecture!**
 
 ## Tutorial
 
