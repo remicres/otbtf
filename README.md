@@ -51,7 +51,7 @@ Let's describe quickly the new applications provided.
 ## PatchesExtraction
 
 This application performs the extraction of patches in images from a vector data containing points. The OTB sampling framework can be used to generate the set of selected points. After that, you can use the **PatchesExtraction** application to perform the sampling of your images.
-We denote input source an input image, or a stack of input image (of the same size !). The user can set the **OTB_TF_NSOURCES** environment variable to select the number of input sources that he wants. For example, if she wants to sample a time series of Sentinel or Landsat, and in addition a very high resolution image like Spot-7 or Rapideye (like the [M3 deep net](https://arxiv.org/pdf/1803.01945.pdf)), she needs 2 sources (1 for the TS and 1 for the VHRS). The sampled patches will be extracted at each positions designed by the points, if they are entirely inside all input images. For each image source, patches sizes must be provided.
+We denote input source an input image, or a stack of input image (of the same size !). The user can set the **OTB_TF_NSOURCES** environment variable to select the number of input sources that he wants. For example, if she wants to sample a time series of Sentinel or Landsat, and in addition a very high resolution image like Spot-7 or Rapideye (like the [M3 deep net](https://arxiv.org/pdf/1803.01945.pdf)), she needs 2 sources (1 for the TS and 1 for the VHR). The sampled patches will be extracted at each positions designed by the points, if they are entirely inside all input images. For each image source, patches sizes must be provided.
 For each source, the application export all sampled patches as a single multiband raster, stacked in rows. For instance, if you have a number *n* of samples of size *16 x 16* in a *4* channels source image, the output image will be a raster of size *16 x 16n* with *4* channels. 
 An optional output is an image of size *1 x n* containing the value of one specific field of the input vector data. Typically, the *class* field can be used to generate a dataset suitable for a model that performs pixel wise classification. 
 
@@ -334,7 +334,7 @@ Note that you can still set the `OTB_TF_NSOURCES` environment variable.
 
 ## The basics
 
-Here we will try to provide a simple example of doing a classification using a deep net that performs on one single VHRS image.
+Here we will try to provide a simple example of doing a classification using a deep net that performs on one single VHR image.
 Our data set consists in one Spot-7 image, *spot7.tif*, and a training vector data, *terrain_truth.shp* that qualifies two classes that are forest / non-forest.
 First, we **compute statistics** of the vector data : how many points can we sample inside objects, and how many objects in each class.
 ```
