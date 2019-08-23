@@ -13,13 +13,13 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
 
 Below are some screen captures of deep learning applications performed at large scale with OTBTF.
  - Image to image translation (Spot-7 image --> Wikimedia Map using CGAN)
-<img src ="doc/pix2pix.png" />
+<img src ="doc/images/pix2pix.png" />
 
  - Landcover mapping (Spot-7 images --> Building map using semantic segmentation)
-<img src ="doc/landcover.png" />
+<img src ="doc/images/landcover.png" />
 
  - Image enhancement (Enhancement of Sentinel-2 images at 1.5m  using SRGAN)
-<img src ="doc/supresol.png" />
+<img src ="doc/images/supresol.png" />
 
 You can read more details about these applications on [this blog](https://mdl4eo.irstea.fr/2019/)
 
@@ -27,209 +27,35 @@ You can read more details about these applications on [this blog](https://mdl4eo
 
 For now you have two options: either use the existing *docker image*, or build everything yourself *from source*.
 
-# Docker
+# Docker image
+
 Use the latest image from dockerhub:
 ```
 docker pull mdl4eo/otbtf1.6
 docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf1.6 otbcli_PatchesExtraction -help
 ```
 Please note that for now, TensorFlow and OTB are built with the minimal optimization flags, no CUDA/OpenCL enabled, no AVX and such for CPU. 
-*Feel free to contribute, adding your own Dockerfile with CUDA support, etc!*
+
+**Feel free to contribute, adding your own Dockerfile with CUDA support, etc!**
 
 The dockerfiles corresponding to the images available on dockerhub are provided in the `tools/dockerfiles/` path of this repository.
 
 # Build from sources
-This remote module has been tested successfully on Ubuntu 18 and CentOs 7 with last CUDA drivers, TensorFlow r1.14 and OTB develop (0df44b312d64d6c3890b65d3790d4a17d0fd5f23).
 
-## Build OTB
-First, **build the latest *develop* branch of OTB from sources**. You can check the [OTB documentation](https://www.orfeo-toolbox.org/SoftwareGuide/SoftwareGuidech2.html) which details all the steps, if fact it is quite easy thank to the SuperBuild.
-
-Basically, you have to create a folder for OTB, clone sources, configure OTB SuperBuild, and build it.
-The following has been validated with an OTB 6.7.0.
-```
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install aptitude
-sudo aptitude install make cmake-curses-gui build-essential libtool automake git libbz2-dev python-dev libboost-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev zlib1g-dev libcurl4-gnutls-dev swig libkml-dev
-sudo mkdir /work
-sudo chown $USER /work
-mkdir /work/otb
-cd /work/otb
-mkdir build
-git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git OTB
-cd build
-ccmake /work/otb/OTB/SuperBuild
-```
-From here you can tell the SuperBuild to use system boost, curl, zlib, libkml for instance.
-
-Then you can build it:
-```
-make -j $(grep -c ^processor /proc/cpuinfo)
-```
-
-## Build TensorFlow with shared libraries
-During this step, you have to **build Tensorflow from source** except if you want to use only the sampling applications of OTBTensorflow (in this case, skip this section).
-The following has been validated with TensorFlow r1.14 and gcc 5.3.1.
-
-### Bazel
-First, install Bazel.
-```
-sudo apt-get install pkg-config zip g++ zlib1g-dev unzip python
-wget https://github.com/bazelbuild/bazel/releases/download/0.20.0/bazel-0.20.0-installer-linux-x86_64.sh
-chmod +x bazel-0.20.0-installer-linux-x86_64.sh
-./bazel-0.20.0-installer-linux-x86_64.sh --user
-export PATH="$PATH:$HOME/bin"
-```
-
-If you fail to install properly Bazel, you can read the beginning of [the instructions](https://www.tensorflow.org/install/install_sources) that present alternative methods for this.
-
-### Required packages
-There is a few required packages that you need to install:
-```
-sudo apt install python-dev python-pip python3-dev python3-pip python3-mock
-sudo pip install pip six numpy wheel mock keras
-sudo pip3 install pip six numpy wheel mock keras
-```
-
-For a pure python3 install, you might need to workaround a bazel bug the following way:
-```
-sudo ln -s /usr/bin/python3 /usr/bin/python
-```
-
-### Build TensorFlow the right way
-Now, let's build TensorFlow with all the stuff required by OTBTF.
-Make a directory for TensorFlow.
-For instance `mkdir /work/tf`.
-
-Clone TensorFlow.
-```
-cd /work/tf
-git clone https://github.com/tensorflow/tensorflow.git
-```
-
-Now configure the project. If you have CUDA and other NVIDIA stuff installed in your system, remember that you have to tell the script that it is in `/usr/` (no symlink required!).
-
-```
-cd tensorflow
-./configure
-```
-Then, you have to build TensorFlow with the instructions sets supported by your CPU (For instance here is AVX, AVX2, FMA, SSE4.1, SSE4.2 that play fine on a modern intel CPU). You have to tell Bazel to build:
-
- 1. The TensorFlow python pip package
- 2. The libtensorflow_cc.so library
- 3. The libtensorflow_framework.so library
-```
-bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.1 --copt=-msse4.2 //tensorflow:libtensorflow_framework.so //tensorflow:libtensorflow_cc.so //tensorflow:libtensorflow.so //tensorflow/tools/pip_package:build_pip_package
-```
-
-*You might fail this step (e.g. missing packages). In this case, it's recommended to clear the bazel cache, using something like `rm $HOME/.cache/bazel/* -rf` before configuring and building everything!*
-
-### Prepare the right stuff to use TensorFlow in external (cmake) projects
-This is the most important!
-First, build and deploy the pip package.
-```
-bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
-pip install /tmp/tensorflow_pkg/tensorflow-1.12.0rc0-cp27-cp27mu-linux_x86_64.whl
-```
-For the C++ API, it's a bit more tricky.
-Let's begin.
-First, download dependencies.
-```
-/work/tf/tensorflow/tensorflow/contrib/makefile/download_dependencies.sh
-```
-Then, build Google Protobuf
-```
-mkdir /tmp/proto
-cd /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/protobuf/
-./autogen.sh
-./configure --prefix=/tmp/proto/
-make -j $(grep -c ^processor /proc/cpuinfo)
-make install
-```
-Then, "build" eigen (header only...)
-```
-mkdir /tmp/eigen
-cd ../eigen
-mkdir build_dir
-cd build_dir
-cmake -DCMAKE_INSTALL_PREFIX=/tmp/eigen/ ../
-make install -j $(grep -c ^processor /proc/cpuinfo)
-```
-Then, build NSync
-```
-/work/tf/tensorflow/tensorflow/contrib/makefile/compile_nsync.sh
-```
-Then, build absl
-```
-mkdir /tmp/absl
-cd /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/absl/
-mkdir build_dir
-cd build_dir
-cmake -DCMAKE_INSTALL_PREFIX=/tmp/absl ../
-make -j $(grep -c ^processor /proc/cpuinfo)
-```
-Now, you have to copy the useful stuff in a directory
-
-```
-# Create folders
-mkdir /work/tf/installdir
-mkdir /work/tf/installdir/lib
-mkdir /work/tf/installdir/include
-
-# Copy libs
-cp /work/tf/tensorflow/bazel-bin/tensorflow/libtensorflow_cc.so /work/tf/installdir/lib/
-cp /work/tf/tensorflow/bazel-bin/tensorflow/libtensorflow_framework.so /work/tf/installdir/lib/
-cp /tmp/proto/lib/libprotobuf.a /work/tf/installdir/lib/
-cp /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/nsync/builds/default.linux.c++11/*.a /work/tf/installdir/lib/
-ln -s /work/tf/installdir/lib/libtensorflow_framework.so /work/tf/installdir/lib/libtensorflow_framework.so.1
-ln -s /work/tf/installdir/lib/libtensorflow_cc.so /work/tf/installdir/lib/libtensorflow_cc.so.1
-
-# Copy headers
-mkdir /work/tf/installdir/include/tensorflow
-cp -r /work/tf/tensorflow/bazel-genfiles/* /work/tf/installdir/include
-cp -r /work/tf/tensorflow/tensorflow/cc /work/tf/installdir/include/tensorflow
-cp -r /work/tf/tensorflow/tensorflow/core /work/tf/installdir/include/tensorflow
-cp -r /work/tf/tensorflow/third_party /work/tf/installdir/include
-cp -r /tmp/proto/include/* /work/tf/installdir/include
-cp -r /tmp/eigen/include/eigen3/* /work/tf/installdir/include
-cp /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/nsync/public/* /work/tf/installdir/include/
-cd /work/tf/tensorflow/tensorflow/contrib/makefile/downloads/absl
-find absl/ -name '*.h' -exec cp --parents \{\} /work/tf/installdir/include/ \; 
-find absl/ -name '*.inc' -exec cp --parents \{\} /work/tf/installdir/include/ \; 
-
-# Cleaning
-find /work/tf/installdir/ -name "*.cc" -type f -delete
-```
-Well done. Now you have a working copy of TensorFlow located in `/work/tf/installdir` that is ready to use in external C++ cmake projects :)
-
-## Build this remote module
-Finally, we can build this module.
-Clone the repository in your the OTB sources directory for remote modules (something like `/work/otb/OTB/Modules/Remote/`).
-Re configure OTB with cmake of ccmake, and set the following variables
-
- - **Module_OTBTensorflow** to **ON**
- - **OTB_USE_TENSORFLOW** to **ON** (if you set to OFF, you will have only the sampling applications)
- - **TENSORFLOW_CC_LIB** to `/work/tf/installdir/lib/libtensorflow_cc.so`
- - **TENSORFLOW_FRAMEWORK_LIB** to `/work/tf/installdir/lib/libtensorflow_framework.so`
- - **tensorflow_include_dir** to `/work/tf/installdir/include`
-
-Re build and re install OTB.
-```
-cd /work/otb/build/OTB/build
-ccmake
-make -j $(grep -c ^processor /proc/cpuinfo)
-```
-Done !
+See [here](docs/HOWTOBUILD.md) to see how to build the remote module from sources.
 
 # New applications
+
 Let's describe quickly the new applications provided.
+
 ## PatchesExtraction
+
 This application performs the extraction of patches in images from a vector data containing points. The OTB sampling framework can be used to generate the set of selected points. After that, you can use the **PatchesExtraction** application to perform the sampling of your images.
 We denote input source an input image, or a stack of input image (of the same size !). The user can set the **OTB_TF_NSOURCES** environment variable to select the number of input sources that he wants. For example, if she wants to sample a time series of Sentinel or Landsat, and in addition a very high resolution image like Spot-7 or Rapideye (like the [M3 deep net](https://arxiv.org/pdf/1803.01945.pdf)), she needs 2 sources (1 for the TS and 1 for the VHRS). The sampled patches will be extracted at each positions designed by the points, if they are entirely inside all input images. For each image source, patches sizes must be provided.
 For each source, the application export all sampled patches as a single multiband raster, stacked in rows. For instance, if you have a number *n* of samples of size *16 x 16* in a *4* channels source image, the output image will be a raster of size *16 x 16n* with *4* channels. 
 An optional output is an image of size *1 x n* containing the value of one specific field of the input vector data. Typically, the *class* field can be used to generate a dataset suitable for a model that performs pixel wise classification. 
 
-![Schema](doc/patches_extraction.png)
+![Schema](doc/images/patches_extraction.png)
 
 ```
 This application extracts patches in multiple input images. Change the OTB_TF_NSOURCES environment variable to set the number of sources.
@@ -253,7 +79,8 @@ otbcli_PatchesExtraction -vec points.sqlite -source1.il $s2_list -source1.patchs
 ```
 
 ## Build your Tensorflow model
-You can build your Tensorflow model as shown in the `otb/Modules/Remote/otbtensorflow/python` directory. The high-level Python API of Tensorflow is used here to explort a *SavedModel* that applications of this remote module can read.
+
+You can build your Tensorflow model as shown in the `./python/` directory. The high-level Python API of Tensorflow is used here to explort a *SavedModel* that applications of this remote module can read.
 Python purists can even train their own models, thank to Python bindings of OTB: to get patches as 4D numpy arrays, just read the patches images with OTB (**ExtractROI** application for instance) and get the output float vector image as numpy array. Then, simply do a np.reshape to the dimensions that you want ! 
 However, you can use any deep net available on the web, or use an existing gui application to create your own Tensorflow models.
 The important thing here is to know the following parameters for your **placeholders** (the inputs of your model) and **output tensors** (the outputs of your model).
@@ -265,7 +92,7 @@ The important thing here is to know the following parameters for your **placehol
    - Expression field
    - Scale factor
 
-![Schema](doc/schema.png)
+![Schema](doc/images/schema.png)
 
 Here the scale factor is related to one of the model inputs. It tells if your model perform a physical change of spacing of the output (e.g. introduced by non unitary strides in pooling or convolution operators). For each output, it must be expressed relatively to one single input called the reference input.
 Additionally, you will need to remember the **target nodes** (e.g. optimizers, ...) used for training and every other placeholder that are important, especially user placeholders that are used only for training without default value (e.g. "dropout value").
@@ -274,7 +101,7 @@ Additionally, you will need to remember the **target nodes** (e.g. optimizers, .
 Here we assume that you have produced patches using the **PatchesExtraction** application, and that you have a model stored in a directory somewhere on your filesystem. The **TensorflowModelTrain** performs the training, validation (against test dataset, and against validation dataset) providing the usual metrics that machine learning frameworks provide (confusion matrix, recall, precision, f-score, ...).
 Set you input data for training and for validation. The validation against test data is performed on the same data as for training, and the validation against the validation data, well, is performed on the dataset that you give to the application. You can set also batches sizes, and custom placeholders for single valued tensors for both training and validation. The last is useful if you have a model that behaves differently depending the given placeholder. Let's take the example of dropout: it's nice for training, but you have to disable it to use the model. Hence you will pass a placeholder with dropout=0.3 for training and dropout=0.0 for validation. 
 
-![Schema](doc/model_training.png)
+![Schema](doc/images/model_training.png)
 
 ```
 Train a multisource deep learning net using Tensorflow. Change the OTB_TF_NSOURCES environment variable to set the number of sources.
@@ -327,7 +154,7 @@ The **TensorflowModelServe** application perform model serving, it can be used t
 So, this application takes in input one or multiple images (remember that you can change the number of inputs by setting the `OTB_TF_NSOURCES` to the desired number) and produce one output of the specified tensors.
 Like it was said before, the user is responsible of giving the *receptive field* and *name* of input placeholders, as well as the *expression field*, *scale factor* and *name* of the output tensors. The user can ask for multiple tensors, that will be stack along the channel dimension of the output raster. However, if the sizes of those output tensors are not consistent (e.g. a different number of (x,y) elements), an exception will be thrown.
 
-![Schema](doc/classif_map.png)
+![Schema](doc/images/classif_map.png)
 
 
 ```
@@ -502,8 +329,11 @@ None
 ```
 
 Note that you can still set the `OTB_TF_NSOURCES` environment variable.
-Some examples and tutorial are coming soon for this part :)
-# Practice
+
+# How to use
+
+## The basics
+
 Here we will try to provide a simple example of doing a classification using a deep net that performs on one single VHRS image.
 Our data set consists in one Spot-7 image, *spot7.tif*, and a training vector data, *terrain_truth.shp* that qualifies two classes that are forest / non-forest.
 First, we **compute statistics** of the vector data : how many points can we sample inside objects, and how many objects in each class.
@@ -531,8 +361,11 @@ Then, we use the **TensorflowModelServe** application to produce the **predictio
 ```
 otbcli_TensorflowModelServe -source1.il spot7.tif -source1.placeholder x1 -source1.rfieldx 16 -source1.rfieldy 16 -model.dir /tmp/my_new_model -output.names prediction -out map.tif uint8
 ```
-# Tutorial
-A complete tutorial is available at [MDL4EO's blog](https://mdl4eo.irstea.fr/2019/01/04/an-introduction-to-deep-learning-on-remote-sensing-images-tutorial/)
-# Contact
-You can contact Remi Cresson if you have any issues with this remote module at remi [dot] cresson [at] irstea [dot] fr
 
+## Models
+
+In the `python` folder are provided some ready-to-use deep networks, with documentation and scientific references. 
+Feel free to contribute with your own architecture!
+
+## Tutorial
+A tutorial is available at [MDL4EO's blog](https://mdl4eo.irstea.fr/2019/01/04/an-introduction-to-deep-learning-on-remote-sensing-images-tutorial/)
