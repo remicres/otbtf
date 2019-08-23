@@ -14,7 +14,7 @@ Predicted label is a single pixel, for an input patch of size 16x16 (for an inpu
 The learning rate of the training operator can be adjusted using the *lr* placeholder.
 The following figure summarizes this architecture.
 
-<img src ="../doc/savedmodel_simple_cnn.png" />
+<img src ="../doc/images/savedmodel_simple_cnn.png" />
 
 ### Generate the model
 
@@ -28,7 +28,7 @@ Note that you can adjust the number of classes for the model with the `--nclasse
 
 ### Train the model
 
-Use *TensorflowModelTrain* to train this model.
+Use **TensorflowModelTrain** to train this model.
 
 ```
 otbcli_TensorflowModelTrain \
@@ -76,8 +76,8 @@ However, patch-based approach is slow because each patch is processed independen
 In fully convolutional mode, the model is used to process larger blocks in order to estimate simultaneously multiple pixels classes.
 The model has a total number of 4 strides (caused by pooling).
 Hence the physical spacing of the features maps, in spatial dimensions, is divided by 4.
-This is what is called *spcscale* in the *TensorflowModelServe* application.
-If you want to use the model in fully convolutional mode, you have to tell *TensorflowModelServe* that the model performs a change of physical spacing of the output, 4 in our case.
+This is what is called *spcscale* in the **TensorflowModelServe** application.
+If you want to use the model in fully convolutional mode, you have to tell **TensorflowModelServe** that the model performs a change of physical spacing of the output, 4 in our case.
 
 ```
 otbcli_TensorflowModelServe \
@@ -96,7 +96,7 @@ otbcli_TensorflowModelServe \
 
 The `create_savedmodel_simple_fcn.py` script enables you to create a fully convolutional model which does not use any stride.
 
-<img src ="../doc/savedmodel_simple_fcnn.png" />
+<img src ="../doc/images/savedmodel_simple_fcnn.png" />
 
 Thank to that, once trained this model can be applied on the image to produce a landcover map at the same resolution as the input image, in a fully convolutional (i.e. fast) manner.
 The main difference with the model described in the previous section is the *spcscale* parameter that must be let to default (i.e. unitary).
@@ -139,7 +139,7 @@ Type `python create_model_ienco-m3_patchbased.py --help` to see the other availa
 
 Let's train the M3 model from time series (TS) and Very High Resolution Satellite (VHRS) patches images.
 
-<img src ="../doc/model_training.png" />
+<img src ="../doc/images/model_training.png" />
 
 First, tell OTBTF that we want two sources: one for time series + one for VHR image
 
@@ -147,7 +147,7 @@ First, tell OTBTF that we want two sources: one for time series + one for VHR im
 export OTB_TF_NSOURCES=2
 ```
 
-Run the *TensorflowModelTrain* application of OTBTF.
+Run the **TensorflowModelTrain** application of OTBTF.
 
 Note that for time series we could also have provided a list of images rather that a single big images stack (since "sourceX.il" is an input image list parameter).
 
@@ -170,7 +170,7 @@ otbcli_TensorflowModelTrain \
 
 Let's produce a land cover map using the M3 model from time series (TS) and Very High Resolution Satellite image (VHRS)
 
-<img src ="../doc/classif_map.png" />
+<img src ="../doc/images/classif_map.png" />
 
 Since we provide time series as the reference source (*source1*), the output classes are estimated at the same resolution.
 
@@ -240,7 +240,7 @@ otbcli_TensorflowModelServe \
 It's common that very high resolution products are composed with a panchromatic channel at high-resolution (Pan), and a multispectral image generally at lower resolution (MS).
 This model inputs separately the two sources (Pan and MS) separately.
 
-<img src ="../doc/savedmodel_simple_pxs_fcn.png" />
+<img src ="../doc/images/savedmodel_simple_pxs_fcn.png" />
 
 Use `create_savedmodel_pxs_fcn.py` to generate this model.
 
@@ -255,7 +255,7 @@ export OTB_TF_NSOURCES=2
 ### Inference at MS image resolution
 
 Here we perform the land cover map at the same resolution as the MS image.
-Do do this, we set the MS image as the first source in the *TensorflowModelServe* application.
+Do do this, we set the MS image as the first source in the **TensorflowModelServe** application.
 
 ```
 otbcli_TensorflowModelServe \
@@ -282,7 +282,7 @@ otbcli_TensorflowModelServe \
 ### Inference at Pan image resolution
 
 Here we perform the land cover map at the same resolution as the Pan image.
-Do do this, we set the Pan image as the first source in the *TensorflowModelServe* application.
+Do do this, we set the Pan image as the first source in the **TensorflowModelServe** application.
 
 ```
 otbcli_TensorflowModelServe \
