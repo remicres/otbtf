@@ -27,7 +27,7 @@ You can read more details about these applications on [this blog](https://mdl4eo
 
 For now you have two options: either use the existing **docker image**, or build everything yourself **from source**.
 
-# Docker image
+## Docker image
 
 Use the latest image from dockerhub:
 ```
@@ -40,7 +40,7 @@ Please note that for now, TensorFlow and OTB are built with the minimal optimiza
 
 The dockerfiles corresponding to the images available on dockerhub are provided in the `tools/dockerfiles/` path of this repository.
 
-# Build from sources
+## Build from sources
 
 See [here](doc/HOWTOBUILD.md) to see how to build the remote module from sources.
 
