@@ -197,3 +197,37 @@ Check that the applications run properly from command line.
 otbcli_TensorflowModelServe --help
 ```
 
+The following output should be displayed:
+
+```
+Multisource deep learning classifier using TensorFlow. Change the OTB_TF_NSOURCES environment variable to set the number of sources.
+Parameters: 
+        -source1                <group>          Parameters for source #1 
+MISSING -source1.il             <string list>    Input image (or list to stack) for source #1  (mandatory)
+MISSING -source1.rfieldx        <int32>          Input receptive field (width) for source #1  (mandatory)
+MISSING -source1.rfieldy        <int32>          Input receptive field (height) for source #1  (mandatory)
+MISSING -source1.placeholder    <string>         Name of the input placeholder for source #1  (mandatory)
+        -model                  <group>          model parameters 
+MISSING -model.dir              <string>         TensorFlow model_save directory  (mandatory)
+        -model.userplaceholders <string list>    Additional single-valued placeholders. Supported types: int, float, bool.  (optional, off by default)
+        -model.fullyconv        <boolean>        Fully convolutional  (optional, off by default, default value is false)
+        -output                 <group>          Output tensors parameters 
+        -output.spcscale        <float>          The output spacing scale, related to the first input  (mandatory, default value is 1)
+MISSING -output.names           <string list>    Names of the output tensors  (mandatory)
+        -output.efieldx         <int32>          The output expression field (width)  (mandatory, default value is 1)
+        -output.efieldy         <int32>          The output expression field (height)  (mandatory, default value is 1)
+        -optim                  <group>          This group of parameters allows optimization of processing time 
+        -optim.disabletiling    <boolean>        Disable tiling  (optional, off by default, default value is false)
+        -optim.tilesizex        <int32>          Tile width used to stream the filter output  (mandatory, default value is 16)
+        -optim.tilesizey        <int32>          Tile height used to stream the filter output  (mandatory, default value is 16)
+MISSING -out                    <string> [pixel] output image  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is float) (mandatory)
+        -inxml                  <string>         Load otb application from xml file  (optional, off by default)
+        -progress               <boolean>        Report progress 
+        -help                   <string list>    Display long help (empty list), or help for given parameters keys
+
+Use -help param1 [... paramN] to see detailed documentation of those parameters.
+
+Examples: 
+otbcli_TensorflowModelServe -source1.il spot6pms.tif -source1.placeholder x1 -source1.rfieldx 16 -source1.rfieldy 16 -model.dir /tmp/my_saved_model/ -model.userplaceholders is_training=false dropout=0.0 -output.names out_predict1 out_proba1 -out "classif128tgt.tif?&streaming:type=tiled&streaming:sizemode=height&streaming:sizevalue=256"
+```
+
