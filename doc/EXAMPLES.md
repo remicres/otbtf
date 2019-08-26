@@ -245,7 +245,7 @@ otbcli_TensorflowModelServe \
 It's common that very high resolution products are composed with a panchromatic channel at high-resolution (Pan), and a multispectral image generally at lower resolution (MS).
 This model inputs separately the two sources (Pan and MS) separately.
 
-Gaetano, R., Ienco, D., Ose, K., & Cresson, R. (2018). A two-branch CNN architecture for land cover classification of PAN and MS imagery. Remote Sensing, 10(11), 1746.
+See: Gaetano, R., Ienco, D., Ose, K., & Cresson, R. (2018). A two-branch CNN architecture for land cover classification of PAN and MS imagery. Remote Sensing, 10(11), 1746.
 
 <img src ="../doc/images/savedmodel_simple_pxs_fcn.png" />
 
@@ -290,13 +290,14 @@ otbcli_TensorflowModelServe \
 
 Here we perform the land cover map at the same resolution as the Pan image.
 Do do this, we set the Pan image as the first source in the **TensorflowModelServe** application.
+Note that this model can not be applied in a fully convolutional fashion at the Pan image resolution.
+We hence perform the processing in patch-based mode.
 
 ```
 otbcli_TensorflowModelServe \
 -source1.il $pan -source1.rfieldx 32 -source1.rfieldy 32 -source1.placeholder "x2" \
 -source2.il $ms -source2.rfieldx 8 -source2.rfieldy 8 -source2.placeholder "x1" \
 -model.dir $modeldir \
--model.fullyconv on \
 -output.names "prediction" \
 -out $output_classif
 ```
@@ -309,7 +310,5 @@ otbcli_TensorflowModelServe \
 -source2.il $pan -source2.rfieldx 32 -source2.rfieldy 32 -source2.placeholder "x2" \
 -model.dir $modeldir \
 -model.fullyconv on \
--output.names "prediction" \
--output.spcscale 0.25 \
 -out $output_classif
 ```
