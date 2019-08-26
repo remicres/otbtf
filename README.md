@@ -51,7 +51,7 @@ This application performs the extraction of patches in images from a vector data
 The OTB sampling framework can be used to generate the set of selected points. 
 After that, you can use the **PatchesExtraction** application to perform the sampling of your images.
 We denote _input source_ an input image, or a stack of input images (of the same size !). 
-The user can set the `OTB_TF_NSOURCES` environment variable to select the number of _input sources_ that he wants. 
+The user can set the `OTB_TF_NSOURCES` environment variable to select the number of _input sources_ that he wants.
 For example, for sampling a Time Series (TS) together with a single Very High Resolution image (VHR), a number of 2 sources is required: 1 input images list for time series and 1 input image for the VHR.
 The sampled patches will be extracted at each positions designed by the points, only if they are entirely lying inside all _input sources_ extents.
 For each _input source_, patches sizes must be provided.
