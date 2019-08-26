@@ -239,7 +239,7 @@ public:
     SetDocExampleParameterValue("model.dir",                 "/tmp/my_saved_model/");
     SetDocExampleParameterValue("training.userplaceholders", "is_training=true dropout=0.2");
     SetDocExampleParameterValue("training.targetnodes",      "optimizer");
-    SetDocExampleParameterValue("model.saveto",              "/tmp/my_saved_model_vars1");
+    SetDocExampleParameterValue("model.saveto",              "/tmp/my_saved_model/variables/variables");
 
   }
 
