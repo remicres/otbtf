@@ -51,7 +51,7 @@ This application performs the extraction of patches in images from a vector data
 The OTB sampling framework can be used to generate the set of selected points. 
 After that, you can use the **PatchesExtraction** application to perform the sampling of your images.
 We denote _input source_ an input image, or a stack of input images (of the same size !). 
-The user can set the **OTB_TF_NSOURCES** environment variable to select the number of _input sources_ that he wants. 
+The user can set the `OTB_TF_NSOURCES` environment variable to select the number of _input sources_ that he wants. 
 For example, for sampling a Time Series (TS) together with a single Very High Resolution image (VHR), a number of 2 sources is required: 1 input images list for time series and 1 input image for the VHR.
 The sampled patches will be extracted at each positions designed by the points, only if they are entirely lying inside all _input sources_ extents.
 For each _input source_, patches sizes must be provided.
@@ -109,15 +109,14 @@ The **expression field** corresponds to the output volume that the deep net will
 
 Here we assume that you have produced patches using the **PatchesExtraction** application, and that you have a **SavedModel** stored in a directory somewhere on your filesystem.
 The **TensorflowModelTrain** application performs the training, validation (against test dataset, and against validation dataset) providing the usual metrics that machine learning frameworks provide (confusion matrix, recall, precision, f-score, ...).
-You must provide the path of the **SavedModel** to the _model.dir_ parameter.
-The _model.restorefrom_ and _model.saveto_ corresponds to the variables of the **SavedModel** used respectively for restoring and saving them.
-For instance, you can overwrite the variables of the **SavedModel** directly in its `variables/variables...` file.
-Set you _input sources_ for training (_training_ parameter group) and for validation (_validation_ parameter group): the evaluation is performed against training data, and optionally also against the validation data (only if you set _validation.mode_ to "class").
+You must provide the path of the **SavedModel** to the `model.dir` parameter.
+The `model.restorefrom` and `model.saveto` corresponds to the variables of the **SavedModel** used respectively for restoring and saving them.
+Set you _input sources_ for training (`training` parameter group) and for validation (`validation` parameter group): the evaluation is performed against training data, and optionally also against the validation data (only if you set `validation.mode` to "class").
 For each _input sources_, the patch size and the placeholder name must be provided.
-Regarding validation, if a different name is found in a particular _input source_ of the _validation_ parameter group, the application knows that the _input source_ is not fed to the model at inference, but is used as reference to compute evaluation metrics of the validation dataset.
-Batch size (_training.batchsize_) and number of epochs (_training.epochs_) can be set.
-_User placeholders_ can be set separately for training (_training.userplaceholders_) and validation (_validation.userplaceholders_).
-The _validation.userplaceholders_ can be useful if you have a model that behaves differently depending the given placeholder. 
+Regarding validation, if a different name is found in a particular _input source_ of the `validation` parameter group, the application knows that the _input source_ is not fed to the model at inference, but is used as reference to compute evaluation metrics of the validation dataset.
+Batch size (`training.batchsize`) and number of epochs (`training.epochs`) can be set.
+_User placeholders_ can be set separately for training (`training.userplaceholders`) and validation (`validation.userplaceholders`).
+The `validation.userplaceholders` can be useful if you have a model that behaves differently depending the given placeholder. 
 Let's take the example of dropout: it's nice for training, but you have to disable it to use the model at inference time. 
 Hence you will pass a placeholder with "dropout\_rate=0.3" for training and "dropout\_rate=0.0" for validation. 
 Of course, one can train models from handmade python code: to import the patches images, a convenient method consist in reading patches images as numpy arrays using OTB applications (e.g. **ExtractROI**) or GDAL, then do a np.reshape to the dimensions wanted.
@@ -183,7 +182,7 @@ In addition, the native tiling strategy of OTB consists in strips but this might
 For Convolutional Neural Networks for instance, square tiles are more interesting because the padding required to perform the computation of one single strip of pixels induces to input a lot more pixels that to process the computation of one single tile of pixels.
 So, this application takes in input one or multiple _input sources_ (the number of _input sources_ can be changed by setting the `OTB_TF_NSOURCES` to the desired number) and produce one output of the specified tensors.
 The user is responsible of giving the **receptive field** and **name** of _input placeholders_, as well as the **expression field**, **scale factor** and **name** of _output tensors_.
-The first _input source_ (_source1.il_) corresponds to the _reference input source_.
+The first _input source_ (`source1.il`) corresponds to the _reference input source_.
 As explained [previously](#buildmodel), the **scale factor** provided for the _output tensors_ is related to this _reference input source_.
 The user can ask for multiple _output tensors_, that will be stack along the channel dimension of the output raster.
 However, if the sizes of those _output tensors_ are not consistent (e.g. a different number of (x,y) elements), an exception will be thrown.
@@ -392,7 +391,7 @@ But here, we will just perform some fine tuning of our model.
 The **SavedModel** is located in the `outmodel` directory.
 Our model is quite basic: it has two input placeholders, **x1** and **y1** respectively for input patches (with size 16x16) and input reference labels (with size 1x1).
 We named **prediction** the tensor that predict the labels and the optimizer that perform the stochastic gradient descent is an operator named **optimizer**.
-We perform the fine tuning and we export the new model variables directly in the `outmodel/variables` folder, overwritting the existing variables of the model.
+We perform the fine tuning and we export the new model variables directly in the _outmodel/variables_ folder, overwritting the existing variables of the model.
 We use the **TensorflowModelTrain** application to perform the training of this existing model.
 ```
 otbcli_TensorflowModelTrain -model.dir /path/to/oursavedmodel -training.targetnodesnames optimizer -training.source1.il samp_patches.tif -training.source1.patchsizex 16 -training.source1.patchsizey 16 -training.source1.placeholder x1 -training.source2.il samp_labels.tif -training.source2.patchsizex 1 -training.source2.patchsizey 1 -training.source2.placeholder y1 -model.saveto /path/to/oursavedmodel/variables/variables
