@@ -180,7 +180,6 @@ Let's produce a land cover map using the M3 model from time series (TS) and Very
 <img src ="../doc/images/classif_map.png" />
 
 Since we provide time series as the reference source (*source1*), the output classes are estimated at the same resolution.
-
 This model can be run in patch-based mode only.
 
 ```
@@ -198,7 +197,6 @@ This architecture was one of the first to introduce a fully convolutional model 
 Maggiori, E., Tarabalka, Y., Charpiat, G., & Alliez, P. (2016). _Convolutional neural networks for large-scale remote-sensing image classification_. IEEE Transactions on Geoscience and Remote Sensing, 55(2), 645-657.
 
 See the original paper [here](https://hal.inria.fr/hal-01350706/document).
-
 This fully convolutional model performs binary semantic segmentation of large scale images without any blocking artifacts.
 
 ### Generate the model
@@ -246,6 +244,8 @@ otbcli_TensorflowModelServe \
 
 It's common that very high resolution products are composed with a panchromatic channel at high-resolution (Pan), and a multispectral image generally at lower resolution (MS).
 This model inputs separately the two sources (Pan and MS) separately.
+
+Gaetano, R., Ienco, D., Ose, K., & Cresson, R. (2018). A two-branch CNN architecture for land cover classification of PAN and MS imagery. Remote Sensing, 10(11), 1746.
 
 <img src ="../doc/images/savedmodel_simple_pxs_fcn.png" />
 
