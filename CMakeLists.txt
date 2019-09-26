@@ -14,8 +14,7 @@ if(OTB_USE_TENSORFLOW)
   find_library(TENSORFLOW_CC_LIB NAMES libtensorflow_cc)
   find_library(TENSORFLOW_FRAMEWORK_LIB NAMES libtensorflow_framework)
 
-  set(OTBTensorflow_SYSTEM_INCLUDE_DIRS ${tensorflow_include_dir})
-  set(OTBTensorflow_LIBRARIES ${TENSORFLOW_CC_LIB} ${TENSORFLOW_FRAMEWORK_LIB})
+  set(TENSORFLOW_LIBS "${TENSORFLOW_CC_LIB}" "${TENSORFLOW_FRAMEWORK_LIB}")
 
 else()
   message("Tensorflow support disabled")
