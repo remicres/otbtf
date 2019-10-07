@@ -22,9 +22,17 @@ if(OTB_USE_TENSORFLOW)
 endif()
 
 # Tensorflow-independent APPS
+OTB_CREATE_APPLICATION(NAME PatchesSelection
+	SOURCES otbPatchesSelection.cxx
+	LINK_LIBRARIES ${OTBCOMMON_LIBRARIES}
+)
 OTB_CREATE_APPLICATION(NAME PatchesExtraction
 	SOURCES otbPatchesExtraction.cxx
 	LINK_LIBRARIES ${${otb-module}_LIBRARIES}
+)
+OTB_CREATE_APPLICATION(NAME PatchesManipulation
+	SOURCES otbPatchesManipulation.cxx
+	LINK_LIBRARIES ${OTBCOMMON_LIBRARIES}
 )
 OTB_CREATE_APPLICATION(NAME LabelImageSampleSelection
 	SOURCES otbLabelImageSampleSelection.cxx
