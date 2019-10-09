@@ -103,7 +103,6 @@ public:
 
     // Documentation
     SetName("PatchesSelection");
-    SetDocName("PatchesSelection");
     SetDescription("This application generate points sampled at regular interval over "
         "the input image region. The grid size and spacing can be configured.");
     SetDocLongDescription("This application produces a vector data containing "
