@@ -22,6 +22,7 @@
 #include "itkFlatStructuringElement.h"
 #include "itkBinaryErodeImageFilter.h"
 #include "otbStreamingResampleImageFilter.h"
+#include "itkMaskImageFilter.h"
 
 // image utils
 #include "otbTensorflowCommon.h"
@@ -93,6 +94,8 @@ public:
 
   typedef tf::Distribution<UInt8ImageType> DistributionType;
 
+  typedef itk::MaskImageFilter<UInt8ImageType, UInt8ImageType, UInt8ImageType> MaskImageFilterType;
+
   void DoUpdateParameters()
   {
   }
@@ -112,6 +115,8 @@ public:
 
     // Input image
     AddParameter(ParameterType_InputImage, "in", "input image");
+    AddParameter(ParameterType_InputImage, "mask", "input mask");
+    MandatoryOff("mask");
 
     // Input no-data value
     AddParameter(ParameterType_Float, "nodata", "nodata value");
@@ -539,17 +544,28 @@ public:
     m_NoDataFilter->GetFunctor().SetNoDataValue(GetParameterFloat("nodata"));
     m_NoDataFilter->SetInput(GetParameterFloatVectorImage("in"));
     m_NoDataFilter->UpdateOutputInformation();
+    UInt8ImageType::Pointer src = m_NoDataFilter->GetOutput();
+
+    // If mask available, use it
+    if (HasValue("mask"))
+      {
+      m_MaskImageFilter = MaskImageFilterType::New();
+      m_MaskImageFilter->SetInput(m_NoDataFilter->GetOutput());
+      m_MaskImageFilter->SetMaskImage(GetParameterUInt8Image("mask"));
+      m_MaskImageFilter->UpdateOutputInformation();
+      src = m_MaskImageFilter->GetOutput();
+      }
 
     // Padding 1 pixel
-    UInt8ImageType::SizeType size = m_NoDataFilter->GetOutput()->GetLargestPossibleRegion().GetSize();
+    UInt8ImageType::SizeType size = src->GetLargestPossibleRegion().GetSize();
     size[0] += 2;
     size[1] += 2;
-    UInt8ImageType::SpacingType spacing = m_NoDataFilter->GetOutput()->GetSignedSpacing();
-    UInt8ImageType::PointType origin = m_NoDataFilter->GetOutput()->GetOrigin();
+    UInt8ImageType::SpacingType spacing = src->GetSignedSpacing();
+    UInt8ImageType::PointType origin = src->GetOrigin();
     origin[0] -= spacing[0];
     origin[1] -= spacing[1];
     m_PadFilter = PadFilterType::New();
-    m_PadFilter->SetInput( m_NoDataFilter->GetOutput() );
+    m_PadFilter->SetInput( src );
     m_PadFilter->SetOutputOrigin(origin);
     m_PadFilter->SetOutputSpacing(spacing);
     m_PadFilter->SetOutputSize(size);
@@ -594,13 +610,13 @@ public:
   }
 
 private:
-  RadiusType                  m_Radius;
-  IsNoDataFilterType::Pointer m_NoDataFilter;
-  PadFilterType::Pointer      m_PadFilter;
-  MorphoFilterType::Pointer   m_MorphoFilter;
-  VectorDataType::Pointer     m_OutVectorDataTrain;
-  VectorDataType::Pointer     m_OutVectorDataValid;
-
+  RadiusType                   m_Radius;
+  IsNoDataFilterType::Pointer  m_NoDataFilter;
+  PadFilterType::Pointer       m_PadFilter;
+  MorphoFilterType::Pointer    m_MorphoFilter;
+  VectorDataType::Pointer      m_OutVectorDataTrain;
+  VectorDataType::Pointer      m_OutVectorDataValid;
+  MaskImageFilterType::Pointer m_MaskImageFilter;
 }; // end of class
 
 } // end namespace wrapper
