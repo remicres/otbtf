@@ -138,7 +138,7 @@ RUN mkdir -p /work/otb \
  && cd /work/otb \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git otb \
  && cd otb \
- && git checkout 7.0.0-rc1
+ && git checkout 7.0
 
 # ----------------------------------------------------------------------------
 # Build OTB: Stage 2 (superbuild)
