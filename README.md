@@ -36,10 +36,10 @@ docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf1.7 otbcli_PatchesExtr
 ```
 
 For now, there is two docker images available.
- - *mdl4eo/otbtf1.7:cpu* : Ubuntu Xenial, Python3, Orfeo ToolBox 7.0 and TensorFlow 1.14 with no optimization flags
- - *mdl4eo/otbtf1.7:gpu* : Ubuntu Xenial, Python3, Orfeo ToolBox 7.0 and TensorFlow 1.14 with CUDA/CUDNN support (built with compute capabilities 6.1, 5.2, 3.5). *Suited for NVIDIA GPUs*.
+ - **mdl4eo/otbtf1.7:cpu** : Ubuntu Xenial, Python3, Orfeo ToolBox 7.0 and TensorFlow 1.14 with no optimization flags
+ - **mdl4eo/otbtf1.7:gpu** : Ubuntu Xenial, Python3, Orfeo ToolBox 7.0 and TensorFlow 1.14 with CUDA/CUDNN support (built with compute capabilities 6.1, 5.2, 3.5). **Suited for NVIDIA GPUs**.
 The dockerfiles corresponding to the images available on dockerhub are provided in the `tools/dockerfiles/` path of this repository.
-You can find more details on the *GPU docker image* and some *docker tips and tricks* on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/)
+You can find more details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/)
 
 ## Build from sources
 
