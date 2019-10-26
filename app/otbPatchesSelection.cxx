@@ -653,12 +653,6 @@ public:
 
       SampleChessboard();
     }
-    else if (GetParameterAsString("strategy") == "chessboardfast")
-    {
-      otbAppLogINFO("Sampling at regular interval in space (\"Chessboard\" like) without checking image content");
-
-      SampleChessboardFast();
-    }
     else if (GetParameterAsString("strategy") == "balanced")
     {
       otbAppLogINFO("Sampling with balancing strategy");
