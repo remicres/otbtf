@@ -187,7 +187,7 @@ TensorflowSampler<TInputImage, TVectorData>
           IndexType outIndex;
           outIndex[0] = 0;
           outIndex[1] = count * m_PatchSizes[i][1];
-          RegionType region(outIndex, m_PatchSizes);
+          RegionType region(outIndex, m_PatchSizes[i]);
 
           IteratorType it(m_OutputPatchImages[i], region);
           for (it.GoToBegin(); !it.IsAtEnd(); ++it)
