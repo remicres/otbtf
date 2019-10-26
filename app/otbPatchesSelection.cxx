@@ -237,22 +237,10 @@ public:
   };
 
   /*
-   * Apply the given function at each sampling location
-   */
-  template<typename TLambda>
-  void Apply(TLambda lambda)
-  {
-    if (GetParameterInt("nockeck")==1)
-      ApplyFast(lambda);
-    else
-      ApplyWithCheck(lambda);
-  }
-
-  /*
    * Apply the given function at each sampling location, checking if the patch is valid or not
    */
   template<typename TLambda>
-  void ApplyWithCheck(TLambda lambda)
+  void Apply(TLambda lambda)
   {
 
     // Explicit streaming over the morphed mask, based on the RAM parameter
@@ -260,7 +248,11 @@ public:
     StreamingManagerType::Pointer m_StreamingManager = StreamingManagerType::New();
     m_StreamingManager->SetAvailableRAMInMB(GetParameterInt("ram"));
 
-    UInt8ImageType::Pointer inputImage = m_MorphoFilter->GetOutput();
+    UInt8ImageType::Pointer inputImage;
+    if (GetParameterInt("nockeck")==1)
+      inputImage = GetParameterUInt8Image("mask");
+    else
+      inputImage = m_MorphoFilter->GetOutput();
     UInt8ImageType::RegionType entireRegion = inputImage->GetLargestPossibleRegion();
     entireRegion.ShrinkByRadius(m_Radius);
     m_StreamingManager->PrepareStreaming(inputImage, entireRegion );
@@ -298,7 +290,7 @@ public:
 
             // Compute coordinates
             UInt8ImageType::PointType geo;
-            m_MorphoFilter->GetOutput()->TransformIndexToPhysicalPoint(inIt.GetIndex(), geo);
+            inputImage->TransformIndexToPhysicalPoint(inIt.GetIndex(), geo);
             DataNodeType::PointType point;
             point[0] = geo[0];
             point[1] = geo[1];
@@ -310,49 +302,6 @@ public:
       }
 
     }
-  }
-
-  /*
-   * Apply the given function at each sampling location, without checking the valid pixels under
-   */
-  template<typename TLambda>
-  void ApplyFast(TLambda lambda)
-  {
-
-    FloatVectorImageType::Pointer inputImage = GetParameterFloatVectorImage("in");
-    FloatVectorImageType::RegionType entireRegion = inputImage->GetLargestPossibleRegion();
-    entireRegion.ShrinkByRadius(m_Radius);
-    FloatVectorImageType::IndexType start;
-    start[0] = m_Radius[0] + 1;
-    start[1] = m_Radius[1] + 1;
-    FloatVectorImageType::IndexType pos;
-    pos.Fill(0);
-    FloatVectorImageType::IndexValueType step = GetParameterInt("grid.step");
-
-    typedef itk::ImageRegionConstIteratorWithOnlyIndex<FloatVectorImageType> IteratorType;
-    IteratorType inIt (inputImage, entireRegion);
-    for (inIt.GoToBegin(); !inIt.IsAtEnd(); ++inIt)
-      {
-      FloatVectorImageType::IndexType idx = inIt.GetIndex();
-      idx[0] -= start[0];
-      idx[1] -= start[1];
-      if (idx[0] % step == 0 && idx[1] % step == 0)
-        {
-        // Update grid position
-        pos[0] = idx[0] / step;
-        pos[1] = idx[1] / step;
-
-        // Compute coordinates
-        FloatVectorImageType::PointType geo;
-        inputImage->TransformIndexToPhysicalPoint(inIt.GetIndex(), geo);
-        DataNodeType::PointType point;
-        point[0] = geo[0];
-        point[1] = geo[1];
-
-        // Lambda call
-        lambda(pos, geo);
-        }
-      }
   }
 
   /*
