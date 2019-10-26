@@ -27,6 +27,7 @@
 // image utils
 #include "otbTensorflowCommon.h"
 #include "otbTensorflowSamplingUtils.h"
+#include "itkImageRegionConstIteratorWithOnlyIndex.h"
 
 // Functor to retrieve nodata
 template<class TPixel, class OutputPixel>
@@ -122,6 +123,8 @@ public:
     AddParameter(ParameterType_Float, "nodata", "nodata value");
     MandatoryOn                      ("nodata");
     SetDefaultParameterFloat         ("nodata", 0);
+    AddParameter(ParameterType_Bool,  "nocheck", "If on, no check on the validity of patches is performed");
+    MandatoryOff                     ("nocheck");
 
     // Grid
     AddParameter(ParameterType_Group, "grid", "grid settings");
@@ -239,6 +242,18 @@ public:
   template<typename TLambda>
   void Apply(TLambda lambda)
   {
+    if (GetParameterInt("nockeck")==1)
+      ApplyFast(lambda);
+    else
+      ApplyWithCheck(lambda);
+  }
+
+  /*
+   * Apply the given function at each sampling location, checking if the patch is valid or not
+   */
+  template<typename TLambda>
+  void ApplyWithCheck(TLambda lambda)
+  {
 
     // Explicit streaming over the morphed mask, based on the RAM parameter
     typedef otb::RAMDrivenStrippedStreamingManager<UInt8ImageType> StreamingManagerType;
@@ -295,6 +310,49 @@ public:
       }
 
     }
+  }
+
+  /*
+   * Apply the given function at each sampling location, without checking the valid pixels under
+   */
+  template<typename TLambda>
+  void ApplyFast(TLambda lambda)
+  {
+
+    FloatVectorImageType::Pointer inputImage = GetParameterFloatVectorImage("in");
+    FloatVectorImageType::RegionType entireRegion = inputImage->GetLargestPossibleRegion();
+    entireRegion.ShrinkByRadius(m_Radius);
+    FloatVectorImageType::IndexType start;
+    start[0] = m_Radius[0] + 1;
+    start[1] = m_Radius[1] + 1;
+    FloatVectorImageType::IndexType pos;
+    pos.Fill(0);
+    FloatVectorImageType::IndexValueType step = GetParameterInt("grid.step");
+
+    typedef itk::ImageRegionConstIteratorWithOnlyIndex<FloatVectorImageType> IteratorType;
+    IteratorType inIt (inputImage, entireRegion);
+    for (inIt.GoToBegin(); !inIt.IsAtEnd(); ++inIt)
+      {
+      FloatVectorImageType::IndexType idx = inIt.GetIndex();
+      idx[0] -= start[0];
+      idx[1] -= start[1];
+      if (idx[0] % step == 0 && idx[1] % step == 0)
+        {
+        // Update grid position
+        pos[0] = idx[0] / step;
+        pos[1] = idx[1] / step;
+
+        // Compute coordinates
+        FloatVectorImageType::PointType geo;
+        inputImage->TransformIndexToPhysicalPoint(inIt.GetIndex(), geo);
+        DataNodeType::PointType point;
+        point[0] = geo[0];
+        point[1] = geo[1];
+
+        // Lambda call
+        lambda(pos, geo);
+        }
+      }
   }
 
   /*
@@ -594,6 +652,12 @@ public:
       otbAppLogINFO("Sampling at regular interval in space (\"Chessboard\" like)");
 
       SampleChessboard();
+    }
+    else if (GetParameterAsString("strategy") == "chessboardfast")
+    {
+      otbAppLogINFO("Sampling at regular interval in space (\"Chessboard\" like) without checking image content");
+
+      SampleChessboardFast();
     }
     else if (GetParameterAsString("strategy") == "balanced")
     {
