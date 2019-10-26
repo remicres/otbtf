@@ -545,7 +545,6 @@ public:
     otbAppLogINFO("Grid step : " << this->GetParameterInt("grid.step"));
     otbAppLogINFO("Patch size : " << this->GetParameterInt("grid.psize"));
 
-
     // Compute no-data mask
     m_NoDataFilter = IsNoDataFilterType::New();
     m_NoDataFilter->GetFunctor().SetNoDataValue(GetParameterFloat("nodata"));
@@ -556,6 +555,9 @@ public:
     // If mask available, use it
     if (HasValue("mask"))
       {
+      if (GetParameterUInt8Image("mask")->GetLargestPossibleRegion().GetSize() !=
+          GetParameterFloatVectorImage("in")->GetLargestPossibleRegion().GetSize())
+        otbAppLogFATAL("Mask must have the same size as the input image!");
       m_MaskImageFilter = MaskImageFilterType::New();
       m_MaskImageFilter->SetInput(m_NoDataFilter->GetOutput());
       m_MaskImageFilter->SetMaskImage(GetParameterUInt8Image("mask"));
