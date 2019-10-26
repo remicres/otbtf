@@ -181,6 +181,29 @@ TensorflowSampler<TInputImage, TVectorData>
           // If not, reject this sample
           hasBeenSampled = false;
         }
+        // Check if it contains no-data values
+        if (m_RejectPatchesWithNodata && hasBeenSampled)
+          {
+          IndexType outIndex;
+          outIndex[0] = 0;
+          outIndex[1] = count * m_PatchSizes[i][1];
+          RegionType region(outIndex, m_PatchSizes);
+
+          IteratorType it(m_OutputPatchImages[i], region);
+          for (it.GoToBegin(); !it.IsAtEnd(); ++it)
+            {
+            PixelType pix = it.Get();
+            for (int i; i<pix.Size(); i++)
+              if (pix[i] == m_NodataValue)
+              {
+                hasBeenSampled = false;
+                break;
+              }
+            if (hasBeenSampled)
+              break;
+            }
+
+          }
       } // Next input
       if (hasBeenSampled)
       {
