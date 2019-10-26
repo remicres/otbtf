@@ -249,7 +249,7 @@ public:
     m_StreamingManager->SetAvailableRAMInMB(GetParameterInt("ram"));
 
     UInt8ImageType::Pointer inputImage;
-    if (GetParameterInt("nockeck")==1)
+    if (GetParameterInt("nocheck")==1)
       inputImage = GetParameterUInt8Image("mask");
     else
       inputImage = m_MorphoFilter->GetOutput();
