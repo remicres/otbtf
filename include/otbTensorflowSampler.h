@@ -83,7 +83,8 @@ public:
                                                   ExtractROIMultiFilterPointerType;
   typedef typename std::vector<ImagePointerType>  ImagePointerListType;
   typedef typename std::vector<SizeType>          SizeListType;
-  typedef typename itk::ImageRegionConstIterator  IteratorType;
+  typedef typename itk::ImageRegionConstIterator<ImageType>
+                                                  IteratorType;
 
   /** Vector data typedefs */
   typedef TVectorData                             VectorDataType;
