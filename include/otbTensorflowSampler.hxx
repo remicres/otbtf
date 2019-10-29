@@ -200,15 +200,11 @@ TensorflowSampler<TInputImage, TVectorData>
             for (int i; i<pix.Size(); i++)
               if (pix[i] == m_NodataValue)
               {
-                std::cout << "[0]: pix[" << i << "]=" << pix[i] << std::endl;
-                std::cout << "break" << std::endl;
                 hasBeenSampled = false;
-                std::cout << "no actually break" << std::endl;
                 break;
               }
             if (!hasBeenSampled)
               {
-              std::cout << "BREAKED" << std::endl;
               break;
               }
             }
@@ -217,6 +213,22 @@ TensorflowSampler<TInputImage, TVectorData>
       } // Next input
       if (hasBeenSampled)
       {
+        // TODO: delete
+        IndexType outIndex;
+        outIndex[0] = 0;
+        outIndex[1] = count * m_PatchSizes[0][1];
+        RegionType region(outIndex, m_PatchSizes[0]);
+        IteratorType it(m_OutputPatchImages[0], region);
+        for (it.GoToBegin(); !it.IsAtEnd(); ++it)
+          {
+          PixelType pix = it.Get();
+          for (int i; i<pix.Size(); i++)
+            if (pix[i] == m_NodataValue)
+            {
+              std::cout << "PROBLEM" << std::endl;
+            }
+          }
+
         // Fill label
         labelIndex[1] = count;
         m_OutputLabelImage->SetPixel(labelIndex, labelPix);
@@ -226,7 +238,6 @@ TensorflowSampler<TInputImage, TVectorData>
       }
       else
       {
-        std::cout << "REJECTED: " << rejected << std::endl;
         rejected++;
       }
 
