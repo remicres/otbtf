@@ -203,6 +203,7 @@ TensorflowSampler<TInputImage, TVectorData>
                 std::cout << "[0]: pix[" << i << "]=" << pix[i] << std::endl;
                 std::cout << "break" << std::endl;
                 hasBeenSampled = false;
+                std::cout << "no actually break" << std::endl;
                 break;
               }
             if (!hasBeenSampled)
