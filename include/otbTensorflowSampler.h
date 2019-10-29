@@ -24,6 +24,9 @@
 // Tree iterator
 #include "itkPreOrderTreeIterator.h"
 
+// Image iterator
+#include "itkImageRegionConstIterator.h"
+
 namespace otb
 {
 
@@ -80,6 +83,8 @@ public:
                                                   ExtractROIMultiFilterPointerType;
   typedef typename std::vector<ImagePointerType>  ImagePointerListType;
   typedef typename std::vector<SizeType>          SizeListType;
+  typedef typename itk::ImageRegionConstIterator<ImageType>
+                                                  IteratorType;
 
   /** Vector data typedefs */
   typedef TVectorData                             VectorDataType;
@@ -103,6 +108,12 @@ public:
   /** Set / get image */
   virtual void PushBackInputWithPatchSize(const ImageType *input, SizeType & patchSize);
   const ImageType* GetInput(unsigned int index);
+
+  /** Set / get no-data related parameters */
+  itkSetMacro(NodataValue, InternalPixelType);
+  itkGetMacro(NodataValue, InternalPixelType);
+  itkSetMacro(RejectPatchesWithNodata, bool);
+  itkGetMacro(RejectPatchesWithNodata, bool);
 
   /** Do the real work */
   virtual void Update();
@@ -133,6 +144,10 @@ private:
   ImagePointerType     m_OutputLabelImage;
   unsigned long        m_NumberOfAcceptedSamples;
   unsigned long        m_NumberOfRejectedSamples;
+
+  // No data stuff
+  InternalPixelType    m_NodataValue;
+  bool                 m_RejectPatchesWithNodata;
 
 }; // end class
 

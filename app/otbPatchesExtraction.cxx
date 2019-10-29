@@ -163,6 +163,12 @@ public:
     // Input vector data
     AddParameter(ParameterType_InputVectorData, "vec", "Positions of the samples (must be in the same projection as input image)");
 
+    // No data parameters
+    AddParameter(ParameterType_Bool, "usenodata", "Reject samples that have no-data value");
+    MandatoryOff                    ("usenodata");
+    AddParameter(ParameterType_Float, "nodataval", "No data value (used only if \"usenodata\" is on)");
+    SetDefaultParameterFloat(         "nodataval", 0.0);
+
     // Output label
     AddParameter(ParameterType_OutputImage, "outlabels", "output labels");
     SetDefaultOutputPixelType              ("outlabels", ImagePixelType_uint8);
@@ -191,6 +197,8 @@ public:
     SamplerType::Pointer sampler = SamplerType::New();
     sampler->SetInputVectorData(GetParameterVectorData("vec"));
     sampler->SetField(GetParameterAsString("field"));
+    sampler->SetRejectPatchesWithNodata(GetParameterInt("usenodata")==1);
+    sampler->SetNodataValue(GetParameterFloat("nodataval"));
     for (auto& bundle: m_Bundles)
     {
       sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize);
