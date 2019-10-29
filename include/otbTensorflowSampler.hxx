@@ -201,6 +201,7 @@ TensorflowSampler<TInputImage, TVectorData>
               if (pix[i] == m_NodataValue)
               {
                 std::cout << "[0]: pix[" << i << "]=" << pix[i] << std::endl;
+                std::cout << "break" << std::endl;
                 hasBeenSampled = false;
                 break;
               }
