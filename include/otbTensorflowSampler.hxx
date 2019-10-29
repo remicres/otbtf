@@ -206,10 +206,10 @@ TensorflowSampler<TInputImage, TVectorData>
                 hasBeenSampled = false;
                 break;
                 }
-              if (!hasBeenSampled)
-                {
-                break;
-                }
+              }
+            if (!hasBeenSampled)
+              {
+              break;
               }
             }
 
