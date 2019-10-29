@@ -197,7 +197,7 @@ TensorflowSampler<TInputImage, TVectorData>
           for (it.GoToBegin(); !it.IsAtEnd(); ++it)
             {
             PixelType pix = it.Get();
-            for (unsigned int band; band<pix.Size(); band++)
+            for (unsigned int band; band < pix.Size(); band++)
               if (pix[band] == m_NodataValue)
               {
                 hasBeenSampled = false;
