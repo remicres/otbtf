@@ -20,6 +20,10 @@ template <class TInputImage, class TVectorData>
 TensorflowSampler<TInputImage, TVectorData>
 ::TensorflowSampler()
  {
+  m_NumberOfAcceptedSamples = 0;
+  m_NumberOfRejectedSamples = 0;
+  m_RejectPatchesWithNodata = false;
+  m_NodataValue = 0;
  }
 
 template <class TInputImage, class TVectorData>
@@ -199,7 +203,7 @@ TensorflowSampler<TInputImage, TVectorData>
                 hasBeenSampled = false;
                 break;
               }
-            if (hasBeenSampled)
+            if (!hasBeenSampled)
               break;
             }
 
