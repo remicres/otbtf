@@ -23,16 +23,16 @@ TensorflowSampler<TInputImage, TVectorData>
   m_NumberOfAcceptedSamples = 0;
   m_NumberOfRejectedSamples = 0;
   m_RejectPatchesWithNodata = false;
-  m_NodataValue = 0;
  }
 
 template <class TInputImage, class TVectorData>
 void
 TensorflowSampler<TInputImage, TVectorData>
-::PushBackInputWithPatchSize(const ImageType *input, SizeType & patchSize)
+::PushBackInputWithPatchSize(const ImageType *input, SizeType & patchSize, InternalPixelType nodataval)
  {
   this->ProcessObject::PushBackInput(const_cast<ImageType*>(input));
   m_PatchSizes.push_back(patchSize);
+  m_NoDataValues.push_back(nodataval);
  }
 
 template <class TInputImage, class TVectorData>
@@ -198,7 +198,7 @@ TensorflowSampler<TInputImage, TVectorData>
             {
             PixelType pix = it.Get();
             for (unsigned int band = 0 ; band < pix.Size() ; band++)
-              if (pix[band] == m_NodataValue)
+              if (pix[band] == m_NoDataValues[i])
                 hasBeenSampled = false;
             }
 

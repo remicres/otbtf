@@ -106,12 +106,10 @@ public:
   itkGetConstMacro(InputVectorData, VectorDataPointer);
 
   /** Set / get image */
-  virtual void PushBackInputWithPatchSize(const ImageType *input, SizeType & patchSize);
+  virtual void PushBackInputWithPatchSize(const ImageType *input, SizeType & patchSize, InternalPixelType nodataval);
   const ImageType* GetInput(unsigned int index);
 
   /** Set / get no-data related parameters */
-  itkSetMacro(NodataValue, InternalPixelType);
-  itkGetMacro(NodataValue, InternalPixelType);
   itkSetMacro(RejectPatchesWithNodata, bool);
   itkGetMacro(RejectPatchesWithNodata, bool);
 
@@ -146,7 +144,7 @@ private:
   unsigned long        m_NumberOfRejectedSamples;
 
   // No data stuff
-  InternalPixelType    m_NodataValue;
+  std::vector<InternalPixelType> m_NoDataValues;
   bool                 m_RejectPatchesWithNodata;
 
 }; // end class
