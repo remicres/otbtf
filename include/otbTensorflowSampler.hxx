@@ -226,6 +226,7 @@ TensorflowSampler<TInputImage, TVectorData>
       }
       else
       {
+        std::cout << "REJECTED: " << rejected << std::endl;
         rejected++;
       }
 
