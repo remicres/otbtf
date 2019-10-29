@@ -230,6 +230,7 @@ TensorflowSampler<TInputImage, TVectorData>
               std::cout << band << std::endl;
           }
 
+
         // Fill label
         labelIndex[1] = count;
         m_OutputLabelImage->SetPixel(labelIndex, labelPix);
