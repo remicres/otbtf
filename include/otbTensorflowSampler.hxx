@@ -198,33 +198,14 @@ TensorflowSampler<TInputImage, TVectorData>
             {
             PixelType pix = it.Get();
             for (unsigned int band = 0 ; band < pix.Size() ; band++)
-              {
               if (pix[band] == m_NodataValue)
-                {
                 hasBeenSampled = false;
-                }
-              }
             }
 
           }
       } // Next input
       if (hasBeenSampled)
       {
-        // TODO: delete this
-        IndexType outIndex;
-        outIndex[0] = 0;
-        outIndex[1] = count * m_PatchSizes[0][1];
-        RegionType region(outIndex, m_PatchSizes[0]);
-        IteratorType it(m_OutputPatchImages[0], region);
-        for (it.GoToBegin(); !it.IsAtEnd(); ++it)
-          {
-          PixelType pix = it.Get();
-          for (unsigned int band = 0; band < pix.Size(); band++)
-            if (pix[band] == m_NodataValue)
-              std::cout << "BIG PROBlEM" << std::endl;
-          }
-
-
         // Fill label
         labelIndex[1] = count;
         m_OutputLabelImage->SetPixel(labelIndex, labelPix);
