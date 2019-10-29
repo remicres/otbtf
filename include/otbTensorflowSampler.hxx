@@ -202,12 +202,7 @@ TensorflowSampler<TInputImage, TVectorData>
               if (pix[band] == m_NodataValue)
                 {
                 hasBeenSampled = false;
-                break;
                 }
-              }
-            if (hasBeenSampled)
-              {
-              break;
               }
             }
 
