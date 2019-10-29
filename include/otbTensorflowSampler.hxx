@@ -20,6 +20,10 @@ template <class TInputImage, class TVectorData>
 TensorflowSampler<TInputImage, TVectorData>
 ::TensorflowSampler()
  {
+  m_NumberOfAcceptedSamples = 0;
+  m_NumberOfRejectedSamples = 0;
+  m_RejectPatchesWithNodata = false;
+  m_NodataValue = 0;
  }
 
 template <class TInputImage, class TVectorData>
@@ -181,7 +185,7 @@ TensorflowSampler<TInputImage, TVectorData>
           // If not, reject this sample
           hasBeenSampled = false;
         }
-        // Check if it contains no-data values
+        // Check if the sampled patch contains a no-data value
         if (m_RejectPatchesWithNodata && hasBeenSampled)
           {
           IndexType outIndex;
@@ -193,13 +197,13 @@ TensorflowSampler<TInputImage, TVectorData>
           for (it.GoToBegin(); !it.IsAtEnd(); ++it)
             {
             PixelType pix = it.Get();
-            for (int i; i<pix.Size(); i++)
+            for (int i; i < pix.Size(); i++)
               if (pix[i] == m_NodataValue)
               {
                 hasBeenSampled = false;
                 break;
               }
-            if (hasBeenSampled)
+            if (!hasBeenSampled)
               break;
             }
 
