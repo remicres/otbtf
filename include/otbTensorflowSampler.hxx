@@ -201,6 +201,7 @@ TensorflowSampler<TInputImage, TVectorData>
               {
               if (pix[band] == m_NodataValue)
                 {
+                std::cout << "FOUNd NODATA" << stdd::endl;
                 hasBeenSampled = false;
                 break;
                 }
