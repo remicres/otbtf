@@ -163,6 +163,7 @@ TensorflowSampler<TInputImage, TVectorData>
   labelIndex[0] = 0;
   PixelType labelPix;
   labelPix.SetSize(1);
+  std::cout << "REJECT is " << m_RejectPatchesWithNodata << std::endl;
   while (!itVector.IsAtEnd())
   {
     if (!itVector.Get()->IsRoot() && !itVector.Get()->IsDocument() && !itVector.Get()->IsFolder())
@@ -201,7 +202,6 @@ TensorflowSampler<TInputImage, TVectorData>
               if (pix[i] == m_NodataValue)
               {
                 hasBeenSampled = false;
-                std::cout << "REJECT!" << std::endl;
                 break;
               }
             if (!hasBeenSampled)
