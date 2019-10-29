@@ -207,7 +207,10 @@ TensorflowSampler<TInputImage, TVectorData>
                 break;
               }
             if (!hasBeenSampled)
+              {
+              std::cout << "BREAKED" << std::endl;
               break;
+              }
             }
 
           }
