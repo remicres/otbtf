@@ -197,8 +197,14 @@ public:
     SamplerType::Pointer sampler = SamplerType::New();
     sampler->SetInputVectorData(GetParameterVectorData("vec"));
     sampler->SetField(GetParameterAsString("field"));
-    sampler->SetRejectPatchesWithNodata(GetParameterInt("usenodata")==1);
-    sampler->SetNodataValue(GetParameterFloat("nodataval"));
+    if (GetParameterInt("usenodata")==1)
+      {
+      otbAppLogINFO("Rejecting patches that have at least one no-data value");
+      sampler->SetRejectPatchesWithNodata(true);
+      float nodatavalue = GetParameterFloat("nodataval");
+      otbAppLogINFO("No-data value: " << nodatavalue);
+      sampler->SetNodataValue(nodatavalue);
+      }
     for (auto& bundle: m_Bundles)
     {
       sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize);
