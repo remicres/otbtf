@@ -201,6 +201,7 @@ TensorflowSampler<TInputImage, TVectorData>
               if (pix[i] == m_NodataValue)
               {
                 hasBeenSampled = false;
+                std::cout << "REJECT!" << std::endl;
                 break;
               }
             if (!hasBeenSampled)
