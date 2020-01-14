@@ -1,15 +1,19 @@
-# OTBTF
+# ![OTBTF](doc/images/logo.png) OTBTF
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+## Orfeo ToolBox meets TensorFlow
 
 This remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org) provides a generic, multi purpose deep learning framework, targeting remote sensing images processing.
 It contains a set of new process objects that internally invoke [Tensorflow](https://www.tensorflow.org/), and a bunch of user-oriented applications to perform deep learning with real-world remote sensing images.
 Applications can be used to build OTB pipelines from Python or C++ APIs. 
 
-*Main highlights*
+### Highlights
  - Sampling,
  - Training, supporting save/restore/import operations (a model can be trained from scratch or fine-tuned),
  - Serving models with support of OTB streaming mechanism. Meaning (1) not limited by images sizes, (2) can be used as a "lego" in any OTB pipeline and preserve streaming, (3) MPI support available (use multiple processing unit to generate one single output image)
 
-*Portfolio*
+### Portfolio
 
 Below are some screen captures of deep learning applications performed at large scale with OTBTF.
  - Image to image translation (Spot-7 image --> Wikimedia Map using CGAN)
