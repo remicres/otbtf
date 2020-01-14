@@ -61,6 +61,9 @@ public:
     std::string                        m_KeyOut;  // Key of output samples image
     std::string                        m_KeyPszX; // Key for samples sizes X
     std::string                        m_KeyPszY; // Key for samples sizes Y
+    std::string                        m_KeyNoData; // Key for no-data value
+
+    FloatVectorImageType::InternalPixelType m_NoDataValue; // No data value
   };
 
 
@@ -77,7 +80,7 @@ public:
 
     // Create keys and descriptions
     std::stringstream ss_group_key, ss_desc_group, ss_key_in, ss_key_out, ss_desc_in,
-    ss_desc_out, ss_key_dims_x, ss_desc_dims_x, ss_key_dims_y, ss_desc_dims_y;
+    ss_desc_out, ss_key_dims_x, ss_desc_dims_x, ss_key_dims_y, ss_desc_dims_y, ss_key_nodata, ss_desc_nodata;
     ss_group_key   << "source"                    << inputNumber;
     ss_desc_group  << "Parameters for source "    << inputNumber;
     ss_key_out     << ss_group_key.str()          << ".out";
@@ -88,6 +91,8 @@ public:
     ss_desc_dims_x << "X patch size for image "   << inputNumber;
     ss_key_dims_y  << ss_group_key.str()          << ".patchsizey";
     ss_desc_dims_y << "Y patch size for image "   << inputNumber;
+    ss_key_nodata  << ss_group_key.str()          << ".nodata";
+    ss_desc_nodata << "No-data value for image "   << inputNumber << "(used only if \"usenodata\" is on)";
 
     // Populate group
     AddParameter(ParameterType_Group,          ss_group_key.str(),  ss_desc_group.str());
@@ -97,6 +102,8 @@ public:
     SetMinimumParameterIntValue               (ss_key_dims_x.str(), 1);
     AddParameter(ParameterType_Int,            ss_key_dims_y.str(), ss_desc_dims_y.str());
     SetMinimumParameterIntValue               (ss_key_dims_y.str(), 1);
+    AddParameter(ParameterType_Float,          ss_key_nodata.str(), ss_desc_nodata.str());
+    SetDefaultParameterFloat                  (ss_key_nodata.str(), 0);
 
     // Add a new bundle
     SourceBundle bundle;
@@ -104,6 +111,7 @@ public:
     bundle.m_KeyOut  = ss_key_out.str();
     bundle.m_KeyPszX = ss_key_dims_x.str();
     bundle.m_KeyPszY = ss_key_dims_y.str();
+    bundle.m_KeyNoData = ss_key_nodata.str();
 
     m_Bundles.push_back(bundle);
 
@@ -123,6 +131,9 @@ public:
       // Patch size
       bundle.m_PatchSize[0] = GetParameterInt(bundle.m_KeyPszX);
       bundle.m_PatchSize[1] = GetParameterInt(bundle.m_KeyPszY);
+
+      // No data value
+      bundle.m_NoDataValue = GetParameterFloat(bundle.m_KeyNoData);
     }
   }
 
@@ -166,8 +177,6 @@ public:
     // No data parameters
     AddParameter(ParameterType_Bool, "usenodata", "Reject samples that have no-data value");
     MandatoryOff                    ("usenodata");
-    AddParameter(ParameterType_Float, "nodataval", "No data value (used only if \"usenodata\" is on)");
-    SetDefaultParameterFloat(         "nodataval", 0.0);
 
     // Output label
     AddParameter(ParameterType_OutputImage, "outlabels", "output labels");
@@ -199,15 +208,12 @@ public:
     sampler->SetField(GetParameterAsString("field"));
     if (GetParameterInt("usenodata")==1)
       {
-      otbAppLogINFO("Rejecting patches that have at least one no-data value");
+      otbAppLogINFO("Rejecting samples that have at least one no-data value");
       sampler->SetRejectPatchesWithNodata(true);
-      float nodatavalue = GetParameterFloat("nodataval");
-      otbAppLogINFO("No-data value: " << nodatavalue);
-      sampler->SetNodataValue(nodatavalue);
       }
     for (auto& bundle: m_Bundles)
     {
-      sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize);
+      sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize, bundle.m_NoDataValue);
     }
 
     // Run the filter
