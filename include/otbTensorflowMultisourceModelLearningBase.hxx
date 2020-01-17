@@ -82,7 +82,8 @@ TensorflowMultisourceModelLearningBase<TInputImage>
       }
     else if (m_NumberOfSamples != currNumberOfSamples)
       {
-      itkGenericExceptionMacro("Previous batch size is " << m_NumberOfSamples
+      itkGenericExceptionMacro("Batch size of input " << (i-1)
+          << " was " << m_NumberOfSamples
           << " but input " << i
           << " has a batch size of " << currNumberOfSamples );
       }
