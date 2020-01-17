@@ -1,15 +1,19 @@
-# OTBTF
+# ![OTBTF](doc/images/logo.png) OTBTF
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+## Orfeo ToolBox meets TensorFlow
 
 This remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org) provides a generic, multi purpose deep learning framework, targeting remote sensing images processing.
 It contains a set of new process objects that internally invoke [Tensorflow](https://www.tensorflow.org/), and a bunch of user-oriented applications to perform deep learning with real-world remote sensing images.
 Applications can be used to build OTB pipelines from Python or C++ APIs. 
 
-*Main highlights*
+### Highlights
  - Sampling,
  - Training, supporting save/restore/import operations (a model can be trained from scratch or fine-tuned),
  - Serving models with support of OTB streaming mechanism. Meaning (1) not limited by images sizes, (2) can be used as a "lego" in any OTB pipeline and preserve streaming, (3) MPI support available (use multiple processing unit to generate one single output image)
 
-*Portfolio*
+### Portfolio
 
 Below are some screen captures of deep learning applications performed at large scale with OTBTF.
  - Image to image translation (Spot-7 image --> Wikimedia Map using CGAN)
@@ -31,11 +35,15 @@ For now you have two options: either use the existing **docker image**, or build
 
 Use the latest image from dockerhub:
 ```
-docker pull mdl4eo/otbtf1.6
-docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf1.6 otbcli_PatchesExtraction -help
+docker pull mdl4eo/otbtf1.7
+docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf1.7 otbcli_PatchesExtraction -help
 ```
-Please note that for now, TensorFlow and OTB are built with the minimal optimization flags, no CUDA/OpenCL enabled, no AVX and such for CPU. **Contributions are welcome: add more Dockerfiles, e.g. with OpenCL or CUDA support, CPU optimisations, etc.**
+
+For now, there is two docker images available.
+ - **mdl4eo/otbtf1.7:cpu** : Ubuntu Xenial, Python3, Orfeo ToolBox 7.0 and TensorFlow 1.14 with no optimization flags
+ - **mdl4eo/otbtf1.7:gpu** : Ubuntu Xenial, Python3, Orfeo ToolBox 7.0 and TensorFlow 1.14 with CUDA/CUDNN support (built with compute capabilities 6.1, 5.2, 3.5). **Suited for NVIDIA GPUs**.
 The dockerfiles corresponding to the images available on dockerhub are provided in the `tools/dockerfiles/` path of this repository.
+You can find more details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/)
 
 ## Build from sources
 
