@@ -185,7 +185,7 @@ TensorflowSampler<TInputImage, TVectorData>
           // If not, reject this sample
           hasBeenSampled = false;
         }
-        // Check if it contains no-data values
+        // Check if the sampled patch contains a no-data value
         if (m_RejectPatchesWithNodata && hasBeenSampled)
           {
           IndexType outIndex;
@@ -201,7 +201,6 @@ TensorflowSampler<TInputImage, TVectorData>
               if (pix[band] == m_NoDataValues[i])
                 hasBeenSampled = false;
             }
-
           }
       } // Next input
       if (hasBeenSampled)

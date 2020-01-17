@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
 
 MAINTAINER Remi Cresson <remi.cresson[at]irstea[dot]fr>
 
@@ -100,7 +100,40 @@ RUN export TF_ROOT=/work/tf \
  && git clone https://github.com/tensorflow/tensorflow.git \
  && cd tensorflow \
  && git checkout r1.14 \
- && echo "\n\n\n\n\n\n\n\n\n" | ./configure \
+ && export PYTHON_BIN_PATH=$(which python) \
+ && export PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])')" \
+ && export PYTHONPATH=/usr/lib/ \
+ && export PYTHON_ARG=/usr/lib/ \
+ && export CUDA_TOOLKIT_PATH=/usr/local/cuda-10.1/ \
+ && export CUDNN_INSTALL_PATH=/usr/ \
+ && export TF_NEED_GCP=0 \
+ && export TF_NEED_CUDA=1 \
+ && export TF_CUDA_VERSION="$($CUDA_TOOLKIT_PATH/bin/nvcc --version | sed -n 's/^.*release \(.*\),.*/\1/p')" \
+ && export TF_CUDA_COMPUTE_CAPABILITIES=6.1,5.2,3.5 \
+ && export TF_NEED_HDFS=0 \
+ && export TF_NEED_OPENCL=0 \
+ && export TF_NEED_JEMALLOC=1 \
+ && export TF_ENABLE_XLA=0 \
+ && export TF_NEED_VERBS=0 \
+ && export TF_CUDA_CLANG=0 \
+ && export TF_CUDNN_VERSION="$(sed -n 's/^#define CUDNN_MAJOR\s*\(.*\).*/\1/p' $CUDNN_INSTALL_PATH/include/cudnn.h)" \
+ && export TF_NEED_MKL=0 \
+ && export TF_DOWNLOAD_MKL=0 \
+ && export TF_NEED_AWS=0 \
+ && export TF_NEED_MPI=0 \
+ && export TF_NEED_GDR=0 \
+ && export TF_NEED_S3=0 \
+ && export TF_NEED_OPENCL_SYCL=0 \
+ && export TF_SET_ANDROID_WORKSPACE=0 \
+ && export TF_NEED_COMPUTECPP=0 \
+ && export GCC_HOST_COMPILER_PATH=$(which gcc) \
+ && export CC_OPT_FLAGS="-march=native" \
+ && export TF_NEED_KAFKA=0 \
+ && export TF_NEED_TENSORRT=0 \
+ && export TF_NCCL_VERSION=2.4 \
+ && export GCC_HOST_COMPILER_PATH=$(which gcc) \
+ && export CC_OPT_FLAGS="-march=native" \
+ && ./configure \
  && bazel build //tensorflow:libtensorflow_framework.so //tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package
 
 RUN export TF_ROOT=/work/tf \
@@ -125,9 +158,8 @@ RUN export TF_ROOT=/work/tf \
  && cd ${TF_ROOT}/tensorflow/tensorflow/contrib/makefile/downloads/absl \
  && find absl/ -name '*.h' -exec cp --parents \{\}                                       /work/tf/installdir/include/ \; \
  && find absl/ -name '*.inc' -exec cp --parents \{\}                                     /work/tf/installdir/include/ \; \
- && find /work/tf/installdir/ -name "*.cc" -type f -delete 
-
-RUN echo "Create symlinks for tensorflow libs" \
+ && find /work/tf/installdir/ -name "*.cc" -type f -delete \
+ && echo "Create symlinks for tensorflow libs" \
  && ln -s /work/tf/installdir/lib/libtensorflow_cc.so /work/tf/installdir/lib/libtensorflow_cc.so.1 \
  && ln -s /work/tf/installdir/lib/libtensorflow_framework.so /work/tf/installdir/lib/libtensorflow_framework.so.1
 
@@ -138,7 +170,7 @@ RUN mkdir -p /work/otb \
  && cd /work/otb \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git otb \
  && cd otb \
- && git checkout 7.0.0-rc1
+ && git checkout release-7.0
 
 # ----------------------------------------------------------------------------
 # Build OTB: Stage 2 (superbuild)
@@ -207,3 +239,4 @@ ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/work/otb/superbuild_install/lib/:/work/tf
 # docker run -v /path/to/host/:/path/to/mount/ otbtf_image otbcli_ExtractROI
 # docker run -ti -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY otbtf_image otbgui_ExtractROI
 # ----------------------------------------------------------------------------
+
