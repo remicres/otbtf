@@ -22,6 +22,7 @@
 #include "itkFlatStructuringElement.h"
 #include "itkBinaryErodeImageFilter.h"
 #include "otbStreamingResampleImageFilter.h"
+#include "itkNearestNeighborInterpolateImageFunction.h"
 #include "itkMaskImageFilter.h"
 
 // image utils
@@ -92,6 +93,7 @@ public:
   typedef itk::BinaryErodeImageFilter<UInt8ImageType, UInt8ImageType, StructuringType> MorphoFilterType;
 
   typedef otb::StreamingResampleImageFilter<UInt8ImageType,UInt8ImageType> PadFilterType;
+  typedef itk::NearestNeighborInterpolateImageFunction<UInt8ImageType> NNInterpolatorType;
 
   typedef tf::Distribution<UInt8ImageType> DistributionType;
 
@@ -132,6 +134,10 @@ public:
     SetMinimumParameterIntValue    ("grid.step", 1);
     AddParameter(ParameterType_Int, "grid.psize", "patches size");
     SetMinimumParameterIntValue    ("grid.psize", 1);
+    AddParameter(ParameterType_Int, "grid.offsetx", "offset of the grid (x axis)");
+    SetDefaultParameterInt         ("grid.offsetx", 0);
+    AddParameter(ParameterType_Int, "grid.offsety", "offset of the grid (y axis)");
+    SetDefaultParameterInt         ("grid.offsety", 0);
 
     // Strategy
     AddParameter(ParameterType_Choice, "strategy", "Selection strategy for validation/training patches");
@@ -243,16 +249,39 @@ public:
   void Apply(TLambda lambda)
   {
 
+    int userOffX = GetParameterInt("grid.offsetx");
+    int userOffY = GetParameterInt("grid.offsety");
+
     // Explicit streaming over the morphed mask, based on the RAM parameter
     typedef otb::RAMDrivenStrippedStreamingManager<UInt8ImageType> StreamingManagerType;
     StreamingManagerType::Pointer m_StreamingManager = StreamingManagerType::New();
     m_StreamingManager->SetAvailableRAMInMB(GetParameterInt("ram"));
 
     UInt8ImageType::Pointer inputImage;
+    bool readInput = true;
     if (GetParameterInt("nocheck")==1)
-      inputImage = GetParameterUInt8Image("mask");
+      {
+      otbAppLogINFO("\"nocheck\" mode is enabled. Input image pixels no-data values will not be checked.");
+      if (HasUserValue("mask"))
+        {
+        otbAppLogINFO("Using the provided \"mask\" parameter.");
+        inputImage = GetParameterUInt8Image("mask");
+        }
+      else
+        {
+        // This is just a hack to not trigger the whole morpho/pad pipeline
+        inputImage = m_NoDataFilter->GetOutput();
+        readInput = false;
+        }
+      }
     else
+      {
       inputImage = m_MorphoFilter->GetOutput();
+
+      // Offset update because the morpho filter pads the input image with 1 pixel border
+      userOffX += 1;
+      userOffY += 1;
+      }
     UInt8ImageType::RegionType entireRegion = inputImage->GetLargestPossibleRegion();
     entireRegion.ShrinkByRadius(m_Radius);
     m_StreamingManager->PrepareStreaming(inputImage, entireRegion );
@@ -264,6 +293,11 @@ public:
     UInt8ImageType::IndexType pos;
     UInt8ImageType::IndexValueType step = GetParameterInt("grid.step");
     pos.Fill(0);
+
+    // Offset update
+    userOffX %= step ;
+    userOffY %= step ;
+
     for (int m_CurrentDivision = 0; m_CurrentDivision < m_NumberOfDivisions; m_CurrentDivision++)
     {
       otbAppLogINFO("Processing split " << (m_CurrentDivision + 1) << "/" << m_NumberOfDivisions);
@@ -278,9 +312,11 @@ public:
         idx[0] -= start[0];
         idx[1] -= start[1];
 
-        if (idx[0] % step == 0 && idx[1] % step == 0)
+        if (idx[0] % step == userOffX && idx[1] % step == userOffY)
         {
-          UInt8ImageType::InternalPixelType pixVal = inIt.Get();
+          UInt8ImageType::InternalPixelType pixVal = 1;
+          if (readInput)
+            pixVal = inIt.Get();
 
           if (pixVal == 1)
           {
@@ -311,7 +347,7 @@ public:
   AllocateSamples(unsigned int nbOfClasses = 2)
   {
     // Nb of samples (maximum)
-    const UInt8ImageType::RegionType entireRegion = m_MorphoFilter->GetOutput()->GetLargestPossibleRegion();
+    const UInt8ImageType::RegionType entireRegion = m_NoDataFilter->GetOutput()->GetLargestPossibleRegion();
     const unsigned int maxNbOfCols = std::ceil(entireRegion.GetSize(0)/GetParameterInt("grid.step")) + 1;
     const unsigned int maxNbOfRows = std::ceil(entireRegion.GetSize(1)/GetParameterInt("grid.step")) + 1;
     unsigned int maxNbOfSamples = 1;
@@ -574,6 +610,8 @@ public:
     origin[0] -= spacing[0];
     origin[1] -= spacing[1];
     m_PadFilter = PadFilterType::New();
+    NNInterpolatorType::Pointer nnInterpolator = NNInterpolatorType::New();
+    m_PadFilter->SetInterpolator(nnInterpolator);
     m_PadFilter->SetInput( src );
     m_PadFilter->SetOutputOrigin(origin);
     m_PadFilter->SetOutputSpacing(spacing);
@@ -582,8 +620,8 @@ public:
     m_PadFilter->UpdateOutputInformation();
 
     // Morpho
-    m_Radius[0] = this->GetParameterInt("grid.psize")/2;
-    m_Radius[1] = this->GetParameterInt("grid.psize")/2;
+    m_Radius[0] = this->GetParameterInt("grid.psize") / 2;
+    m_Radius[1] = this->GetParameterInt("grid.psize") / 2;
     StructuringType se = StructuringType::Box(m_Radius);
     m_MorphoFilter = MorphoFilterType::New();
     m_MorphoFilter->SetKernel(se);
