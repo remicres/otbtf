@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #==========================================================================
 #
-#   Copyright Remi Cresson (IRSTEA)
+#   Copyright 2018-2019 Remi Cresson (IRSTEA)
+#   Copyright 2020 Remi Cresson (INRAE)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,16 +26,18 @@ from tricks import CheckpointToSavedModel
 
 # Parser
 parser = argparse.ArgumentParser()
-parser.add_argument("--ckpt",    help="checkpoint file prefix",   required=True)
-parser.add_argument("--inputs",  help="input placeholder names",  required=True, nargs='+')
-parser.add_argument("--outputs", help="output placeholder names", required=True, nargs='+')
-parser.add_argument("--model",   help="output SavedModel",        required=True)
+parser.add_argument("--ckpt",    help="Checkpoint file (without the \".meta\" extension)", required=True)
+parser.add_argument("--inputs",  help="Inputs names (e.g. [\"x_cnn_1:0\", \"x_cnn_2:0\"])",  required=True, nargs='+')
+parser.add_argument("--outputs", help="Outputs names (e.g. [\"prediction:0\", \"features:0\"])", required=True, nargs='+')
+parser.add_argument("--model",   help="Output directory for SavedModel", required=True)
 parser.add_argument('--clear_devices', dest='clear_devices', action='store_true')
 parser.set_defaults(clear_devices=False)
 params = parser.parse_args()
 
 if __name__ == "__main__":
-
-  CheckpointToSavedModel(params.ckpt, params.inputs, params.outputs, params.model, params.clear_devices)
-  
+  CheckpointToSavedModel(ckpt_path=params.ckpt, 
+                         inputs=params.inputs, 
+                         outputs=params.outputs, 
+                         savedmodel_path=params.model, 
+                         clear_devices=params.clear_devices)
   quit()
