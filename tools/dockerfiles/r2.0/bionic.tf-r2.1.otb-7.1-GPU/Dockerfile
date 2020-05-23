@@ -235,7 +235,7 @@ RUN cd /work/otb/otb/Modules/Remote \
 # Add important environment variables
 # ----------------------------------------------------------------------------
 ENV PATH="$PATH:/work/otb/superbuild_install/bin/"
-ENV PYTHONPATH="/work/otb/superbuild_install/lib/otb/python:$PYTHONPATH"
+ENV PYTHONPATH="/work/otb/superbuild_install/lib/otb/python:/work/otb/otb/Modules/Remote/otbtf/python$PYTHONPATH"
 ENV OTB_APPLICATION_PATH="/work/otb/superbuild_install/lib/otb/applications"
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/work/otb/superbuild_install/lib/:/work/tf/installdir/lib/"
 
