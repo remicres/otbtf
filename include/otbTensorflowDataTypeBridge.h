@@ -13,6 +13,7 @@
 
 #include <typeinfo>
 #include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/tensor.h"
 
 namespace otb {
 namespace tf {
