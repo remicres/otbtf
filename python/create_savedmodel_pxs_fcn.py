@@ -53,8 +53,7 @@ def my_model(x1, x2):
                                           activation=tf.nn.relu)  # out size: 1x1x64
 
     # Stack features
-    features = tf.reshape(tf.stack([conv3_x1, conv4_x2], axis=3),
-                          shape=[-1, 128], name="features")
+    features = tf.reshape(tf.stack([conv3_x1, conv4_x2], axis=3), shape=[-1, 128], name="features")
 
     # 8 neurons for 8 classes
     estimated = tf.compat.v1.layers.dense(inputs=features, units=params.nclasses, activation=None)
@@ -69,8 +68,7 @@ with tf.compat.v1.Graph().as_default():
     x1 = tf.compat.v1.placeholder(tf.float32, [None, None, None, 4], name="x1")
     x2 = tf.compat.v1.placeholder(tf.float32, [None, None, None, 1], name="x2")
     y = tf.compat.v1.placeholder(tf.int32, [None, None, None, 1], name="y")
-    lr = tf.compat.v1.placeholder_with_default(tf.constant(0.0002, dtype=tf.float32, shape=[]),
-                                               shape=[], name="lr")
+    lr = tf.compat.v1.placeholder_with_default(tf.constant(0.0002, dtype=tf.float32, shape=[]), shape=[], name="lr")
 
     # Output
     y_estimated, y_label = my_model(x1, x2)
