@@ -217,7 +217,7 @@ RUN mkdir -p /work/otb/build \
 # Build OTB: Stage 3 (bindings)
 # ----------------------------------------------------------------------------
 RUN cd /work/otb/otb/Modules/Remote \
- && git clone https://github.com/remicres/otbtf.git \
+ && git clone -b v2beta https://github.com/remicres/otbtf.git \
  && cd /work/otb/build/OTB/build \
  && cmake /work/otb/otb \
         -DOTB_WRAP_PYTHON=ON \
@@ -235,9 +235,21 @@ RUN cd /work/otb/otb/Modules/Remote \
 # Add important environment variables
 # ----------------------------------------------------------------------------
 ENV PATH="$PATH:/work/otb/superbuild_install/bin/"
-ENV PYTHONPATH="/work/otb/superbuild_install/lib/otb/python:/work/otb/otb/Modules/Remote/otbtf/python$PYTHONPATH"
+ENV PYTHONPATH="/work/otb/superbuild_install/lib/otb/python:/work/otb/otb/Modules/Remote/otbtf/python:$PYTHONPATH"
 ENV OTB_APPLICATION_PATH="/work/otb/superbuild_install/lib/otb/applications"
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/work/otb/superbuild_install/lib/:/work/tf/installdir/lib/"
+
+# ----------------------------------------------------------------------------
+# Add one user
+# ----------------------------------------------------------------------------
+RUN useradd -s /bin/bash -m otbuser
+USER otbuser
+WORKDIR /home/otbuser
+
+# ----------------------------------------------------------------------------
+# Clean
+# ----------------------------------------------------------------------------
+RUN rm -rf /tmp/* /root/.cache && apt-get clean
 
 # ----------------------------------------------------------------------------
 # Exemple :
