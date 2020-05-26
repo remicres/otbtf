@@ -29,23 +29,27 @@ parser.add_argument("--outdir", help="Output directory for SavedModel", required
 params = parser.parse_args()
 
 
+def conv2d_valid(x, kernel_size, filters, activation="relu"):
+    conv_op = tf.keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, activation=activation)
+    return conv_op(x)
+
+
 def my_model(x):
+    max_pool_2x = tf.keras.layers.MaxPool2D(pool_size=2, strides=2)
+
     # input patches: 16x16x4
-    conv1 = tf.compat.v1.layers.conv2d(inputs=x, filters=16, kernel_size=[5, 5], padding="valid",
-                                       activation=tf.nn.relu)  # out size: 12x12x16
-    pool1 = tf.compat.v1.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)  # out: 6x6x16
-    conv2 = tf.compat.v1.layers.conv2d(inputs=pool1, filters=16, kernel_size=[3, 3], padding="valid",
-                                       activation=tf.nn.relu)  # out size: 4x4x16
-    pool2 = tf.compat.v1.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)  # out: 2x2x16
-    conv3 = tf.compat.v1.layers.conv2d(inputs=pool2, filters=32, kernel_size=[2, 2], padding="valid",
-                                       activation=tf.nn.relu)  # out size: 1x1x32
+    conv1 = conv2d_valid(x, filters=16, kernel_size=5)  # out size: 12x12x16
+    pool1 = max_pool_2x(conv1)  # out: 6x6x16
+    conv2 = conv2d_valid(pool1, filters=16, kernel_size=3)  # out size: 4x4x16
+    pool2 = max_pool_2x(conv2)  # out: 2x2x16
+    conv3 = conv2d_valid(pool2, filters=32, kernel_size=2)  # out size: 1x1x32
 
     # Features
     features = tf.reshape(conv3, shape=[-1, 32], name="features")
 
     # Neurons for classes
-    estimated = tf.compat.v1.layers.dense(inputs=features, units=params.nclasses, activation=None)
-    estimated_label = tf.argmax(estimated, 1, name="prediction")
+    estimated = tf.keras.layers.Dense(params.nclasses)(features)
+    estimated_label = tf.argmax(estimated, name="prediction")
 
     return estimated, estimated_label
 
