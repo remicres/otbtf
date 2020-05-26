@@ -240,16 +240,16 @@ ENV OTB_APPLICATION_PATH="/work/otb/superbuild_install/lib/otb/applications"
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/work/otb/superbuild_install/lib/:/work/tf/installdir/lib/"
 
 # ----------------------------------------------------------------------------
+# Clean
+# ----------------------------------------------------------------------------
+RUN rm -rf /tmp/* /root/.cache && apt-get clean
+
+# ----------------------------------------------------------------------------
 # Add one user
 # ----------------------------------------------------------------------------
 RUN useradd -s /bin/bash -m otbuser
 USER otbuser
 WORKDIR /home/otbuser
-
-# ----------------------------------------------------------------------------
-# Clean
-# ----------------------------------------------------------------------------
-RUN rm -rf /tmp/* /root/.cache && apt-get clean
 
 # ----------------------------------------------------------------------------
 # Exemple :
