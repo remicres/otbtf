@@ -39,10 +39,16 @@ docker pull mdl4eo/otbtf1.7
 docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf1.7 otbcli_PatchesExtraction -help
 ```
 
-For now, there is two docker images available.
- - **mdl4eo/otbtf1.7:cpu** : Ubuntu Xenial, Python3, Orfeo ToolBox 7.0 and TensorFlow 1.14 with no optimization flags
- - **mdl4eo/otbtf1.7:gpu** : Ubuntu Xenial, Python3, Orfeo ToolBox 7.0 and TensorFlow 1.14 with CUDA/CUDNN support (built with compute capabilities 6.1, 5.2, 3.5). **Suited for NVIDIA GPUs**.
-The dockerfiles corresponding to the images available on dockerhub are provided in the `tools/dockerfiles/` path of this repository.
+Available docker images:
+
+| Name | Os | TF | OTB | GPU |
+| ---- | --- | --- | --- |
+| **mdl4eo/otbtf1.7:cpu** | Ubuntu Xenial | r1.14  | 7.0.0 | No |
+| **mdl4eo/otbtf1.7:gpu** | Ubuntu Xenial | r1.14  | 7.0.0 | Yes |
+| **mdl4eo/otbtf2.0:cpu** | Ubuntu Xenial | r2.1  | 7.1.0 | No |
+| **mdl4eo/otbtf2.0:gpu** | Ubuntu Xenial | r2.1  | 7.1.0 | Yes |
+
+All GPU docker images are suited for **NVIDIA GPUs**. They use CUDA/CUDNN support and are built with compute capabilities 6.1, 5.2, 3.5. To change the compute capabilities, you can edit the dockerfile and build your own docker image (dockerfiles are provided in the `tools/dockerfiles/` path of the repository).
 You can find more details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/)
 
 ## Build from sources
@@ -78,10 +84,11 @@ MISSING -source1.il         <string list>    Input image(s) 1  (mandatory)
 MISSING -source1.out        <string> [pixel] Output patches for image 1  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is float) (mandatory)
 MISSING -source1.patchsizex <int32>          X patch size for image 1  (mandatory)
 MISSING -source1.patchsizey <int32>          Y patch size for image 1  (mandatory)
+        -source1.nodata     <float>          No-data value for image 1(used only if "usenodata" is on)  (mandatory, default value is 0)
 MISSING -vec                <string>         Positions of the samples (must be in the same projection as input image)  (mandatory)
+        -usenodata          <boolean>        Reject samples that have no-data value  (optional, off by default, default value is false)
         -outlabels          <string> [pixel] output labels  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is uint8) (optional, off by default)
 MISSING -field              <string>         field of class in the vector data  (mandatory)
-        -inxml              <string>         Load otb application from xml file  (optional, off by default)
         -progress           <boolean>        Report progress 
         -help               <string list>    Display long help (empty list), or help for given parameters keys
 
@@ -166,7 +173,6 @@ MISSING -training.source2.placeholder <string>         Name of the input placeho
         -validation.source2           <group>          Parameters for source #2 (validation) 
         -validation.source2.il        <string list>    Input image (or list to stack) for source #2 (validation)  (mandatory)
         -validation.source2.name      <string>         Name of the input placeholder or output tensor for source #2 (validation)  (mandatory)
-        -inxml                        <string>         Load otb application from xml file  (optional, off by default)
         -progress                     <boolean>        Report progress 
         -help                         <string list>    Display long help (empty list), or help for given parameters keys
 
@@ -220,7 +226,6 @@ MISSING -output.names           <string list>    Names of the output tensors  (m
         -optim.tilesizex        <int32>          Tile width used to stream the filter output  (mandatory, default value is 16)
         -optim.tilesizey        <int32>          Tile height used to stream the filter output  (mandatory, default value is 16)
 MISSING -out                    <string> [pixel] output image  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is float) (mandatory)
-        -inxml                  <string>         Load otb application from xml file  (optional, off by default)
         -progress               <boolean>        Report progress 
         -help                   <string list>    Display long help (empty list), or help for given parameters keys
 
@@ -236,6 +241,7 @@ Who has never dreamed to use classic classifiers performing on deep learning fea
 This is possible thank to two new applications that uses the existing training/classification applications of OTB:
 
 **TrainClassifierFromDeepFeatures**: is a composite application that wire the **TensorflowModelServe** application output into the existing official **TrainImagesClassifier** application. 
+
 ```
 Train a classifier from deep net based features of an image and training vector data.
 Parameters: 
