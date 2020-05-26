@@ -71,7 +71,6 @@ def create_savedmodel(sess, inputs, outputs, directory):
     outputs_names = {o: graph.get_tensor_by_name(o) for o in outputs}
     tf.compat.v1.saved_model.simple_save(sess, directory, inputs=inputs_names, outputs=outputs_names)
 
-
 def ckpt_to_savedmodel(ckpt_path, inputs, outputs, savedmodel_path, clear_devices=False):
     """
     Read a Checkpoint and build a SavedModel
