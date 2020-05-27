@@ -35,14 +35,15 @@ For now you have two options: either use the existing **docker image**, or build
 
 Use the latest image from dockerhub:
 ```
-docker pull mdl4eo/otbtf1.7
-docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf1.7 otbcli_PatchesExtraction -help
+docker pull mdl4eo/otbtf2.0:cpu
+docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf2.0:cpu otbcli_PatchesExtraction -help
 ```
 
 Available docker images:
 
 | Name | Os | TF | OTB | Description |
 | ---- | --- | --- | --- |
+| **mdl4eo/otbtf1.6:cpu** | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization |
 | **mdl4eo/otbtf1.7:cpu** | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization |
 | **mdl4eo/otbtf1.7:gpu** | Ubuntu Xenial | r1.14  | 7.0.0 | GPU |
 | **mdl4eo/otbtf2.0:cpu** | Ubuntu Xenial | r2.1  | 7.1.0 | CPU, compiled with MKL |
