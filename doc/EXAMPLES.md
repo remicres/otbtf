@@ -215,8 +215,8 @@ The model perform the semantic segmentation from one single source.
 otbcli_TensorflowModelTrain \
 -model.dir $modeldir \
 -model.saveto "$modeldir/variables/variables" \
--training.source1.il $patches_image_train -training.source1.patchsizex 1 -training.source1.patchsizey 1 -training.source1.placeholder "x" \
--training.source2.il $patches_labels_train -training.source2.patchsizex 25 -training.source2.patchsizey 25 -training.source2.placeholder "y" \
+-training.source1.il $patches_image_train -training.source1.patchsizex 80 -training.source1.patchsizey 80 -training.source1.placeholder "x" \
+-training.source2.il $patches_labels_train -training.source2.patchsizex 16 -training.source2.patchsizey 16 -training.source2.placeholder "y" \
 -training.targetnodes "optimizer" \
 -training.userplaceholders "is_training=true" "learning_rate=0.0002" \
 -validation.mode "class" -validation.step 1 \
