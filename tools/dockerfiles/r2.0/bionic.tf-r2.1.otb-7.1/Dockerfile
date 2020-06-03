@@ -211,7 +211,7 @@ RUN mkdir -p /work/otb/build \
 # Build OTB: Stage 3 (bindings)
 # ----------------------------------------------------------------------------
 RUN cd /work/otb/otb/Modules/Remote \
- && git clone -b release-2.0-rc1 https://github.com/remicres/otbtf.git \
+ && git clone -b release-2.0-rc2 https://github.com/remicres/otbtf.git \
  && cd /work/otb/build/OTB/build \
  && cmake /work/otb/otb \
         -DOTB_WRAP_PYTHON=ON \
