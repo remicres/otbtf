@@ -46,7 +46,7 @@ def my_model(x):
 
     # Neurons for classes
     estimated = tf.keras.layers.Dense(params.nclasses)(features)
-    estimated_label = tf.argmax(estimated, name="prediction")
+    estimated_label = tf.argmax(estimated, name="prediction", axis=-1)
 
     return estimated, estimated_label
 
