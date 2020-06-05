@@ -262,7 +262,7 @@ public:
     if (GetParameterInt("nocheck")==1)
       {
       otbAppLogINFO("\"nocheck\" mode is enabled. Input image pixels no-data values will not be checked.");
-      if (HasUserValue("mask"))
+      if (HasValue("mask"))
         {
         otbAppLogINFO("Using the provided \"mask\" parameter.");
         inputImage = GetParameterUInt8Image("mask");
