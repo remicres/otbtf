@@ -82,7 +82,7 @@ RUN apt-get update -y \
 # ----------------------------------------------------------------------------
 RUN ln -s /usr/bin/python3 /usr/bin/python \
  && python3 -m pip install --upgrade pip \
- && python3 -m pip install pip six numpy wheel mock keras future setuptools
+ && python3 -m pip install pip six numpy wheel mock keras keras_applications keras_preprocessing future setuptools
 
 # ----------------------------------------------------------------------------
 # Build TensorFlow
