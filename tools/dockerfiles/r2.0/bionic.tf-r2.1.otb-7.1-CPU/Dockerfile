@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+FROM ubuntu:18.04
 
 MAINTAINER Remi Cresson <remi.cresson[at]irstea[dot]fr>
 
@@ -100,24 +100,17 @@ RUN export TF_ROOT=/work/tf \
  && git clone https://github.com/tensorflow/tensorflow.git \
  && cd tensorflow \
  && git checkout r2.1 \
- && export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/cuda/lib64/:/usr/local/cuda/lib64/stubs/" \
  && export PYTHON_BIN_PATH=$(which python) \
  && export PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])')" \
  && export PYTHONPATH=/usr/lib/ \
  && export PYTHON_ARG=/usr/lib/ \
- && export CUDA_TOOLKIT_PATH=/usr/local/cuda-10.1/ \
- && export CUDNN_INSTALL_PATH=/usr/ \
  && export TF_NEED_GCP=0 \
- && export TF_NEED_CUDA=1 \
- && export TF_CUDA_VERSION="$($CUDA_TOOLKIT_PATH/bin/nvcc --version | sed -n 's/^.*release \(.*\),.*/\1/p')" \
- && export TF_CUDA_COMPUTE_CAPABILITIES=7.5,6.1,5.2 \
+ && export TF_NEED_CUDA=0 \
  && export TF_NEED_HDFS=0 \
  && export TF_NEED_OPENCL=0 \
  && export TF_NEED_JEMALLOC=1 \
- && export TF_ENABLE_XLA=1 \
+ && export TF_ENABLE_XLA=0 \
  && export TF_NEED_VERBS=0 \
- && export TF_CUDA_CLANG=0 \
- && export TF_CUDNN_VERSION="$(sed -n 's/^#define CUDNN_MAJOR\s*\(.*\).*/\1/p' $CUDNN_INSTALL_PATH/include/cudnn.h)" \
  && export TF_NEED_MKL=0 \
  && export TF_DOWNLOAD_MKL=0 \
  && export TF_NEED_AWS=0 \
