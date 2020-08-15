@@ -427,3 +427,7 @@ In the `python` folder are provided some [ready-to-use deep networks, with docum
 ## Tutorial
 
 A tutorial is available at [MDL4EO's blog](https://mdl4eo.irstea.fr/2019/01/04/an-introduction-to-deep-learning-on-remote-sensing-images-tutorial/)
+
+## Book
+
+A full tutorial is available in [this book](https://g.co/kgs/S77JPT). About 160 pages explain how to use OTBTF (with also OTB, QGIS and TensorFlow) for landcover mapping (patch-based image classification, fully convolutional models, hybrid deep networks X random forest classifiers, semantic segmentation from OSM data, image restoration with joint SAR/Optical sensors).
