@@ -46,7 +46,7 @@ Available docker images:
 | **mdl4eo/otbtf1.6:cpu** | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   |
 | **mdl4eo/otbtf1.7:cpu** | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   |
 | **mdl4eo/otbtf1.7:gpu** | Ubuntu Xenial | r1.14  | 7.0.0 | GPU                    |
-| **mdl4eo/otbtf2.0:cpu** | Ubuntu Xenial | r2.1   | 7.1.0 | CPU, compiled with MKL |
+| **mdl4eo/otbtf2.0:cpu** | Ubuntu Xenial | r2.1   | 7.1.0 | CPU, no optimization   |
 | **mdl4eo/otbtf2.0:gpu** | Ubuntu Xenial | r2.1   | 7.1.0 | GPU                    |
 
 All GPU docker images are suited for **NVIDIA GPUs**. They use CUDA/CUDNN support and are built with compute capabilities 6.1, 5.2, 3.5. To change the compute capabilities, you can edit the dockerfile and build your own docker image (dockerfiles are provided in the `tools/dockerfiles/` path of the repository).
@@ -431,3 +431,7 @@ A tutorial is available at [MDL4EO's blog](https://mdl4eo.irstea.fr/2019/01/04/a
 ## Book
 
 A full tutorial is available in [this book](https://g.co/kgs/S77JPT). About 160 pages explain how to use OTBTF (with also OTB, QGIS and TensorFlow) for landcover mapping (patch-based image classification, fully convolutional models, hybrid deep networks X random forest classifiers, semantic segmentation from OSM data, image restoration with joint SAR/Optical sensors).
+
+## Cite
+
+Cresson, R. (2018). A framework for remote sensing images processing using deep learning techniques. IEEE Geoscience and Remote Sensing Letters, 16(1), 25-29.
