@@ -178,15 +178,16 @@ class PatchesReader:
 
     def get_stats(self):
         """ Return some statistics """
-        axis = (0, 1)  # (row, col)
         logging.info("Computing stats")
         if not self.use_streaming:
+            axis = (1, 2)  # (row, col)
             stats = {src_key: {"min": np.amin(patches_buffer, axis=axis),
                                "max": np.amax(patches_buffer, axis=axis),
                                "mean": np.mean(patches_buffer, axis=axis),
                                "std": np.std(patches_buffer, axis=axis)} for src_key, patches_buffer in
                      self.patches_buffer.items()}
         else:
+            axis = (0, 1)  # (row, col)
             def _filled(value):
                 return {src_key: value * np.ones((self.nb_of_channels[src_key])) for src_key in self.ds}
             _maxs = _filled(0.0)
