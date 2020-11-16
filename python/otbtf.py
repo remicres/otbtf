@@ -112,7 +112,7 @@ class PatchesReader:
 
         # ds sizes
         src_key_0 = list(self.ds)[0]  # first key
-        self.ds_sizes = [self._get_nb_of_patches(ds) for ds in self.ds[src_key_0].values()]
+        self.ds_sizes = [self._get_nb_of_patches(ds) for ds in self.ds[src_key_0]]
         self.size = sum(self.ds_sizes)
 
         # if use_streaming is False, we store in memory all patches images
