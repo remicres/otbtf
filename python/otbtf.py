@@ -178,12 +178,13 @@ class PatchesReader:
 
     def get_stats(self):
         """ Return some statistics """
+        axis = (0, 1)  # (row, col)
         logging.info("Computing stats")
         if not self.use_streaming:
-            stats = {src_key: {"min": np.amin(patches_buffer),
-                               "max": np.amax(patches_buffer),
-                               "mean": np.mean(patches_buffer),
-                               "std": np.std(patches_buffer)} for src_key, patches_buffer in
+            stats = {src_key: {"min": np.amin(patches_buffer, axis=axis),
+                               "max": np.amax(patches_buffer, axis=axis),
+                               "mean": np.mean(patches_buffer, axis=axis),
+                               "std": np.std(patches_buffer, axis=axis)} for src_key, patches_buffer in
                      self.patches_buffer.items()}
         else:
             def _filled(value):
@@ -195,7 +196,6 @@ class PatchesReader:
             for index in range(self.size):
                 sample = self.get_sample(index=index)
                 for src_key, ds in self.ds.items():
-                    axis = (0, 1)  # (row, col)
                     patch = sample[src_key]
                     _mins[src_key] = np.minimum(np.amin(patch, axis=axis).flatten(), _mins)
                     _maxs[src_key] = np.maximum(np.amax(patch, axis=axis).flatten(), _maxs)
