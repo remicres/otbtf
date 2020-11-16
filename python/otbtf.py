@@ -269,8 +269,11 @@ class Dataset:
                                                          output_types=self.output_types,
                                                          output_shapes=self.output_shapes).repeat(1)
 
-        # add a function for stats
-        self.get_stats = self.patches_reader.get_stats
+    def get_stats(self):
+        """
+        @return: the dataset statistics, computed by the patches reader
+        """
+        return self.patches_reader.get_stats()
 
     def read_one_sample(self):
         """
