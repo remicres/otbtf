@@ -239,6 +239,7 @@ class Dataset:
 
         # patches reader
         self.patches_reader = PatchesReader(filenames_dict=filenames_dict, use_streaming=use_streaming)
+        self.size = self.patches_reader.size
 
         # iterator
         self.iterator = Iterator(handler=self.patches_reader)
