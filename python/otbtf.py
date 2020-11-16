@@ -5,7 +5,6 @@ import numpy as np
 import tensorflow as tf
 import gdal
 import logging
-import math
 
 """
 ---------------------------------------------------- Buffer class ------------------------------------------------------
@@ -204,10 +203,11 @@ class PatchesReader:
 
             rsize = 1.0 / float(self.size)
             print(_mins)
+            print(_sums)
             stats = {src_key: {"min": _mins[src_key],
                                "max": _maxs[src_key],
                                "mean": rsize * _sums[src_key],
-                               "std": math.sqrt(rsize * _sqsums[src_key] - (rsize * _sums[src_key]) ** 2)
+                               "std": np.sqrt(rsize * _sqsums[src_key] - (rsize * _sums[src_key]) ** 2)
                                } for src_key in self.ds}
         logging.info("Stats: {}".format(stats))
         return stats
