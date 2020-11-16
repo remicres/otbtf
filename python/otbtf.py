@@ -196,12 +196,11 @@ class PatchesReader:
             _sqsums = _filled(0.0)
             for index in range(self.size):
                 sample = self.get_sample(index=index)
-                for src_key, ds in self.ds.items():
-                    patch = sample[src_key]
-                    _mins[src_key] = np.minimum(np.amin(patch, axis=axis).flatten(), _mins)
-                    _maxs[src_key] = np.maximum(np.amax(patch, axis=axis).flatten(), _maxs)
-                    _sums[src_key] += np.sum(patch, axis=axis).flatten()
-                    _sqsums[src_key] += np.sum(np.square(patch), axis=axis).flatten()
+                for src_key, np_arr in sample.items():
+                    _mins[src_key] = np.minimum(np.amin(np_arr, axis=axis).flatten(), _mins)
+                    _maxs[src_key] = np.maximum(np.amax(np_arr, axis=axis).flatten(), _maxs)
+                    _sums[src_key] += np.sum(np_arr, axis=axis).flatten()
+                    _sqsums[src_key] += np.sum(np.square(np_arr), axis=axis).flatten()
 
             rsize = 1.0 / float(self.size)
             stats = {src_key: {"min": _mins[src_key],
