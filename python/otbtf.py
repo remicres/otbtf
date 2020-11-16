@@ -207,7 +207,7 @@ class PatchesReader:
                                "max": _maxs[src_key],
                                "mean": rsize * _sums[src_key],
                                "std": math.sqrt(rsize * _sqsums[src_key] - (rsize * _sums[src_key]) ** 2)
-                               } for src_key in self.ds.items()}
+                               } for src_key in self.ds}
         logging.info("Stats: {}".format(stats))
         return stats
 
