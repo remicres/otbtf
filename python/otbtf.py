@@ -39,12 +39,12 @@ class Buffer:
 
 class RandomIterator:
     """
-    Pick a random number in the [0, max_number) range.
+    Pick a random number in the [0, handler.size) range.
     """
 
-    def __init__(self, max_number):
+    def __init__(self, handler):
 
-        self.indices = np.arange(0, max_number)
+        self.indices = np.arange(0, handler.size)
         self.shuffle()
         self.count = 0
 
@@ -224,7 +224,7 @@ class Dataset:
     tuples.
     """
 
-    def __init__(self, filenames_dict, random_order=True, use_streaming=False, buffer_length=128):
+    def __init__(self, filenames_dict, use_streaming=False, buffer_length=128, Iterator=RandomIterator):
         """
         :param filenames_dict: A dict() structured as follow:
             {src_name1: [src1_patches_image1, ..., src1_patches_imageN1],
@@ -232,18 +232,16 @@ class Dataset:
              ...
              src_nameM: [srcM_patches_image1, ..., srcM_patches_imageNM]}
 
-        :param random_order: if True, the dataset will deliver patches in a random order.
         :param use_streaming: if True, the patches are read on the fly from the disc, nothing is kept in memory.
         :param buffer_length: The number of samples that are stored in the buffer when "use_streaming" is True.
+        :param Iterator: The iterator class used to generate the sequence of patches indices.
         """
 
         # patches reader
-        self.patches_reader = PatchesReader(filenames_dict=filenames_dict,
-                                            random_order=random_order,
-                                            use_streaming=use_streaming)
+        self.patches_reader = PatchesReader(filenames_dict=filenames_dict, use_streaming=use_streaming)
 
         # iterator
-        self.iterator = RandomIterator(max_number=self.patches_reader.size)
+        self.iterator = Iterator(handler=self.patches_reader)
 
         # Get patches sizes and type, of the first sample of the first tile
         self.output_types = dict()
