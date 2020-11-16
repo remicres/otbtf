@@ -187,10 +187,12 @@ class PatchesReader:
                      self.patches_buffer.items()}
         else:
             axis = (0, 1)  # (row, col)
+
             def _filled(value):
                 return {src_key: value * np.ones((self.nb_of_channels[src_key])) for src_key in self.ds}
+
             _maxs = _filled(0.0)
-            _mins = _filled(100000.0)
+            _mins = _filled(float("inf"))
             _sums = _filled(0.0)
             _sqsums = _filled(0.0)
             for index in range(self.size):
