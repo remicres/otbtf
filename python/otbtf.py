@@ -111,7 +111,7 @@ class PatchesReader:
             raise Exception("Sources must have the same number of patches! Number of patches: {}".format(nb_of_patches))
 
         # ds sizes
-        src_key_0 = self.ds.keys()[0]
+        src_key_0 = list(self.ds)[0]  # first key
         self.ds_sizes = [self._get_nb_of_patches(ds) for ds in self.ds[src_key_0].values()]
         self.size = sum(self.ds_sizes)
 
