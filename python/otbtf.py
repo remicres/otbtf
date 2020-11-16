@@ -196,16 +196,13 @@ class PatchesReader:
             for index in range(self.size):
                 sample = self.get_sample(index=index)
                 for src_key, np_arr in sample.items():
-                    print(np_arr.shape)
+                    rnumel = 1.0 / float(np_arr.shape[0] * np_arr.shape[1])
                     _mins[src_key] = np.minimum(np.amin(np_arr, axis=axis).flatten(), _mins[src_key])
                     _maxs[src_key] = np.maximum(np.amax(np_arr, axis=axis).flatten(), _maxs[src_key])
-                    _sums[src_key] += np.sum(np_arr, axis=axis).flatten()
-                    _sqsums[src_key] += np.sum(np.square(np_arr), axis=axis).flatten()
+                    _sums[src_key] += rnumel * np.sum(np_arr, axis=axis).flatten()
+                    _sqsums[src_key] += rnumel * np.sum(np.square(np_arr), axis=axis).flatten()
 
             rsize = 1.0 / float(self.size)
-            print(_sums)
-            print(_sqsums)
-            print(rsize)
             stats = {src_key: {"min": _mins[src_key],
                                "max": _maxs[src_key],
                                "mean": rsize * _sums[src_key],
