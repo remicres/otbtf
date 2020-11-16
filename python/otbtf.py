@@ -180,7 +180,7 @@ class PatchesReader:
         """ Return some statistics """
         logging.info("Computing stats")
         if not self.use_streaming:
-            axis = (1, 2)  # (row, col)
+            axis = (0, 1, 2)  # (row, col)
             stats = {src_key: {"min": np.amin(patches_buffer, axis=axis),
                                "max": np.amax(patches_buffer, axis=axis),
                                "mean": np.mean(patches_buffer, axis=axis),
