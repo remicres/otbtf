@@ -335,13 +335,14 @@ class Dataset:
         for elem in range(self.size):
             yield self.read_one_sample()
 
-    def get_tf_dataset(self, batch_size):
+    def get_tf_dataset(self, batch_size, drop_remainder=True):
         """
         Returns a TF dataset, ready to be used with the provided batch size
         :param batch_size: the batch size
+        :param drop_remainder: drop incomplete batches
         :return: The TF dataset
         """
-        return self.tf_dataset.batch(batch_size)
+        return self.tf_dataset.batch(batch_size, drop_remainder=drop_remainder)
 
     def get_total_wait_in_seconds(self):
         """
