@@ -202,6 +202,9 @@ class PatchesReader:
                     _sqsums[src_key] += np.sum(np.square(np_arr), axis=axis).flatten()
 
             rsize = 1.0 / float(self.size)
+            print(_sums)
+            print(_sqsums)
+            print(rsize)
             stats = {src_key: {"min": _mins[src_key],
                                "max": _maxs[src_key],
                                "mean": rsize * _sums[src_key],
