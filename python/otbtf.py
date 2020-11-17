@@ -346,6 +346,9 @@ class Dataset:
         :param drop_remainder: drop incomplete batches
         :return: The TF dataset
         """
+        if batch_size <= 2 * self.miner_buffer.max_length:
+            logging.warning("Batch size is {} but dataset buffer has {} elements. Consider using a larger dataset "
+                            "buffer to avoid I/O bottleneck".format(batch_size, self.miner_buffer.max_length))
         return self.tf_dataset.batch(batch_size, drop_remainder=drop_remainder)
 
     def get_total_wait_in_seconds(self):
