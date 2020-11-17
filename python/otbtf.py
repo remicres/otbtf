@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 import gdal
 import logging
+from abc import ABC, abstractmethod
 
 """
 ---------------------------------------------------- Buffer class ------------------------------------------------------
@@ -32,19 +33,33 @@ class Buffer:
 
 
 """
+------------------------------------------------- IteratorBase class ---------------------------------------------------
+"""
+
+
+class IteratorBase(ABC):
+    """
+    Base class for iterators
+    """
+    @abstractmethod
+    def __init__(self, handler):
+        pass
+
+
+"""
 ------------------------------------------------ RandomIterator class --------------------------------------------------
 """
 
 
-class RandomIterator:
+class RandomIterator(IteratorBase):
     """
     Pick a random number in the [0, handler.size) range.
     """
 
     def __init__(self, handler):
-
+        super().__init__(handler)
         self.indices = np.arange(0, handler.size)
-        self.shuffle()
+        self._shuffle()
         self.count = 0
 
     def __iter__(self):
@@ -55,27 +70,101 @@ class RandomIterator:
         if self.count < len(self.indices) - 1:
             self.count += 1
         else:
-            self.shuffle()
+            self._shuffle()
             self.count = 0
         return current_index
 
-    def shuffle(self):
+    def _shuffle(self):
         np.random.shuffle(self.indices)
 
 
 """
--------------------------------------------------- Patches reader class ------------------------------------------------
+------------------------------------------------ PatchesReaderBase class -----------------------------------------------
 """
 
 
-class PatchesReader:
+class PatchesReaderBase(ABC):
+    """
+    Base class for patches delivery
+    """
+
+    @abstractmethod
+    def get_sample(self, index):
+        """
+        Return one sample.
+        @return a dict() having the following structure:
+
+        {"src_key_0": np.array((psz_y_0, psz_x_0, nb_ch_0)),
+         "src_key_1": np.array((psz_y_1, psz_x_1, nb_ch_1)),
+         ...
+         "src_key_M": np.array((psz_y_M, psz_x_M, nb_ch_M))}
+
+        """
+        pass
+
+    @abstractmethod
+    def get_stats(self):
+        """
+        Compute some statistics for each source.
+        Depending if streaming is used, the statistics are computed directly in memory, or chunk-by-chunk.
+
+        @return a dict having the following structure:
+        {
+        "src_key_0":
+            {"min": np.array([...]),
+            "max": np.array([...]),
+            "mean": np.array([...]),
+            "std": np.array([...])},
+        ...,
+        "src_key_M":
+            {"min": np.array([...]),
+            "max": np.array([...]),
+            "mean": np.array([...]),
+            "std": np.array([...])},
+        }
+        """
+        pass
+
+    @abstractmethod
+    def get_size(self):
+        """
+        Returns the total number of samples
+        @return: number of samples (int)
+        """
+        pass
+
+
+"""
+----------------------------------------------- PatchesImagesReader class ----------------------------------------------
+"""
+
+
+class PatchesImagesReader(PatchesReaderBase):
+    """
+    This class provides a read access to a set of patches images.
+
+    A patches image is an image of patches stacked in rows, as produced from the OTBTF "PatchesExtraction"
+    application, and is stored in a raster format (e.g. GeoTiff).
+    A source can be a particular domain in which the patches are extracted (remember that in OTBTF applications,
+    the number of sources is controlled by the OTB_TF_NSOURCES environment variable).
+
+    This class enables to use:
+     - multiple sources
+     - multiple patches images per source
+
+    Each patch can be independently accessed using the get_sample(index) function, with index in [0, self.size),
+    self.size being the total number of patches (must be the same for each sources).
+
+    :@see PatchesReaderBase
+    """
+
     def __init__(self, filenames_dict, use_streaming=False):
         """
         :param filenames_dict: A dict() structured as follow:
-            {src_name1: [src1_patches_image1.tif, ..., src1_patches_imageN1.tif],
-             src_name2: [src2_patches_image2.tif, ..., src2_patches_imageN2.tif],
+            {src_name1: [src1_patches_image_1.tif, ..., src1_patches_image_N.tif],
+             src_name2: [src2_patches_image_1.tif, ..., src2_patches_image_N.tif],
              ...
-             src_nameM: [srcM_patches_image1.tif, ..., srcM_patches_imageNM.tif]}
+             src_nameM: [srcM_patches_image_1.tif, ..., srcM_patches_image_N.tif]}
         :param use_streaming: if True, the patches are read on the fly from the disc, nothing is kept in memory.
         """
 
@@ -165,7 +254,10 @@ class PatchesReader:
         return np.float32(buffer)
 
     def get_sample(self, index):
-        """ Return one sample of the dataset. index must be in the [0, self.size) range. """
+        """
+        Return one sample of the dataset.
+        :param index: the sample index. Must be in the [0, self.size) range.
+        """
         assert (0 <= index)
         assert (index < self.size)
 
@@ -178,7 +270,12 @@ class PatchesReader:
         return res
 
     def get_stats(self):
-        """ Return some statistics """
+        """
+        Compute some statistics for each source.
+        Depending if streaming is used, the statistics are computed directly in memory, or chunk-by-chunk.
+
+        @return statistics dict
+        """
         logging.info("Computing stats")
         if not self.use_streaming:
             axis = (0, 1, 2)  # (row, col)
@@ -215,6 +312,9 @@ class PatchesReader:
         logging.info("Stats: {}".format(stats))
         return stats
 
+    def get_size(self):
+        return self.size
+
 
 """
 --------------------------------------------------- Dataset class ------------------------------------------------------
@@ -223,27 +323,23 @@ class PatchesReader:
 
 class Dataset:
     """
-    Handles the "mining" of the patches.
-    This class has a thread that extract tuples from the patches readers, while ensuring the access of already gathered
-    tuples.
+    Handles the "mining" of patches.
+    This class has a thread that extract tuples from the readers, while ensuring the access of already gathered tuples.
+
+    :@see PatchesReaderBase
+    :@see Buffer
     """
 
-    def __init__(self, filenames_dict, use_streaming=False, buffer_length=128, Iterator=RandomIterator):
+    def __init__(self, patches_reader, buffer_length=128, Iterator=RandomIterator):
         """
-        :param filenames_dict: A dict() structured as follow:
-            {src_name1: [src1_patches_image1, ..., src1_patches_imageN1],
-             src_name2: [src2_patches_image2, ..., src2_patches_imageN2],
-             ...
-             src_nameM: [srcM_patches_image1, ..., srcM_patches_imageNM]}
-
-        :param use_streaming: if True, the patches are read on the fly from the disc, nothing is kept in memory.
-        :param buffer_length: The number of samples that are stored in the buffer when "use_streaming" is True.
+        :param patches_reader: The patches reader instance
+        :param buffer_length: The number of samples that are stored in the buffer
         :param Iterator: The iterator class used to generate the sequence of patches indices.
         """
 
         # patches reader
-        self.patches_reader = PatchesReader(filenames_dict=filenames_dict, use_streaming=use_streaming)
-        self.size = self.patches_reader.size
+        self.patches_reader = patches_reader
+        self.size = self.patches_reader.get_size()
 
         # iterator
         self.iterator = Iterator(handler=self.patches_reader)
@@ -359,3 +455,34 @@ class Dataset:
         :return: duration in seconds
         """
         return self.tot_wait
+
+
+"""
+------------------------------------------- DatasetFromPatchesImages class ---------------------------------------------
+"""
+
+
+class DatasetFromPatchesImages(Dataset):
+    """
+    Handles the "mining" of a set of patches images.
+
+    :@see PatchesImagesReader
+    :@see Dataset
+    """
+
+    def __init__(self, filenames_dict, use_streaming=False, buffer_length=128, Iterator=RandomIterator):
+        """
+        :param filenames_dict: A dict() structured as follow:
+            {src_name1: [src1_patches_image1, ..., src1_patches_imageN1],
+             src_name2: [src2_patches_image2, ..., src2_patches_imageN2],
+             ...
+             src_nameM: [srcM_patches_image1, ..., srcM_patches_imageNM]}
+        :param use_streaming: if True, the patches are read on the fly from the disc, nothing is kept in memory.
+        :param buffer_length: The number of samples that are stored in the buffer (used when "use_streaming" is True).
+        :param Iterator: The iterator class used to generate the sequence of patches indices.
+        """
+        # patches reader
+        patches_reader = PatchesImagesReader(filenames_dict=filenames_dict, use_streaming=use_streaming)
+
+        super().__init__(patches_reader=patches_reader, use_streaming=use_streaming, buffer_length=buffer_length,
+                         Iterator=Iterator)
