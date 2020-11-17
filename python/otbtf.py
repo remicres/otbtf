@@ -16,8 +16,8 @@ from abc import ABC, abstractmethod
 def gdal_open(filename):
     """
     Open a GDAL raster
-    @param filename: raster file
-    @return: GDAL ds instance
+    :param filename: raster file
+    :return: a GDAL ds instance
     """
     ds = gdal.Open(filename)
     if ds is None:
@@ -28,10 +28,10 @@ def gdal_open(filename):
 def read_as_np_arr(ds, as_patches=True):
     """
     Read a GDAL raster as numpy array
-    @param ds: GDAL ds instance
-    @param as_patches: if True, the returned numpy array has the following shape (n, psz_x, psz_x, nb_channels). If
+    :param ds: GDAL ds instance
+    :param as_patches: if True, the returned numpy array has the following shape (n, psz_x, psz_x, nb_channels). If
         False, the shape is (1, psz_y, psz_x, nb_channels)
-    @return: Numpy array of dim 4
+    :return: Numpy array of dim 4
     """
     buffer = ds.ReadAsArray()
     szx = ds.RasterXSize
@@ -72,52 +72,6 @@ class Buffer:
 
 
 """
-------------------------------------------------- IteratorBase class ---------------------------------------------------
-"""
-
-
-class IteratorBase(ABC):
-    """
-    Base class for iterators
-    """
-    @abstractmethod
-    def __init__(self, handler):
-        pass
-
-
-"""
------------------------------------------------- RandomIterator class --------------------------------------------------
-"""
-
-
-class RandomIterator(IteratorBase):
-    """
-    Pick a random number in the [0, handler.size) range.
-    """
-
-    def __init__(self, handler):
-        super().__init__(handler)
-        self.indices = np.arange(0, handler.size)
-        self._shuffle()
-        self.count = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        current_index = self.indices[self.count]
-        if self.count < len(self.indices) - 1:
-            self.count += 1
-        else:
-            self._shuffle()
-            self.count = 0
-        return current_index
-
-    def _shuffle(self):
-        np.random.shuffle(self.indices)
-
-
-"""
 ------------------------------------------------ PatchesReaderBase class -----------------------------------------------
 """
 
@@ -131,23 +85,17 @@ class PatchesReaderBase(ABC):
     def get_sample(self, index):
         """
         Return one sample.
-        @return a dict() having the following structure:
-
-        {"src_key_0": np.array((psz_y_0, psz_x_0, nb_ch_0)),
-         "src_key_1": np.array((psz_y_1, psz_x_1, nb_ch_1)),
-         ...
-         "src_key_M": np.array((psz_y_M, psz_x_M, nb_ch_M))}
-
+        :return One sample instance, whatever the sample structure is (dict, numpy array, ...)
         """
         pass
 
     @abstractmethod
-    def get_stats(self):
+    def get_stats(self) -> dict:
         """
         Compute some statistics for each source.
         Depending if streaming is used, the statistics are computed directly in memory, or chunk-by-chunk.
 
-        @return a dict having the following structure:
+        :return a dict having the following structure:
         {
         "src_key_0":
             {"min": np.array([...]),
@@ -168,7 +116,7 @@ class PatchesReaderBase(ABC):
     def get_size(self):
         """
         Returns the total number of samples
-        @return: number of samples (int)
+        :return: number of samples (int)
         """
         pass
 
@@ -194,10 +142,10 @@ class PatchesImagesReader(PatchesReaderBase):
     Each patch can be independently accessed using the get_sample(index) function, with index in [0, self.size),
     self.size being the total number of patches (must be the same for each sources).
 
-    :@see PatchesReaderBase
+    :see PatchesReaderBase
     """
 
-    def __init__(self, filenames_dict, use_streaming=False):
+    def __init__(self, filenames_dict: dict, use_streaming=False):
         """
         :param filenames_dict: A dict() structured as follow:
             {src_name1: [src1_patches_image_1.tif, ..., src1_patches_image_N.tif],
@@ -275,6 +223,11 @@ class PatchesImagesReader(PatchesReaderBase):
         """
         Return one sample of the dataset.
         :param index: the sample index. Must be in the [0, self.size) range.
+        :return: The sample is stored in a dict() with the following structure:
+            {"src_key_0": np.array((psz_y_0, psz_x_0, nb_ch_0)),
+             "src_key_1": np.array((psz_y_1, psz_x_1, nb_ch_1)),
+             ...
+             "src_key_M": np.array((psz_y_M, psz_x_M, nb_ch_M))}
         """
         assert (0 <= index)
         assert (index < self.size)
@@ -292,7 +245,7 @@ class PatchesImagesReader(PatchesReaderBase):
         Compute some statistics for each source.
         Depending if streaming is used, the statistics are computed directly in memory, or chunk-by-chunk.
 
-        @return statistics dict
+        :return statistics dict
         """
         logging.info("Computing stats")
         if not self.use_streaming:
@@ -335,6 +288,52 @@ class PatchesImagesReader(PatchesReaderBase):
 
 
 """
+------------------------------------------------- IteratorBase class ---------------------------------------------------
+"""
+
+
+class IteratorBase(ABC):
+    """
+    Base class for iterators
+    """
+    @abstractmethod
+    def __init__(self, patches_reader: PatchesReaderBase):
+        pass
+
+
+"""
+------------------------------------------------ RandomIterator class --------------------------------------------------
+"""
+
+
+class RandomIterator(IteratorBase):
+    """
+    Pick a random number in the [0, handler.size) range.
+    """
+
+    def __init__(self, patches_reader):
+        super().__init__(patches_reader=patches_reader)
+        self.indices = np.arange(0, patches_reader.get_size())
+        self._shuffle()
+        self.count = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        current_index = self.indices[self.count]
+        if self.count < len(self.indices) - 1:
+            self.count += 1
+        else:
+            self._shuffle()
+            self.count = 0
+        return current_index
+
+    def _shuffle(self):
+        np.random.shuffle(self.indices)
+
+
+"""
 --------------------------------------------------- Dataset class ------------------------------------------------------
 """
 
@@ -344,11 +343,12 @@ class Dataset:
     Handles the "mining" of patches.
     This class has a thread that extract tuples from the readers, while ensuring the access of already gathered tuples.
 
-    :@see PatchesReaderBase
-    :@see Buffer
+    :see PatchesReaderBase
+    :see Buffer
     """
 
-    def __init__(self, patches_reader, buffer_length=128, Iterator=RandomIterator):
+    def __init__(self, patches_reader: PatchesReaderBase, buffer_length: int = 128,
+                 Iterator: IteratorBase = RandomIterator):
         """
         :param patches_reader: The patches reader instance
         :param buffer_length: The number of samples that are stored in the buffer
@@ -387,9 +387,9 @@ class Dataset:
                                                          output_types=self.output_types,
                                                          output_shapes=self.output_shapes).repeat(1)
 
-    def get_stats(self):
+    def get_stats(self) -> dict:
         """
-        @return: the dataset statistics, computed by the patches reader
+        :return: the dataset statistics, computed by the patches reader
         """
         return self.patches_reader.get_stats()
 
@@ -484,11 +484,12 @@ class DatasetFromPatchesImages(Dataset):
     """
     Handles the "mining" of a set of patches images.
 
-    :@see PatchesImagesReader
-    :@see Dataset
+    :see PatchesImagesReader
+    :see Dataset
     """
 
-    def __init__(self, filenames_dict, use_streaming=False, buffer_length=128, Iterator=RandomIterator):
+    def __init__(self, filenames_dict: dict, use_streaming: bool = False, buffer_length: int = 128,
+                 Iterator: IteratorBase = RandomIterator):
         """
         :param filenames_dict: A dict() structured as follow:
             {src_name1: [src1_patches_image1, ..., src1_patches_imageN1],
