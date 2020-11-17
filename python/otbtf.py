@@ -360,7 +360,7 @@ class Dataset:
         self.size = self.patches_reader.get_size()
 
         # iterator
-        self.iterator = Iterator(handler=self.patches_reader)
+        self.iterator = Iterator(patches_reader=self.patches_reader)
 
         # Get patches sizes and type, of the first sample of the first tile
         self.output_types = dict()
