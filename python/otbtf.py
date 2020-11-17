@@ -502,5 +502,4 @@ class DatasetFromPatchesImages(Dataset):
         # patches reader
         patches_reader = PatchesImagesReader(filenames_dict=filenames_dict, use_streaming=use_streaming)
 
-        super().__init__(patches_reader=patches_reader, use_streaming=use_streaming, buffer_length=buffer_length,
-                         Iterator=Iterator)
+        super().__init__(patches_reader=patches_reader, buffer_length=buffer_length, Iterator=Iterator)
