@@ -143,13 +143,15 @@ class PatchesReader:
     def read_as_np_arr(ds, as_patches=True):
         buffer = ds.ReadAsArray()
         szx = ds.RasterXSize
-        szy = ds.RasterYSize
-        n = int(szy / szx)
         if len(buffer.shape) == 3:
             buffer = np.transpose(buffer, axes=(1, 2, 0))
         if not as_patches:
             n = 1
-        return np.float32(buffer.reshape((n, szx, szx, ds.RasterCount)))
+            szy = ds.RasterYSize
+        else:
+            n = int(ds.RasterYSize / szx)
+            szy = szx
+        return np.float32(buffer.reshape((n, szy, szx, ds.RasterCount)))
 
     @staticmethod
     def _read_extract_as_np_arr(ds, offset):
