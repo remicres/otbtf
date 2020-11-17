@@ -7,6 +7,45 @@ import gdal
 import logging
 from abc import ABC, abstractmethod
 
+
+"""
+------------------------------------------------------- Helpers --------------------------------------------------------
+"""
+
+
+def gdal_open(filename):
+    """
+    Open a GDAL raster
+    @param filename: raster file
+    @return: GDAL ds instance
+    """
+    ds = gdal.Open(filename)
+    if ds is None:
+        raise Exception("Unable to open file {}".format(filename))
+    return ds
+
+
+def read_as_np_arr(ds, as_patches=True):
+    """
+    Read a GDAL raster as numpy array
+    @param ds: GDAL ds instance
+    @param as_patches: if True, the returned numpy array has the following shape (n, psz_x, psz_x, nb_channels). If
+        False, the shape is (1, psz_y, psz_x, nb_channels)
+    @return: Numpy array of dim 4
+    """
+    buffer = ds.ReadAsArray()
+    szx = ds.RasterXSize
+    if len(buffer.shape) == 3:
+        buffer = np.transpose(buffer, axes=(1, 2, 0))
+    if not as_patches:
+        n = 1
+        szy = ds.RasterYSize
+    else:
+        n = int(ds.RasterYSize / szx)
+        szy = szx
+    return np.float32(buffer.reshape((n, szy, szx, ds.RasterCount)))
+
+
 """
 ---------------------------------------------------- Buffer class ------------------------------------------------------
 """
@@ -175,7 +214,7 @@ class PatchesImagesReader(PatchesReaderBase):
         for src_key, src_filenames in filenames_dict.items():
             self.ds[src_key] = []
             for src_filename in src_filenames:
-                self.ds[src_key].append(self.gdal_open(src_filename))
+                self.ds[src_key].append(gdal_open(src_filename))
 
         if len(set([len(ds_list) for ds_list in self.ds.values()])) != 1:
             raise Exception("Each source must have the same number of patches images")
@@ -205,7 +244,7 @@ class PatchesImagesReader(PatchesReaderBase):
 
         # if use_streaming is False, we store in memory all patches images
         if not self.use_streaming:
-            patches_list = {src_key: [self.read_as_np_arr(ds) for ds in self.ds[src_key]] for src_key in self.ds}
+            patches_list = {src_key: [read_as_np_arr(ds) for ds in self.ds[src_key]] for src_key in self.ds}
             self.patches_buffer = {src_key: np.concatenate(patches_list[src_key], axis=-1) for src_key in self.ds}
 
     def _get_ds_and_offset_from_index(self, index):
@@ -218,29 +257,8 @@ class PatchesImagesReader(PatchesReaderBase):
         return i, offset
 
     @staticmethod
-    def gdal_open(filename):
-        ds = gdal.Open(filename)
-        if ds is None:
-            raise Exception("Unable to open file {}".format(filename))
-        return ds
-
-    @staticmethod
     def _get_nb_of_patches(ds):
         return int(ds.RasterYSize / ds.RasterXSize)
-
-    @staticmethod
-    def read_as_np_arr(ds, as_patches=True):
-        buffer = ds.ReadAsArray()
-        szx = ds.RasterXSize
-        if len(buffer.shape) == 3:
-            buffer = np.transpose(buffer, axes=(1, 2, 0))
-        if not as_patches:
-            n = 1
-            szy = ds.RasterYSize
-        else:
-            n = int(ds.RasterYSize / szx)
-            szy = szx
-        return np.float32(buffer.reshape((n, szy, szx, ds.RasterCount)))
 
     @staticmethod
     def _read_extract_as_np_arr(ds, offset):
