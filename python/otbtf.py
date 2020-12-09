@@ -399,6 +399,7 @@ class Dataset:
         self.tot_wait = 0
         self.miner_thread = self._summon_miner_thread()
         self.read_lock = multiprocessing.Lock()
+        self.mining_lock = multiprocessing.Lock()
         self._dump()
 
         # Prepare tf dataset for one epoch
@@ -410,7 +411,7 @@ class Dataset:
         """
         :return: the dataset statistics, computed by the patches reader
         """
-        with self.read_lock:
+        with self.mining_lock:
             return self.patches_reader.get_stats()
 
     def read_one_sample(self):
@@ -455,8 +456,9 @@ class Dataset:
         while not self.miner_buffer.is_complete():
             try:
                 index = next(self.iterator)
-                new_sample = self.patches_reader.get_sample(index=index)
-                self.miner_buffer.add(new_sample)
+                with self.mining_lock:
+                    new_sample = self.patches_reader.get_sample(index=index)
+                    self.miner_buffer.add(new_sample)
             except Exception as e:
                 logging.warning("Error during collecting samples: {}".format(e))
 
