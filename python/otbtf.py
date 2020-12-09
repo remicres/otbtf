@@ -410,7 +410,8 @@ class Dataset:
         """
         :return: the dataset statistics, computed by the patches reader
         """
-        return self.patches_reader.get_stats()
+        with self.read_lock:
+            return self.patches_reader.get_stats()
 
     def read_one_sample(self):
         """
