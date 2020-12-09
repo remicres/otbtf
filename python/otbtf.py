@@ -394,12 +394,12 @@ class Dataset:
 
         # buffers
         self.miner_buffer = Buffer(buffer_length)
+        self.mining_lock = multiprocessing.Lock()
         self.consumer_buffer = Buffer(buffer_length)
         self.consumer_buffer_pos = 0
         self.tot_wait = 0
         self.miner_thread = self._summon_miner_thread()
         self.read_lock = multiprocessing.Lock()
-        self.mining_lock = multiprocessing.Lock()
         self._dump()
 
         # Prepare tf dataset for one epoch
