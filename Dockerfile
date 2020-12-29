@@ -27,7 +27,7 @@ RUN if $GUI ; then \
 ### Python3 link
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
 
-# NumPy version is a problem with system's gdal dep - may be venv would better than just being first in PYTHONPATH
+# NumPy version is a problem with system's gdal dep - venv could be a better option than just being first in PYTHONPATH
 RUN pip install --no-cache-dir -U numpy future pip six mock wheel \
  && pip install --no-cache-dir keras_applications --no-deps \
  && pip install --no-cache-dir keras_preprocessing --no-deps
