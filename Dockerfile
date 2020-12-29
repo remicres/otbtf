@@ -86,7 +86,7 @@ RUN git clone https://github.com/tensorflow/tensorflow.git -b $TF \
  && cp -r bazel-tensorflow/external/eigen_archive/Eigen /opt/otbtf/include \
  && cp -r tensorflow/lite/tools/make/downloads/absl/absl /opt/otbtf/include \
  # Cleaning
- && ( $KEEP_SRC_TF || rm -vrf /src/tf ) \
+ && ( $KEEP_SRC_TF || rm -rf /src/tf ) \
  && rm -rf /root/.cache/ /tmp/*
 
 ### Build protobuf
@@ -148,7 +148,7 @@ RUN cd /src/otb/build/OTB/build \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  # Cleaning
  && ( $GUI || rm -rf /opt/otbtf/bin/otbgui* ) \
- && ( $KEEP_SRC_OTB || rm -vrf /src/otb ) \
+ && ( $KEEP_SRC_OTB || rm -rf /src/otb ) \
  && rm -rf /root/.cache /tmp/*
 
 # ----------------------------------------------------------------------------
