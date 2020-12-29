@@ -22,7 +22,7 @@ export GCC_HOST_COMPILER_PATH=$(which gcc)
 export TF_NEED_MKL=0
 #export TF_DOWNLOAD_MKL=1
 
-# Optimization is controled with "bazel -c opt"
+# Optimization is controlled with bazel -c opt
 #export CC_OPT_FLAGS="-march=native"
 
 export CUDA_TOOLKIT_PATH=$(find /usr/local -maxdepth 1 -type d -name 'cuda-*')
