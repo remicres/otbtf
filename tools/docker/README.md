@@ -7,14 +7,14 @@ In order to set persistent environment variables you'll need to edit the [Docker
 ## Bazel remote cache daemon
 This will prevent rebuilding TF for each docker build --network='host', even if docker cache was purged (after `docker system prune`).  
 In order to use cache, the bazel cmd (and env) has to be exactly the same, any change in [build-env-tf.sh](build-env-tf.sh) and `--build-arg` (if related to bazel env) will result in a complete new build.  
-You'll need to add ` --network='host'` to the docker build command in order to see localhost ports (the other way is a virtual docker network / bridge with a different IP).  
+You'll need to add ` --network='host'` to the docker build command in order to see localhost ports (the other way is a virtual docker network / bridge so it would be a different IP than 127.0.0.1).  
 
 ```bash
 mkdir -p $HOME/.cache/bazel
 docker run --detach -u 1000:1000 -v $HOME/.cache/bazel:/data -p 9090:8080 buchgr/bazel-remote-cache --max_size=20
 ```
 Here with max 20GB but 12GB should be enough in order to save both GPU and CPU build artifacts.  
-The cache should persist in your .cache/bazel folder next to the local (host) bazel cache if it exists but they won't be merged (I don't know if it is possible, but you could just use a dummy remote cache the same way, if you need to compile from host instead of docker).  
+The cache should persist in your `.cache/bazel` folder next to the local bazel cache if it exists but they won't be merged (I don't know if it is possible, but you could use a dummy remote cache the same way if you need to compile from host instead of docker).  
 
 
 ## Default arguments
@@ -48,15 +48,14 @@ docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=nvidia/cuda:11.1
 
 # Enable MKL
 BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs --config=mkl --copt='-mfpmath=both'"
-docker build --network='host' -t otbtf:cpu-mkl--build-arg BZL_CONFIG=$BZL_CONFIG \
-    --build-arg BASE_IMG=nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04 .
+docker build --network='host' -t otbtf:cpu-mkl --build-arg BZL_CONFIG=$BZL_CONFIG --build-arg BASE_IMG=nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04 .
 
 # Manage versions
 docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04 \
     --build-arg TF=r2.1 --build-arg BAZEL=0.29.1 --build-arg PROTOBUF=3.8.0 --build-arg OTB=release-7.1 \
     --build-arg BAZEL_OPTIONS="--noincompatible_do_not_split_linking_cmdline -c opt --verbose_failures" .
 # In order to build olstable you'll need to modify the Dockerfile to clone the repo at the desired branch 
-# instead of copying files from the docker build --network='host' context
+# instead of copying files from the docker build context
 
 # Build with GUI (disabled by default)
 docker build --network='host' -t otbtf:cpu-gui --build-arg BASE_IMG=ubuntu:20.04 --build-arg GUI=true .
