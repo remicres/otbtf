@@ -26,7 +26,6 @@ BAZEL=3.1.0
 TF=r2.4
 PROTOBUF=3.9.2
 OTB=release-7.2
-USE_MKL=true
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow:libtensorflow_framework.so //tensorflow/tools/pip_package:build_pip_package"
 BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs"
 BZL_OPTIONS="--compilation_mode opt --verbose_failures --remote_cache=http://localhost:9090"
@@ -41,11 +40,16 @@ SUDO=true
 # Build for CPU using default Dockerfiles args (without AWS, HDFS and GCP support)
 docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:20.04 .
 
-# Clear bazel config var 
+# Clear bazel config var
 docker build --network='host' -t otbtf:cpu-dev --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIG="" KEEP_SRC_OTB=true .
 
 # Build with latest CUDA
 docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04 .
+
+# Enable MKL
+BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs --config=mkl --copt='-mfpmath=both'"
+docker build --network='host' -t otbtf:cpu-mkl--build-arg BZL_CONFIG=$BZL_CONFIG \
+    --build-arg BASE_IMG=nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04 .
 
 # Manage versions
 docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04 \

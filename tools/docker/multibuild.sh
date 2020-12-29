@@ -20,8 +20,9 @@ docker build --network='host' -t registry.gitlab.com/latelescop/docker/otbtf:r$R
 # CPU
 docker build --network='host' -t registry.gitlab.com/latelescop/docker/otbtf:r$RELEASE:cpu --build-arg BASE_IMG=$IMG .
 docker build --network='host' -t registry.gitlab.com/latelescop/docker/otbtf:r$RELEASE:cpu-dev --build-arg BASE_IMG=$IMG --build-arg KEEP_SRC_OTB=true .
-# MKL may be enabled by default but this arg is checked before setting bazel flags and copying files
-#docker build --network='host' -t registry.gitlab.com/latelescop/docker/otbtf:r$RELEASE:cpu-mkl --build-arg BASE_IMG=$IMG --build-arg MKL=true .
+# Enable MKL with bazel config flag
+#BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs --config=mkl --copt='-mfpmath=both'"
+#docker build --network='host' -t registry.gitlab.com/latelescop/docker/otbtf:r$RELEASE:cpu-mkl --build-arg BASE_IMG=$IMG --build-arg BZL_CONFIG=$CONF .
 
 docker login registry.gitlab.com
 
@@ -33,4 +34,3 @@ docker push registry.gitlab.com/latelescop/docker/otbtf:r$RELEASE:cpu-dev
 docker push registry.gitlab.com/latelescop/docker/otbtf:r$RELEASE:gpu
 docker push registry.gitlab.com/latelescop/docker/otbtf:r$RELEASE:gpu-dev
 #docker push registry.gitlab.com/latelescop/docker/otbtf:r$RELEASE:gpu-gui
-

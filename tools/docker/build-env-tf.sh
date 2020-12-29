@@ -18,17 +18,12 @@ export TF_NEED_OPENCL_SYCL=0
 export TF_SET_ANDROID_WORKSPACE=0
 export TF_NEED_COMPUTECPP=0
 export GCC_HOST_COMPILER_PATH=$(which gcc)
+# For MKL support, edit BZL_CONFIG: --config=mkl --copt='-mfpmath=both' 
+export TF_NEED_MKL=0
+#export TF_DOWNLOAD_MKL=1
+
 # Optimization is controled with "bazel -c opt"
 #export CC_OPT_FLAGS="-march=native"
-
-if [ $USE_MKL == true ]; then
-    export BZL_CONFIG=$BZL_CONFIG" --config=mkl --copt=\"-mfpmath=both\""
-    export TF_NEED_MKL=1
-    export TF_DOWNLOAD_MKL=1
-else
-    export TF_NEED_MKL=0
-    export TF_DOWNLOAD_MKL=0
-fi
 
 export CUDA_TOOLKIT_PATH=$(find /usr/local -maxdepth 1 -type d -name 'cuda-*')
 if  [ ! -z $CUDA_TOOLKIT_PATH ] ; then
@@ -36,7 +31,6 @@ if  [ ! -z $CUDA_TOOLKIT_PATH ] ; then
     export TF_CUDA_VERSION=$(echo $CUDA_TOOLKIT_PATH | sed -r 's/.*\/cuda-([0-9]{2}\.[0-9])/\1/')
     export TF_CUDA_CLANG=0
     export TF_CUDA_COMPUTE_CAPABILITIES="8.6,7.5,6.1,5.2"
-    export BZL_CONFIG=$BZL_CONFIG" --config=cuda"
     export TF_NEED_CUDA=1
     export TF_NEED_TENSORRT=0
     export CUDNN_INSTALL_PATH="/usr/"
