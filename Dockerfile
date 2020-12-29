@@ -52,7 +52,6 @@ RUN wget https://github.com/bazelbuild/bazel/releases/download/$BAZEL/bazel-$BAZ
 
 ### TF
 ARG TF=r2.4
-ARG USE_MKL=false
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow:libtensorflow_framework.so //tensorflow/tools/pip_package:build_pip_package"
 ARG BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs"
 ARG BZL_OPTIONS="--compilation_mode opt --verbose_failures --remote_cache=http://localhost:9090"
@@ -79,16 +78,18 @@ RUN git clone https://github.com/tensorflow/tensorflow.git -b $TF \
  && ./tensorflow/lite/tools/make/download_dependencies.sh \
  && ./tensorflow/lite/tools/make/build_lib.sh \
  && mkdir -p /opt/otbtf/lib /opt/otbtf/include/tensorflow \
- && cp bazel-bin/tensorflow/libtensorflow_cc.so* /opt/otbtf/lib \
- && cp bazel-bin/tensorflow/libtensorflow_framework.so* /opt/otbtf/lib \
- && cp -r tensorflow/cc /opt/otbtf/include/tensorflow \
- && cp -r tensorflow/core /opt/otbtf/include/tensorflow \
- && cp -r third_party /opt/otbtf/include \
- && cp -r bazel-tensorflow/external/eigen_archive/unsupported /opt/otbtf/include \
- && cp -r bazel-tensorflow/external/eigen_archive/Eigen /opt/otbtf/include \
- && cp -r tensorflow/lite/tools/make/downloads/absl/absl /opt/otbtf/include \
- && ( ! $USE_MKL || (cp -r bazel-tensorflow/external/mkl_linux/lib/* /opt/otbtf/lib/ \
-                  && cp -r bazel-tensorflow/external/mkl_linux/include/* /opt/otbtf/include/ ) ) \
+ && cp -v bazel-bin/tensorflow/libtensorflow_cc.so* /opt/otbtf/lib \
+ && cp -v bazel-bin/tensorflow/libtensorflow_framework.so* /opt/otbtf/lib \
+ && cp -vr tensorflow/cc /opt/otbtf/include/tensorflow \
+ && cp -vr tensorflow/core /opt/otbtf/include/tensorflow \
+ && cp -vr third_party /opt/otbtf/include \
+ && cp -vr bazel-tensorflow/external/eigen_archive/unsupported /opt/otbtf/include \
+ && cp -vr bazel-tensorflow/external/eigen_archive/Eigen /opt/otbtf/include \
+ && cp -vr tensorflow/lite/tools/make/downloads/absl/absl /opt/otbtf/include \
+ && if [ -e bazel-tensorflow/external/mkl_linux/ ]; then \
+       cp -vr bazel-tensorflow/external/mkl_linux/lib/* /opt/otbtf/lib/ \
+       && cp -vr bazel-tensorflow/external/mkl_linux/include/* /opt/otbtf/include/ ; \
+    fi \
  # Cleaning
  #&& mv /tmp/tensorflow_pkg /opt/otbtf/pip_pkg \
  && ( $KEEP_SRC_TF || rm -rf /src/tf ) \
