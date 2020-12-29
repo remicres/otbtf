@@ -39,16 +39,16 @@ SUDO=true
 ## Build examples
 ```bash
 # Build for CPU using default Dockerfiles args (without AWS, HDFS and GCP support)
-docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:20.04
+docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:20.04 .
 
 # Clear bazel config var 
 docker build --network='host' -t otbtf:cpu-dev --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIG="" KEEP_SRC_OTB=true .
 
 # Build with latest CUDA
-docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04
+docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04 .
 
 # Manage versions
-docker build --network='host' otbtf:oldstable-gpu --build-arg BASE_IMG cuda:10.1-cudnn7-devel-ubuntu18.04 \
+docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04 \
     --build-arg TF=r2.1 --build-arg BAZEL=0.29.1 --build-arg PROTOBUF=3.8.0 --build-arg OTB=release-7.1 \
     --build-arg BAZEL_OPTIONS="--noincompatible_do_not_split_linking_cmdline -c opt --verbose_failures" .
 # In order to build olstable you'll need to modify the Dockerfile to clone the repo at the desired branch 
