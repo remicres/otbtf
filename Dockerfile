@@ -1,10 +1,10 @@
-# Configurable Dockerfile with multi-stage build - Author: Vincent Delbar
+##### Configurable Dockerfile with multi-stage build - Author: Vincent Delbar
 ##############################################################################
 ARG BASE_IMG
-# Mandatory, tested with ubuntu:20.04 and nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04
+# Mandatory, ubuntu:20.04 and nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04
 
 # ----------------------------------------------------------------------------
-# Init base stage, will be cloned as intermediate env
+# Init base stage - will be cloned as intermediate env
 # ----------------------------------------------------------------------------
 FROM $BASE_IMG AS otbtf-base
 WORKDIR /tmp
@@ -22,19 +22,18 @@ ARG GUI=false
 RUN if $GUI ; then \
         apt-get update -y \
         && cat build-deps-gui.txt | xargs apt-get install --no-install-recommends -y \
-        && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* ; \
-    fi
+        && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* ; fi
 
 ### Python3 link
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
 
-# NumPy version is a problem with system's gdal deps (v1.17), may be venv is a better solution than just being first in PYTHONPATH
+# NumPy version is a problem with system's gdal dep - may be venv would better than just being first in PYTHONPATH
 RUN pip install --no-cache-dir -U numpy future pip six mock wheel \
  && pip install --no-cache-dir keras_applications --no-deps \
  && pip install --no-cache-dir keras_preprocessing --no-deps
 
 # ----------------------------------------------------------------------------
-# Tmp builder stage (dangling cache should persist until "docker system prune")
+# Tmp builder stage - dangling cache should persist until "docker system prune"
 # ----------------------------------------------------------------------------
 FROM otbtf-base AS builder
 
@@ -55,13 +54,13 @@ ARG TF=r2.4
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow:libtensorflow_framework.so //tensorflow/tools/pip_package:build_pip_package"
 ARG BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs"
 ARG BZL_OPTIONS="--compilation_mode opt --verbose_failures --remote_cache=http://localhost:9090"
-ARG KEEP_SRC_TF=false
 
 RUN mkdir /src/tf
 WORKDIR /src/tf
 COPY tools/docker/build-env-tf.sh ./
 
 # Build
+ARG KEEP_SRC_TF=false
 RUN git clone https://github.com/tensorflow/tensorflow.git -b $TF \
  && cd tensorflow \
  && export PATH=$PATH:/opt/otbtf/bin \
@@ -88,10 +87,8 @@ RUN git clone https://github.com/tensorflow/tensorflow.git -b $TF \
  && cp -vr tensorflow/lite/tools/make/downloads/absl/absl /opt/otbtf/include \
  && if [ -e bazel-tensorflow/external/mkl_linux/ ]; then \
        cp -vr bazel-tensorflow/external/mkl_linux/lib/* /opt/otbtf/lib/ \
-       && cp -vr bazel-tensorflow/external/mkl_linux/include/* /opt/otbtf/include/ ; \
-    fi \
+       && cp -vr bazel-tensorflow/external/mkl_linux/include/* /opt/otbtf/include/ ; fi \
  # Cleaning
- #&& mv /tmp/tensorflow_pkg /opt/otbtf/pip_pkg \
  && ( $KEEP_SRC_TF || rm -rf /src/tf ) \
  && rm -rf /root/.cache/ /tmp/*
 
@@ -105,7 +102,7 @@ RUN cd /tmp \
  && make install -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  && rm -rf /root/.cache/ /tmp/*
 
-# Link python site-packages in order to build with any minor version bump
+# Link python site-packages in order to build with any ubuntu distribution
 RUN cd /opt/otbtf/lib/ && ln -s $(find . -maxdepth 1 -type d -name "python3.*") python3
 
 ### OTB
@@ -116,7 +113,7 @@ RUN mkdir /src/otb
 WORKDIR /src/otb
 COPY tools/docker/build-flags-otb.txt ./
 
-# SuperBuild
+# SuperBuild OTB deps
 RUN git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git -b $OTB \
  && mkdir -p build \
  && cd build \
@@ -135,8 +132,8 @@ RUN mkdir /src/otb/otb/Modules/Remote/otbtf
 COPY . /src/otb/otb/Modules/Remote/otbtf
 #RUN cd /src/otb/otb/Modules/Remote && git clone https://github.com/remicres/otbtf.git
 
+# Build OTB
 ARG KEEP_SRC_OTB=false
-# Rebuild OTB
 RUN cd /src/otb/build/OTB/build \
  && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/otbtf/lib \
  && export PATH=$PATH:/opt/otbtf/bin \
@@ -185,8 +182,7 @@ COPY --chown=otbuser python pyotbtf
 ARG SUDO=true
 RUN if $SUDO; then \
         usermod -a -G sudo otbuser \
-        && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; \
-    fi
+        && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
 
 # This won't prevent ownership problems when using volume - if you're not UID 1000, see "docker [run|create] -u $UID:$GID"
 USER otbuser
@@ -195,9 +191,9 @@ USER otbuser
 RUN python -c 'import tensorflow, otbtf, tricks, otbApplication'
 
 ### Optional custom env
-# Required with CUDA<11 + TF<=2.2 for RTX GPU
+
+# Required with CUDA<11 + TF<=2.2 for RTX GPUs
 #ENV TF_FORCE_GPU_ALLOW_GROWTH=true
 
-# Enable auto XLA JIT (CPU support and multi GPU is experimental)
+# Enable auto XLA JIT (CPU support and multi GPU is experimental) - for CPU add " --tf_xla_cpu_global_jit"
 #ENV TF_XLA_FLAGS="--tf_xla_auto_jit=2"
-# For CPU add " --tf_xla_cpu_global_jit"
