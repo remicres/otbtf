@@ -77,19 +77,16 @@ RUN git clone https://github.com/tensorflow/tensorflow.git -b $TF \
  && ./tensorflow/lite/tools/make/download_dependencies.sh \
  && ./tensorflow/lite/tools/make/build_lib.sh \
  && mkdir -p /opt/otbtf/lib /opt/otbtf/include/tensorflow \
- && cp -v bazel-bin/tensorflow/libtensorflow_cc.so* /opt/otbtf/lib \
- && cp -v bazel-bin/tensorflow/libtensorflow_framework.so* /opt/otbtf/lib \
- && cp -vr tensorflow/cc /opt/otbtf/include/tensorflow \
- && cp -vr tensorflow/core /opt/otbtf/include/tensorflow \
- && cp -vr third_party /opt/otbtf/include \
- && cp -vr bazel-tensorflow/external/eigen_archive/unsupported /opt/otbtf/include \
- && cp -vr bazel-tensorflow/external/eigen_archive/Eigen /opt/otbtf/include \
- && cp -vr tensorflow/lite/tools/make/downloads/absl/absl /opt/otbtf/include \
- && if [ -e bazel-tensorflow/external/mkl_linux/ ]; then \
-       cp -vr bazel-tensorflow/external/mkl_linux/lib/* /opt/otbtf/lib/ \
-       && cp -vr bazel-tensorflow/external/mkl_linux/include/* /opt/otbtf/include/ ; fi \
+ && cp bazel-bin/tensorflow/libtensorflow_cc.so* /opt/otbtf/lib \
+ && cp bazel-bin/tensorflow/libtensorflow_framework.so* /opt/otbtf/lib \
+ && cp -r tensorflow/cc /opt/otbtf/include/tensorflow \
+ && cp -r tensorflow/core /opt/otbtf/include/tensorflow \
+ && cp -r third_party /opt/otbtf/include \
+ && cp -r bazel-tensorflow/external/eigen_archive/unsupported /opt/otbtf/include \
+ && cp -r bazel-tensorflow/external/eigen_archive/Eigen /opt/otbtf/include \
+ && cp -r tensorflow/lite/tools/make/downloads/absl/absl /opt/otbtf/include \
  # Cleaning
- && ( $KEEP_SRC_TF || rm -rf /src/tf ) \
+ && ( $KEEP_SRC_TF || rm -vrf /src/tf ) \
  && rm -rf /root/.cache/ /tmp/*
 
 ### Build protobuf
@@ -151,7 +148,7 @@ RUN cd /src/otb/build/OTB/build \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  # Cleaning
  && ( $GUI || rm -rf /opt/otbtf/bin/otbgui* ) \
- && ( $KEEP_SRC_OTB || rm -rf /src/otb ) \
+ && ( $KEEP_SRC_OTB || rm -vrf /src/otb ) \
  && rm -rf /root/.cache /tmp/*
 
 # ----------------------------------------------------------------------------
