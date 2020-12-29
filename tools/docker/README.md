@@ -4,7 +4,7 @@ You may build a custom docker image using `--build-arg` and [build-env-tf.sh](bu
 In order to set persistent environment variables you'll need to edit the [Dockerfile](../../Dockerfile).  
 
 
-## Bazel remote cache deamon
+## Bazel remote cache daemon
 This will prevent rebuilding TF for each docker build --network='host', even if docker cache was purged (after `docker system prune`).  
 In order to use cache, the bazel cmd (and env) has to be exactly the same, any change in [build-env-tf.sh](build-env-tf.sh) and `--build-arg` (if related to bazel env) will result in a complete new build.  
 You'll need to add ` --network='host'` to the docker build command in order to see localhost ports (the other way is a virtual docker network / bridge with a different IP).  
@@ -14,7 +14,7 @@ mkdir -p $HOME/.cache/bazel
 docker run --detach -u 1000:1000 -v $HOME/.cache/bazel:/data -p 9090:8080 buchgr/bazel-remote-cache --max_size=20
 ```
 Here with max 20GB but 12GB should be enough in order to save both GPU and CPU build artifacts.  
-The cache should persist in your .cache/bazel folder next to the local (host) bazel cache if it exists but it they won't be merged (I don't know if it is possible, but you could just use the remote cache the same way if you need to compile from host instead of docker).  
+The cache should persist in your .cache/bazel folder next to the local (host) bazel cache if it exists but they won't be merged (I don't know if it is possible, but you could just use a dummy remote cache the same way, if you need to compile from host instead of docker).  
 
 
 ## Default arguments
@@ -61,7 +61,7 @@ docker build --network='host' -t otbtf:cpu-gui --build-arg BASE_IMG=ubuntu:20.04
 ### Debug build
 If you failed to build, you can still access the last layer and check CMake errors and logs.  
 Run `docker images`, find the latest layer id, and run a tmp container with it (example: `docker run -it d60496d9612e bash`).  
-You may also need to split some multi-commands layers in the Dockerfile in order to see files before they get removed.  
+You may also need to split some multi-command layers in the Dockerfile in order to see logs before they get removed.  
 If you run into "Out Of Memory errors" during SuperBuild you should decrease CPU_RATIO (ex 0.75).  
 
 ## Container examples
