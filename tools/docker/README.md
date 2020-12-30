@@ -43,7 +43,7 @@ Then ust add ` --network='host'` to the docker build command, or connect bazel t
 docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:20.04 .
 
 # Clear bazel config var
-docker build --network='host' -t otbtf:cpu-dev --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIG="" KEEP_SRC_OTB=true .
+docker build --network='host' -t otbtf:cpu-dev --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIG= KEEP_SRC_OTB=true .
 
 # Build with latest CUDA
 docker build --network='host' -t otbtf:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04 KEEP_SRC_OTB=true .
