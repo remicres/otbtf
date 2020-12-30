@@ -162,11 +162,15 @@ COPY --from=builder /opt/otbtf /opt/otbtf
 # /src will be empty, except with true KEEP_*_SRC variables
 COPY --from=builder /src /src
 
-# Persistent environment variables
+# Persistent environment variables (all users)
 ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/otb/python:/home/otbuser/pyotbtf:$PYTHONPATH"
 ENV PATH="/opt/otbtf/bin:$PATH"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
+# Required with CUDA<11 + TF<=2.2 for RTX GPUs
+#ENV TF_FORCE_GPU_ALLOW_GROWTH=true
+# Enable auto XLA JIT (CPU support and multi GPU is experimental) - for CPU add " --tf_xla_cpu_global_jit"
+#ENV TF_XLA_FLAGS="--tf_xla_auto_jit=2"
 
 # Create default user
 RUN useradd -s /bin/bash -m otbuser
@@ -183,14 +187,7 @@ RUN if $SUDO; then \
 
 # This won't prevent ownership problems when using volume - if you're not UID 1000, see "docker [run|create] -u $UID:$GID"
 USER otbuser
+# User variables goes here
 
 # Test python imports
 RUN python -c 'import tensorflow, otbtf, tricks, otbApplication'
-
-### Optional custom env
-
-# Required with CUDA<11 + TF<=2.2 for RTX GPUs
-#ENV TF_FORCE_GPU_ALLOW_GROWTH=true
-
-# Enable auto XLA JIT (CPU support and multi GPU is experimental) - for CPU add " --tf_xla_cpu_global_jit"
-#ENV TF_XLA_FLAGS="--tf_xla_auto_jit=2"
