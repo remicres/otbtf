@@ -52,7 +52,7 @@ RUN wget https://github.com/bazelbuild/bazel/releases/download/$BAZEL/bazel-$BAZ
 ### TF
 ARG TF=r2.4
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow:libtensorflow_framework.so //tensorflow/tools/pip_package:build_pip_package"
-ARG BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs"
+ARG BZL_CONFIG="--config=opt"
 ARG BZL_OPTIONS="--compilation_mode opt --verbose_failures --remote_cache=http://localhost:9090"
 
 RUN mkdir /src/tf
