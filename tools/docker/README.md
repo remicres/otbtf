@@ -2,7 +2,7 @@
 Docker build has to be called from the root of the repository (i.e. `docker build .` or `bash tools/docker/multibuild.sh`).  
 You may build a custom docker image using `--build-arg` and [build-env-tf.sh](build-env-tf.sh).  
 Regarding OTB, you can edit cmake flags in [build-flags-otb.txt](build-flags-otb.txt) and the `OTB` argument for the git branch to clone.  
-If you need additional Ubuntu packages see [build-deps-cli.txt](build-deps-cli.txt) and [build-deps-gui.txt](build-deps-gui.txt) for GUI related packages.
+If you need additional Ubuntu packages see [build-deps-cli.txt](build-deps-cli.txt) and [build-deps-gui.txt](build-deps-gui.txt) for GUI related packages, it is disabled by default in order to save space, and because docker xvfb isn't working properly with opengl.
 
 ## Default arguments
 ```
@@ -95,9 +95,9 @@ docker start -i otbtf-gpu-dev
 
 ## GUI
 ```bash
-# With GUI (disabled by default), docker is going instable if using GPU img but otbgui seems ok.
-# xvfb isn't properly configured with NVIDIA drivers and monteverdi yields GLX errors, we may need more apt packages and some ENV tricks
+# With GUI (disabled by default): otbgui seems ok but monteverdi (opengl) isn't working
 docker build --network='host' -t otbtf:cpu-gui --build-arg BASE_IMG=ubuntu:20.04 --build-arg GUI=true .
 docker create -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY -it --name otbtf-gui otbtf:cpu-gui
-docker start -i otbtf-gui --volume /path/to/mount:/container/path otbtf-gui
+docker start -i otbtf-gui
+$ mapla
 ```
