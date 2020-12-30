@@ -1,30 +1,31 @@
 # TF - bazel build env variables
 
+# Optimization is controlled with bazel -c opt
+#export CC_OPT_FLAGS="-march=native"
+export GCC_HOST_COMPILER_PATH=$(which gcc)
 export PYTHON_BIN_PATH=$(which python)
 export PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])')"
 export TF_ENABLE_XLA=1
-export TF_NEED_CUDA=0
 export TF_NEED_MPI=0
 export TF_NEED_GDR=0
-export TF_NEED_S3=0
 export TF_NEED_KAFKA=0
 export TF_NEED_OPENCL=0
 export TF_NEED_JEMALLOC=1
 export TF_NEED_VERBS=0
 export TF_NEED_OPENCL_SYCL=0
-export TF_SET_ANDROID_WORKSPACE=0
 export TF_NEED_COMPUTECPP=0
-export GCC_HOST_COMPILER_PATH=$(which gcc)
-# You could use BZL_CONFIG=" --config=nogcp --config=noaws --config=nohdfs"
-export TF_NEED_AWS=0
-export TF_NEED_GCP=0
-export TF_NEED_HDFS=0
-# For MKL support, edit BZL_CONFIG: --config=mkl --copt='-mfpmath=both'
+export TF_SET_ANDROID_WORKSPACE=0
+# We need to set BZL_CONFIG=" --config=nogcp --config=noaws --config=nohdfs"
+#export TF_NEED_S3=0
+#export TF_NEED_AWS=0
+#export TF_NEED_GCP=0
+#export TF_NEED_HDFS=0
+# For MKL support BZL_CONFIG+=" --config=mkl --copt='-mfpmath=both'"
 #export TF_DOWNLOAD_MKL=1
-export TF_NEED_MKL=0
-# Optimization is controlled with bazel -c opt
-#export CC_OPT_FLAGS="-march=native"
+#export TF_NEED_MKL=0
 
+# GPU
+export TF_NEED_CUDA=0
 export CUDA_TOOLKIT_PATH=$(find /usr/local -maxdepth 1 -type d -name 'cuda-*')
 if  [ ! -z $CUDA_TOOLKIT_PATH ] ; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CUDA_TOOLKIT_PATH/lib64:$CUDA_TOOLKIT_PATH/lib64/stubs"
