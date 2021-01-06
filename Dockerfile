@@ -167,9 +167,11 @@ ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/otb/python:/
 ENV PATH="/opt/otbtf/bin:$PATH"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
-# Required with CUDA<11 + TF<=2.2 for RTX GPUs
+
+# Required with TF<2.4
 #ENV TF_FORCE_GPU_ALLOW_GROWTH=true
-# Enable auto XLA JIT (CPU support and multi GPU is experimental) - for CPU add " --tf_xla_cpu_global_jit"
+
+# Enable auto XLA JIT - will cause cublas errors with CUDA 11.1 (core dump)
 #ENV TF_XLA_FLAGS="--tf_xla_auto_jit=2"
 
 # Create default user
