@@ -9,8 +9,8 @@ IMG=ubuntu:$UBUNTU
 GPU_IMG=nvidia/cuda:$CUDA-cudnn$CUDNN-devel-ubuntu$UBUNTU
 
 # Bazel remote cache daemon
-mkdir -p $HOME/.cache/bazel
-docker run -d -u 1000:1000 -v $HOME/.cache/bazel:/data -p 9090:8080  buchgr/bazel-remote-cache --max_size=20
+mkdir -p $HOME/.cache/bazel_remote
+docker run -d -u 1000:1000 -v $HOME/.cache/bazel_remote:/data -p 9090:8080  buchgr/bazel-remote-cache --max_size=20
 
 # GPU support is enabled if CUDA is found in /usr/local
 docker build --network='host' -t mdl4eo/otbtf$RELEASE:gpu --build-arg BASE_IMG=$GPU_IMG .
