@@ -18,9 +18,9 @@ docker run -d -u 1000:1000 -v $HOME/.cache/bazel-remote:/data -p 9090:8080  buch
 #docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu-dev --build-arg BASE_IMG=$IMG --build-arg KEEP_SRC_OTB=true .
 # Enable MKL with bazel config flag
 CONF="--config=opt --config=nogcp --config=noaws --config=nohdfs --config=mkl --copt='-mfpmath=both'"
-docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu --build-arg BASE_IMG=$IMG --build-arg BZL_CONFIG=$CONF .
+docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu --build-arg BASE_IMG=$IMG --build-arg BZL_CONFIG="$CONF" .
 # Keep OTB src and build files in order to rebuild with other modules
-docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu-dev --build-arg BASE_IMG=$IMG --build-arg BZL_CONFIG=$CONF --build-arg KEEP_SRC_OTB=true .
+docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu-dev --build-arg BASE_IMG=$IMG --build-arg BZL_CONFIG="$CONF" --build-arg KEEP_SRC_OTB=true .
 
 # GPU support is enabled if CUDA is found in /usr/local
 docker build --network='host' -t mdl4eo/otbtf$RELEASE:gpu --build-arg BASE_IMG=$GPU_IMG .
