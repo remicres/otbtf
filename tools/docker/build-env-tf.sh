@@ -14,6 +14,7 @@ export TF_NEED_JEMALLOC=1
 export TF_NEED_VERBS=0
 export TF_NEED_OPENCL_SYCL=0
 export TF_NEED_COMPUTECPP=0
+export TF_NEED_ROCM=0
 export TF_SET_ANDROID_WORKSPACE=0
 # We need to set BZL_CONFIG=" --config=nogcp --config=noaws --config=nohdfs"
 #export TF_NEED_S3=0
@@ -31,7 +32,7 @@ if  [ ! -z $CUDA_TOOLKIT_PATH ] ; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CUDA_TOOLKIT_PATH/lib64:$CUDA_TOOLKIT_PATH/lib64/stubs"
     export TF_CUDA_VERSION=$(echo $CUDA_TOOLKIT_PATH | sed -r 's/.*\/cuda-([0-9]{2}\.[0-9])/\1/')
     export TF_CUDA_CLANG=0
-    export TF_CUDA_COMPUTE_CAPABILITIES="8.6,7.5,6.1,5.2"
+    export TF_CUDA_COMPUTE_CAPABILITIES="7.5,6.1,5.2"
     export TF_NEED_CUDA=1
     export TF_NEED_TENSORRT=0
     export CUDNN_INSTALL_PATH="/usr/"
