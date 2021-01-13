@@ -25,7 +25,7 @@ There is no way make a common build of OTB shared between every docker build, si
 But if you just need to rebuild with different GUI or KEEP_SRC arguments, or may be a different branch of OTBTF, bazel cache may help you to rebuild everything except TF, even if docker cache was purged (after `docker system prune`).  
 In order to recycle the cache, the bazel cmd (and env) has to be exactly the same, any change in [build-env-tf.sh](build-env-tf.sh) and `--build-arg` (if related to bazel env, cuda, mkl, xla...) may result in a complete new build, except if bazel is overwriting your variables with some --config flags.  
 
-Start a cache - here with max 20GB but 15GB should be enough to save 3 TF builds (GPU, CPU and CPU-MKL):  
+Start a cache - here with max 20GB but 12GB should be enough to save 2 TF builds (GPU, and CPU-MKL):  
 ```bash
 mkdir -p $HOME/.cache/bazel-remote
 docker run --detach -u 1000:1000 -v $HOME/.cache/bazel-remote:/data -p 9090:8080 buchgr/bazel-remote-cache --max_size=20
@@ -42,10 +42,10 @@ Then ust add ` --network='host'` to the docker build command, or connect bazel t
 docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:18.04 .
 
 # Clear bazel config var
-docker build --network='host' -t otbtf:cpu-dev --build-arg BASE_IMG=ubuntu:18.04 --build-arg BZL_CONFIG= KEEP_SRC_OTB=true .
+docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:18.04 --build-arg BZL_CONFIG= .
 
 # Build with latest CUDA
-docker build --network='host' -t otbtf:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04 KEEP_SRC_OTB=true .
+docker build --network='host' -t otbtf:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04 --build-arg KEEP_SRC_OTB=true .
 
 # Enable MKL
 BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs --config=mkl --copt='-mfpmath=both'"
@@ -83,12 +83,13 @@ docker exec otbtf-gpu python -c 'import tensorflow as tf; print(tf.test.is_gpu_a
 docker create --gpus=all -it --name otbtf-gpu-dev mdl4eo/otbtf2.1:gpu-dev
 docker start -i otbtf-gpu-dev
 ```
-```
-    $ sudo -i
-    # cd /src/otb/otb/Modules/Remote
-    # git clone https://gitlab.irstea.fr/raffaele.gaetano/otbSelectiveHaralickTextures.git
-    # cd /src/otb/build/OTB/build
-    # cmake -DModule_OTBAppSelectiveHaralickTextures=ON /src/otb/otb && make install -j
+In the container shell:
+```bash
+sudo -i
+cd /src/otb/otb/Modules/Remote
+git clone https://gitlab.irstea.fr/raffaele.gaetano/otbSelectiveHaralickTextures.git
+cd /src/otb/build/OTB/build
+cmake -DModule_OTBAppSelectiveHaralickTextures=ON /src/otb/otb && make install -j
 ```
 
 
