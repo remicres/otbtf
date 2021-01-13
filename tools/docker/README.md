@@ -77,7 +77,7 @@ docker start -i otbtf-gpu
 
 # Run in background
 docker start otbtf-gpu
-docker exec otbtf-gpu otbcli_ImageClassifierFromDeepFeatures
+docker exec otbtf-gpu python -c 'import tensorflow as tf; print(tf.test.is_gpu_available())'
 
 # Rebuild OTB with more modules (e.g. otbSelectiveHaralickTextures)
 docker create --gpus=all -it --name otbtf-gpu-dev mdl4eo/otbtf2.1:gpu-dev
