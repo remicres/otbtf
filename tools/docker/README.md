@@ -11,7 +11,6 @@ CPU_RATIO=0.95
 GUI=false
 BAZEL=3.1.0
 TF=r2.4
-PROTOBUF=3.9.2
 OTB=release-7.2
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow:libtensorflow_framework.so //tensorflow/tools/pip_package:build_pip_package"
 BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs"
@@ -54,7 +53,7 @@ docker build --network='host' -t otbtf:cpu-mkl --build-arg BZL_CONFIG=$BZL_CONFI
 
 # Manage versions
 docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04 \
-    --build-arg TF=r2.1 --build-arg BAZEL=0.29.1 --build-arg PROTOBUF=3.8.0 --build-arg OTB=release-7.2 \
+    --build-arg TF=r2.1 --build-arg BAZEL=0.29.1 --build-arg OTB=release-7.2 \
     --build-arg BAZEL_OPTIONS="--noincompatible_do_not_split_linking_cmdline -c opt --verbose_failures" .
 # You could edit the Dockerfile to clone an old branch of the repo instead of cp new files from the build context
 ```
