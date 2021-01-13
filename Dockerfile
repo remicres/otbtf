@@ -90,7 +90,7 @@ RUN mkdir /src/otb
 WORKDIR /src/otb
 COPY tools/docker/build-flags-otb.txt ./
 
-# SuperBuild OTB deps
+# SuperBuild OTB
 RUN git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git -b $OTB \
  && mkdir -p build \
  && cd build \
@@ -109,7 +109,7 @@ RUN mkdir /src/otb/otb/Modules/Remote/otbtf
 COPY . /src/otb/otb/Modules/Remote/otbtf
 #RUN cd /src/otb/otb/Modules/Remote && git clone https://github.com/remicres/otbtf.git
 
-# Build OTB
+# Rebuild with module
 ARG KEEP_SRC_OTB=false
 RUN cd /src/otb/build/OTB/build \
  && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/otbtf/lib \
@@ -123,8 +123,7 @@ RUN cd /src/otb/build/OTB/build \
       -DTENSORFLOW_CC_LIB=/opt/otbtf/lib/libtensorflow_cc.so \
       -DTENSORFLOW_FRAMEWORK_LIB=/opt/otbtf/lib/libtensorflow_framework.so \
       -Dtensorflow_include_dir=/opt/otbtf/include/tf \
- && cd /src/otb/build/ \
- && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
+ && make install -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  # Cleaning
  && ( $GUI || rm -rf /opt/otbtf/bin/otbgui* ) \
  && ( $KEEP_SRC_OTB || rm -rf /src/otb ) \
