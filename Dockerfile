@@ -160,6 +160,9 @@ WORKDIR /home/otbuser
 
 # Copy python files
 COPY --chown=otbuser python pyotbtf
+# Symlink executable python files in PATH
+RUN for f in /home/otbuser/pyotbtf/*.py; do \
+      if [ -x $f ]; then ln -s $f /opt/otbtf/bin; fi; done
 
 # Give admin rights without password
 ARG SUDO=true
