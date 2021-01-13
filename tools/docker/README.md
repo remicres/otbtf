@@ -28,8 +28,8 @@ In order to recycle the cache, the bazel cmd (and env) has to be exactly the sam
 
 Start a cache - here with max 20GB but 15GB should be enough to save 3 TF builds (GPU, CPU and CPU-MKL):  
 ```bash
-mkdir -p $HOME/.cache/bazel
-docker run --detach -u 1000:1000 -v $HOME/.cache/bazel:/data -p 9090:8080 buchgr/bazel-remote-cache --max_size=20
+mkdir -p $HOME/.cache/bazel-remote
+docker run --detach -u 1000:1000 -v $HOME/.cache/bazel-remote:/data -p 9090:8080 buchgr/bazel-remote-cache --max_size=20
 ```
 The cache should persist in your `.cache/bazel` folder next to the local bazel cache if it exists.  
 They won't merge, I don't know if it is possible, but you can make use of a dummy remote cache as well if you want to recompile from host instead of docker).  
@@ -40,17 +40,17 @@ Then ust add ` --network='host'` to the docker build command, or connect bazel t
 ## Build examples
 ```bash
 # Build for CPU using default Dockerfiles args (without AWS, HDFS and GCP support)
-docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:20.04 .
+docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:18.04 .
 
 # Clear bazel config var
-docker build --network='host' -t otbtf:cpu-dev --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIG= KEEP_SRC_OTB=true .
+docker build --network='host' -t otbtf:cpu-dev --build-arg BASE_IMG=ubuntu:18.04 --build-arg BZL_CONFIG= KEEP_SRC_OTB=true .
 
 # Build with latest CUDA
-docker build --network='host' -t otbtf:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04 KEEP_SRC_OTB=true .
+docker build --network='host' -t otbtf:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04 KEEP_SRC_OTB=true .
 
 # Enable MKL
 BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs --config=mkl --copt='-mfpmath=both'"
-docker build --network='host' -t otbtf:cpu-mkl --build-arg BZL_CONFIG=$BZL_CONFIG --build-arg BASE_IMG=nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04 .
+docker build --network='host' -t otbtf:cpu-mkl --build-arg BZL_CONFIG=$BZL_CONFIG --build-arg BASE_IMG=nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04 .
 
 # Manage versions
 docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04 \
@@ -70,7 +70,7 @@ If you see OOM errors during SuperBuild you should decrease CPU_RATIO (ex 0.75).
 ```bash
 
 # Pull GPU image and create container with mounted home directory
-# (requires apt package nvidia-docker2 and latest CUDA driver - now support RTX 30*)
+# (requires apt package nvidia-docker2 and CUDA>=11.0)
 docker create --gpus=all --volume $HOME:/home/otbuser/volume -it --name otbtf-gpu mdl4eo/otbtf2.1:gpu
 
 # Run interactive
@@ -96,7 +96,7 @@ docker start -i otbtf-gpu-dev
 ## GUI
 ```bash
 # With GUI (disabled by default): otbgui seems ok but monteverdi (opengl) isn't working
-docker build --network='host' -t otbtf:cpu-gui --build-arg BASE_IMG=ubuntu:20.04 --build-arg GUI=true .
+docker build --network='host' -t otbtf:cpu-gui --build-arg BASE_IMG=ubuntu:18.04 --build-arg GUI=true .
 docker create -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY -it --name otbtf-gui otbtf:cpu-gui
 docker start -i otbtf-gui
 $ mapla

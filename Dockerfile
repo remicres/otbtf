@@ -1,7 +1,7 @@
 ##### Configurable Dockerfile with multi-stage build - Author: Vincent Delbar
 ##############################################################################
+# Mandatory arg
 ARG BASE_IMG
-# Mandatory, ubuntu:20.04 and nvidia/cuda:11.1-cudnn8-devel-ubuntu20.04
 
 # ----------------------------------------------------------------------------
 # Init base stage - will be cloned as intermediate env
@@ -12,21 +12,19 @@ WORKDIR /tmp
 ### Sys packages
 COPY tools/docker/build-deps-*.txt ./
 ARG DEBIAN_FRONTEND=noninteractive
-
 # CLI
 RUN apt-get update -y \
  && cat build-deps-cli.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 # GUI
 ARG GUI=false
-RUN if $GUI ; then \
+RUN if $GUI; then \
         apt-get update -y \
         && cat build-deps-gui.txt | xargs apt-get install --no-install-recommends -y \
-        && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* ; fi
+      && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*; fi
 
-### Python3 link
+### Python3
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
-
 # NumPy version is a problem with system's gdal dep - venv could be a better option than just being first in PYTHONPATH
 RUN pip install --no-cache-dir -U numpy future pip six mock wheel \
  && pip install --no-cache-dir keras_applications --no-deps \
@@ -43,7 +41,7 @@ ARG CPU_RATIO=0.95
 RUN mkdir -p /src /opt/otbtf
 WORKDIR /tmp
 
-### Get bazel bin
+### Install bazel
 ARG BAZEL=3.1.0
 RUN wget https://github.com/bazelbuild/bazel/releases/download/$BAZEL/bazel-$BAZEL-installer-linux-x86_64.sh \
  && bash bazel-$BAZEL-installer-linux-x86_64.sh --prefix=/opt/otbtf \
@@ -167,11 +165,9 @@ ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/otb/python:/
 ENV PATH="/opt/otbtf/bin:$PATH"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
-
-# Required with TF<2.4
+# Required with TF<2.4 with RTX GPUs
 #ENV TF_FORCE_GPU_ALLOW_GROWTH=true
-
-# Enable auto XLA JIT - will cause cublas errors with CUDA 11.1 (core dump)
+# Enable auto XLA JIT - may cause cublas errors with CUDA 11 (core dump)
 #ENV TF_XLA_FLAGS="--tf_xla_auto_jit=2"
 
 # Create default user
