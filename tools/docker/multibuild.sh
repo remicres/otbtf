@@ -14,13 +14,13 @@ mkdir -p $HOME/.cache/bazel-remote
 docker run -d -u 1000:1000 -v $HOME/.cache/bazel-remote:/data -p 9090:8080  buchgr/bazel-remote-cache --max_size=20
 
 # CPU (no MKL)
-#docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu --build-arg BASE_IMG=$IMG .
-#docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu-dev --build-arg BASE_IMG=$IMG --build-arg KEEP_SRC_OTB=true .
-# Enable MKL with bazel config flag
-MKL_CONF="--config=nogcp --config=noaws --config=nohdfs --config=mkl --config=opt --copt='-mfpmath=both'"
-docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu --build-arg BASE_IMG=$IMG --build-arg BZL_CONFIG="$MKL_CONF" .
+docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu --build-arg BASE_IMG=$IMG .
+docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu-dev --build-arg BASE_IMG=$IMG --build-arg KEEP_SRC_OTB=true .
+# Enable MKL with bazel config flag (tested on CNN : actually slower than a normal CPU build)
+#MKL_CONF="--config=nogcp --config=noaws --config=nohdfs --config=mkl --config=opt --copt='-mfpmath=both' --copt='-march=native'"
+#docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu --build-arg BASE_IMG=$IMG --build-arg BZL_CONFIG="$MKL_CONF" .
 # Keep OTB src and build files in order to rebuild with other modules
-docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu-dev --build-arg BASE_IMG=$IMG --build-arg BZL_CONFIG="$MKL_CONF" --build-arg KEEP_SRC_OTB=true .
+#docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu-dev --build-arg BASE_IMG=$IMG --build-arg BZL_CONFIG="$MKL_CONF" --build-arg KEEP_SRC_OTB=true .
 
 # GPU support is enabled if CUDA is found in /usr/local
 docker build --network='host' -t mdl4eo/otbtf$RELEASE:gpu --build-arg BASE_IMG=$GPU_IMG .
