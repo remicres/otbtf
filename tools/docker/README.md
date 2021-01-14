@@ -13,8 +13,8 @@ BAZEL=3.1.0
 TF=r2.4
 OTB=release-7.2
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow:libtensorflow_framework.so //tensorflow/tools/pip_package:build_pip_package"
-BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs"
-BZL_OPTIONS="--compilation_mode opt --verbose_failures --remote_cache=http://localhost:9090"
+BZL_CONFIG="--config=nogcp --config=noaws --config=nohdfs --config=opt"
+BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
 KEEP_SRC_TF=false
 KEEP_SRC_OTB=false
 SUDO=true
@@ -41,20 +41,20 @@ Then ust add ` --network='host'` to the docker build command, or connect bazel t
 # Build for CPU using default Dockerfiles args (without AWS, HDFS and GCP support)
 docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:18.04 .
 
-# Clear bazel config var
+# Clear bazel config var (deactivate optimizations and unset noaws/nogcp/nohdfs)
 docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:18.04 --build-arg BZL_CONFIG= .
 
 # Build with latest CUDA
 docker build --network='host' -t otbtf:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04 --build-arg KEEP_SRC_OTB=true .
 
 # Enable MKL
-BZL_CONFIG="--config=opt --config=nogcp --config=noaws --config=nohdfs --config=mkl --copt='-mfpmath=both'"
-docker build --network='host' -t otbtf:cpu-mkl --build-arg BZL_CONFIG=$BZL_CONFIG --build-arg BASE_IMG=nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04 .
+MKL_CONFIG="--config=nogcp --config=noaws --config=nohdfs --config=mkl --config=opt --copt='-mfpmath=both'"
+docker build --network='host' -t otbtf:cpu-mkl --build-arg BZL_CONFIG=$MKL_CONFIG --build-arg BASE_IMG=nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04 .
 
 # Manage versions
 docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04 \
     --build-arg TF=r2.1 --build-arg BAZEL=0.29.1 --build-arg OTB=release-7.2 \
-    --build-arg BAZEL_OPTIONS="--noincompatible_do_not_split_linking_cmdline -c opt --verbose_failures" .
+    --build-arg BAZEL_OPTIONS="--noincompatible_do_not_split_linking_cmdline --verbose_failures" .
 # You could edit the Dockerfile to clone an old branch of the repo instead of cp new files from the build context
 ```
 
