@@ -1,7 +1,7 @@
 # TF - bazel build env variables
 
 # Optimization is controlled with bazel -c opt
-#export CC_OPT_FLAGS="-march=native"
+export CC_OPT_FLAGS="-march=native -Wno-sign-compare"
 export GCC_HOST_COMPILER_PATH=$(which gcc)
 export PYTHON_BIN_PATH=$(which python)
 export PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])')"
