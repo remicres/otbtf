@@ -78,6 +78,8 @@ RUN git clone https://github.com/tensorflow/tensorflow.git -b $TF \
  # Symlink wheel's include dir to /opt/otbtf/include/tf
  && ln -s $(find /opt/otbtf -type d -wholename "*/site-packages/tensorflow/include") /opt/otbtf/include/tf \
  && cp tensorflow/cc/saved_model/tag_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model \
+ # Symlink external libs (required for MKL - libiomp5)
+ && for f in $(find -L /opt -wholename /opt/otbtf/include/tf/**/*.so | xargs); do ln -s $f /opt/otbtf/lib; done \
  # Cleaning
  && ( $KEEP_SRC_TF || rm -rf /src/tf ) \
  && rm -rf /root/.cache/ /tmp/*
@@ -141,7 +143,7 @@ COPY --from=builder /opt/otbtf /opt/otbtf
 COPY --from=builder /src /src
 
 # Link site-packages in order to build with any python version
-RUN cd /opt/otbtf/lib/ && ln -s $(find . -maxdepth 1 -type d -name "python3.*") python3
+RUN cd /opt/otbtf/lib/ && ln -s python3.* python3
 
 # Persistent environment variables (all users)
 ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/otb/python:/home/otbuser/pyotbtf:$PYTHONPATH"
@@ -160,8 +162,7 @@ WORKDIR /home/otbuser
 # Copy python files
 COPY --chown=otbuser python pyotbtf
 # Symlink executable python files in PATH
-RUN for f in /home/otbuser/pyotbtf/*.py; do \
-      if [ -x $f ]; then ln -s $f /opt/otbtf/bin; fi; done
+RUN for f in /home/otbuser/pyotbtf/*.py; do if [ -x $f ]; then ln -s $f /opt/otbtf/bin; fi; done
 
 # Give admin rights without password
 ARG SUDO=true
