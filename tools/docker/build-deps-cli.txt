@@ -1,6 +1,4 @@
 apt-transport-https
-autoconf
-automake
 ca-certificates
 curl
 cmake
@@ -28,6 +26,7 @@ zip
 
 bison
 gdal-bin
+python3-gdal
 libboost-date-time-dev
 libboost-filesystem-dev
 libboost-graph-dev
@@ -51,5 +50,4 @@ libossim-dev
 libpng-dev
 libsvm-dev
 libtinyxml-dev
-python3-gdal
 zlib1g-dev
