@@ -1,7 +1,7 @@
 # TF - bazel build env variables
 
 # Optimization is controlled with bazel --config=opt, will set AVX and SSE flags on linux, without '-march=native' (disabled in TF2.4)
-# Just uncomment CC_OPT_FLAGS or append --copt='-march=native' to the BZL_CONFIG arg in case you need it
+# Just uncomment CC_OPT_FLAGS or append --copt='-march=native' to the BZL_CONFIGS arg in case you need it
 #export CC_OPT_FLAGS="-march=native -Wno-sign-compare"
 export GCC_HOST_COMPILER_PATH=$(which gcc)
 export PYTHON_BIN_PATH=$(which python)
@@ -17,12 +17,12 @@ export TF_NEED_OPENCL_SYCL=0
 export TF_NEED_COMPUTECPP=0
 export TF_NEED_ROCM=0
 export TF_SET_ANDROID_WORKSPACE=0
-# We need to set BZL_CONFIG=" --config=nogcp --config=noaws --config=nohdfs"
+# We need to set BZL_CONFIGS=" --config=nogcp --config=noaws --config=nohdfs"
 #export TF_NEED_S3=0
 #export TF_NEED_AWS=0
 #export TF_NEED_GCP=0
 #export TF_NEED_HDFS=0
-# For MKL support BZL_CONFIG+=" --config=mkl --config=opt --copt='-mfpmath=both'"
+# For MKL support BZL_CONFIGS+=" --config=mkl --config=opt --copt='-mfpmath=both'"
 #export TF_DOWNLOAD_MKL=1
 #export TF_NEED_MKL=0
 
