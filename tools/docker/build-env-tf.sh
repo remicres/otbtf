@@ -1,9 +1,9 @@
 # TF - bazel build env variables
 
-export GCC_HOST_COMPILER_PATH=$(which gcc)
-# Optimization is controlled with bazel --config=opt, it will set AVX and SSE flags on linux if possible (without the march=native flag)
-# It is disabled in TF2.4 config, you may pass it with --copt='-march=native', see BZL_CONFIG arg or just uncomment this line
+# Optimization is controlled with bazel --config=opt, will set AVX and SSE flags on linux, without '-march=native' (disabled in TF2.4)
+# Just uncomment CC_OPT_FLAGS or append --copt='-march=native' to the BZL_CONFIG arg in case you need it
 #export CC_OPT_FLAGS="-march=native -Wno-sign-compare"
+export GCC_HOST_COMPILER_PATH=$(which gcc)
 export PYTHON_BIN_PATH=$(which python)
 export PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])')"
 export TF_ENABLE_XLA=1
@@ -26,14 +26,14 @@ export TF_SET_ANDROID_WORKSPACE=0
 #export TF_DOWNLOAD_MKL=1
 #export TF_NEED_MKL=0
 
-# GPU
+# CUDA
 export TF_NEED_CUDA=0
 export CUDA_TOOLKIT_PATH=$(find /usr/local -maxdepth 1 -type d -name 'cuda-*')
 if  [ ! -z $CUDA_TOOLKIT_PATH ] ; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CUDA_TOOLKIT_PATH/lib64:$CUDA_TOOLKIT_PATH/lib64/stubs"
     export TF_CUDA_VERSION=$(echo $CUDA_TOOLKIT_PATH | sed -r 's/.*\/cuda-(.*)/\1/')
     export TF_CUDA_CLANG=0
-    export TF_CUDA_COMPUTE_CAPABILITIES="7.5,6.1,5.2"
+    export TF_CUDA_COMPUTE_CAPABILITIES="5.2,6.1,7.0,7.5"
     export TF_NEED_CUDA=1
     export TF_NEED_TENSORRT=0
     export CUDNN_INSTALL_PATH="/usr/"
