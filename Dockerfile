@@ -44,7 +44,7 @@ RUN wget -O /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/relea
  && chmod +x /opt/otbtf/bin/bazelisk-linux-amd64 \
  && ln -s /opt/otbtf/bin/bazelisk-linux-amd64 /opt/otbtf/bin/bazel
 
-ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow:libtensorflow_framework.so //tensorflow/tools/pip_package:build_pip_package"
+ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
 # --config=opt with bazel's default optimizations (otherwise edit CC_OPT_FLAGS in build-env-tf.sh)
 ARG BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
 # --compilation_mode opt is already enabled by default (see tf repo /.bazelrc and /configure.py)
@@ -61,29 +61,23 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
       source ../build-env-tf.sh \
       && ./configure \
       && export TMP=/tmp/bazel \
-      && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS"
+      && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS" \
       && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" ' \
-# Installation - split here in order to check logs      ^
+# Installation - split here if you need to debug        ^
 #RUN cd tensorflow \
  && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf /tmp/tensorflow_pkg/tensorflow*.whl \
- # Libraries
- && mkdir -p /opt/otbtf/lib \
+ && ln -s /opt/otbtf/lib/python3.* /opt/otbtf/lib/python3 \
  && cp -P bazel-bin/tensorflow/libtensorflow_cc.so* /opt/otbtf/lib/ \
- && cp -P bazel-bin/tensorflow/libtensorflow_framework.so* /opt/otbtf/lib/ \
- # => symlink external libs (required for MKL - libiomp5)
- && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
- # Headers
- && mkdir /opt/otbtf/include \
  && ln -s $(find /opt/otbtf -type d -wholename "*/site-packages/tensorflow/include") /opt/otbtf/include/tf \
- # => the only missing header in the wheel
+ # The only missing header in the wheel
  && cp tensorflow/cc/saved_model/tag_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
+ # Symlink external libs (required for MKL - libiomp5)
+ && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
  # Cleaning
  && mv /root/.cache/bazel* /src/tf/ \
  && ( $KEEP_SRC_TF || rm -rf /src/tf ) \
  && rm -rf /root/.cache/ /tmp/*
-# Link wheel's site-packages in order to find any python3 version
-RUN cd /opt/otbtf/lib && ln -s python3.* python3
 
 ### OTB
 ARG GUI=false
@@ -119,8 +113,8 @@ RUN cd /src/otb/build/OTB/build \
       -DOTB_WRAP_PYTHON=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 \
       -DOTB_USE_TENSORFLOW=ON -DModule_OTBTensorflow=ON \
       -Dtensorflow_include_dir=/opt/otbtf/include/tf \
-      -DTENSORFLOW_CC_LIB=/opt/otbtf/lib/libtensorflow_cc.so \
-      -DTENSORFLOW_FRAMEWORK_LIB=/opt/otbtf/lib/libtensorflow_framework.so \
+      -DTENSORFLOW_CC_LIB=/opt/otbtf/lib/libtensorflow_cc.so.2 \
+      -DTENSORFLOW_FRAMEWORK_LIB=/opt/otbtf/lib/python3/site-packages/tensorflow/libtensorflow_framework.so.2 \
  && make install -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  # Cleaning
  && ( $GUI || rm -rf /opt/otbtf/bin/otbgui* ) \
