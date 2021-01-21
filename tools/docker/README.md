@@ -10,6 +10,7 @@ If you need additional Ubuntu packages see [build-deps-cli.txt](build-deps-cli.t
 BASE_IMG        (mandatory)
 CPU_RATIO=0.95
 GUI=false
+NUMPY_SPEC="~=1.19"
 TF=r2.4.0
 OTB=7.2.0
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow:libtensorflow_framework.so //tensorflow/tools/pip_package:build_pip_package"
@@ -54,9 +55,13 @@ docker build --network='host' -t otbtf:gpu-dev-full --build-arg BASE_IMG=nvidia/
 
 # Build old release
 docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04 \
-    --build-arg TF=r2.1 --build-arg OTB=release-7.2 \
+    --build-arg TF=r2.1 --build-arg NUMPY_SPEC="<1.19" --build-arg OTB=release-7.2 \
     --build-arg BAZEL_OPTIONS="--noincompatible_do_not_split_linking_cmdline --verbose_failures --remote_cache=http://localhost:9090" .
 # You may edit the Dockerfile to clone an old branch of the repo instead of copying files from the build context
+
+# Numpy version requirement :
+# TF <  2.4  ==> numpy<1.19.0,>=1.16.0
+# TF >= 2.4  ==> numpy~=1.19
 ```
 
 ### Debug build
