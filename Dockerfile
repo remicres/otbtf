@@ -21,12 +21,12 @@ RUN if $GUI; then \
       && cat build-deps-gui.txt | xargs apt-get install --no-install-recommends -y \
       && apt-get clean && rm -rf /var/lib/apt/lists/* ; fi
 
-### Python3
+### Python3 links and pip packages
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
-# NumPy version is a problem with system's gdal dep - venv could be a better option than just being first in PYTHONPATH
-RUN pip install --no-cache-dir -U numpy future pip six mock wheel \
- && pip install --no-cache-dir keras_applications --no-deps \
- && pip install --no-cache-dir keras_preprocessing --no-deps
+# NumPy version is conflicting with system's gdal dep, may require venv
+ARG NUMPY_SPEC="~=1.19"
+RUN pip install --no-cache-dir -U pip wheel mock six future "numpy$NUMPY_SPEC" \
+ && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
 # ----------------------------------------------------------------------------
 # Tmp builder stage - dangling cache should persist until "docker builder prune"
