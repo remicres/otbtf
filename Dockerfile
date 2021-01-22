@@ -23,7 +23,7 @@ RUN if $GUI; then \
 
 ### Python3 links and pip packages
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
-# NumPy version is conflicting with system's gdal dep, may require venv
+# NumPy version is conflicting with system's gdal dep and may require venv
 ARG NUMPY_SPEC="~=1.19"
 RUN pip install --no-cache-dir -U pip wheel mock six future "numpy$NUMPY_SPEC" \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
@@ -31,23 +31,25 @@ RUN pip install --no-cache-dir -U pip wheel mock six future "numpy$NUMPY_SPEC" \
 # ----------------------------------------------------------------------------
 # Tmp builder stage - dangling cache should persist until "docker builder prune"
 FROM otbtf-base AS builder
-# 0.75 may be required to avoid OOM errors (especially for OTB GUI)
+# A smaller value may be required to avoid OOM errors when building OTB GUI
 ARG CPU_RATIO=1
 
 RUN mkdir -p /src/tf /opt/otbtf/bin /opt/otbtf/include /opt/otbtf/lib
 WORKDIR /src/tf
 
+RUN git config --global advice.detachedHead false
+
 ### TF
-ARG TF=v2.4.0
-# Install bazelisk (will read .bazelrc and download the right bazel version - latest by default)
-RUN wget -O /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
- && chmod +x /opt/otbtf/bin/bazelisk-linux-amd64 \
- && ln -s /opt/otbtf/bin/bazelisk-linux-amd64 /opt/otbtf/bin/bazel
+ARG TF=v2.4.1
+# Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
+RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
+ && chmod +x /opt/otbtf/bin/bazelisk \
+ && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
-# --config=opt with bazel's default optimizations (otherwise edit CC_OPT_FLAGS in build-env-tf.sh)
+# "--config=opt" will enable 'march=native' (otherwise edit CC_OPT_FLAGS in build-env-tf.sh)
 ARG BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
-# --compilation_mode opt is already enabled by default (see tf repo /.bazelrc and /configure.py)
+# "--compilation_mode opt" is already enabled by default (see tf repo .bazelrc and configure.py)
 ARG BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
 
 # Build
@@ -63,7 +65,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
       && export TMP=/tmp/bazel \
       && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS" \
       && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" ' \
-# Installation - split here if you need to debug        ^
+# Installation - split here if you want to check files  ^
 #RUN cd tensorflow \
  && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf /tmp/tensorflow_pkg/tensorflow*.whl \
@@ -75,7 +77,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
  # Symlink external libs (required for MKL - libiomp5)
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
  # Cleaning
- && mv /root/.cache/bazel* /src/tf/ \
+ && rm -rf bazel-* \
  && ( $KEEP_SRC_TF || rm -rf /src/tf ) \
  && rm -rf /root/.cache/ /tmp/*
 
@@ -94,11 +96,13 @@ RUN git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotool
  # Set GL/Qt build flags
  && if $GUI; then \
       sed -i -r "s/-DOTB_USE_(QT|OPENGL|GL[UFE][WT])=OFF/-DOTB_USE_\1=ON/" ../build-flags-otb.txt; fi \
+ # Possible ENH: superbuild-all-dependencies switch, with separated build-deps-minimal.txt and build-deps-otbcli.txt)
+ #&& if $OTB_SUPERBUILD_ALL; then sed -i -r "s/-DOTB_USE_SYSTEM_([A-Z0-9]*)=ON/-DOTB_USE_SYSTEM_\1=OFF/"" ../build-flags-otb.txt; fi \
  && OTB_FLAGS=$(cat "../build-flags-otb.txt") \
  && cmake ../otb/SuperBuild -DCMAKE_INSTALL_PREFIX=/opt/otbtf $OTB_FLAGS \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))")
 
-### OTBTF - copy (without .git) or clone repo
+### OTBTF - copy (without .git/) or clone repository
 COPY . /src/otbtf
 #RUN git clone https://github.com/remicres/otbtf.git /src/otbtf
 RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
@@ -113,6 +117,7 @@ RUN cd /src/otb/build/OTB/build \
       -DOTB_WRAP_PYTHON=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 \
       -DOTB_USE_TENSORFLOW=ON -DModule_OTBTensorflow=ON \
       -Dtensorflow_include_dir=/opt/otbtf/include/tf \
+      # Forcing TF>=2, this Dockerfile hasn't been tested with v1 + missing link for libtensorflow_framework.so in the wheel
       -DTENSORFLOW_CC_LIB=/opt/otbtf/lib/libtensorflow_cc.so.2 \
       -DTENSORFLOW_FRAMEWORK_LIB=/opt/otbtf/lib/python3/site-packages/tensorflow/libtensorflow_framework.so.2 \
  && make install -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
@@ -129,11 +134,9 @@ RUN for f in /src/otbtf/python/*.py; do if [ -x $f ]; then ln -s $f /opt/otbtf/b
 FROM otbtf-base
 MAINTAINER Remi Cresson <remi.cresson[at]inrae[dot]fr>
 
-COPY --from=builder /opt/otbtf /opt/
-COPY --from=builder /src /
-# Relocate ~/.cache/bazel and ~/.cache/bazelisk
-RUN if [ -d /src/tf/bazel ]; then \
-      mkdir -p /root/.cache && mv /src/tf/bazel* /root/.cache/
+# Copy files from intermediate stage
+COPY --from=builder /opt/otbtf /opt/otbtf
+COPY --from=builder /src /src
 
 # System-wide ENV
 ENV PATH="/opt/otbtf/bin:$PATH"
@@ -141,7 +144,7 @@ ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
 ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/otb/python:/src/otbtf/python"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 
-# Default user, directory and command (bash = 'docker create' entrypoint)
+# Default user, directory and command (bash is the entrypoint when using 'docker create')
 RUN useradd -s /bin/bash -m otbuser
 WORKDIR /home/otbuser
 
@@ -151,7 +154,7 @@ RUN if $SUDO; then \
       usermod -a -G sudo otbuser \
       && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
 
-# Set /src/otbtf ownership to otbuser (but you will need 'sudo -i' in order to rebuild TF or OTB)
+# Set /src/otbtf ownership to otbuser (but you still need 'sudo -i' in order to rebuild TF or OTB)
 RUN chown -R otbuser:otbuser /src/otbtf
 
 # This won't prevent ownership problems with volumes if you're not UID 1000
@@ -159,4 +162,6 @@ USER otbuser
 # User-only ENV
 
 # Test python imports
-RUN python -c "import numpy, tensorflow, otbtf, tricks, otbApplication"
+RUN python -c "import tensorflow"
+RUN python -c "import otbtf, tricks"
+RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
