@@ -20,6 +20,7 @@
 import gdal
 import numpy as np
 import tensorflow.compat.v1 as tf
+from deprecated import deprecated
 
 tf.disable_v2_behavior()
 
@@ -88,3 +89,26 @@ def ckpt_to_savedmodel(ckpt_path, inputs, outputs, savedmodel_path, clear_device
 
         # Create a SavedModel
         create_savedmodel(sess, inputs=inputs, outputs=outputs, directory=savedmodel_path)
+   
+@deprecated        
+def CreateSavedModel(sess, inputs, outputs, directory):
+    """
+    Create a SavedModel
+    @param sess      TF session
+    @param inputs    List of inputs names (e.g. ["x_cnn_1:0", "x_cnn_2:0"])
+    @param outputs   List of outputs names (e.g. ["prediction:0", "features:0"])
+    @param directory Path for the generated SavedModel
+    """
+    create_savedmodel(sess, inputs, outputs, directory)
+    
+@deprecated
+def CheckpointToSavedModel(ckpt_path, inputs, outputs, savedmodel_path, clear_devices=False):
+    """
+    Read a Checkpoint and build a SavedModel
+    @param ckpt_path       Path to the checkpoint file (without the ".meta" extension)
+    @param inputs          List of inputs names (e.g. ["x_cnn_1:0", "x_cnn_2:0"])
+    @param outputs         List of outputs names (e.g. ["prediction:0", "features:0"])
+    @param savedmodel_path Path for the generated SavedModel
+    @param clear_devices   Clear TF devices positionning (True/False)
+    """
+    ckpt_to_savedmodel(ckpt_path, inputs, outputs, savedmodel_path, clear_devices)
