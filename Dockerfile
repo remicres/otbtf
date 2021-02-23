@@ -25,7 +25,7 @@ RUN if $GUI; then \
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
 # NumPy version is conflicting with system's gdal dep and may require venv
 ARG NUMPY_SPEC="~=1.19"
-RUN pip install --no-cache-dir -U pip wheel mock six future "numpy$NUMPY_SPEC" \
+RUN pip install --no-cache-dir -U pip wheel mock six future deprecated "numpy$NUMPY_SPEC" \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
 # ----------------------------------------------------------------------------
