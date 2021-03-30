@@ -101,9 +101,9 @@ void RecopyImageRegionToTensorWithCast(const typename TImage::Pointer inputPtr, 
   else if (dt == tensorflow::DT_DOUBLE)
     RecopyImageRegionToTensor<TImage, double>(inputPtr, region, tensor, elemIdx);
   else if (dt == tensorflow::DT_UINT64)
-    RecopyImageRegionToTensor<TImage, unsigned long int>(inputPtr, region, tensor, elemIdx);
+    RecopyImageRegionToTensor<TImage, unsigned long long int>(inputPtr, region, tensor, elemIdx);
   else if (dt == tensorflow::DT_INT64)
-    RecopyImageRegionToTensor<TImage, long int>(inputPtr, region, tensor, elemIdx);
+    RecopyImageRegionToTensor<TImage, long long int>(inputPtr, region, tensor, elemIdx);
   else if (dt == tensorflow::DT_UINT32)
     RecopyImageRegionToTensor<TImage, unsigned int>(inputPtr, region, tensor, elemIdx);
   else if (dt == tensorflow::DT_INT32)
