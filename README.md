@@ -50,7 +50,8 @@ Available docker images:
 | **mdl4eo/otbtf2.0:gpu** | Ubuntu Xenial | r2.1   | 7.1.0 | GPU                    |
 
 All GPU docker images are suited for **NVIDIA GPUs**. They use CUDA/CUDNN support and are built with compute capabilities 6.1, 5.2, 3.5. To change the compute capabilities, you can edit the dockerfile and build your own docker image (dockerfiles are provided in the `tools/dockerfiles/` path of the repository).
-You can find more details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/)
+You can find more details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/). Also you can check [this document](https://gitlab.irstea.fr/raffaele.gaetano/moringa/-/tree/develop/docker) that also mentions useful stuff.
+
 
 ## Build from sources
 
