@@ -97,13 +97,23 @@ void RecopyImageRegionToTensorWithCast(const typename TImage::Pointer inputPtr, 
 {
   tensorflow::DataType dt = tensor.dtype();
   if (dt == tensorflow::DT_FLOAT)
-    RecopyImageRegionToTensor<TImage, float>        (inputPtr, region, tensor, elemIdx);
+    RecopyImageRegionToTensor<TImage, float>(inputPtr, region, tensor, elemIdx);
   else if (dt == tensorflow::DT_DOUBLE)
-    RecopyImageRegionToTensor<TImage, double>       (inputPtr, region, tensor, elemIdx);
+    RecopyImageRegionToTensor<TImage, double>(inputPtr, region, tensor, elemIdx);
+  else if (dt == tensorflow::DT_UINT64)
+    RecopyImageRegionToTensor<TImage, unsigned long long int>(inputPtr, region, tensor, elemIdx);
   else if (dt == tensorflow::DT_INT64)
     RecopyImageRegionToTensor<TImage, long long int>(inputPtr, region, tensor, elemIdx);
+  else if (dt == tensorflow::DT_UINT32)
+    RecopyImageRegionToTensor<TImage, unsigned int>(inputPtr, region, tensor, elemIdx);
   else if (dt == tensorflow::DT_INT32)
-    RecopyImageRegionToTensor<TImage, int>          (inputPtr, region, tensor, elemIdx);
+    RecopyImageRegionToTensor<TImage, int>(inputPtr, region, tensor, elemIdx);
+  else if (dt == tensorflow::DT_UINT16)
+    RecopyImageRegionToTensor<TImage, unsigned short int> (inputPtr, region, tensor, elemIdx);
+  else if (dt == tensorflow::DT_INT16)
+    RecopyImageRegionToTensor<TImage, short int>(inputPtr, region, tensor, elemIdx);
+  else if (dt == tensorflow::DT_UINT8)
+    RecopyImageRegionToTensor<TImage, unsigned char> (inputPtr, region, tensor, elemIdx);
   else
     itkGenericExceptionMacro("TF DataType "<< dt << " not currently implemented !");
 }
