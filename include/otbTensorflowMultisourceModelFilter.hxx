@@ -218,8 +218,8 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     ImageToExtent(currentImage, currentInputImageExtentInf, currentInputImageExtentSup, this->GetInputReceptiveFields()[imageIndex]);
     for(unsigned int dim = 0; dim<ImageType::ImageDimension; ++dim)
       {
-      extentInf[dim] = vnl_math_max(currentInputImageExtentInf[dim], extentInf[dim]);
-      extentSup[dim] = vnl_math_min(currentInputImageExtentSup[dim], extentSup[dim]);
+      extentInf[dim] = vnl_math_max(currentInputImageExtentInf[dim], extentInf[dim]) + 0.5 * currentImage->GetSpacing()[dim];
+      extentSup[dim] = vnl_math_min(currentInputImageExtentSup[dim], extentSup[dim]) - 0.5 * currentImage->GetSpacing()[dim];
       }
     }
 
