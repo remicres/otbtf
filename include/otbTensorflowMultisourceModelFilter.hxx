@@ -64,8 +64,8 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
  }
 
 /**
-  Compute the input image extent i.e. corners inf & sup
-  Function taken from "Mosaic" and adapted
+  Compute the input image extent: corners inf and sup.
+  Very important: **corners**, not pixel center
  */
 template <class TInputImage, class TOutputImage>
 void
@@ -90,8 +90,8 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   image->TransformIndexToPhysicalPoint(imageFirstIndex, imageOrigin);
   for(unsigned int dim = 0; dim<OutputImageType::ImageDimension; ++dim)
     {
-    extentInf[dim] = vnl_math_min(imageOrigin[dim], imageEnd[dim]);
-    extentSup[dim] = vnl_math_max(imageOrigin[dim], imageEnd[dim]);
+    extentInf[dim] = vnl_math_min(imageOrigin[dim], imageEnd[dim]) - 0.5 * image->GetSpacing()[dim];
+    extentSup[dim] = vnl_math_max(imageOrigin[dim], imageEnd[dim]) + 0.5 * image->GetSpacing()[dim];
     }
 
  }
@@ -207,7 +207,8 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   extentSup.Fill(itk::NumericTraits<double>::max());
   extentInf.Fill(itk::NumericTraits<double>::NonpositiveMin());
 
-  // Compute the extent of each input images and update the global extent
+  // Compute the extent of each input images and update the extent or the output image.
+  // The extent of the output image is the intersection of all input images extents.
   for (unsigned int imageIndex = 0 ; imageIndex < this->GetNumberOfInputs() ; imageIndex++)
     {
     ImageType * currentImage = static_cast<ImageType *>(
@@ -223,13 +224,21 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
       }
     }
 
-  // Set final size
-  m_OutputSize[0] = std::floor( (extentSup[0] - extentInf[0]) / std::abs(m_OutputSpacing[0]) ) + 1;
-  m_OutputSize[1] = std::floor( (extentSup[1] - extentInf[1]) / std::abs(m_OutputSpacing[1]) ) + 1;
 
-  // Set final origin
-  m_OutputOrigin[0] =  extentInf[0];
-  m_OutputOrigin[1] =  extentSup[1];
+  // Set final origin, aligned to the reference image grid.
+  // Here we simply get back to the center of the pixel (extents are pixels corners coordinates)
+  m_OutputOrigin[0] =  extentInf[0] + 0.5 * this->GetInput(0)->GetSpacing()[0];
+  m_OutputOrigin[1] =  extentSup[1] - 0.5 * this->GetInput(0)->GetSpacing()[1];
+
+  // Set final size
+  m_OutputSize[0] = std::floor( (extentSup[0] - extentInf[0]) / std::abs(m_OutputSpacing[0]) );
+  m_OutputSize[1] = std::floor( (extentSup[1] - extentInf[1]) / std::abs(m_OutputSpacing[1]) );
+
+  // We should take in account one more thing: the expression field. It enlarge slightly the output image extent.
+  m_OutputOrigin[0] -= m_OutputSpacing[0] * std::floor(0.5 * this->GetOutputExpressionFields().at(0)[0]);
+  m_OutputOrigin[1] -= m_OutputSpacing[1] * std::floor(0.5 * this->GetOutputExpressionFields().at(0)[1]);
+  m_OutputSize[0] += this->GetOutputExpressionFields().at(0)[0] - 1;
+  m_OutputSize[1] += this->GetOutputExpressionFields().at(0)[1] - 1;
 
   // Set output grid size
   if (!m_ForceOutputGridSize)
