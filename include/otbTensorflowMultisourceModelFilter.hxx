@@ -230,16 +230,15 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   m_OutputOrigin[0] =  extentInf[0] + 0.5 * this->GetInput(0)->GetSpacing()[0];
   m_OutputOrigin[1] =  extentSup[1] - 0.5 * this->GetInput(0)->GetSpacing()[1];
 
-  // The top-left corner of the first pixel starts at min(input_0_origin - input_0_rfield/2, ..., input_n_origin - input_n_rfield/2)
-  // We should take in account one more thing: the expression field. It enlarge slightly the output image extent.
-  // TODO:
-  // - update origin
-  // - update size
-
   // Set final size
   m_OutputSize[0] = std::floor( (extentSup[0] - extentInf[0]) / std::abs(m_OutputSpacing[0]) );
   m_OutputSize[1] = std::floor( (extentSup[1] - extentInf[1]) / std::abs(m_OutputSpacing[1]) );
 
+  // We should take in account one more thing: the expression field. It enlarge slightly the output image extent.
+  m_OutputOrigin[0] -= m_OutputSpacing[0] * std::floor(0.5 * this->GetOutputExpressionFields().at(0)[0]);
+  m_OutputOrigin[1] -= m_OutputSpacing[1] * std::floor(0.5 * this->GetOutputExpressionFields().at(0)[1]);
+  m_OutputSize[0] += this->GetOutputExpressionFields().at(0)[0] - 1;
+  m_OutputSize[1] += this->GetOutputExpressionFields().at(0)[1] - 1;
 
   // Set output grid size
   if (!m_ForceOutputGridSize)
