@@ -79,7 +79,8 @@ Every one can **contribute** to OTBTF! Don't be shy.
 
 ## Cite
 
-```@article{cresson2018framework,
+```
+@article{cresson2018framework,
   title={A framework for remote sensing images processing using deep learning techniques},
   author={Cresson, R{\'e}mi},
   journal={IEEE Geoscience and Remote Sensing Letters},
