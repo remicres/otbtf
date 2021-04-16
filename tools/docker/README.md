@@ -63,7 +63,7 @@ docker build --network='host' -t otbtf:gpu --build-arg BASE_IMG=nvidia/cuda:11.0
 
 # Build dev with TF and OTB sources (huge image) + set git branches/tags to clone
 docker build --network='host' -t otbtf:gpu-dev-full --build-arg BASE_IMG=nvidia/cuda:11.0.3-cudnn8-devel-ubuntu20.04 \
-    --build-arg KEEP_SRC_OTB=true --buid-arg KEEP_SRC_TF=true --build-arg TF=nightly --build-arg OTB=develop .
+    --build-arg KEEP_SRC_OTB=true --build-arg KEEP_SRC_TF=true --build-arg TF=nightly --build-arg OTB=develop .
 
 # Build old release
 docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04 \
