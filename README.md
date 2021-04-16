@@ -67,17 +67,26 @@ See [here](doc/HOWTOBUILD.md) to see how to build the remote module from sources
 
 ## How to use it?
 
-### Documentation
+- Reading [the documentation](doc/APPLICATIONS.md) will help, of course 😉
+- A small [tutorial](https://mdl4eo.irstea.fr/2019/01/04/an-introduction-to-deep-learning-on-remote-sensing-images-tutorial/) on MDL4EO's blog
+- in the `python` folder are provided some [ready-to-use deep networks, with documentation and scientific references](doc/EXAMPLES.md).
+- A book: *Cresson, R. (2020). Deep Learning for Remote Sensing Images with Open Source Software. CRC Press.* Use QGIS, OTB and Tensorflow to perform various kind of deep learning sorcery on remote sensing images (patch-based classification for landcover mapping, semantic segmentation of buildings, optical image restoration from joint SAR/Optical time series).
+- Check [our repository](https://github.com/remicres/otbtf_tutorials_resources) containing stuff (data and models) to begin with with!
 
-Reading [the documentation](doc/APPLICATIONS.md) will help, of course 😉
+## Contribute
 
-### Tutorial
+Every one can **contribute** to OTBTF! Don't be shy.
 
-A small tutorial is available at [MDL4EO's blog](https://mdl4eo.irstea.fr/2019/01/04/an-introduction-to-deep-learning-on-remote-sensing-images-tutorial/)
+## Cite
 
-### Ready-to-train models and open datasets
-
-Check [our repository](https://github.com/remicres/otbtf_tutorials_resources) containing stuff (data and models) to begin with with!
-
-Also, in the `python` folder are provided some [ready-to-use deep networks, with documentation and scientific references](doc/EXAMPLES.md).
-**Feel free to contribute with your own architecture!**
+```@article{cresson2018framework,
+  title={A framework for remote sensing images processing using deep learning techniques},
+  author={Cresson, R{\'e}mi},
+  journal={IEEE Geoscience and Remote Sensing Letters},
+  volume={16},
+  number={1},
+  pages={25--29},
+  year={2018},
+  publisher={IEEE}
+}
+```
