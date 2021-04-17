@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # ==========================================================================
 #
-#   Copyright Remi Cresson, Dino Ienco (IRSTEA)
+#   Copyright 2018-2019 Remi Cresson, Dino Ienco (IRSTEA)
+#   Copyright 2020-2021 Remi Cresson, Dino Ienco (INRAE)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -27,9 +28,9 @@
 
 from tricks import create_savedmodel
 import tensorflow.compat.v1 as tf
-
+import tensorflow.compat.v1.nn.rnn_cell as rnn
 tf.disable_v2_behavior()
-from tf.contrib import rnn
+
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -65,7 +66,7 @@ def RnnAttention(x, nunits, nlayer, n_dims, n_timetamps, is_training_ph):
         # SIGNLE LAYER: single GRUCell, nunits hidden units each
     else:
         cell = rnn.GRUCell(nunits)
-    outputs, _ = rnn.static_rnn(cell, x, dtype="float32")
+    outputs, _ = tf.compat.v1.nn.static_rnn(cell, x, dtype="float32")
     # At this point, outputs is a list of "n_timestamps" tensors [N, B, C]
     outputs = tf.stack(outputs, axis=1)
     # At this point, outputs is a tensor of size [N, n_timestamps, B, C]

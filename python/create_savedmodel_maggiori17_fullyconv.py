@@ -3,7 +3,7 @@
 #==========================================================================
 #
 #   Copyright 2018-2019 Remi Cresson (IRSTEA)
-#   Copyright 2020 Remi Cresson (INRAE)
+#   Copyright 2020-2021 Remi Cresson (INRAE)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ with tf.compat.v1.Graph().as_default():
     # placeholder for images and labels
     lr = tf.compat.v1.placeholder_with_default(tf.constant(0.0002, dtype=tf.float32, shape=[]), shape=[],
                                                name="learning_rate")
+    training = tf.placeholder_with_default(tf.constant(False, dtype=tf.bool, shape=()), shape=(),
+                                           name="is_training")
     x = tf.compat.v1.placeholder(tf.float32, shape=(None, patch_size_xs, patch_size_xs, params.n_channels), name="x")
     y = tf.compat.v1.placeholder(tf.int32,   shape=(None, patch_size_label, patch_size_label, 1),  name="y")
 
@@ -53,7 +55,7 @@ with tf.compat.v1.Graph().as_default():
                                        activation=tf.nn.crelu)
 
     # Normalization of output of layer 1
-    norm1 = tf.compat.v1.layers.batch_normalization(conv1)
+    norm1 = tf.compat.v1.layers.batch_normalization(conv1, training=training)
 
     # pooling layer #1
     pool1 = tf.compat.v1.layers.max_pooling2d(inputs=norm1, pool_size=[4, 4], strides=4)
@@ -63,14 +65,14 @@ with tf.compat.v1.Graph().as_default():
                                        activation=tf.nn.crelu)
 
     # Normalization of output of layer 2
-    norm2 = tf.compat.v1.layers.batch_normalization(conv2)
+    norm2 = tf.compat.v1.layers.batch_normalization(conv2, training=training)
 
     # Convolutional Layer #3
     conv3 = tf.compat.v1.layers.conv2d(inputs=norm2, filters=80, kernel_size=[3, 3], padding="valid",
                                        activation=tf.nn.crelu)
 
     # Normalization of output of layer 3
-    norm3 = tf.compat.v1.layers.batch_normalization(conv3)
+    norm3 = tf.compat.v1.layers.batch_normalization(conv3, training=training)
 
     # Convolutional Layer #4
     conv4 = tf.compat.v1.layers.conv2d(inputs=norm3, filters=1, kernel_size=[8, 8], padding="valid",
