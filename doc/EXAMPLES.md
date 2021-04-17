@@ -224,6 +224,8 @@ otbcli_TensorflowModelTrain \
 -validation.source2.il $patches_labels_valid -validation.source2.name "estimated" \
 ```
 
+Note that the `userplaceholders` parameter contains the *is_training* placeholder, fed with value *true* because the default value for this placeholder is *false*, and it is used in the batch normalization layers (take a look in the `create_savedmodel_maggiori17_fullyconv.py` code).
+
 ### Inference
 
 This model can be used in fully convolutional mode only.
