@@ -89,8 +89,16 @@ def ckpt_to_savedmodel(ckpt_path, inputs, outputs, savedmodel_path, clear_device
 
         # Create a SavedModel
         create_savedmodel(sess, inputs=inputs, outputs=outputs, directory=savedmodel_path)
-   
-@deprecated        
+
+@deprecated
+def read_samples(filename):
+   """
+   Read a patches image.
+   @param filename: raster file name
+   """
+   return read_image_as_np(filename, as_patches=True)
+
+@deprecated
 def CreateSavedModel(sess, inputs, outputs, directory):
     """
     Create a SavedModel
@@ -100,7 +108,7 @@ def CreateSavedModel(sess, inputs, outputs, directory):
     @param directory Path for the generated SavedModel
     """
     create_savedmodel(sess, inputs, outputs, directory)
-    
+
 @deprecated
 def CheckpointToSavedModel(ckpt_path, inputs, outputs, savedmodel_path, clear_devices=False):
     """
