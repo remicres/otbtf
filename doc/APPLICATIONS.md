@@ -1,10 +1,13 @@
+# Description of applications
 
-## PatchesExtraction
+This section introduces the new OTB applications provided in OTBTF.
 
-This application performs the extraction of patches in images from a vector data containing points. 
-The OTB sampling framework can be used to generate the set of selected points. 
-After that, you can use the **PatchesExtraction** application to perform the sampling of your images.
-We denote _input source_ an input image, or a stack of input images or channels (which will be concatenated: they must have the same size). 
+## Patches extraction
+
+The `PatchesExtraction` application performs the extraction of patches in images from a vector data containing points.
+Each point locates the **center** of the **central pixel** of the patch.
+For patches with even size of *N*, the **central pixel** corresponds to the pixel index *N/2+1* (index starting at 0).
+We denote one _input source_, either an input image, or a stack of input images that will be concatenated (they must have the same size). 
 The user can set the `OTB_TF_NSOURCES` environment variable to select the number of _input sources_ that he wants.
 For example, for sampling a Time Series (TS) together with a single Very High Resolution image (VHR), two sources are required: 
  - 1 input images list for time series,
@@ -321,9 +324,11 @@ None
 
 Note that you can still set the `OTB_TF_NSOURCES` environment variable.
 
-# How to use
+# Basic example
 
-## The basics
+Below is a minimal example that presents the main steps to train a model, and perform the inference.
+
+## Sampling
 
 Here we will try to provide a simple example of doing a classification using a deep net that performs on one single VHR image.
 Our data set consists in one Spot-7 image, *spot7.tif*, and a training vector data, *terrain_truth.shp* that describes sparsely forest / non-forest polygons.
@@ -342,6 +347,9 @@ We want to produce one image of 16x16 patches, and one image for the correspondi
 ```
 otbcli_PatchesExtraction -source1.il spot7.tif -source1.patchsizex 16 -source1.patchsizey 16 -vec points.shp -field class -source1.out samp_labels.tif -outpatches samp_patches.tif
 ```
+
+## Training
+
 Now we have two images for patches and labels. 
 We can split them to distinguish test/validation groups (with the **ExtractROI** application for instance).
 But here, we will just perform some fine tuning of our model.
@@ -354,6 +362,8 @@ We use the **TensorflowModelTrain** application to perform the training of this 
 otbcli_TensorflowModelTrain -model.dir /path/to/oursavedmodel -training.targetnodesnames optimizer -training.source1.il samp_patches.tif -training.source1.patchsizex 16 -training.source1.patchsizey 16 -training.source1.placeholder x1 -training.source2.il samp_labels.tif -training.source2.patchsizex 1 -training.source2.patchsizey 1 -training.source2.placeholder y1 -model.saveto /path/to/oursavedmodel/variables/variables
 ```
 Note that we could also have performed validation in this step. In this case, the `validation.source2.placeholder` would be different than the `training.source2.placeholder`, and would be **prediction**. This way, the program know what is the target tensor to evaluate. 
+
+## Inference
 
 After this step, we use the trained model to produce the entire map of forest over the whole Spot-7 image.
 For this, we use the **TensorflowModelServe** application to produce the **prediction** tensor output for the entire image.
