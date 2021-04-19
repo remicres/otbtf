@@ -1,6 +1,6 @@
 # OTBTF docker images overview
 
-## Available images
+### Available images
 
 Here is the list of OTBTF docker images hosted on [dockerhub](https://hub.docker.com/u/mdl4eo).
 
@@ -21,12 +21,12 @@ Here is the list of OTBTF docker images hosted on [dockerhub](https://hub.docker
 
 You can also find plenty of interesting OTBTF flavored images at [LaTelescop gitlab registry](https://gitlab.com/latelescop/docker/otbtf/container_registry/).
 
-## Development ready images
+### Development ready images
 
 Until r2.4, all images are development-ready. For instance, you can recompile the whole OTB from `/work/otb/build/OTB/build`.
 Since r2.4, only `gpu` tagged image is development-ready, and you can recompile OTB from `/src/otb/build/OTB/build`.
 
-# Build your own images
+### Build your own images
 
 If you want to use optimization flags, change GPUs compute capability, etc. you can build your own docker image using the provided dockerfile. 
 See the [docker build documentation](tools/dockerfiles).
@@ -43,17 +43,18 @@ docker run -v /mnt/my_device/:/data/ -ti mdl4eo/otbtf2.4:cpu bash -c "ls /data"
 ```
 Beware of ownership issues! see the last section of this doc.
 
-# Other 
+# GPU enabled docker 
 
-You can find more details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/). 
+In Linux, this is quite straightforward. 
+Just follow the steps described in the [nvidia-docker documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
+You can then use the OTBTF `gpu` tagged docker images.
 
-# Docker help
+You can find some details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/). 
+Be careful though, these infos might be a bit outdated...
 
-This section is inspired from the [moringa docker help](https://gitlab.irstea.fr/raffaele.gaetano/moringa/-/raw/develop/docker/README.md). Big thanks to them.
+# Docker Installation
 
-## Installation and first steps
-
-### Windows 10
+### Installation and first steps on Windows 10
 
 1. Install [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#manual-installation-steps) (Windows Subsystem for Linux)
 2. Install [docker desktop](https://www.docker.com/products/docker-desktop)
@@ -68,11 +69,17 @@ Troubleshooting:
 - [Docker for windows WSL documentation](https://docs.docker.com/docker-for-windows/wsl)
 - [WSL2 installation steps](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 
+### Use the GPU with Windows 10 + WSL2
+
+*TODO*
+
 ### Debian and Ubuntu
 
 See here how to install docker on Ubuntu [here](https://docs.docker.com/engine/install/ubuntu/).
 
-## Usage
+# Docker Usage
+
+This section is largely inspired from the [moringa docker help](https://gitlab.irstea.fr/raffaele.gaetano/moringa/-/raw/develop/docker/README.md). Big thanks to them.
 
 ## Useful diagnostic commands
 
@@ -161,7 +168,7 @@ docker stop otbtf
 docker rm otbtf
 ```
 
-## Fix volume ownership issue (required if host's UID > 1000)
+# Fix volume ownership issue (required if host's UID > 1000)
 
 When mounting a volume, you may experience errors while trying to write files from within the container.
 Since the default user (**otbuser**) is UID 1000, you won't be able to write files into your volume 
