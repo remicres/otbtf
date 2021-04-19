@@ -24,7 +24,7 @@ RUN if $GUI; then \
 ### Python3 links and pip packages
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
 # NumPy version is conflicting with system's gdal dep and may require venv
-ARG NUMPY_SPEC="~=1.19"
+ARG NUMPY_SPEC="==1.19.*"
 RUN pip install --no-cache-dir -U pip wheel mock six future deprecated "numpy$NUMPY_SPEC" \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
@@ -47,7 +47,7 @@ RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/rele
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
-# "--config=opt" will enable 'march=native' (otherwise edit CC_OPT_FLAGS in build-env-tf.sh)
+# "--config=opt" will enable 'march=native' (otherwise read comments about CPU compatibilty and edit CC_OPT_FLAGS in build-env-tf.sh)
 ARG BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
 # "--compilation_mode opt" is already enabled by default (see tf repo .bazelrc and configure.py)
 ARG BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
@@ -97,7 +97,7 @@ RUN git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotool
  && if $GUI; then \
       sed -i -r "s/-DOTB_USE_(QT|OPENGL|GL[UFE][WT])=OFF/-DOTB_USE_\1=ON/" ../build-flags-otb.txt; fi \
  # Possible ENH: superbuild-all-dependencies switch, with separated build-deps-minimal.txt and build-deps-otbcli.txt)
- #&& if $OTB_SUPERBUILD_ALL; then sed -i -r "s/-DOTB_USE_SYSTEM_([A-Z0-9]*)=ON/-DOTB_USE_SYSTEM_\1=OFF/"" ../build-flags-otb.txt; fi \
+ #&& if $OTB_SUPERBUILD_ALL; then sed -i -r "s/-DUSE_SYSTEM_([A-Z0-9]*)=ON/-DUSE_SYSTEM_\1=OFF/"" ../build-flags-otb.txt; fi \
  && OTB_FLAGS=$(cat "../build-flags-otb.txt") \
  && cmake ../otb/SuperBuild -DCMAKE_INSTALL_PREFIX=/opt/otbtf $OTB_FLAGS \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))")
@@ -132,7 +132,7 @@ RUN for f in /src/otbtf/python/*.py; do if [ -x $f ]; then ln -s $f /opt/otbtf/b
 # ----------------------------------------------------------------------------
 # Final stage
 FROM otbtf-base
-MAINTAINER Remi Cresson <remi.cresson[at]inrae[dot]fr>
+LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
 # Copy files from intermediate stage
 COPY --from=builder /opt/otbtf /opt/otbtf
