@@ -75,7 +75,13 @@ Troubleshooting:
 
 ### Use the GPU with Windows 10 + WSL2
 
-*TODO*
+*Work in progress*
+
+Some users have reported to use OTBTF with GPU in windows 10 using WSL2. 
+How to install WSL2 with Cuda on windows 10:
+https://docs.nvidia.com/cuda/wsl-user-guide/index.html
+https://docs.docker.com/docker-for-windows/wsl/#gpu-support
+
 
 ### Debian and Ubuntu
 
