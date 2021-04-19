@@ -34,7 +34,7 @@ You can read more details about these applications on [this blog](https://mdl4eo
 
 ## How to install
 
-For now you have two options: either use the existing **docker image**, or build everything yourself **from source**.
+For now you have two options: either use the existing **docker image**, or build everything **from source**.
 
 ### Docker
 
