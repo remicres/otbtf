@@ -1,4 +1,6 @@
-# ![OTBTF](doc/images/logo.png) OTBTF: Orfeo ToolBox meets TensorFlow
+![OTBTF](doc/images/logo.png)
+
+# OTBTF: Orfeo ToolBox meets TensorFlow
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -14,7 +16,7 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
 - Model training, supporting save/restore/import operations (a model can be trained from scratch or fine-tuned) with `TensorflowModelTrain`,
 - Inference with support of OTB streaming mechanism with `TensorflowModelServe`. The streaming mechanism means (1) no limitation with images sizes, (2) inference can be used as a "lego" in any OTB pipeline (using C++ or Python APIs) and preserving streaming, (3) MPI support available (use multiple processing unit to generate one single output image)
 
-### Python API
+### Python
 
 This is a work in progress. For now, `tricks.py` provides a set of helpers to build deep nets, and `otbtf.py` provides datasets which can be used in Tensorflow pipelines to train networks from python.
 
