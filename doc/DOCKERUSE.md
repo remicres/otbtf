@@ -29,7 +29,7 @@ Since r2.4, only `gpu` tagged image is development-ready, and you can recompile 
 ### Build your own images
 
 If you want to use optimization flags, change GPUs compute capability, etc. you can build your own docker image using the provided dockerfile. 
-See the [docker build documentation](tools/dockerfiles).
+See the [docker build documentation](tools/docker/README.md).
 
 # Mounting file systems
 
