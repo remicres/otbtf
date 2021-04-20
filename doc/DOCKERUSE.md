@@ -89,7 +89,7 @@ See here how to install docker on Ubuntu [here](https://docs.docker.com/engine/i
 
 # Docker Usage
 
-This section is largely inspired from the [moringa docker help](https://gitlab.irstea.fr/raffaele.gaetano/moringa/-/raw/develop/docker/README.md). Big thanks to them.
+This section is largely inspired from the [moringa docker help](https://gitlab.irstea.fr/raffaele.gaetano/moringa/blob/develop/docker/README.md). Big thanks to them.
 
 ## Useful diagnostic commands
 
