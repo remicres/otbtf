@@ -4,16 +4,17 @@
 
 Here is the list of OTBTF docker images hosted on [dockerhub](https://hub.docker.com/u/mdl4eo).
 
-| Name                        | Os            | TF     | OTB   | Description            |
-| --------------------------- | ------------- | ------ | ----- | ---------------------- |
-| **mdl4eo/otbtf1.6:cpu**     | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   |
-| **mdl4eo/otbtf1.7:cpu**     | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   |
-| **mdl4eo/otbtf1.7:gpu**     | Ubuntu Xenial | r1.14  | 7.0.0 | GPU                    |
-| **mdl4eo/otbtf2.0:cpu**     | Ubuntu Xenial | r2.1   | 7.1.0 | CPU, no optimization   |
-| **mdl4eo/otbtf2.0:gpu**     | Ubuntu Xenial | r2.1   | 7.1.0 | GPU                    |
-| **mdl4eo/otbtf2.4:cpu**     | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, no optimization   |
-| **mdl4eo/otbtf2.4:cpu-mkl** | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, Intel MKL, AVX512 |
-| **mdl4eo/otbtf2.4:gpu**     | Ubuntu Focal  | r2.4.1 | 7.2.0 | GPU                    |
+| Name                          | Os            | TF     | OTB   | Description            |
+| ----------------------------- | ------------- | ------ | ----- | ---------------------- |
+| **mdl4eo/otbtf1.6:cpu**       | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   |
+| **mdl4eo/otbtf1.7:cpu**       | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   |
+| **mdl4eo/otbtf1.7:gpu**       | Ubuntu Xenial | r1.14  | 7.0.0 | GPU                    |
+| **mdl4eo/otbtf2.0:cpu**       | Ubuntu Xenial | r2.1   | 7.1.0 | CPU, no optimization   |
+| **mdl4eo/otbtf2.0:gpu**       | Ubuntu Xenial | r2.1   | 7.1.0 | GPU                    |
+| **mdl4eo/otbtf2.4:cpu-basic** | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, no optimization   |
+| **mdl4eo/otbtf2.4:cpu**       | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, few optimizations |
+| **mdl4eo/otbtf2.4:cpu-mkl**   | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, Intel MKL, AVX512 |
+| **mdl4eo/otbtf2.4:gpu**       | Ubuntu Focal  | r2.4.1 | 7.2.0 | GPU                    |
 
 - `cpu` tagged docker images are compiled without optimization.
 - `gpu` tagged docker images are suited for **NVIDIA GPUs**. They use CUDA/CUDNN support and are built with compute capabilities 5.2, 6.1, 7.0, 7.5. 
