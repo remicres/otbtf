@@ -48,10 +48,18 @@ Beware of ownership issues! see the last section of this doc.
 
 In Linux, this is quite straightforward. 
 Just follow the steps described in the [nvidia-docker documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
-You can then use the OTBTF `gpu` tagged docker images with the **NVIDIA runtime**:
+You can then use the OTBTF `gpu` tagged docker images with the **NVIDIA runtime** : 
+
+With Docker version earlier than 19.03 :
 
 ```bash
 docker run --runtime=nvidia -ti mdl4eo/otbtf2.4:gpu bash
+```
+
+With Docker version including and after 19.03 :
+
+```bash
+docker run --gpus all -ti mdl4eo/otbtf2.4:gpu bash
 ```
 
 You can find some details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/). 
