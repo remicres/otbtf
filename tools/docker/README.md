@@ -76,23 +76,23 @@ docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia
 ```bash
 # Use same ubuntu and CUDA version than your target machine, beware of CC optimization and CPU compatibilty (avoid "-march=native")
 docker build --network='host' -t otbtf:custom --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 \
-    --build-arg TF=2.5.0 --build-arg ZIP_TF_BIN=true .
+    --build-arg TF=v2.5.0 --build-arg ZIP_TF_BIN=true .
 # Retrieve zip file
-docker run -v $HOME:/home/otbuser/volume otbtf:custom cp /opt/otbtf/tf-2.5.0.zip /home/otbuser/volume
+docker run -v $HOME:/home/otbuser/volume otbtf:custom cp /opt/otbtf/tf-v2.5.0.zip /home/otbuser/volume
 
 # Target machine shell
 cd $HOME
-unzip tf-2.5.0.zip
+unzip tf-v2.5.0.zip
 sudo mkdir -p /opt/tensorflow/lib
-sudo mv tf-2.5.0/libtensorflow_cc* /opt/tensorflow/lib
+sudo mv tf-v2.5.0/libtensorflow_cc* /opt/tensorflow/lib
 # You may need to create a virtualenv, here TF and dependencies are installed next to user's pip packages
 pip3 install --no-cache-dir -U pip wheel mock six future deprecated "numpy==1.19.*"
 pip3 install --no-cache-dir --no-deps keras_applications keras_preprocessing
-pip3 install tf-2.5.0/tensorflow-2.5.0-cp38-cp38-linux_x86_64.whl
+pip3 install tf-v2.5.0/tensorflow-v2.5.0-cp38-cp38-linux_x86_64.whl
 
 TF_WHEEL_DIR="$HOME/.local/lib/python3.8/site-packages/tensorflow"
 # If you installed the wheel as regular user, with root pip it should be in /usr/local/lib/python3.*, or in your virtualenv lib/ directory
-mv tf-2.5.0/tag_constants.h $TF_WHEEL_DIR/include/tensorflow/cc/saved_model/
+mv tf-v2.5.0/tag_constants.h $TF_WHEEL_DIR/include/tensorflow/cc/saved_model/
 # Then recompile OTB with OTBTF using libraries in /opt/tensorflow/lib and instructions in [HOWTOBUILD.md](../../doc/HOWTOBUILD.md).
 cmake $OTB_GIT \
     -DOTB_USE_TENSORFLOW=ON -DModule_OTBTensorflow=ON \
