@@ -40,7 +40,7 @@ WORKDIR /src/tf
 RUN git config --global advice.detachedHead false
 
 ### TF
-ARG TF=v2.4.1
+ARG TF=v2.5.0
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
  && chmod +x /opt/otbtf/bin/bazelisk \
@@ -83,7 +83,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
 
 ### OTB
 ARG GUI=false
-ARG OTB=7.2.0
+ARG OTB=7.3.0
 
 RUN mkdir /src/otb
 WORKDIR /src/otb
@@ -97,7 +97,7 @@ RUN git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotool
  && if $GUI; then \
       sed -i -r "s/-DOTB_USE_(QT|OPENGL|GL[UFE][WT])=OFF/-DOTB_USE_\1=ON/" ../build-flags-otb.txt; fi \
  # Possible ENH: superbuild-all-dependencies switch, with separated build-deps-minimal.txt and build-deps-otbcli.txt)
- #&& if $OTB_SUPERBUILD_ALL; then sed -i -r "s/-DUSE_SYSTEM_([A-Z0-9]*)=ON/-DUSE_SYSTEM_\1=OFF/"" ../build-flags-otb.txt; fi \
+ #&& if $OTB_SUPERBUILD_ALL; then sed -i -r "s/-DUSE_SYSTEM_([A-Z0-9]*)=ON/-DUSE_SYSTEM_\1=OFF/ " ../build-flags-otb.txt; fi \
  && OTB_FLAGS=$(cat "../build-flags-otb.txt") \
  && cmake ../otb/SuperBuild -DCMAKE_INSTALL_PREFIX=/opt/otbtf $OTB_FLAGS \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))")
