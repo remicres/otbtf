@@ -88,7 +88,7 @@ sudo mv tf-v2.5.0/libtensorflow_cc* /opt/tensorflow/lib
 # You may need to create a virtualenv, here TF and dependencies are installed next to user's pip packages
 pip3 install --no-cache-dir -U pip wheel mock six future deprecated "numpy==1.19.*"
 pip3 install --no-cache-dir --no-deps keras_applications keras_preprocessing
-pip3 install tf-v2.5.0/tensorflow-v2.5.0-cp38-cp38-linux_x86_64.whl
+pip3 install tf-v2.5.0/tensorflow-2.5.0-cp38-cp38-linux_x86_64.whl
 
 TF_WHEEL_DIR="$HOME/.local/lib/python3.8/site-packages/tensorflow"
 # If you installed the wheel as regular user, with root pip it should be in /usr/local/lib/python3.*, or in your virtualenv lib/ directory
