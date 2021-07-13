@@ -1,9 +1,9 @@
 # Build with Docker
 Docker build has to be called from the root of the repository (i.e. `docker build .` or `bash tools/docker/multibuild.sh`).  
 You can build a custom image using `--build-arg` and several config files :
-- Ubuntu : `BASE_IMG` should accept any version, for additional packages see [build-deps-cli.txt](build-deps-cli.txt) and [build-deps-gui.txt](build-deps-gui.txt)
-- TensorFlow : `TF` arg for the git branch or tag + [build-env-tf.sh](build-env-tf.sh) and BZL_* arguments for the build configuration
-- OrfeoToolBox : `OTB` arg for the git branch or tag + [build-flags-otb.txt](build-flags-otb.txt) to edit cmake flags
+- Ubuntu : `BASE_IMG` should accept any version, for additional packages see [build-deps-cli.txt](build-deps-cli.txt) and [build-deps-gui.txt](build-deps-gui.txt).
+- TensorFlow : `TF` arg for the git branch or tag + [build-env-tf.sh](build-env-tf.sh) and BZL_* arguments for the build configuration. `ZIP_TF_BIN` allows you to save compiled binaries if you want to install it elsewhere.    
+- OrfeoToolBox : `OTB` arg for the git branch or tag + [build-flags-otb.txt](build-flags-otb.txt) to edit cmake flags. Set `KEEP_SRC_OTB` in order to preserve OTB git directory.
 
 ### Base images
 ```bash
@@ -25,7 +25,7 @@ OTB=7.3.0
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
 BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
 BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
-KEEP_SRC_TF=false
+ZIP_TF_BIN=false
 KEEP_SRC_OTB=false
 SUDO=true
 
@@ -38,7 +38,7 @@ SUDO=true
 If you just need to rebuild with different GUI or KEEP_SRC arguments, or may be a different branch of OTB, bazel cache will help you to rebuild everything except TF, even if the docker cache was purged (after `docker [system|builder] prune`).  
 In order to recycle the cache, bazel config and TF git tag should be exactly the same, any change in [build-env-tf.sh](build-env-tf.sh) and `--build-arg` (if related to bazel env, cuda, mkl, xla...) may result in a fresh new build.  
 
-Start a cache daemon - here with max 20GB but 12GB should be enough to save 2 TF builds (GPU and CPU):  
+Start a cache daemon - here with max 20GB but 10GB should be enough to save 2 TF builds (GPU and CPU):  
 ```bash
 mkdir -p $HOME/.cache/bazel-remote
 docker run --detach -u 1000:1000 -v $HOME/.cache/bazel-remote:/data -p 9090:8080 buchgr/bazel-remote-cache --max_size=20
@@ -46,7 +46,7 @@ docker run --detach -u 1000:1000 -v $HOME/.cache/bazel-remote:/data -p 9090:8080
 Then just add ` --network='host'` to the docker build command, or connect bazel to a remote server - see 'BZL_OPTIONS'.  
 The other way of docker is a virtual bridge, but you'll need to edit the IP address.  
 
-## Build examples
+## Images build examples
 ```bash
 # Build for CPU using default Dockerfiles args (without AWS, HDFS or GCP support)
 docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:20.04 .
@@ -70,6 +70,36 @@ docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia
     --build-arg TF=r2.1 --build-arg NUMPY_SPEC="<1.19" \
     --build-arg BAZEL_OPTIONS="--noincompatible_do_not_split_linking_cmdline --verbose_failures --remote_cache=http://localhost:9090" .
 # You could edit the Dockerfile in order to clone an old branch of the repo instead of copying files from the build context
+```
+
+### Build for another machine and save TF compiled files 
+```bash
+# Use same ubuntu and CUDA version than your target machine, beware of CC optimization and CPU compatibilty (avoid "-march=native")
+docker build --network='host' -t otbtf:custom --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 \
+    --build-arg TF=2.5.0 --build-arg ZIP_TF_BIN=true .
+# Retrieve zip file
+docker run -v $HOME:/home/otbuser/volume otbtf:custom cp /opt/otbtf/tf-2.5.0.zip /home/otbuser/volume
+
+# Target machine shell
+cd $HOME
+unzip tf-2.5.0.zip
+sudo mkdir -p /opt/tensorflow/lib
+sudo mv tf-2.5.0/libtensorflow_cc* /opt/tensorflow/lib
+# You may need to create a virtualenv, here TF and dependencies are installed next to user's pip packages
+pip3 install --no-cache-dir -U pip wheel mock six future deprecated "numpy==1.19.*"
+pip3 install --no-cache-dir --no-deps keras_applications keras_preprocessing
+pip3 install tf-2.5.0/tensorflow-2.5.0-cp38-cp38-linux_x86_64.whl
+
+TF_WHEEL_DIR="$HOME/.local/lib/python3.8/site-packages/tensorflow"
+# If you installed the wheel as regular user, with root pip it should be in /usr/local/lib/python3.*, or in your virtualenv lib/ directory
+mv tf-2.5.0/tag_constants.h $TF_WHEEL_DIR/include/tensorflow/cc/saved_model/
+# Then recompile OTB with OTBTF using libraries in /opt/tensorflow/lib and instructions in [HOWTOBUILD.md](../../doc/HOWTOBUILD.md).
+cmake $OTB_GIT \
+    -DOTB_USE_TENSORFLOW=ON -DModule_OTBTensorflow=ON \
+    -DTENSORFLOW_CC_LIB=/opt/tensorflow/lib/libtensorflow_cc.so.2 \
+    -Dtensorflow_include_dir=$TF_WHEEL_DIR/include \
+    -DTENSORFLOW_FRAMEWORK_LIB=$TF_WHEEL_DIR/libtensorflow_framework.so.2 \
+&& make install -j 
 ```
 
 ### Debug build

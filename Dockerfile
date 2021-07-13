@@ -53,7 +53,7 @@ ARG BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
 ARG BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
 
 # Build
-ARG KEEP_SRC_TF=false
+ARG ZIP_TF_BIN=false
 COPY tools/docker/build-env-tf.sh ./
 RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git \
  && cd tensorflow \
@@ -76,10 +76,10 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
  && cp tensorflow/cc/saved_model/tag_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
  # Symlink external libs (required for MKL - libiomp5)
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
+ # Compress and save TF binaries
+ && ( ! $ZIP_TF_BIN || zip -9 -j --symlinks /opt/otbtf/tf-$TF.zip tensorflow/cc/saved_model/tag_constants.h bazel-bin/tensorflow/libtensorflow_cc.so* /tmp/tensorflow_pkg/tensorflow*.whl ) \
  # Cleaning
- && rm -rf bazel-* \
- && ( $KEEP_SRC_TF || rm -rf /src/tf ) \
- && rm -rf /root/.cache/ /tmp/*
+ && rm -rf bazel-* /src/tf /root/.cache/ /tmp/*
 
 ### OTB
 ARG GUI=false
