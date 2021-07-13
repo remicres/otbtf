@@ -12,7 +12,6 @@ mkdir -p $HOME/.cache/bazel-remote
 docker run -d -u 1000:1000 -v $HOME/.cache/bazel-remote:/data -p 9090:8080  buchgr/bazel-remote-cache --max_size=20
 
 ### CPU (no MKL)
-#docker build --network='host' -t mdl4eo/otbtf$RELEASE:-cpu-dev-all --build-arg BASE_IMG=$IMG --build-arg KEEP_SRC_OTB=true  --build-arg KEEP_SRC_TF=true .
 docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu-dev --build-arg BASE_IMG=$IMG --build-arg KEEP_SRC_OTB=true .
 docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu --build-arg BASE_IMG=$IMG .
 #docker build --network='host' -t mdl4eo/otbtf$RELEASE:-cpu-gui --build-arg BASE_IMG=$IMG --build-arg GUI=true .
@@ -23,19 +22,16 @@ docker build --network='host' -t mdl4eo/otbtf$RELEASE:cpu --build-arg BASE_IMG=$
 #docker build --network='host' -t mdl4eo/otbtf$RELEASE:-cpu-mkl-dev --build-arg BASE_IMG=$IMG --build-arg BZL_CONFIGS="$MKL_CONF" --build-arg KEEP_SRC_OTB=true .
 
 ### GPU support is enabled if CUDA is found in /usr/local
-#docker build --network='host' -t mdl4eo/otbtf$RELEASE:-gpu-dev-all --build-arg BASE_IMG=$GPU_IMG --build-arg KEEP_SRC_OTB=true --build-arg KEEP_SRC_TF=true .
 docker build --network='host' -t mdl4eo/otbtf$RELEASE:gpu-dev --build-arg BASE_IMG=$GPU_IMG --build-arg KEEP_SRC_OTB=true .
 docker build --network='host' -t mdl4eo/otbtf$RELEASE:gpu --build-arg BASE_IMG=$GPU_IMG .
 #docker build --network='host' -t mdl4eo/otbtf$RELEASE:-gpu-gui --build-arg BASE_IMG=$GPU_IMG --build-arg GUI=true .
 
 #docker login
-#docker push mdl4eo/otbtf$RELEASE:-cpu-dev-all
 docker push mdl4eo/otbtf$RELEASE:-cpu-dev
 docker push mdl4eo/otbtf$RELEASE:-cpu
 #docker push mdl4eo/otbtf$RELEASE:-cpu-gui
 #docker push mdl4eo/otbtf$RELEASE:-cpu-mkl
 
-#docker push mdl4eo/otbtf$RELEASE:-gpu-dev-all
 docker push mdl4eo/otbtf$RELEASE:-gpu-dev
 docker push mdl4eo/otbtf$RELEASE:-gpu
 #docker push mdl4eo/otbtf$RELEASE:-gpu-gui
