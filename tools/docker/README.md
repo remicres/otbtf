@@ -8,7 +8,7 @@ You can build a custom image using `--build-arg` and several config files :
 ### Base images
 ```bash
 UBUNTU=20.04            # or 16.04, 18.04
-CUDA=11.0.3             # or 10.1, 10.2
+CUDA=11.2.2             # or 10.1, 10.2, 11.0.3
 CUDNN=8                 # or 7
 IMG=ubuntu:$UBUNTU
 GPU_IMG=nvidia/cuda:$CUDA-cudnn$CUDNN-devel-ubuntu$UBUNTU
@@ -17,11 +17,11 @@ GPU_IMG=nvidia/cuda:$CUDA-cudnn$CUDNN-devel-ubuntu$UBUNTU
 ### Default arguments
 ```bash
 BASE_IMG                # mandatory
-CPU_RATIO=0.95
+CPU_RATIO=1
 GUI=false
-NUMPY_SPEC="~=1.19"
-TF=r2.4.1
-OTB=7.2.0
+NUMPY_SPEC="==1.19.*"
+TF=v2.5.0
+OTB=7.3.0
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
 BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
 BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
@@ -31,7 +31,7 @@ SUDO=true
 
 # NumPy version requirement :
 # TF <  2.4 : "numpy<1.19.0,>=1.16.0"
-# TF >= 2.4 : "numpy~=1.19"
+# TF >= 2.4 : "numpy==1.19.*"
 ```
 
 ### Bazel remote cache daemon
@@ -61,11 +61,11 @@ docker build --network='host' -t otbtf:cpu-mkl --build-arg BZL_CONFIGS="$MKL_CON
 # Build for GPU (if you're building for your system only you should edit CUDA_COMPUTE_CAPABILITIES in build-env-tf.sh)
 docker build --network='host' -t otbtf:gpu --build-arg BASE_IMG=nvidia/cuda:11.0.3-cudnn8-devel-ubuntu20.04 .
 
-# Build dev with TF and OTB sources (huge image) + set git branches/tags to clone
-docker build --network='host' -t otbtf:gpu-dev-full --build-arg BASE_IMG=nvidia/cuda:11.0.3-cudnn8-devel-ubuntu20.04 \
-    --build-arg KEEP_SRC_OTB=true --build-arg KEEP_SRC_TF=true --build-arg TF=nightly --build-arg OTB=develop .
+# Build latest TF and OTB, set git branches/tags to clone
+docker build --network='host' -t otbtf:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 \
+    --build-arg KEEP_SRC_OTB=true --build-arg TF=nightly --build-arg OTB=develop .
 
-# Build old release
+# Build old release (TF-2.1)
 docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04 \
     --build-arg TF=r2.1 --build-arg NUMPY_SPEC="<1.19" \
     --build-arg BAZEL_OPTIONS="--noincompatible_do_not_split_linking_cmdline --verbose_failures --remote_cache=http://localhost:9090" .
@@ -80,7 +80,7 @@ If you see OOM errors during SuperBuild you should decrease CPU_RATIO (e.g. 0.75
 ## Container examples
 ```bash
 # Pull GPU image and create a new container with your home directory as volume (requires apt package nvidia-docker2 and CUDA>=11.0)
-docker create --gpus=all --volume $HOME:/home/otbuser/volume -it --name otbtf-gpu mdl4eo/otbtf2.1:gpu
+docker create --gpus=all --volume $HOME:/home/otbuser/volume -it --name otbtf-gpu mdl4eo/otbtf2.4:gpu
 
 # Run interactive
 docker start -i otbtf-gpu
@@ -92,7 +92,7 @@ docker exec otbtf-gpu python -c 'import tensorflow as tf; print(tf.test.is_gpu_a
 
 ### Rebuild OTB with more modules
 ```bash
-docker create --gpus=all -it --name otbtf-gpu-dev mdl4eo/otbtf2.1:gpu-dev
+docker create --gpus=all -it --name otbtf-gpu-dev mdl4eo/otbtf2.4:gpu-dev
 docker start -i otbtf-gpu-dev
 ```
 ```bash
@@ -114,7 +114,7 @@ docker start -i otbtf-gui
 $ mapla
 ```
 
-### Common errors
+## Common errors
 Buid :  
 `Error response from daemon: manifest for nvidia/cuda:11.0-cudnn8-devel-ubuntu20.04 not found: manifest unknown: manifest unknown`  
 => Image is missing from dockerhub

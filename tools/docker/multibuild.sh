@@ -1,8 +1,8 @@
 #!/bin/bash
 ### Docker multibuild and push, see default args and more examples in tools/docker/README.md
-RELEASE=2.1
+RELEASE=2.5
 UBUNTU=20.04
-CUDA=11.0.3
+CUDA=11.2.2
 CUDNN=8
 IMG=ubuntu:$UBUNTU
 GPU_IMG=nvidia/cuda:$CUDA-cudnn$CUDNN-devel-ubuntu$UBUNTU
