@@ -132,8 +132,8 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   //////////////////////////////////////////////////////////////////////////////////////////
 
   // Get input and output tensors datatypes and shapes
-  tf::GetTensorAttributes(m_Graph, m_InputPlaceholders, m_InputTensorsShapes, m_InputTensorsDataTypes);
-  tf::GetTensorAttributes(m_Graph, m_OutputTensors, m_OutputTensorsShapes, m_OutputTensorsDataTypes);
+  tf::GetInputAttributes(this->GetSignatureDef(), m_InputPlaceholders, m_InputTensorsShapes, m_InputTensorsDataTypes);
+  tf::GetOutputAttributes(this->GetSignatureDef(), m_OutputTensors, m_OutputTensorsShapes, m_OutputTensorsDataTypes);
 
  }
 
