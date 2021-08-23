@@ -106,6 +106,8 @@ public:
   tensorflow::GraphDef GetGraph()                { return m_Graph ;     }
   void SetSession(tensorflow::Session * session) { m_Session = session; }
   tensorflow::Session * GetSession()             { return m_Session;    }
+  void SetSignatureDef(tensorflow::SignatureDef signature_def) {m_SignatureDef = signature_def;   }
+  tensorflow::SignatureDef GetSignatureDef()                {return m_SignatureDef;         }
 
   /** Model parameters */
   void PushBackInputTensorBundle(std::string name, SizeType receptiveField, ImagePointerType image);
@@ -158,6 +160,7 @@ private:
   // Tensorflow graph and session
   tensorflow::GraphDef       m_Graph;                   // The TensorFlow graph
   tensorflow::Session *      m_Session;                 // The TensorFlow session
+  tensorflow::SignatureDef   m_SignatureDef;            // The TensorFlow SignatureDef
 
   // Model parameters
   StringList                 m_InputPlaceholders;       // Input placeholders names
