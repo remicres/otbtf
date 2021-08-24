@@ -1,6 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) Remi Cresson (IRSTEA). All rights reserved.
+  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
+  Copyright (c) 2020-2021 Remi Cresson (INRAE)
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -27,13 +28,13 @@ namespace otb {
 namespace tf {
 
 // Restore a model from a path
-void RestoreModel(const std::string path, tensorflow::SavedModelBundle & bundle);
+void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
 // Restore a model from a path
-void SaveModel(const std::string path, tensorflow::SavedModelBundle & bundle);
+void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
 // Load a session and a graph from a folder
-void LoadModel(const std::string path, tensorflow::SavedModelBundle & bundle);
+void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
 // Load a graph from a .meta file
 tensorflow::GraphDef LoadGraph(std::string filename);

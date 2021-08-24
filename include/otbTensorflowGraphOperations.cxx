@@ -1,6 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) Remi Cresson (IRSTEA). All rights reserved.
+  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
+  Copyright (c) 2020-2021 Remi Cresson (INRAE)
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -16,10 +17,10 @@ namespace tf {
 //
 // Restore a model from a path
 //
-void RestoreModel(const std::string path, tensorflow::SavedModelBundle & bundle)
+void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle)
 {
   tensorflow::Tensor checkpointPathTensor(tensorflow::DT_STRING, tensorflow::TensorShape());
-  checkpointPathTensor.scalar<std::string>()() = path;
+  checkpointPathTensor.scalar<tensorflow::tstring>()() = path;
   std::vector<std::pair<std::string, tensorflow::Tensor>> feed_dict =
   {{bundle.meta_graph_def.saver_def().filename_tensor_name(), checkpointPathTensor}};
   auto status = bundle.session->Run(feed_dict, {}, {bundle.meta_graph_def.saver_def().restore_op_name()}, nullptr);
@@ -32,10 +33,10 @@ void RestoreModel(const std::string path, tensorflow::SavedModelBundle & bundle)
 //
 // Restore a model from a path
 //
-void SaveModel(const std::string path, tensorflow::SavedModelBundle & bundle)
+void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle)
 {
   tensorflow::Tensor checkpointPathTensor(tensorflow::DT_STRING, tensorflow::TensorShape());
-  checkpointPathTensor.scalar<std::string>()() = path;
+  checkpointPathTensor.scalar<tensorflow::tstring>()() = path;
   std::vector<std::pair<std::string, tensorflow::Tensor>> feed_dict =
   {{bundle.meta_graph_def.saver_def().filename_tensor_name(), checkpointPathTensor}};
   auto status = bundle.session->Run(feed_dict, {}, {bundle.meta_graph_def.saver_def().save_tensor_name()}, nullptr);
@@ -48,7 +49,7 @@ void SaveModel(const std::string path, tensorflow::SavedModelBundle & bundle)
 //
 // Load a session and a graph from a folder
 //
-void LoadModel(const std::string path, tensorflow::SavedModelBundle & bundle)
+void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle)
 {
 
   tensorflow::RunOptions runoptions;
