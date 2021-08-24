@@ -84,8 +84,49 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   // Run the TF session here
   // The session will initialize the outputs
 
+
+  // DEBUG 
+  for (auto& ss: m_OutputTensors)
+  { std::cout << "DEBUG m_OutputTensor :" << ss << std::endl;}
+
+  for (auto& map: m_NameToLayerNameMapping)
+  {
+    std::cout << "first of Mapping" << map.first << std::endl;
+    std::cout << "second of Mapping" << map.second << std::endl;
+  }
+
+  // Inputs corresponds to the names of placeholder, as specified when calling TensorFlowModelServe application
+  // Decloud example: For TF1 model, it is specified by the user as "tower_0:s2_t". For TF2 model, it must be specified by the user as "s2_t"
+  // Thus, for TF2, we must transorm that to "serving_default_s2_t"
+  DictType inputs_new;
+  for (auto& dict: inputs)
+  {
+    DictElementType element = {m_NameToLayerNameMapping[dict.first], dict.second};
+    inputs_new.push_back(element);
+    std::cout << "DEBUG dans boucle name issu de inputs" << dict.first << std::endl;
+    std::cout << "DEBUG m_NameToLayerNameMapping[dict.first] INPUT " << m_NameToLayerNameMapping[dict.first] << std::endl;
+  }
+
+  StringList m_OutputTensors_new;
+  for (auto& name: m_OutputTensors)
+  {
+    std::cout << "DEBUG dans boucle name issu de m_OutputTensors " << name << std::endl;
+    std::cout << "DEBUG m_NameToLayerNameMapping[name] OUTPUT " << m_NameToLayerNameMapping[name] << std::endl;
+    m_OutputTensors_new.push_back(m_NameToLayerNameMapping[name]);
+  }
+
+ 
+
   // Run the session, evaluating our output tensors from the graph
-  auto status = this->GetSession()->Run(inputs, m_OutputTensors, m_TargetNodesNames, &outputs);
+  auto status = this->GetSession()->Run(inputs_new, m_OutputTensors_new, m_TargetNodesNames, &outputs);
+ 
+  // DEBUG
+  tensorflow::Tensor& output = outputs[0];
+  std::cout << "<<<<<<<<<<<<<<<<<<TENSOR INFO<<<<<<<<<<<<<<<<<<<"<<std::endl;
+  std::cout << otb::tf::PrintTensorInfos(output) << std::endl;
+  std::cout << "<<<<<<<<<<<<<<<<<<TENSOR INFO<<<<<<<<<<<<<<<<<<<"<<std::endl;
+  std::cout << " " << std::endl;
+
   if (!status.ok()) {
 
     // Create a debug report
@@ -130,6 +171,21 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   //////////////////////////////////////////////////////////////////////////////////////////
   //                               Get tensors information
   //////////////////////////////////////////////////////////////////////////////////////////
+  tensorflow::SignatureDef signaturedef = this->GetSignatureDef();
+  for (auto& output: signaturedef.outputs())
+  { 
+    std::string name = output.first;
+    std::string layerName = output.second.name();
+    m_NameToLayerNameMapping[name] = layerName;
+    std::cout << "DEBUG dans boucle output: GenerateOutputInformation pour remplir mapping " << name << std::endl;
+  } 
+  for (auto& input: signaturedef.inputs())
+  { 
+    std::string inputName = input.first;
+    std::string layerName = input.second.name();
+    m_NameToLayerNameMapping[inputName] = layerName;
+    std::cout << "DEBUG dans boucle output: GenerateOutputInformation pour remplir mapping " << inputName << std::endl;
+  }
 
   // Get input and output tensors datatypes and shapes
   tf::GetInputAttributes(this->GetSignatureDef(), m_InputPlaceholders, m_InputTensorsShapes, m_InputTensorsDataTypes);
