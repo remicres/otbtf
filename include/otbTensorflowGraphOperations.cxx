@@ -100,7 +100,7 @@ void GetOutputAttributes(const tensorflow::SignatureDef& signature_def, std::vec
       // output is a pair (name, tensor_info)
       // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
     {
-      if (output.first.compare((*nameIt)) == 0)
+      if (output.first.find((*nameIt)) != std::string::npos)
         {
           found = true;
 	  const tensorflow::TensorInfo& tensor_info = output.second;
@@ -160,7 +160,7 @@ void GetInputAttributes(const tensorflow::SignatureDef& signature_def, std::vect
       // input is a pair (name, tensor_info)
       // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
     {
-      if (input.first.compare((*nameIt)) == 0)
+      if (input.first.find((*nameIt)) != std::string::npos)
         {
           found = true;
 	  const tensorflow::TensorInfo& tensor_info = input.second;
