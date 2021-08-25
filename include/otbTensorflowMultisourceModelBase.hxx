@@ -178,13 +178,15 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
     std::string layerName = output.second.name();
     m_NameToLayerNameMapping[name] = layerName;
     std::cout << "DEBUG dans boucle output: GenerateOutputInformation pour remplir mapping " << name << std::endl;
+    std::cout << "                        :                                      layername " << layerName << std::endl;
   } 
   for (auto& input: signaturedef.inputs())
   { 
     std::string inputName = input.first;
     std::string layerName = input.second.name();
     m_NameToLayerNameMapping[inputName] = layerName;
-    std::cout << "DEBUG dans boucle output: GenerateOutputInformation pour remplir mapping " << inputName << std::endl;
+    std::cout << "DEBUG dans boucle input: GenerateOutputInformation pour remplir mapping " << inputName << std::endl;
+    std::cout << "                       :                                      layername " << layerName << std::endl;
   }
 
   // Get input and output tensors datatypes and shapes
