@@ -1,6 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) Remi Cresson (IRSTEA). All rights reserved.
+  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
+  Copyright (c) 2020-2021 Remi Cresson (INRAE)
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
