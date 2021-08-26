@@ -400,21 +400,21 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   {
     std::string name = output.first;
     std::string layerName = output.second.name();
-    //m_NameToLayerNameMapping[name] = layerName;
+    //m_UserNameToLayerNameMapping[name] = layerName;
     std::cout << "DEBUG dans ModelFiler.hxx : outs pour remplir mapping " << name << std::endl;
   }
   for (auto& output: this->GetSignatureDef().outputs())
   {
     std::string name = output.first;
     std::string layerName = output.second.name();
-    //m_NameToLayerNameMapping[name] = layerName;
+    //m_UserNameToLayerNameMapping[name] = layerName;
     std::cout << "DEBUG dans ModelFiler.hxx : this->GetSignatureDef().outputs() pour remplir mapping " << name << std::endl;
   } 
   for (auto& input: this->GetSignatureDef().inputs())
   {
     std::string inputName = input.first;
     std::string layerName = input.second.name();
-    //m_NameToLayerNameMapping[inputName] = layerName;
+    //m_UserNameToLayerNameMapping[inputName] = layerName;
     std::cout << "DEBUG dans ModelFilter.hxx: this->GetSignatureDef().inputs() pour remplir mapping " << inputName << std::endl;
   } 
 
