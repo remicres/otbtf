@@ -90,7 +90,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   for (auto& ss: m_OutputTensors)
   { std::cout << "DEBUG m_OutputTensor :" << ss << std::endl;}
 
-  for (auto& map: m_NameToLayerNameMapping)
+  for (auto& map: m_UserNameToLayerNameMapping)
   {
     std::cout << "first of Mapping" << map.first << std::endl;
     std::cout << "second of Mapping" << map.second << std::endl;
@@ -102,18 +102,18 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   DictType inputs_new;
   for (auto& dict: inputs)
   {
-    DictElementType element = {m_NameToLayerNameMapping[dict.first], dict.second};
+    DictElementType element = {m_UserNameToLayerNameMapping[dict.first], dict.second};
     inputs_new.push_back(element);
     std::cout << "DEBUG dans boucle name issu de inputs" << dict.first << std::endl;
-    std::cout << "DEBUG m_NameToLayerNameMapping[dict.first] INPUT " << m_NameToLayerNameMapping[dict.first] << std::endl;
+    std::cout << "DEBUG m_UserNameToLayerNameMapping[dict.first] INPUT " << m_UserNameToLayerNameMapping[dict.first] << std::endl;
   }
 
   StringList m_OutputTensors_new;
   for (auto& name: m_OutputTensors)
   {
     std::cout << "DEBUG dans boucle name issu de m_OutputTensors " << name << std::endl;
-    std::cout << "DEBUG m_NameToLayerNameMapping[name] OUTPUT " << m_NameToLayerNameMapping[name] << std::endl;
-    m_OutputTensors_new.push_back(m_NameToLayerNameMapping[name]);
+    std::cout << "DEBUG m_UserNameToLayerNameMapping[name] OUTPUT " << m_UserNameToLayerNameMapping[name] << std::endl;
+    m_OutputTensors_new.push_back(m_UserNameToLayerNameMapping[name]);
   }
 
  
@@ -177,7 +177,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   { 
     std::string name = output.first;
     std::string layerName = output.second.name();
-    m_NameToLayerNameMapping[name] = layerName;
+    m_UserNameToLayerNameMapping[name] = layerName;
     std::cout << "DEBUG dans boucle output: GenerateOutputInformation pour remplir mapping " << name << std::endl;
     std::cout << "                        :                                      layername " << layerName << std::endl;
   } 
@@ -185,7 +185,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   { 
     std::string inputName = input.first;
     std::string layerName = input.second.name();
-    m_NameToLayerNameMapping[inputName] = layerName;
+    m_UserNameToLayerNameMapping[inputName] = layerName;
     std::cout << "DEBUG dans boucle input: GenerateOutputInformation pour remplir mapping " << inputName << std::endl;
     std::cout << "                       :                                      layername " << layerName << std::endl;
   }

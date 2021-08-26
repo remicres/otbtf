@@ -178,7 +178,7 @@ private:
   TensorShapeProtoList       m_OutputTensorsShapes;     // Output tensors shapes
 
   // Ajout
-  std::map<std::string, std::string> m_NameToLayerNameMapping;
+  std::map<std::string, std::string> m_UserNameToLayerNameMapping;
 
 }; // end class
 
