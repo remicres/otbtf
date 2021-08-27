@@ -255,7 +255,7 @@ public:
     m_TFFilter = TFModelFilterType::New();
     m_TFFilter->SetGraph(m_SavedModel.meta_graph_def.graph_def());
     m_TFFilter->SetSession(m_SavedModel.session.get());
-    m_TFFilter->SetSignatureDef(m_SavedModel.GetSignatures().at("serving_default"));
+    m_TFFilter->SearchAndSetSignatureDef(m_SavedModel.GetSignatures());
     m_TFFilter->SetOutputTensors(GetParameterStringList("output.names"));
     m_TFFilter->SetOutputSpacingScale(GetParameterFloat("output.spcscale"));
     otbAppLogINFO("Output spacing ratio: " << m_TFFilter->GetOutputSpacingScale());
