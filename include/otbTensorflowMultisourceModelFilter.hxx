@@ -394,31 +394,6 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   DictType inputs;
 
 
-  // DEBUG Tentative
-  auto outs = this->GetSignatureDef().outputs();
-  for (auto& output: outs)
-  {
-    std::string name = output.first;
-    std::string layerName = output.second.name();
-    //m_UserNameToLayerNameMapping[name] = layerName;
-    std::cout << "DEBUG dans ModelFiler.hxx : outs pour remplir mapping " << name << std::endl;
-  }
-  for (auto& output: this->GetSignatureDef().outputs())
-  {
-    std::string name = output.first;
-    std::string layerName = output.second.name();
-    //m_UserNameToLayerNameMapping[name] = layerName;
-    std::cout << "DEBUG dans ModelFiler.hxx : this->GetSignatureDef().outputs() pour remplir mapping " << name << std::endl;
-  } 
-  for (auto& input: this->GetSignatureDef().inputs())
-  {
-    std::string inputName = input.first;
-    std::string layerName = input.second.name();
-    //m_UserNameToLayerNameMapping[inputName] = layerName;
-    std::cout << "DEBUG dans ModelFilter.hxx: this->GetSignatureDef().inputs() pour remplir mapping " << inputName << std::endl;
-  } 
-
-
   // Populate input tensors
   for (unsigned int i = 0 ; i < nInputs ; i++)
     {
