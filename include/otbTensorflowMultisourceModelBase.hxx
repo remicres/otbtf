@@ -117,12 +117,14 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   }
 
  
+  // DEBUG
+  std::cout << "<<<<<<<<<<<<<<<<<<< before this->GetSavedModel()->session<<<<<<<<<<<<<<<<<<"<<std::endl;
 
   // Run the session, evaluating our output tensors from the graph
-  auto status = this->GetSession()->Run(inputs_new, m_OutputTensors_new, m_TargetNodesNames, &outputs);
+  auto status = this->GetSavedModel()->session.get()->Run(inputs_new, m_OutputTensors_new, m_TargetNodesNames, &outputs);
  
   // DEBUG
-  std::cout << "<<<<<<<<<<<<<<<<<<< after this.GetSession<<<<<<<<<<<<<<<<<<"<<std::endl;
+  std::cout << "<<<<<<<<<<<<<<<<<<< after this->GetSavedModel()->session<<<<<<<<<<<<<<<<<<"<<std::endl;
   std::cout << " " << std::endl;
 
   if (!status.ok()) {
@@ -169,7 +171,9 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   //////////////////////////////////////////////////////////////////////////////////////////
   //                               Get tensors information
   //////////////////////////////////////////////////////////////////////////////////////////
-  tensorflow::SignatureDef signaturedef = this->GetSignatureDef();
+  // Set all subelement of the model
+  auto signatures = this->GetSavedModel()->GetSignatures();
+  signaturedef = this->SearchAndSetSignatureDef(signatures);
   for (auto& output: signaturedef.outputs())
   { 
     std::string userName = output.first.substr(0, output.first.find(":"));

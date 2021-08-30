@@ -103,20 +103,18 @@ public:
   typedef std::vector<tensorflow::Tensor>            TensorListType;
 
   /** Set and Get the Tensorflow session and graph */
-  void SetGraph(tensorflow::GraphDef graph)      { m_Graph = graph;     }
-  tensorflow::GraphDef GetGraph()                { return m_Graph ;     }
-  void SetSession(tensorflow::Session * session) { m_Session = session; }
-  tensorflow::Session * GetSession()             { return m_Session;    }
+  void SetSaveModel(tensorflow::SavedModelBundle * saved_model;)      { m_SavedModel = saved_model;     }
+  tensorflow::SavedModelBundle * GetSavedModel()                { return m_SavedModel;     }
+
   void SearchAndSetSignatureDef(const tensorflow::protobuf::Map<std::string, tensorflow::SignatureDef> signatures) 
   {
 	  //*msg_proto->mutable_count() = msg_test;
 	  std::cout << "AVANT signature search" << std::endl;
 	  // If serving_default key exists (which is the default for TF saved model), choose it as signature
 	  // Else, choose the first one
-	  if (signatures.contains("serving_default")){
-		 m_SignatureDef = signatures.at("serving_default");
+	  if (signatures.contains(tensorflow::kDefaultServingSignatureDefKey)){
+		 m_SignatureDef = signatures.at(tensorflow::kDefaultServingSignatureDefKey);
 	  } else {
-		 m_SignatureDef = signatures.at("model");
 		 std::cout << "Debug avant .begin()" << std::endl;
 		 auto debug = *(signatures.begin());
 		 std::cout << "Debug après .begin()" << std::endl;
@@ -125,7 +123,6 @@ public:
 	  }
 
   }
-  tensorflow::SignatureDef GetSignatureDef()                {return m_SignatureDef;         }
 
   /** Model parameters */
   void PushBackInputTensorBundle(std::string name, SizeType receptiveField, ImagePointerType image);
@@ -176,9 +173,10 @@ private:
   void operator=(const Self&); //purposely not implemented
 
   // Tensorflow graph and session
-  tensorflow::GraphDef       m_Graph;                   // The TensorFlow graph
-  tensorflow::Session *      m_Session;                 // The TensorFlow session
-  tensorflow::SignatureDef   m_SignatureDef;            // The TensorFlow SignatureDef
+  tensorflow::GraphDef           m_Graph;               // The TensorFlow graph
+  tensorflow::Session *          m_Session;             // The TensorFlow session
+  tensorflow::SignatureDef       m_SignatureDef;        // The TensorFlow SignatureDef
+  tensorflow::SavedModelBundle * m_SavedModel;          // The TensorFlow model
 
   // Model parameters
   StringList                 m_InputPlaceholders;       // Input placeholders names
