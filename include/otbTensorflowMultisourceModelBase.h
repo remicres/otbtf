@@ -19,6 +19,7 @@
 // Tensorflow
 #include "tensorflow/core/public/session.h"
 #include "tensorflow/core/platform/env.h"
+#include "tensorflow/cc/saved_model/signature_constants.h"
 
 // Tensorflow helpers
 #include "otbTensorflowGraphOperations.h"
@@ -103,7 +104,7 @@ public:
   typedef std::vector<tensorflow::Tensor>            TensorListType;
 
   /** Set and Get the Tensorflow session and graph */
-  void SetSaveModel(tensorflow::SavedModelBundle * saved_model;)      { m_SavedModel = saved_model;     }
+  void SetSavedModel(tensorflow::SavedModelBundle * saved_model)      { m_SavedModel = saved_model;     }
   tensorflow::SavedModelBundle * GetSavedModel()                { return m_SavedModel;     }
 
   void SearchAndSetSignatureDef(const tensorflow::protobuf::Map<std::string, tensorflow::SignatureDef> signatures) 

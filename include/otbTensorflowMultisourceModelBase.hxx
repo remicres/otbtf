@@ -173,7 +173,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   //////////////////////////////////////////////////////////////////////////////////////////
   // Set all subelement of the model
   auto signatures = this->GetSavedModel()->GetSignatures();
-  signaturedef = this->SearchAndSetSignatureDef(signatures);
+  auto signaturedef = this->SearchAndSetSignatureDef(signatures);
   for (auto& output: signaturedef.outputs())
   { 
     std::string userName = output.first.substr(0, output.first.find(":"));
@@ -192,8 +192,8 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   }
 
   // Get input and output tensors datatypes and shapes
-  tf::GetInputAttributes(this->GetSignatureDef(), m_InputPlaceholders, m_InputTensorsShapes, m_InputTensorsDataTypes);
-  tf::GetOutputAttributes(this->GetSignatureDef(), m_OutputTensors, m_OutputTensorsShapes, m_OutputTensorsDataTypes);
+  tf::GetTensorAttributes(signaturedef.inputs(), m_InputPlaceholders, m_InputTensorsShapes, m_InputTensorsDataTypes);
+  tf::GetTensorAttributes(signaturedef.outputs(), m_OutputTensors, m_OutputTensorsShapes, m_OutputTensorsDataTypes);
 
  }
 
