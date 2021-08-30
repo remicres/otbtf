@@ -122,10 +122,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   auto status = this->GetSession()->Run(inputs_new, m_OutputTensors_new, m_TargetNodesNames, &outputs);
  
   // DEBUG
-  tensorflow::Tensor& output = outputs[0];
-  std::cout << "<<<<<<<<<<<<<<<<<<TENSOR INFO<<<<<<<<<<<<<<<<<<<"<<std::endl;
-  std::cout << otb::tf::PrintTensorInfos(output) << std::endl;
-  std::cout << "<<<<<<<<<<<<<<<<<<TENSOR INFO<<<<<<<<<<<<<<<<<<<"<<std::endl;
+  std::cout << "<<<<<<<<<<<<<<<<<<< after this.GetSession<<<<<<<<<<<<<<<<<<"<<std::endl;
   std::cout << " " << std::endl;
 
   if (!status.ok()) {
@@ -175,18 +172,18 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   tensorflow::SignatureDef signaturedef = this->GetSignatureDef();
   for (auto& output: signaturedef.outputs())
   { 
-    std::string name = output.first;
+    std::string userName = output.first.substr(0, output.first.find(":"));
     std::string layerName = output.second.name();
-    m_UserNameToLayerNameMapping[name] = layerName;
-    std::cout << "DEBUG dans boucle output: GenerateOutputInformation pour remplir mapping " << name << std::endl;
+    m_UserNameToLayerNameMapping[userName] = layerName;
+    std::cout << "DEBUG dans boucle output: GenerateOutputInformation pour remplir mapping " << userName << std::endl;
     std::cout << "                        :                                      layername " << layerName << std::endl;
   } 
   for (auto& input: signaturedef.inputs())
   { 
-    std::string inputName = input.first;
+    std::string userName = input.first.substr(0, input.first.find(":"));
     std::string layerName = input.second.name();
-    m_UserNameToLayerNameMapping[inputName] = layerName;
-    std::cout << "DEBUG dans boucle input: GenerateOutputInformation pour remplir mapping " << inputName << std::endl;
+    m_UserNameToLayerNameMapping[userName] = layerName;
+    std::cout << "DEBUG dans boucle input: GenerateOutputInformation pour remplir mapping " << userName << std::endl;
     std::cout << "                       :                                      layername " << layerName << std::endl;
   }
 

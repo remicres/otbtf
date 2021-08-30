@@ -19,8 +19,6 @@
 // Tensorflow
 #include "tensorflow/core/public/session.h"
 #include "tensorflow/core/platform/env.h"
-//#include "tensorflow/core/protobuf/meta_graph.pb.h"
-//#include "tensorflow/core/protobuf/graph_debug_info.pb.h"
 
 // Tensorflow helpers
 #include "otbTensorflowGraphOperations.h"
@@ -109,13 +107,20 @@ public:
   tensorflow::GraphDef GetGraph()                { return m_Graph ;     }
   void SetSession(tensorflow::Session * session) { m_Session = session; }
   tensorflow::Session * GetSession()             { return m_Session;    }
-  void SearchAndSetSignatureDef(tensorflow::protobuf::Map<std::string, tensorflow::SignatureDef> signatures) 
+  void SearchAndSetSignatureDef(const tensorflow::protobuf::Map<std::string, tensorflow::SignatureDef> signatures) 
   {
+	  //*msg_proto->mutable_count() = msg_test;
+	  std::cout << "AVANT signature search" << std::endl;
 	  // If serving_default key exists (which is the default for TF saved model), choose it as signature
 	  // Else, choose the first one
-	  if (signatures.contains("serving_default"){
+	  if (signatures.contains("serving_default")){
 		 m_SignatureDef = signatures.at("serving_default");
 	  } else {
+		 m_SignatureDef = signatures.at("model");
+		 std::cout << "Debug avant .begin()" << std::endl;
+		 auto debug = *(signatures.begin());
+		 std::cout << "Debug après .begin()" << std::endl;
+		 std::cout << "FIRST SIGNATUREDEF" << signatures.begin()->first << std::endl;
 		 m_SignatureDef = signatures.begin()->second;
 	  }
 
