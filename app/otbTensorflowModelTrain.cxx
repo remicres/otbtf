@@ -422,8 +422,7 @@ public:
 
     // Setup training filter
     m_TrainModelFilter = TrainModelFilterType::New();
-    m_TrainModelFilter->SetGraph(m_SavedModel.meta_graph_def.graph_def());
-    m_TrainModelFilter->SetSession(m_SavedModel.session.get());
+    m_TrainModelFilter->SetSavedModel(m_SavedModel);
     m_TrainModelFilter->SetOutputTensors(GetParameterStringList("training.outputtensors"));
     m_TrainModelFilter->SetTargetNodesNames(GetParameterStringList("training.targetnodes"));
     m_TrainModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
