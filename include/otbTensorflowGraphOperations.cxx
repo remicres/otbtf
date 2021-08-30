@@ -79,134 +79,10 @@ tensorflow::GraphDef LoadGraph(std::string filename)
 }
 
 
-// Get the following attributes of the specified output tensors (by name) of a graph:
-// - shape
-// - datatype
-void GetOutputAttributes(const tensorflow::SignatureDef& signature_def, std::vector<std::string> & tensorsNames,
-    std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes)
-{
-  // Allocation
-  shapes.clear();
-  shapes.reserve(tensorsNames.size());
-  dataTypes.clear();
-  dataTypes.reserve(tensorsNames.size());
-
-  // Get infos
-  for (std::vector<std::string>::iterator nameIt = tensorsNames.begin();
-      nameIt != tensorsNames.end(); ++nameIt)
-  {
-    bool found = false;
-    std::cout << "Searching for corresponding node of  : " << (*nameIt) << std::endl;
-    for (auto const & output : signature_def.outputs())
-      // output is a pair (name, tensor_info)
-      // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
-    {
-      std::string layername = output.first;
-      if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
-        {
-          found = true;
-	  const tensorflow::TensorInfo& tensor_info = output.second;
-
-	  // DEBUG
-          std::cout << "\tPrintDebugString --------------------------------";
-          std::cout << std::endl;
-          tensor_info.PrintDebugString();
-          std::cout << "\t-------------------------------------------------" << std::endl;
-
-
-	  // Set default to DT_FLOAT
-	  tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
-
-	  // Default (input?) tensor type
-	  ts_dt = tensor_info.dtype();
-	  dataTypes.push_back(ts_dt);
-
-	  // Get the tensor's shape
-	  // Here we assure it's a tensor, with 1 shape
-	  tensorflow::TensorShapeProto ts_shp = tensor_info.tensor_shape();
-	  shapes.push_back(ts_shp);
-      }
-    }
-
-    if (!found)
-    {
-      itkGenericExceptionMacro("Tensor name \"" << (*nameIt) << "\" not found" );
-    }
-
-  }
-
-}
-
-
-//
-// Get the following attributes of the specified input tensors (by name) of a graph:
-// - shape
-// - datatype
-void GetInputAttributes(const tensorflow::SignatureDef& signature_def, std::vector<std::string> & tensorsNames,
-    std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes)
-{
-  // Allocation
-  shapes.clear();
-  shapes.reserve(tensorsNames.size());
-  dataTypes.clear();
-  dataTypes.reserve(tensorsNames.size());
-
-  
-  // Get infos
-  for (std::vector<std::string>::iterator nameIt = tensorsNames.begin();
-      nameIt != tensorsNames.end(); ++nameIt)
-  {
-    bool found = false;
-    std::cout << "Searching for corresponding node of  : " << (*nameIt) << std::endl;
-    for (auto const & input : signature_def.inputs())
-      // input is a pair (name, tensor_info)
-      // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
-    {
-      std::string layername = input.first;
-      if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
-        {
-          found = true;
-	  const tensorflow::TensorInfo& tensor_info = input.second;
-
-	  // DEBUG
-          std::cout << "\tPrintDebugString --------------------------------";
-          std::cout << std::endl;
-          tensor_info.PrintDebugString();
-          std::cout << "\t-------------------------------------------------" << std::endl;
-
-
-	  // Set default to DT_FLOAT
-	  tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
-
-	  // Default (input?) tensor type
-	  ts_dt = tensor_info.dtype();
-	  dataTypes.push_back(ts_dt);
-
-	  // Get the tensor's shape
-	  // Here we assure it's a tensor, with 1 shape
-	  tensorflow::TensorShapeProto ts_shp = tensor_info.tensor_shape();
-	  shapes.push_back(ts_shp);
-      }
-    }
-
-    if (!found)
-    {
-      itkGenericExceptionMacro("Tensor name \"" << (*nameIt) << "\" not found" );
-    }
-
-  }
-
-}
-
-
-
-//
 // Get the following attributes of the specified tensors (by name) of a graph:
 // - shape
 // - datatype
-// Here we assume that the node's output is a tensor
-//
-void GetTensorAttributes(const tensorflow::GraphDef & graph, std::vector<std::string> & tensorsNames,
+void GetTensorAttributes(const map<string, TensorInfo> layers, std::vector<std::string> & tensorsNames,
     std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes)
 {
   // Allocation
@@ -220,42 +96,35 @@ void GetTensorAttributes(const tensorflow::GraphDef & graph, std::vector<std::st
       nameIt != tensorsNames.end(); ++nameIt)
   {
     bool found = false;
-    for (int i = 0 ; i < graph.node_size() ; i++)
+    std::cout << "Searching for corresponding node of  : " << (*nameIt) << std::endl;
+    for (auto const & layer : layers)
+      // layer is a pair (name, tensor_info)
+      // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
     {
-      tensorflow::NodeDef node = graph.node(i);
-
-
-      if (node.name().compare((*nameIt)) == 0)
-      {
-        found = true;
-
-        // Set default to DT_FLOAT
-        tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
-
-        // Default (input?) tensor type
-        auto test_is_output = node.attr().find("T");
-        if (test_is_output != node.attr().end())
+      std::string layername = layer.first;
+      if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
         {
-          ts_dt = node.attr().at("T").type();
-        }
-        auto test_has_dtype = node.attr().find("dtype");
-        if (test_has_dtype != node.attr().end())
-        {
-          ts_dt = node.attr().at("dtype").type();
-        }
-        auto test_output_type = node.attr().find("output_type");
-        if (test_output_type != node.attr().end())
-        {
-          // if there is an output type, we take it instead of the
-          // datatype of the input tensor
-          ts_dt = node.attr().at("output_type").type();
-        }
-        dataTypes.push_back(ts_dt);
+          found = true;
+	  const tensorflow::TensorInfo& tensor_info = layer.second;
 
-        // Get the tensor's shape
-        // Here we assure it's a tensor, with 1 shape
-        tensorflow::TensorShapeProto ts_shp = node.attr().at("_output_shapes").list().shape(0);
-        shapes.push_back(ts_shp);
+	  // DEBUG
+      std::cout << "\tPrintDebugString --------------------------------";
+      std::cout << std::endl;
+      tensor_info.PrintDebugString();
+      std::cout << "\t-------------------------------------------------" << std::endl;
+
+
+	  // Set default to DT_FLOAT
+	  tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
+
+	  // Default (input?) tensor type
+	  ts_dt = tensor_info.dtype();
+	  dataTypes.push_back(ts_dt);
+
+	  // Get the tensor's shape
+	  // Here we assure it's a tensor, with 1 shape
+	  tensorflow::TensorShapeProto ts_shp = tensor_info.tensor_shape();
+	  shapes.push_back(ts_shp);
       }
     }
 
