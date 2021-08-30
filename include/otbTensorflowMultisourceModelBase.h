@@ -104,8 +104,8 @@ public:
   typedef std::vector<tensorflow::Tensor>            TensorListType;
 
   /** Set and Get the Tensorflow session and graph */
-  void SetSavedModel(tensorflow::SavedModelBundle * saved_model)      { m_SavedModel = saved_model;     }
-  tensorflow::SavedModelBundle * GetSavedModel()                { return m_SavedModel;     }
+  void SetSavedModel(tensorflow::SavedModelBundle saved_model)      { m_SavedModel = saved_model;     }
+  tensorflow::SavedModelBundle GetSavedModel()                { return m_SavedModel;     }
 
   void SearchAndSetSignatureDef(const tensorflow::protobuf::Map<std::string, tensorflow::SignatureDef> signatures) 
   {
