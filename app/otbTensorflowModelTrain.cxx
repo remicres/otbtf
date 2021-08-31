@@ -407,7 +407,7 @@ public:
   {
 
     // Load the Tensorflow bundle
-    //tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel);
+    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel);
 
     // Check if we have to restore variables from somewhere
     if (HasValue("model.restorefrom"))
