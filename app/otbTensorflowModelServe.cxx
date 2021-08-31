@@ -177,7 +177,7 @@ public:
     AddParameter(ParameterType_Bool,          "model.fullyconv", "Fully convolutional");
     MandatoryOff                             ("model.fullyconv");
     AddParameter(ParameterType_StringList,    "model.tagsets",    "Which tags (i.e. v1.MetaGraphDefs) to load from the saved model. Can be retrieved by running `saved_model_cli  show --dir your_model_dir --all`");
-    SetDefaultParameterStringList            ("model.tagsets", {tensorflow::kSavedModelTagServe})
+    MandatoryOff                             ("model.tagsets");
 
     // Output tensors parameters
     AddParameter(ParameterType_Group,         "output",          "Output tensors parameters");
@@ -249,8 +249,15 @@ public:
   {
 
     // Load the Tensorflow bundle
-    std::vector<std::string> tagList = GetParameterStringList("model.tagsets");
-    std::unordered_set<std::string> tagSets(tagList.begin(), tagList.end());
+    if (HasUserValue("model.tagsets")){
+        std::vector<std::string> tagList = GetParameterStringList("model.tagsets");
+        std::unordered_set<std::string> tagSets(tagList.begin(), tagList.end()); // convert to unordered_set
+    }else{
+        std::unordered_set<std::string> tagSets = {tensorflow::kSavedModelTagServe};
+    }
+
+
+
     tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, tagSets);
 
     // Prepare inputs
