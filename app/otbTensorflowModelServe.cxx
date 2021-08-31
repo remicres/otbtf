@@ -249,11 +249,12 @@ public:
   {
 
     // Load the Tensorflow bundle
+    std::unordered_set<std::string> tagSets;
     if (HasUserValue("model.tagsets")){
         std::vector<std::string> tagList = GetParameterStringList("model.tagsets");
-        std::unordered_set<std::string> tagSets(tagList.begin(), tagList.end()); // convert to unordered_set
+	std::copy(tagList.begin(), tagList.end(), std::inserter(tagSets, tagSets.end())); // copy in unordered_set
     }else{
-        std::unordered_set<std::string> tagSets = {tensorflow::kSavedModelTagServe};
+        tagSets = {tensorflow::kSavedModelTagServe};
     }
 
 
