@@ -185,6 +185,8 @@ public:
     MandatoryOff                           ("model.restorefrom");
     AddParameter(ParameterType_String,      "model.saveto",       "Save model to path");
     MandatoryOff                           ("model.saveto");
+    AddParameter(ParameterType_StringList,  "model.tagsets",    "Which tags (i.e. v1.MetaGraphDefs) to load from the saved model. Currently, only one tag is supported. Can be retrieved by running `saved_model_cli  show --dir your_model_dir --all`");
+    MandatoryOff                           ("model.tagsets");
 
     // Training parameters group
     AddParameter(ParameterType_Group,       "training",           "Training parameters");
@@ -407,7 +409,13 @@ public:
   {
 
     // Load the Tensorflow bundle
-    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel);
+    if (HasUserValue("model.tagsets")){
+        std::vector<std::string> tagList = GetParameterStringList("model.tagsets");
+	    std::unordered_set<std::string> tagSets(tagList.begin(), tagList.end()); // convert to unordered_set
+	    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, tagSets);
+    }else{
+        tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel);
+    }
 
     // Check if we have to restore variables from somewhere
     if (HasValue("model.restorefrom"))
