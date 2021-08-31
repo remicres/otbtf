@@ -49,7 +49,7 @@ void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
 //
 // Load a session and a graph from a folder
 //
-void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::list<std::string> tagsets)
+void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::unordered_set<std::string> tagsets)
 {
 
   tensorflow::RunOptions runoptions;
