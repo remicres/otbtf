@@ -9,6 +9,10 @@ set(IMAGEXS ${DATADIR}/xs_subset.tif)
 set(IMAGEPAN ${DATADIR}/pan_subset.tif)
 set(IMAGEPXS ${DATADIR}/pxs_subset.tif)
 set(IMAGEPXS2 ${DATADIR}/pxs_subset2.tif)
+set(PATCHESA ${DATADIR}/Sentinel-2_B4328_10m_patches_A.jp2)
+set(PATCHESB ${DATADIR}/Sentinel-2_B4328_10m_patches_B.jp2)
+set(LABELSA ${DATADIR}/Sentinel-2_B4328_10m_labels_A.tif)
+set(LABELSB ${DATADIR}/Sentinel-2_B4328_10m_labels_B.tif)
 
 # Input models
 set(MODEL1 ${MODELSDIR}/model1)
@@ -23,6 +27,28 @@ set(MODEL2_FC_OUT apTvClTensorflowModelServeCNN8x8_32x32FC.tif)
 set(MODEL3_PB_OUT apTvClTensorflowModelServeFCNN16x16PB.tif)
 set(MODEL3_FC_OUT apTvClTensorflowModelServeFCNN16x16FC.tif)
 set(MODEL4_FC_OUT apTvClTensorflowModelServeFCNN64x64to32x32.tif)
+set(MODEL1_SAVED model1_updated)
+
+#----------- Model training : 1-branch CNN (16x16) Patch-Based ----------------
+otb_test_application(NAME TensorflowModelTrainCNN16x16PB
+  APP  TensorflowModelTrain
+  OPTIONS 
+  -training.source1.il ${PATCHESA}
+  -training.source1.placeholder "x"
+  -training.source2.il ${LABELSA}
+  -training.source2.placeholder "y"
+  -validation.source1.il ${PATCHESB}
+  -validation.source2.il ${LABELSB}
+  -validation.source1.name "x"
+  -validation.source2.name "prediction"
+  -training.source1.patchsizex 16 -training.source1.patchsizey 16
+  -training.source2.patchsizex 1 -training.source2.patchsizey 1
+  -model.dir ${MODEL1} 
+  -model.saveto ${MODEL1_SAVED} 
+  -training.targetnodes "optimizer"
+  -validation.mode "class"
+  )
+
 
 #----------- Model serving : 1-branch CNN (16x16) Patch-Based ----------------
 otb_test_application(NAME TensorflowModelServeCNN16x16PB
