@@ -47,7 +47,7 @@ void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
 }
 
 //
-// Load a session and a graph from a folder
+// Load a mode from a folder
 //
 void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::unordered_set<std::string> tagsets)
 {
@@ -62,6 +62,21 @@ void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
     }
 
 }
+
+void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle)
+{
+
+  tensorflow::RunOptions runoptions;
+  runoptions.set_trace_level(tensorflow::RunOptions_TraceLevel_FULL_TRACE);
+  auto status = tensorflow::LoadSavedModel(tensorflow::SessionOptions(), runoptions,
+      path, {tensorflow::kSavedModelTagServe}, &bundle);
+  if (!status.ok())
+    {
+    itkGenericExceptionMacro("Can't load the input model: " << status.ToString() );
+    }
+
+}
+
 
 //
 // Load a graph from a .meta file
