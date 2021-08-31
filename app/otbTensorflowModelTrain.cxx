@@ -422,7 +422,7 @@ public:
 
     // Setup training filter
     m_TrainModelFilter = TrainModelFilterType::New();
-    m_TrainModelFilter->SetSavedModel(m_SavedModel);
+    m_TrainModelFilter->SetSavedModel(& m_SavedModel);
     m_TrainModelFilter->SetOutputTensors(GetParameterStringList("training.outputtensors"));
     m_TrainModelFilter->SetTargetNodesNames(GetParameterStringList("training.targetnodes"));
     m_TrainModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
@@ -445,8 +445,7 @@ public:
       otbAppLogINFO("Set validation mode to classification validation");
 
       m_ValidateModelFilter = ValidateModelFilterType::New();
-      m_ValidateModelFilter->SetGraph(m_SavedModel.meta_graph_def.graph_def());
-      m_ValidateModelFilter->SetSession(m_SavedModel.session.get());
+      m_ValidateModelFilter->SetSavedModel(& m_SavedModel);
       m_ValidateModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
       m_ValidateModelFilter->SetUserPlaceholders(GetUserPlaceholders("validation.userplaceholders"));
       m_ValidateModelFilter->SetInputPlaceholders(m_InputPlaceholdersForValidation);

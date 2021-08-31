@@ -82,7 +82,7 @@ tensorflow::GraphDef LoadGraph(std::string filename)
 // Get the following attributes of the specified tensors (by name) of a graph:
 // - shape
 // - datatype
-void GetTensorAttributes(const std::map<std::string, tensorflow::TensorInfo> layers, std::vector<std::string> & tensorsNames,
+void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::TensorInfo> layers, std::vector<std::string> & tensorsNames,
     std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes)
 {
   // Allocation

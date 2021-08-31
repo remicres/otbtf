@@ -21,7 +21,6 @@ template <class TInputImage, class TOutputImage>
 TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 ::TensorflowMultisourceModelBase()
  {
-  m_Session = nullptr;
   Superclass::SetCoordinateTolerance(itk::NumericTraits<double>::max() );
   Superclass::SetDirectionTolerance(itk::NumericTraits<double>::max() );
  }
@@ -121,7 +120,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   std::cout << "<<<<<<<<<<<<<<<<<<< before this->GetSavedModel().session<<<<<<<<<<<<<<<<<<"<<std::endl;
 
   // Run the session, evaluating our output tensors from the graph
-  auto status = this->GetSavedModel().session.get()->Run(inputs_new, m_OutputTensors_new, m_TargetNodesNames, &outputs);
+  auto status = this->GetSavedModel()->session.get()->Run(inputs_new, m_OutputTensors_new, m_TargetNodesNames, &outputs);
  
   // DEBUG
   std::cout << "<<<<<<<<<<<<<<<<<<< after this->GetSavedModel().session<<<<<<<<<<<<<<<<<<"<<std::endl;
@@ -172,8 +171,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   //                               Get tensors information
   //////////////////////////////////////////////////////////////////////////////////////////
   // Set all subelement of the model
-  auto signatures = this->GetSavedModel().GetSignatures();
-  auto signaturedef = this->SearchAndSetSignatureDef(signatures);
+  auto signaturedef = this->GetSignatureDef();
   for (auto& output: signaturedef.outputs())
   { 
     std::string userName = output.first.substr(0, output.first.find(":"));

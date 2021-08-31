@@ -104,24 +104,27 @@ public:
   typedef std::vector<tensorflow::Tensor>            TensorListType;
 
   /** Set and Get the Tensorflow session and graph */
-  void SetSavedModel(tensorflow::SavedModelBundle saved_model)      { m_SavedModel = saved_model;     }
-  tensorflow::SavedModelBundle GetSavedModel()                { return m_SavedModel;     }
+  void SetSavedModel(tensorflow::SavedModelBundle * saved_model)      { m_SavedModel = saved_model;     }
+  tensorflow::SavedModelBundle * GetSavedModel()                { return m_SavedModel;     }
 
-  void SearchAndSetSignatureDef(const tensorflow::protobuf::Map<std::string, tensorflow::SignatureDef> signatures) 
+  tensorflow::SignatureDef GetSignatureDef() 
   {
-	  //*msg_proto->mutable_count() = msg_test;
+	  auto signatures = this->GetSavedModel()->GetSignatures();
+	  tensorflow::SignatureDef signature_def;
 	  std::cout << "AVANT signature search" << std::endl;
 	  // If serving_default key exists (which is the default for TF saved model), choose it as signature
 	  // Else, choose the first one
 	  if (signatures.contains(tensorflow::kDefaultServingSignatureDefKey)){
-		 m_SignatureDef = signatures.at(tensorflow::kDefaultServingSignatureDefKey);
+		 signature_def = signatures.at(tensorflow::kDefaultServingSignatureDefKey);
 	  } else {
 		 std::cout << "Debug avant .begin()" << std::endl;
 		 auto debug = *(signatures.begin());
 		 std::cout << "Debug après .begin()" << std::endl;
 		 std::cout << "FIRST SIGNATUREDEF" << signatures.begin()->first << std::endl;
-		 m_SignatureDef = signatures.begin()->second;
+		 signature_def = signatures.begin()->second;
 	  }
+
+	  return signature_def;
 
   }
 
@@ -174,9 +177,6 @@ private:
   void operator=(const Self&); //purposely not implemented
 
   // Tensorflow graph and session
-  tensorflow::GraphDef           m_Graph;               // The TensorFlow graph
-  tensorflow::Session *          m_Session;             // The TensorFlow session
-  tensorflow::SignatureDef       m_SignatureDef;        // The TensorFlow SignatureDef
   tensorflow::SavedModelBundle * m_SavedModel;          // The TensorFlow model
 
   // Model parameters

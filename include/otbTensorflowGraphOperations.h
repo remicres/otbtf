@@ -43,13 +43,9 @@ tensorflow::GraphDef LoadGraph(std::string filename);
 // - shape
 // - datatype
 // Here we assume that the node's output is a tensor
-void GetTensorAttributes(const tensorflow::GraphDef & graph, std::vector<std::string> & tensorsNames,
+void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::TensorInfo> layers, std::vector<std::string> & tensorsNames,
     std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes);
 
-void GetInputAttributes(const tensorflow::SavedModelBundle & bundle, std::vector<std::string> & tensorsNames,
-		                    std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes);
-void GetOutputAttributes(const tensorflow::SavedModelBundle & bundle, std::vector<std::string> & tensorsNames,
-		                    std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes);
 
 // Print a lot of stuff about the specified nodes of the graph
 void PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::string> & nodesNames);
