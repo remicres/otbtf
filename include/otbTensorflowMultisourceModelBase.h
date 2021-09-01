@@ -114,6 +114,10 @@ public:
 	  std::cout << "AVANT signature search" << std::endl;
 	  // If serving_default key exists (which is the default for TF saved model), choose it as signature
 	  // Else, choose the first one
+	  if (signatures.size() == 0){
+        itkExceptionMacro("There are no available signatures for this tag-set  \n" <<
+                          "Please check which tag-set to use by running `saved_model_cli show --dir your_model_dir --all`");
+      }
 	  if (signatures.contains(tensorflow::kDefaultServingSignatureDefKey)){
 		 signature_def = signatures.at(tensorflow::kDefaultServingSignatureDefKey);
 	  } else {
