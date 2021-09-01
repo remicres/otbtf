@@ -1,4 +1,4 @@
-image: mdl4eo/otbtf2.4:cpu-basic
+image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
 #docker-build:
 #  image: docker:latest
 #  stage: build
