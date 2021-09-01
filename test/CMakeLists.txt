@@ -33,6 +33,7 @@ set(MODEL1_SAVED model1_updated)
 otb_test_application(NAME TensorflowModelTrainCNN16x16PB
   APP  TensorflowModelTrain
   OPTIONS 
+  -training.epochs 10
   -training.source1.il ${PATCHESA}
   -training.source1.placeholder "x"
   -training.source2.il ${LABELSA}
