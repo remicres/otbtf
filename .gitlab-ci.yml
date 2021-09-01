@@ -35,5 +35,5 @@ cppcheck:
 ctest:
   stage: Test
   script:
-    - cd /src/otb/build/OTB/build && sudo ctest -L OTBTensorflow
+    - cd /src/otb/build/OTB/build && sudo ctest -L OTBTensorflow -V
 
