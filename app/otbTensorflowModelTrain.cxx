@@ -448,7 +448,7 @@ public:
       otbAppLogINFO("Set validation mode to classification validation");
 
       m_ValidateModelFilter = ValidateModelFilterType::New();
-      m_ValidateModelFilter->SetSavedModel(& m_SavedModel);
+      m_ValidateModelFilter->SetSavedModel(&m_SavedModel);
       m_ValidateModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
       m_ValidateModelFilter->SetUserPlaceholders(GetUserPlaceholders("validation.userplaceholders"));
       m_ValidateModelFilter->SetInputPlaceholders(m_InputPlaceholdersForValidation);
