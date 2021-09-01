@@ -50,7 +50,6 @@ otb_test_application(NAME TensorflowModelTrainCNN16x16PB
   -validation.mode "class"
   )
 
-
 #----------- Model serving : 1-branch CNN (16x16) Patch-Based ----------------
 otb_test_application(NAME TensorflowModelServeCNN16x16PB
   APP  TensorflowModelServe
@@ -58,7 +57,7 @@ otb_test_application(NAME TensorflowModelServeCNN16x16PB
   -source1.rfieldx 16 -source1.rfieldy 16 -source1.placeholder x
   -model.dir ${MODEL1} -output.names prediction
   -out ${TEMP}/${MODEL1_PB_OUT}
-  VALID --compare-image ${EPSILON_6}
+  VALID --compare-image ${EPSILON_5}
   ${DATADIR}/${MODEL1_PB_OUT}
   ${TEMP}/${MODEL1_PB_OUT})
 
