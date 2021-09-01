@@ -19,6 +19,7 @@
 // Tensorflow stuff
 #include "tensorflow/core/public/session.h"
 #include "tensorflow/core/platform/env.h"
+#include "tensorflow/cc/saved_model/tag_constants.h"
 
 // Tensorflow model train
 #include "otbTensorflowMultisourceModelTrain.h"
@@ -409,13 +410,14 @@ public:
   {
 
     // Load the Tensorflow bundle
+    std::unordered_set<std::string> tagSets;
     if (HasUserValue("model.tagsets")){
         std::vector<std::string> tagList = GetParameterStringList("model.tagsets");
-	    std::unordered_set<std::string> tagSets(tagList.begin(), tagList.end()); // convert to unordered_set
-	    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, tagSets);
+	    std::copy(tagList.begin(), tagList.end(), std::inserter(tagSets, tagSets.end())); // copy in unordered_set
     }else{
-        tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel);
+        tagSets = {tensorflow::kSavedModelTagServe};
     }
+    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, tagSets);
 
     // Check if we have to restore variables from somewhere
     if (HasValue("model.restorefrom"))
