@@ -37,6 +37,7 @@ ctest:
   script:
     - cd /src/otb/build/OTB/build && sudo ctest -L OTBTensorflow -V
   artifacts:
+    when: on_failure
     paths:
       - Testing/Temporary
     expire_in: 1 week
