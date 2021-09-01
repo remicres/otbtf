@@ -18,6 +18,8 @@ stages:
   - Test
 build:
   stage: build
+  artifacts:
+    untracked: true  
   script:
    - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4
 before_script:
