@@ -410,20 +410,15 @@ public:
   {
 
     // Load the Tensorflow bundle
-    std::unordered_set<std::string> tagSets;
-    if (HasUserValue("model.tagsets")){
-        std::vector<std::string> tagList = GetParameterStringList("model.tagsets");
-	    std::copy(tagList.begin(), tagList.end(), std::inserter(tagSets, tagSets.end())); // copy in unordered_set
-    }else{
-        tagSets = {tensorflow::kSavedModelTagServe};
-    }
-    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, tagSets);
+    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, GetParameterStringList("model.tagsets"));
 
-    // Check if we have to restore variables from somewhere
+    // Check if we have to restore variables from somewhere else
     if (HasValue("model.restorefrom"))
       {
       const std::string path = GetParameterAsString("model.restorefrom");
       otbAppLogINFO("Restoring model from " + path);
+
+      // Load SavedModel variables
       tf::RestoreModel(path, m_SavedModel);
       }
 
@@ -432,7 +427,7 @@ public:
 
     // Setup training filter
     m_TrainModelFilter = TrainModelFilterType::New();
-    m_TrainModelFilter->SetSavedModel(& m_SavedModel);
+    m_TrainModelFilter->SetSavedModel(&m_SavedModel);
     m_TrainModelFilter->SetOutputTensors(GetParameterStringList("training.outputtensors"));
     m_TrainModelFilter->SetTargetNodesNames(GetParameterStringList("training.targetnodes"));
     m_TrainModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
