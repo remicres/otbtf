@@ -55,8 +55,6 @@ public:
     TFSourceType                       m_ImageSource;   // Image source
     FloatVectorImageType::SizeType     m_PatchSize;          // Patch size
 
-    unsigned int                       m_NumberOfElements;  // Number of output samples
-
     std::string                        m_KeyIn;   // Key of input image list
     std::string                        m_KeyOut;  // Key of output samples image
     std::string                        m_KeyPszX; // Key for samples sizes X
