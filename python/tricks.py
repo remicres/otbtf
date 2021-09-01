@@ -72,6 +72,7 @@ def create_savedmodel(sess, inputs, outputs, directory):
     outputs_names = {o: graph.get_tensor_by_name(o) for o in outputs}
     tf.compat.v1.saved_model.simple_save(sess, directory, inputs=inputs_names, outputs=outputs_names)
 
+
 def ckpt_to_savedmodel(ckpt_path, inputs, outputs, savedmodel_path, clear_devices=False):
     """
     Read a Checkpoint and build a SavedModel
@@ -90,13 +91,15 @@ def ckpt_to_savedmodel(ckpt_path, inputs, outputs, savedmodel_path, clear_device
         # Create a SavedModel
         create_savedmodel(sess, inputs=inputs, outputs=outputs, directory=savedmodel_path)
 
+
 @deprecated
 def read_samples(filename):
-   """
+    """
    Read a patches image.
    @param filename: raster file name
    """
-   return read_image_as_np(filename, as_patches=True)
+    return read_image_as_np(filename, as_patches=True)
+
 
 @deprecated
 def CreateSavedModel(sess, inputs, outputs, directory):
@@ -108,6 +111,7 @@ def CreateSavedModel(sess, inputs, outputs, directory):
     @param directory Path for the generated SavedModel
     """
     create_savedmodel(sess, inputs, outputs, directory)
+
 
 @deprecated
 def CheckpointToSavedModel(ckpt_path, inputs, outputs, savedmodel_path, clear_devices=False):
