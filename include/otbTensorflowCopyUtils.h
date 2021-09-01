@@ -21,6 +21,7 @@
 
 // tensorflow::tensor
 #include "tensorflow/core/framework/tensor.h"
+#include "tensorflow/core/framework/tensor_shape.h"
 
 // tensorflow::datatype <--> ImageType::InternalPixelType
 #include "otbTensorflowDataTypeBridge.h"
