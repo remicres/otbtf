@@ -79,7 +79,7 @@ with tf.compat.v1.Graph().as_default():
                                        activation=tf.nn.crelu)
 
     # Deconv = conv on the padded/strided input, that is an (5+1)*4
-    deconv1 = tf.compat.v1.layers.conv2d_transpose(inputs=conv4, filters=1, strides=(4,4), kernel_size=[8, 8],
+    deconv1 = tf.compat.v1.layers.conv2d_transpose(inputs=conv4, filters=1, strides=(4, 4), kernel_size=[8, 8],
                                                    padding="valid", activation=tf.nn.sigmoid)
 
     n = tf.shape(deconv1)[0]
