@@ -19,6 +19,7 @@
 // Tensorflow stuff
 #include "tensorflow/core/public/session.h"
 #include "tensorflow/core/platform/env.h"
+#include "tensorflow/cc/saved_model/tag_constants.h"
 
 // Tensorflow model train
 #include "otbTensorflowMultisourceModelTrain.h"
@@ -185,6 +186,8 @@ public:
     MandatoryOff                           ("model.restorefrom");
     AddParameter(ParameterType_String,      "model.saveto",       "Save model to path");
     MandatoryOff                           ("model.saveto");
+    AddParameter(ParameterType_StringList,  "model.tagsets",    "Which tags (i.e. v1.MetaGraphDefs) to load from the saved model. Currently, only one tag is supported. Can be retrieved by running `saved_model_cli  show --dir your_model_dir --all`");
+    MandatoryOff                           ("model.tagsets");
 
     // Training parameters group
     AddParameter(ParameterType_Group,       "training",           "Training parameters");
@@ -407,7 +410,14 @@ public:
   {
 
     // Load the Tensorflow bundle
-    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel);
+    std::unordered_set<std::string> tagSets;
+    if (HasUserValue("model.tagsets")){
+        std::vector<std::string> tagList = GetParameterStringList("model.tagsets");
+	    std::copy(tagList.begin(), tagList.end(), std::inserter(tagSets, tagSets.end())); // copy in unordered_set
+    }else{
+        tagSets = {tensorflow::kSavedModelTagServe};
+    }
+    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, tagSets);
 
     // Check if we have to restore variables from somewhere
     if (HasValue("model.restorefrom"))

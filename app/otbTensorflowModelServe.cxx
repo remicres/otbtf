@@ -19,7 +19,7 @@
 // Tensorflow stuff
 #include "tensorflow/core/public/session.h"
 #include "tensorflow/core/platform/env.h"
-#include "tensorflow/cc/saved_model/signature_constants.h"
+#include "tensorflow/cc/saved_model/tag_constants.h"
 
 // Tensorflow model filter
 #include "otbTensorflowMultisourceModelFilter.h"
@@ -176,7 +176,7 @@ public:
     SetParameterDescription                  ("model.userplaceholders", "Syntax to use is \"placeholder_1=value_1 ... placeholder_N=value_N\"");
     AddParameter(ParameterType_Bool,          "model.fullyconv", "Fully convolutional");
     MandatoryOff                             ("model.fullyconv");
-    AddParameter(ParameterType_StringList,    "model.tagsets",    "Which tags (i.e. v1.MetaGraphDefs) to load from the saved model. Can be retrieved by running `saved_model_cli  show --dir your_model_dir --all`");
+    AddParameter(ParameterType_StringList,    "model.tagsets",    "Which tags (i.e. v1.MetaGraphDefs) to load from the saved model. Currently, only one tag is supported. Can be retrieved by running `saved_model_cli  show --dir your_model_dir --all`");
     MandatoryOff                             ("model.tagsets");
 
     // Output tensors parameters
@@ -249,13 +249,14 @@ public:
   {
 
     // Load the Tensorflow bundle
+    std::unordered_set<std::string> tagSets;
     if (HasUserValue("model.tagsets")){
         std::vector<std::string> tagList = GetParameterStringList("model.tagsets");
-	    std::unordered_set<std::string> tagSets(tagList.begin(), tagList.end()); // convert to unordered_set
-	    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, tagSets);
+	    std::copy(tagList.begin(), tagList.end(), std::inserter(tagSets, tagSets.end())); // copy in unordered_set
     }else{
-        tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel);
+        tagSets = {tensorflow::kSavedModelTagServe};
     }
+	    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, tagSets);
 
 
 
