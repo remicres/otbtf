@@ -15,6 +15,7 @@
 #include "itkProcessObject.h"
 #include "itkNumericTraits.h"
 #include "itkSimpleDataObjectDecorator.h"
+#include "itkImageToImageFilter.h"
 
 // Tensorflow
 #include "tensorflow/core/public/session.h"
