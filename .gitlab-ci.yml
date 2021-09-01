@@ -7,36 +7,23 @@ workflow:
     - if: $CI_COMMIT_BRANCH == 'master'      # Execute jobs when a new commit is pushed to master branch
     
 stages:
-  - build
   - Static Analysis
   - Test
-  
-build:
-  stage: build
-  artifacts:
-    paths:
-      - /opt
-      - /src
-  script:
-   - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4
-   
+
+# TODO: not build everything for each job...
 before_script:
   - python --version
   - sudo apt update && sudo apt install pylint flake8 cppcheck -y
-  - cd /src/otbtf
+  - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4 && cd /src/otbtf
   
 flake8:
   stage: Static Analysis
-  dependencies: 
-    - build  
   script:
     - python -m flake8 --max-line-length=120 $PWD/python
     
 pylint:
   stage: Static Analysis
   allow_failure: true
-  dependencies: 
-    - build  
   script:
     - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $PWD/python
     
@@ -45,8 +32,7 @@ cppcheck:
   allow_failure: true
   script:
     - cppcheck --enable=all --error-exitcode=1 /src/otbtf
-  dependencies: 
-    - build    
+    
 otbtf_tests:
   stage: Test
   script:
