@@ -14,8 +14,9 @@
 namespace otb {
 namespace tf {
 
+
 //
-// Restore a model from a path
+// Load SavedModel variables
 //
 void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle)
 {
@@ -31,7 +32,7 @@ void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle &
 }
 
 //
-// Restore a model from a path
+// Save SavedModel variables
 //
 void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle)
 {
@@ -47,38 +48,29 @@ void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
 }
 
 //
-// Load a mode from a folder
+// Load a SavedModel
 //
-void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::unordered_set<std::string> tagsets)
+void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::vector<std::string> tagList)
 {
+  // If the tag list is empty, we push back the default tag for model serving
+  if (tagList.size() == 0)
+    tagList.push_back(tensorflow::kSavedModelTagServe);
 
+  // std::vector --> std::unordered_list
+  std::unordered_set<std::string> tagSets;
+  std::copy(tagList.begin(), tagList.end(), std::inserter(tagSets, tagSets.end())); // copy in unordered_set
+
+  // Call to tensorflow::LoadSavedModel
   tensorflow::RunOptions runoptions;
   runoptions.set_trace_level(tensorflow::RunOptions_TraceLevel_FULL_TRACE);
   auto status = tensorflow::LoadSavedModel(tensorflow::SessionOptions(), runoptions,
-      path, tagsets, &bundle);
+      path, tagSets, &bundle);
   if (!status.ok())
     {
     itkGenericExceptionMacro("Can't load the input model: " << status.ToString() );
     }
 
 }
-
-
-//
-// Load a graph from a .meta file
-//
-tensorflow::GraphDef LoadGraph(std::string filename)
-{
-  tensorflow::MetaGraphDef meta_graph_def;
-  auto status = tensorflow::ReadBinaryProto(tensorflow::Env::Default(), filename, &meta_graph_def);
-  if (!status.ok())
-    {
-    itkGenericExceptionMacro("Can't load the input model: " << status.ToString() );
-    }
-
-  return meta_graph_def.graph_def();
-}
-
 
 // Get the following attributes of the specified tensors (by name) of a graph:
 // - shape
