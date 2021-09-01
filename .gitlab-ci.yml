@@ -18,7 +18,7 @@ stages:
   - Test
 before_script:
   - python --version
-  - sudo apt update && sudo apt install pylint flake8
+  - sudo apt update && sudo apt install pylint flake8 -y
   - rm -rf /src/otbtf && ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && make install -j4
 flake8:
   stage: Static Analysis
