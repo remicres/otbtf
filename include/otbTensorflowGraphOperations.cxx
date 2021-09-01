@@ -64,21 +64,6 @@ void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
 }
 
 //
-// Load a graph from a .meta file
-//
-tensorflow::GraphDef LoadGraph(std::string filename)
-{
-  tensorflow::MetaGraphDef meta_graph_def;
-  auto status = tensorflow::ReadBinaryProto(tensorflow::Env::Default(), filename, &meta_graph_def);
-  if (!status.ok())
-    {
-    itkGenericExceptionMacro("Can't load the input model: " << status.ToString() );
-    }
-
-  return meta_graph_def.graph_def();
-}
-
-//
 // Get the following attributes of the specified tensors (by name) of a graph:
 // - shape
 // - datatype

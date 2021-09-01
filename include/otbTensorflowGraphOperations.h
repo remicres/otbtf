@@ -36,9 +36,6 @@ void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
 // Load a session and a graph from a folder
 void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
-// Load a graph from a .meta file
-tensorflow::GraphDef LoadGraph(std::string filename);
-
 // Get the following attributes of the specified tensors (by name) of a graph:
 // - shape
 // - datatype
