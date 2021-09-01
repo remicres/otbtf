@@ -13,24 +13,24 @@ stages:
 before_script:
   - python --version
   - sudo apt update && sudo apt install pylint flake8 cppcheck -y
-  - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4 && cd /src/otbtf
+  - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4
   
 flake8:
   stage: Static Analysis
   script:
-    - python -m flake8 --max-line-length=120 $PWD/python
+    - python -m flake8 --max-line-length=120 /src/otbtf/python
     
 pylint:
   stage: Static Analysis
   allow_failure: true
   script:
-    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $PWD/python
+    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 /src/otbtf/python/python
     
 cppcheck:
   stage: Static Analysis
   allow_failure: true
   script:
-    - cppcheck --enable=all --error-exitcode=1 /src/otbtf
+    - cppcheck --enable=all --error-exitcode=1 /src/otbtf/
     
 ctest:
   stage: Test
