@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#==========================================================================
+# =========================================================================
 #
 #   Copyright 2018-2019 Remi Cresson (IRSTEA)
 #   Copyright 2020-2021 Remi Cresson (INRAE)
@@ -17,7 +17,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#==========================================================================*/
+# =========================================================================
 
 # Reference:
 #
