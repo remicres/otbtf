@@ -1,0 +1,36 @@
+image: mdl4eo/otbtf2.4:cpu-basic
+#docker-build:
+#  image: docker:latest
+#  stage: build
+#  services:
+#    - docker:dind
+#  before_script:
+#    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+#  script:
+#    - docker build --pull -t "$CI_REGISTRY_IMA
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID               # Execute jobs in merge request context
+    - if: $CI_COMMIT_BRANCH == 'master'      # Execute jobs when a new commit is pushed to master branch
+stages:
+#  - build
+  - Static Analysis
+  - Test
+before_script:
+  - python --version
+  - sudo apt update && sudo apt install pylint flake8
+  - rm -rf /src/otbtf && ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && make install -j4
+flake8:
+  stage: Static Analysis
+  script:
+  - python -m flake8 --max-line-length=120 $PWD
+pylint:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+  - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $PWD
+otbtf_tests:
+  stage: Test
+  script:
+   - cd /src/otb/build/OTB/build && ctest -L tensorflow
+   - python -c "print('Test')"
