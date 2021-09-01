@@ -16,10 +16,8 @@
 #include "otbStandardFilterWatcher.h"
 #include "itkFixedArray.h"
 
-// Tensorflow stuff
-#include "tensorflow/core/public/session.h"
-#include "tensorflow/core/platform/env.h"
-#include "tensorflow/cc/saved_model/tag_constants.h"
+// Tensorflow SavedModel
+#include "tensorflow/cc/saved_model/loader.h"
 
 // Tensorflow model filter
 #include "otbTensorflowMultisourceModelFilter.h"
