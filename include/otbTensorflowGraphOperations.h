@@ -34,7 +34,7 @@ void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle &
 void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
 // Load a session and a graph from a folder
-void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
+void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::unordered_set<std::string> tagsets);
 
 // Load a graph from a .meta file
 tensorflow::GraphDef LoadGraph(std::string filename);
