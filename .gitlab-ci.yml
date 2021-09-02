@@ -14,6 +14,7 @@ before_script:
   - python --version
   - sudo apt update && sudo apt install pylint flake8 cppcheck -y
   - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4
+  - sudo ln -s /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing/
   
 flake8:
   stage: Static Analysis
@@ -35,8 +36,7 @@ cppcheck:
 ctest:
   stage: Test
   script:
-    - cd /src/otb/build/OTB/build && sudo ctest -L OTBTensorflow -V
-    - mkdir $CI_PROJECT_DIR/testing && cp -r /src/otb/build/OTB/build/Testing/Temporary/* $CI_PROJECT_DIR/testing
+    - sudo ctest -L OTBTensorflow -V
   artifacts:
     when: on_failure
     paths:
