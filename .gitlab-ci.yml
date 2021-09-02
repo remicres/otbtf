@@ -30,6 +30,7 @@ ctest:
     - sudo touch $OTB_TESTS_DIR/toto.tif && dehjhzskj
   after_script:
     - cp -r $OTB_TESTS_DIR/* $ABSOLUTE_ARTIFACTS_PATH
+    - ls $ABSOLUTE_ARTIFACTS_PATH
   artifacts:
     when: on_failure
     paths:
