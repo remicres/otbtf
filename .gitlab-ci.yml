@@ -20,7 +20,7 @@ ctest:
     - echo $CI_PROJECT_DIR && ls $CI_PROJECT_DIR && touch /tmp/fichier.tif
     - echo "ls $CI_PROJECT_DIR/testing/Temporary/ :" && ls $CI_PROJECT_DIR/testing/Temporary/
     - edjklsd
-    - cp /tmp/fichier.tif .
+    - echo "copy files" && cp /tmp/fichier.tif .
 #    - sudo ctest -L OTBTensorflow -V ; cp -r /src/otb/build/OTB/build/Testing/Temporary/*.tif $CI_PROJECT_DIR/testing/
   artifacts:
     when: on_failure
