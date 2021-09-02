@@ -36,12 +36,8 @@ ctest:
   stage: Test
   script:
     - cd /src/otb/build/OTB/build && sudo ctest -L OTBTensorflow -V
-    - echo $PWD
-    - ls $PWD
   artifacts:
     when: on_failure
     paths:
-      - /src/otb/build/OTB/build/Testing/Temporary/*.tif
-      - echo $PWD
-      - ls $PWD
+      - /src/otb/build/OTB/build/Testing/Temporary/
     expire_in: 1 week
