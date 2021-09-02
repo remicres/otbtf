@@ -17,9 +17,8 @@ ctest:
   stage: Test
   before_script:
     - sudo rm -rf /src/otb/build/OTB/build/Testing/Temporary/*
-  
   script:
-    - sudo ctest -L OTBTensorflow -V
+    - cd /src/otb/build/OTB/build/ && sudo ctest -L OTBTensorflow -V
   after_script:
     - cp -r /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing
   artifacts:
