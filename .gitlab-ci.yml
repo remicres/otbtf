@@ -24,7 +24,7 @@ pylint:
   stage: Static Analysis
   allow_failure: true
   script:
-    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 /src/otbtf/python/python
+    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 /src/otbtf/python
     
 cppcheck:
   stage: Static Analysis
@@ -36,8 +36,9 @@ ctest:
   stage: Test
   script:
     - cd /src/otb/build/OTB/build && sudo ctest -L OTBTensorflow -V
+    - mkdir $CI_PROJECT_DIR/testing && cp -r /src/otb/build/OTB/build/Testing/Temporary/* $CI_PROJECT_DIR/testing
   artifacts:
     when: on_failure
     paths:
-      - /src/otb/build/OTB/build/Testing/Temporary/
+      - $CI_PROJECT_DIR/testing
     expire_in: 1 week
