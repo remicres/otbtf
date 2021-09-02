@@ -17,12 +17,12 @@ before_script:
 ctest:
   stage: Test
   script:
-    - echo $CI_PROJECT_DIR && ls $CI_PROJECT_DIR && sudo touch /src/otb/build/OTB/build/Testing/Temporary/fichier.tif
+    - echo $CI_PROJECT_DIR && ls $CI_PROJECT_DIR && touch fichier.tif
     - echo "ls $CI_PROJECT_DIR/testing/Temporary/ :" && ls $CI_PROJECT_DIR/testing/Temporary/
     - edjklsd
 #    - sudo ctest -L OTBTensorflow -V ; cp -r /src/otb/build/OTB/build/Testing/Temporary/*.tif $CI_PROJECT_DIR/testing/
   artifacts:
     when: on_failure
     paths:
-      - testing/Temporary/fichier.tif
+      - fichier.tif
     expire_in: 1 week
