@@ -24,5 +24,5 @@ ctest:
   artifacts:
     when: on_failure
     paths:
-      - $CI_PROJECT_DIR/testing/Temporary/*.tif
+      - $CI_PROJECT_DIR/testing/Temporary/fichier.tif
     expire_in: 1 week
