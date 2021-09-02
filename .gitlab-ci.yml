@@ -1,5 +1,8 @@
 image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
 
+variables:
+  OTB_TESTS_DIR: /src/otb/build/OTB/build/Testing/Temporary
+  ARTIFACTS_DIR: $CI_PROJECT_DIR/testing
 
 workflow:
   rules:
@@ -15,12 +18,14 @@ before_script:
 
 ctest:
   stage: Test
+  before_script:
+    - rm -rf $OTB_TESTS_DIR/*
   script:
     - sudo ctest -L OTBTensorflow -V
   after_script:
-    - cp -r /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing
+    - cp -r $OTB_TESTS_DIR/* $ARTIFACTS_DIR
   artifacts:
     when: on_failure
     paths:
-      - testing/*.*
+      - $ARTIFACTS_DIR/*.*
     expire_in: 1 week
