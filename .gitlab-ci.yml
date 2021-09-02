@@ -16,8 +16,9 @@ stages:
   - Test
 
 before_script:
-  - sudo apt update && sudo apt install pylint flake8 cppcheck -y
-  - sudo rm -rf $OTBTF_SRC_DIR && sudo ln -s $PWD $OTBTF_SRC_DIR && cd $OTB_BUILD_DIR && sudo make install -j$(nproc --all)
+  - echo "Hello"
+#  - sudo apt update && sudo apt install pylint flake8 cppcheck -y
+#  - sudo rm -rf $OTBTF_SRC_DIR && sudo ln -s $PWD $OTBTF_SRC_DIR && cd $OTB_BUILD_DIR && sudo make install -j$(nproc --all)
 
 ctest:
   stage: Test
@@ -25,10 +26,11 @@ ctest:
     - sudo rm -rf $OTB_TESTS_DIR/*
     - cd $OTB_BUILD_DIR
   script:
-    - sudo ctest -L OTBTensorflow -V
+#    - sudo ctest -L OTBTensorflow -V
+    - touch $OTB_TESTS_DIR/toto.tif
+    - dehjhzskj
   after_script:
-    - mkdir $ABSOLUTE_ARTIFACTS_PATH
-    - cp -r $OTB_TESTS_DIR/* $ABSOLUTE_ARTIFACTS_PATH/*
+    - cp -r $OTB_TESTS_DIR/* $ABSOLUTE_ARTIFACTS_PATH
   artifacts:
     when: on_failure
     paths:
