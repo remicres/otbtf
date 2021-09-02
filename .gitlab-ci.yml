@@ -10,22 +10,15 @@ stages:
   - Test
 
 before_script:
-#  - sudo apt update && sudo apt install pylint flake8 cppcheck -y
-#  - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4
-#  - sudo mkdir -p /src/otb/build/OTB/build/Testing/Temporary && sudo ln -s /src/otb/build/OTB/build/Testing/Temporary testing
+  - sudo apt update && sudo apt install pylint flake8 cppcheck -y
+  - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4
 
 ctest:
   stage: Test
   script:
-    - sudo touch /src/otb/build/OTB/build/Testing/Temporary/fichier.tif
-    - blabla fail
-#    - sudo ctest -L OTBTensorflow -V ; cp -r /src/otb/build/OTB/build/Testing/Temporary/*.tif $CI_PROJECT_DIR/testing/
+    - sudo ctest -L OTBTensorflow -V
   after_script:
     - cp -r /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing
-    - ls .
-    - ls $CI_PROJECT_DIR
-    - ls testing
-    - ls $CI_PROJECT_DIR/testing
   artifacts:
     when: on_failure
     paths:
