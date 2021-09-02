@@ -5,6 +5,7 @@ variables:
   OTB_BUILD_DIR: /src/otb/build/OTB/build
   OTB_TESTS_DIR: $OTB_BUILD_DIR/Testing/Temporary
   ARTIFACTS_DIR: testing
+  ABSOLUTE_ARTIFACTS_PATH: $CI_PROJECT_DIR/$ARTIFACTS_DIR
 
 workflow:
   rules:
@@ -26,7 +27,8 @@ ctest:
   script:
     - sudo ctest -L OTBTensorflow -V
   after_script:
-    - cp -r $OTB_TESTS_DIR/* $CI_PROJECT_DIR/$ARTIFACTS_DIR
+    - mkdir $ABSOLUTE_ARTIFACTS_PATH
+    - cp -r $OTB_TESTS_DIR/* $ABSOLUTE_ARTIFACTS_PATH/*
   artifacts:
     when: on_failure
     paths:
