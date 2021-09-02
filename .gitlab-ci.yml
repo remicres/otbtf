@@ -22,6 +22,10 @@ ctest:
 #    - sudo ctest -L OTBTensorflow -V ; cp -r /src/otb/build/OTB/build/Testing/Temporary/*.tif $CI_PROJECT_DIR/testing/
   after_script:
     - cp -r /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing
+    - ls .
+    - ls $CI_PROJECT_DIR
+    - ls testing
+    - ls $CI_PROJECT_DIR/testing
   artifacts:
     when: on_failure
     paths:
