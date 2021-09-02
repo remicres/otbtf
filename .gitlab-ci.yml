@@ -14,7 +14,7 @@ before_script:
   - python --version
   - sudo apt update && sudo apt install pylint flake8 cppcheck -y
   - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4
-  - sudo ln -s /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing/
+  - sudo mkdir -p /src/otb/build/OTB/build/Testing/Temporary && sudo ln -s /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing/
   
 flake8:
   stage: Static Analysis
