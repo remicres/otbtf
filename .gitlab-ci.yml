@@ -3,20 +3,24 @@ image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
 
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_ID               # Execute jobs in merge request context
-    - if: $CI_COMMIT_BRANCH == 'master'      # Execute jobs when a new commit is pushed to master branch
+    - if: $CI_MERGE_REQUEST_ID             # Execute jobs in merge request context
+    - if: $CI_COMMIT_BRANCH == 'develop'   # Execute jobs when a new commit is pushed to develop branch
     
 stages:
   - Test
 
 before_script:
+    # Install packages for static analysis
   - sudo apt update && sudo apt install pylint flake8 cppcheck -y
-  - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j$(nproc --all)
+    # Replace otbtf source with this git repository tested branch
+  - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf 
+    # Re-build OTB with the new OTBTF sources
+  - cd /src/otb/build/OTB/build && sudo make install -j$(nproc --all)
+    # Empty testing temporary folder (old generated files here)
+  - sudo rm -rf /src/otb/build/OTB/build/Testing/Temporary/*
 
 ctest:
   stage: Test
-  before_script:
-    - sudo rm -rf /src/otb/build/OTB/build/Testing/Temporary/*
   script:
     - cd /src/otb/build/OTB/build/ && sudo ctest -L OTBTensorflow -V
   after_script:
