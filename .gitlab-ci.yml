@@ -1,5 +1,9 @@
 image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
 
+variables:
+  OTB_BUILD: /src/otb/build/OTB/build
+  OTBTF_SRC: /src/otbtf
+
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID             # Execute jobs in merge request context
@@ -13,36 +17,36 @@ before_script:
     # Install packages for static analysis
   - sudo apt update && sudo apt install pylint flake8 cppcheck -y
     # Replace otbtf source with this git repository tested branch
-  - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf 
+  - sudo rm -rf $OTBTF_SRC && sudo ln -s $PWD $OTBTF_SRC 
     # Re-build OTB with the new OTBTF sources
-  - cd /src/otb/build/OTB/build && sudo make install -j$(nproc --all)
+  - cd $OTB_BUILD && sudo make install -j$(nproc --all)
     # Empty testing temporary folder (old generated files here)
-  - sudo rm -rf /src/otb/build/OTB/build/Testing/Temporary/*
+  - sudo rm -rf $OTB_BUILD/Testing/Temporary/*
 
 flake8:
   stage: Static Analysis
   allow_failure: true
   script:
-    - python -m flake8 --max-line-length=120 /src/otbtf/python
+    - python -m flake8 --max-line-length=120 $OTBTF_SRC/python
     
 pylint:
   stage: Static Analysis
   allow_failure: true
   script:
-    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 /src/otbtf/python
+    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $OTBTF_SRC/python
     
 cppcheck:
   stage: Static Analysis
   allow_failure: true
   script:
-    - cppcheck --enable=all --error-exitcode=1 /src/otbtf/
+    - cppcheck --enable=all --error-exitcode=1 $OTBTF_SRC/
 
 ctest:
   stage: Test
   script:
-    - cd /src/otb/build/OTB/build/ && sudo ctest -L OTBTensorflow -V
+    - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow -V
   after_script:
-    - cp -r /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing
+    - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/testing
   artifacts:
     when: on_failure
     paths:
