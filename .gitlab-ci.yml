@@ -1,11 +1,5 @@
 image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
 
-variables:
-  OTBTF_SRC_DIR: /src/otbtf
-  OTB_BUILD_DIR: /src/otb/build/OTB/build
-  OTB_TESTS_DIR: $OTB_BUILD_DIR/Testing/Temporary
-  ARTIFACTS_DIR: testing
-  ABSOLUTE_ARTIFACTS_PATH: $CI_PROJECT_DIR/$ARTIFACTS_DIR
 
 workflow:
   rules:
@@ -16,23 +10,21 @@ stages:
   - Test
 
 before_script:
-  - echo "Hello"
-#  - sudo apt update && sudo apt install pylint flake8 cppcheck -y
-#  - sudo rm -rf $OTBTF_SRC_DIR && sudo ln -s $PWD $OTBTF_SRC_DIR && cd $OTB_BUILD_DIR && sudo make install -j$(nproc --all)
+  - sudo apt update && sudo apt install pylint flake8 cppcheck -y
+  - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j$(nproc --all)
 
 ctest:
   stage: Test
   before_script:
-    - sudo rm -rf $OTB_TESTS_DIR/*
-    - cd $OTB_BUILD_DIR
+    - sudo rm -rf /src/otb/build/OTB/build/Testing/Temporary/*
+  
   script:
-#    - sudo ctest -L OTBTensorflow -V
-    - sudo touch $OTB_TESTS_DIR/toto.tif && dehjhzskj
+    - sudo ctest -L OTBTensorflow -V
   after_script:
-    - cp -r $OTB_TESTS_DIR/* $ABSOLUTE_ARTIFACTS_PATH
-    - ls $ABSOLUTE_ARTIFACTS_PATH
+    - cp -r /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing
   artifacts:
     when: on_failure
     paths:
-      - $ARTIFACTS_DIR/*.*
+      - testing/*.*
     expire_in: 1 week
+
