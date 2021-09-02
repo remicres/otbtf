@@ -18,7 +18,7 @@ ctest:
   stage: Test
   script:
     - sudo touch /src/otb/build/OTB/build/Testing/Temporary/fichier.tif && dsklj
-#    - sudo ctest -L OTBTensorflow -V ; cp -r /src/otb/build/OTB/build/Testing/Temporary/*.tif $CI_PROJECT_DIR/testing/
+#    - echo $CI_PROJECT_DIR && ls $CI_PROJECT_DIR && sudo ctest -L OTBTensorflow -V ; cp -r /src/otb/build/OTB/build/Testing/Temporary/*.tif $CI_PROJECT_DIR/testing/
   artifacts:
     when: on_failure
     paths:
