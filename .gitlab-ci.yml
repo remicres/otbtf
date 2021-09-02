@@ -1,12 +1,12 @@
 image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
 
-
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID             # Execute jobs in merge request context
     - if: $CI_COMMIT_BRANCH == 'develop'   # Execute jobs when a new commit is pushed to develop branch
     
 stages:
+  - Static Analysis
   - Test
 
 before_script:
@@ -18,6 +18,24 @@ before_script:
   - cd /src/otb/build/OTB/build && sudo make install -j$(nproc --all)
     # Empty testing temporary folder (old generated files here)
   - sudo rm -rf /src/otb/build/OTB/build/Testing/Temporary/*
+
+flake8:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+    - python -m flake8 --max-line-length=120 /src/otbtf/python
+    
+pylint:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 /src/otbtf/python
+    
+cppcheck:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+    - cppcheck --enable=all --error-exitcode=1 /src/otbtf/
 
 ctest:
   stage: Test
