@@ -29,5 +29,5 @@ ctest:
   artifacts:
     when: on_failure
     paths:
-      - testing/Temporary/fichier.tif
+      - testing/*.*
     expire_in: 1 week
