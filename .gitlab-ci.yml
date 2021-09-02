@@ -12,14 +12,12 @@ stages:
 before_script:
 #  - sudo apt update && sudo apt install pylint flake8 cppcheck -y
 #  - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4
-  - sudo mkdir -p /src/otb/build/OTB/build/Testing/Temporary && sudo ln -s /src/otb/build/OTB/build/Testing/Temporary testing
+#  - sudo mkdir -p /src/otb/build/OTB/build/Testing/Temporary && sudo ln -s /src/otb/build/OTB/build/Testing/Temporary testing
 
 ctest:
   stage: Test
   script:
     - sudo touch /src/otb/build/OTB/build/Testing/Temporary/fichier.tif
-    - echo "ls $CI_PROJECT_DIR/testing/Temporary/ :" && ls $CI_PROJECT_DIR/testing/Temporary/
-    - edjklsd
 #    - sudo ctest -L OTBTensorflow -V ; cp -r /src/otb/build/OTB/build/Testing/Temporary/*.tif $CI_PROJECT_DIR/testing/
   after_script:
     - cp -r /src/otb/build/OTB/build/Testing/Temporary/*.tif $CI_PROJECT_DIR/testing/
