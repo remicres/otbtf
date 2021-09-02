@@ -41,5 +41,7 @@ ctest:
   artifacts:
     when: on_failure
     paths:
-      - Testing/Temporary/*.tif
+      - /src/otb/build/OTB/build/Testing/Temporary/*.tif
+      - echo $PWD
+      - ls $PWD
     expire_in: 1 week
