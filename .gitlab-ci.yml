@@ -16,12 +16,13 @@ stages:
 
 before_script:
   - sudo apt update && sudo apt install pylint flake8 cppcheck -y
-  - sudo rm -rf $OTBTF_SRC_DIR && sudo ln -s $PWD $OTBTF_SRC_DIR && cd $OTB_BUILD_DIR && sudo make install -j4
+  - sudo rm -rf $OTBTF_SRC_DIR && sudo ln -s $PWD $OTBTF_SRC_DIR && cd $OTB_BUILD_DIR && sudo make install -j$(nproc --all)
 
 ctest:
   stage: Test
   before_script:
     - sudo rm -rf $OTB_TESTS_DIR/*
+    - cd $OTB_BUILD_DIR
   script:
     - sudo ctest -L OTBTensorflow -V
   after_script:
