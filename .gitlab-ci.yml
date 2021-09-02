@@ -7,14 +7,14 @@ workflow:
     - if: $CI_COMMIT_BRANCH == 'master'      # Execute jobs when a new commit is pushed to master branch
     
 stages:
-  - Test
+  - Static Analysis
 
 before_script:
   - python --version
   - sudo apt update && sudo apt install pylint flake8 cppcheck -y
   - sudo rm -rf /src/otbtf && sudo ln -s $PWD /src/otbtf && cd /src/otb/build/OTB/build && sudo make install -j4
-  - sudo mkdir -p /src/otb/build/OTB/build/Testing/Temporary && sudo ln -s /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing/
-    
+  - sudo mkdir -p /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing/ && sudo ln -s /src/otb/build/OTB/build/Testing/Temporary $CI_PROJECT_DIR/testing/
+
 ctest:
   stage: Test
   script:
