@@ -27,8 +27,7 @@ ctest:
     - cd $OTB_BUILD_DIR
   script:
 #    - sudo ctest -L OTBTensorflow -V
-    - touch $OTB_TESTS_DIR/toto.tif
-    - dehjhzskj
+    - sudo touch $OTB_TESTS_DIR/toto.tif && dehjhzskj
   after_script:
     - cp -r $OTB_TESTS_DIR/* $ABSOLUTE_ARTIFACTS_PATH
   artifacts:
