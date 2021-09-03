@@ -26,9 +26,9 @@ void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle &
   {{bundle.meta_graph_def.saver_def().filename_tensor_name(), checkpointPathTensor}};
   auto status = bundle.session->Run(feed_dict, {}, {bundle.meta_graph_def.saver_def().restore_op_name()}, nullptr);
   if (!status.ok())
-    {
+  {
     itkGenericExceptionMacro("Can't restore the input model: " << status.ToString() );
-    }
+  }
 }
 
 //
@@ -42,9 +42,9 @@ void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
   {{bundle.meta_graph_def.saver_def().filename_tensor_name(), checkpointPathTensor}};
   auto status = bundle.session->Run(feed_dict, {}, {bundle.meta_graph_def.saver_def().save_tensor_name()}, nullptr);
   if (!status.ok())
-    {
+  {
     itkGenericExceptionMacro("Can't restore the input model: " << status.ToString() );
-    }
+  }
 }
 
 //
@@ -66,10 +66,9 @@ void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
   auto status = tensorflow::LoadSavedModel(tensorflow::SessionOptions(), runoptions,
       path, tagSets, &bundle);
   if (!status.ok())
-    {
+  {
     itkGenericExceptionMacro("Can't load the input model: " << status.ToString() );
-    }
-
+  }
 }
 
 // Get the following attributes of the specified tensors (by name) of a graph:
@@ -91,43 +90,41 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
     bool found = false;
     std::cout << "Searching for corresponding node of  : " << (*nameIt) << std::endl;
     for (auto const & layer : layers)
+    {
       // layer is a pair (name, tensor_info)
       // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
-    {
       std::string layername = layer.first;
       if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
-        {
-          found = true;
-          const tensorflow::TensorInfo& tensor_info = layer.second;
+      {
+        found = true;
+        const tensorflow::TensorInfo& tensor_info = layer.second;
 
-          // DEBUG
-          std::cout << "\tPrintDebugString --------------------------------";
-          std::cout << std::endl;
-          tensor_info.PrintDebugString();
-          std::cout << "\t-------------------------------------------------" << std::endl;
+        // DEBUG
+        std::cout << "\tPrintDebugString --------------------------------";
+        std::cout << std::endl;
+        tensor_info.PrintDebugString();
+        std::cout << "\t-------------------------------------------------" << std::endl;
 
 
-          // Set default to DT_FLOAT
-          tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
+        // Set default to DT_FLOAT
+        tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
 
-          // Default (input?) tensor type
-          ts_dt = tensor_info.dtype();
-          dataTypes.push_back(ts_dt);
+        // Default (input?) tensor type
+        ts_dt = tensor_info.dtype();
+        dataTypes.push_back(ts_dt);
 
-          // Get the tensor's shape
-          // Here we assure it's a tensor, with 1 shape
-          tensorflow::TensorShapeProto ts_shp = tensor_info.tensor_shape();
-          shapes.push_back(ts_shp);
+        // Get the tensor's shape
+        // Here we assure it's a tensor, with 1 shape
+        tensorflow::TensorShapeProto ts_shp = tensor_info.tensor_shape();
+        shapes.push_back(ts_shp);
       }
-    }
+    } // next layer
 
     if (!found)
     {
       itkGenericExceptionMacro("Tensor name \"" << (*nameIt) << "\" not found" );
     }
-
-  }
-
+  } // next tensor name
 }
 
 //
@@ -170,7 +167,6 @@ void PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::st
       } // node name match
     } // next node name
   } // next node of the graph
-
 }
 
 } // end namespace tf
