@@ -14,22 +14,23 @@ stages:
   - Static Analysis
   - Test
 
-before_script:
+.update_otbtf_src: &update_otbtf_src
   - sudo rm -rf $OTBTF_SRC && sudo ln -s $PWD $OTBTF_SRC  # Replace local OTBTF source directory
 
-.compile:
-  script: cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
+.compile_otbtf: &compile_otbtf
+  - cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
 
 build:
   stage: Build
   allow_failure: false
   script:
-    - !reference [.compile, script]
+    - *compile_otbtf
 
 .static_analysis_base:
   stage: Static Analysis
   allow_failure: true
   before_script:
+    - *update_otbtf_src
     - sudo apt update && sudo apt install pylint flake8 cppcheck -y  # Packages for static analysis
 
 flake8:
@@ -50,10 +51,10 @@ cppcheck:
 
 ctest:
   stage: Test
-  extends: build
   before_script:
-    - !reference [.compile, script]
+    - *update_otbtf_src
   script:
+    - *compile_otbtf
     - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
     - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
   after_script:
