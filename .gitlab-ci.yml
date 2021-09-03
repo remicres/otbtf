@@ -44,8 +44,7 @@ pylint:
     - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $OTBTF_SRC/python
     
 cppcheck:
-  stage: Static Analysis
-  allow_failure: true
+  extends: .static_analysis_base
   script:
     - cppcheck --enable=all --error-exitcode=1 $OTBTF_SRC/
 
