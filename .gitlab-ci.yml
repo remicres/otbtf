@@ -15,24 +15,27 @@ stages:
   - Test
 
 before_script:
-  - sudo apt update && sudo apt install pylint flake8 cppcheck -y  # Packages for static analysis
   - sudo rm -rf $OTBTF_SRC && sudo ln -s $PWD $OTBTF_SRC  # Replace local OTBTF source directory
 
 build:
   stage: Build
   allow_failure: false
-  script:
+  before_script:
     - cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
-    
-flake8:
+
+.static_analysis_base:
   stage: Static Analysis
   allow_failure: true
+  before_script:
+    - sudo apt update && sudo apt install pylint flake8 cppcheck -y  # Packages for static analysis
+
+flake8:
+  extends: .static_analysis_base
   script:
     - python -m flake8 --max-line-length=120 $OTBTF_SRC/python
     
 pylint:
-  stage: Static Analysis
-  allow_failure: true
+  extends: .static_analysis_base
   script:
     - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $OTBTF_SRC/python
     
