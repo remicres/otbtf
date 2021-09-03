@@ -48,6 +48,7 @@ pylint:
 cppcheck:
   extends: .static_analysis_base
   script:
+#   - cppcheck --enable=all  /src/otb/otb/Modules/Remote/otbtf --check-config -I /opt/otbtf/include/OTB-7.2/ -I /usr/include/ITK-4.13/ -I /opt/otbtf/include/tf/ -I /usr/include/ -I /usr/include/boost/predef/os/ --suppress=missingIncludeSystem
     - cppcheck --enable=all --error-exitcode=1 $OTBTF_SRC/
 
 ctest:
