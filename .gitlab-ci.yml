@@ -17,11 +17,14 @@ stages:
 before_script:
   - sudo rm -rf $OTBTF_SRC && sudo ln -s $PWD $OTBTF_SRC  # Replace local OTBTF source directory
 
+.compile:
+  script: cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
+
 build:
   stage: Build
   allow_failure: false
   script:
-    - cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
+    - !reference [.compile, script]
 
 .static_analysis_base:
   stage: Static Analysis
@@ -48,9 +51,12 @@ cppcheck:
 ctest:
   stage: Test
   extends: build
-  after_script:
+  before_script:
+    - !reference [.compile, script]
+  script:
     - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
     - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
+  after_script:
     - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/testing  # Copy artifacts (they must be in $CI_PROJECT_DIR)
   artifacts:
     when: on_failure
