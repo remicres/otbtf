@@ -1,8 +1,8 @@
 image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
 
 variables:
-  OTB_BUILD: /src/otb/build/OTB/build
-  OTBTF_SRC: /src/otbtf
+  OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
+  OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
 
 workflow:
   rules:
@@ -10,19 +10,20 @@ workflow:
     - if: $CI_COMMIT_BRANCH == 'develop'   # Execute jobs when a new commit is pushed to develop branch
     
 stages:
+  - Build
   - Static Analysis
   - Test
 
 before_script:
-    # Install packages for static analysis
-  - sudo apt update && sudo apt install pylint flake8 cppcheck -y
-    # Replace otbtf source with this git repository tested branch
-  - sudo rm -rf $OTBTF_SRC && sudo ln -s $PWD $OTBTF_SRC 
-    # Re-build OTB with the new OTBTF sources
-  - cd $OTB_BUILD && sudo make install -j$(nproc --all)
-    # Empty testing temporary folder (old generated files here)
-  - sudo rm -rf $OTB_BUILD/Testing/Temporary/*
+  - sudo apt update && sudo apt install pylint flake8 cppcheck -y  # Packages for static analysis
+  - sudo rm -rf $OTBTF_SRC && sudo ln -s $PWD $OTBTF_SRC  # Replace local OTBTF source directory
 
+build:
+  stage: Build
+  allow_failure: false
+  script:
+    - cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
+    
 flake8:
   stage: Static Analysis
   allow_failure: true
@@ -43,10 +44,12 @@ cppcheck:
 
 ctest:
   stage: Test
+  extends: build
   script:
-    - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow -V
+    - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
+    - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
   after_script:
-    - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/testing
+    - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/testing  # Copy artifacts (they must be in $CI_PROJECT_DIR)
   artifacts:
     when: on_failure
     paths:
