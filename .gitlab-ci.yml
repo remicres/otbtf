@@ -23,6 +23,8 @@ stages:
 build:
   stage: Build
   allow_failure: false
+  before_script:
+    - *update_otbtf_src
   script:
     - *compile_otbtf
 
