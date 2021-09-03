@@ -17,6 +17,10 @@
 #   limitations under the License.
 #
 # ==========================================================================*/
+"""
+This module contains a set of python functions to interact with geospatial data
+and TensorFlow models.
+"""
 import gdal
 import numpy as np
 import tensorflow.compat.v1 as tf
@@ -47,11 +51,11 @@ def read_image_as_np(filename, as_patches=False):
     myarray = ds.ReadAsArray()
 
     # Re-order bands (when there is > 1 band)
-    if (len(myarray.shape) == 3):
+    if len(myarray.shape) == 3:
         axes = (1, 2, 0)
         myarray = np.transpose(myarray, axes=axes)
 
-    if (as_patches):
+    if as_patches:
         n = int(szy / szx)
         return myarray.reshape((n, szx, szx, n_bands))
 
