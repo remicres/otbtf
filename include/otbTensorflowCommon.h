@@ -18,6 +18,9 @@
 #include <string>
 #include <algorithm>
 #include <functional>
+#include "itkMacro.h"
+#include "itkImageRegionConstIterator.h"
+#include "itkImageRegionIterator.h"
 
 namespace otb {
 namespace tf {

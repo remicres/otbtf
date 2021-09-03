@@ -29,10 +29,14 @@ set(MODEL3_FC_OUT apTvClTensorflowModelServeFCNN16x16FC.tif)
 set(MODEL4_FC_OUT apTvClTensorflowModelServeFCNN64x64to32x32.tif)
 set(MODEL1_SAVED model1_updated)
 
+# Compare images tolerance
+set(DIFF_EPS_HI 1)
+
 #----------- Model training : 1-branch CNN (16x16) Patch-Based ----------------
 otb_test_application(NAME TensorflowModelTrainCNN16x16PB
   APP  TensorflowModelTrain
   OPTIONS 
+  -training.epochs 10
   -training.source1.il ${PATCHESA}
   -training.source1.placeholder "x"
   -training.source2.il ${LABELSA}
@@ -49,7 +53,6 @@ otb_test_application(NAME TensorflowModelTrainCNN16x16PB
   -validation.mode "class"
   )
 
-
 #----------- Model serving : 1-branch CNN (16x16) Patch-Based ----------------
 otb_test_application(NAME TensorflowModelServeCNN16x16PB
   APP  TensorflowModelServe
@@ -57,7 +60,7 @@ otb_test_application(NAME TensorflowModelServeCNN16x16PB
   -source1.rfieldx 16 -source1.rfieldy 16 -source1.placeholder x
   -model.dir ${MODEL1} -output.names prediction
   -out ${TEMP}/${MODEL1_PB_OUT}
-  VALID --compare-image ${EPSILON_6}
+  VALID --compare-image ${DIFF_EPS_HI}
   ${DATADIR}/${MODEL1_PB_OUT}
   ${TEMP}/${MODEL1_PB_OUT})
 
