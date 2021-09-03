@@ -30,7 +30,7 @@ set(MODEL4_FC_OUT apTvClTensorflowModelServeFCNN64x64to32x32.tif)
 set(MODEL1_SAVED model1_updated)
 
 # Compare images tolerance
-set(DIFF_EPS_HI 0.1)
+set(DIFF_EPS_HI 1)
 
 #----------- Model training : 1-branch CNN (16x16) Patch-Based ----------------
 otb_test_application(NAME TensorflowModelTrainCNN16x16PB
