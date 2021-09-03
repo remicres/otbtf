@@ -72,64 +72,6 @@ void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
 
 }
 
-// Get the following attributes of the specified tensors (by name) of a graph:
-// - shape
-// - datatype
-void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::TensorInfo> layers, std::vector<std::string> & tensorsNames,
-    std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes)
-{
-  // Allocation
-  shapes.clear();
-  shapes.reserve(tensorsNames.size());
-  dataTypes.clear();
-  dataTypes.reserve(tensorsNames.size());
-
-  // Get infos
-  for (std::vector<std::string>::iterator nameIt = tensorsNames.begin();
-      nameIt != tensorsNames.end(); ++nameIt)
-  {
-    bool found = false;
-    std::cout << "Searching for corresponding node of  : " << (*nameIt) << std::endl;
-    for (auto const & layer : layers)
-      // layer is a pair (name, tensor_info)
-      // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
-    {
-      std::string layername = layer.first;
-      if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
-        {
-          found = true;
-	  const tensorflow::TensorInfo& tensor_info = layer.second;
-
-	  // DEBUG
-      std::cout << "\tPrintDebugString --------------------------------";
-      std::cout << std::endl;
-      tensor_info.PrintDebugString();
-      std::cout << "\t-------------------------------------------------" << std::endl;
-
-
-	  // Set default to DT_FLOAT
-	  tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
-
-	  // Default (input?) tensor type
-	  ts_dt = tensor_info.dtype();
-	  dataTypes.push_back(ts_dt);
-
-	  // Get the tensor's shape
-	  // Here we assure it's a tensor, with 1 shape
-	  tensorflow::TensorShapeProto ts_shp = tensor_info.tensor_shape();
-	  shapes.push_back(ts_shp);
-      }
-    }
-
-    if (!found)
-    {
-      itkGenericExceptionMacro("Tensor name \"" << (*nameIt) << "\" not found" );
-    }
-
-  }
-
-}
-
 //
 // Print a lot of stuff about the specified nodes of the graph
 //
