@@ -201,15 +201,19 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   //////////////////////////////////////////////////////////////////////////////////////////
 
   // If the output spacing is not specified, we use the first input image as grid reference
-  m_OutputSpacing = this->GetInput(0)->GetSignedSpacing();
+  // OTBTF assumes that the output image has the following geometric properties:
+  // (1) Image origin is the top-left pixel
+  // (2) Image pixel spacing has positive x-spacing and negative y-spacing
+  m_OutputSpacing = this->GetInput(0)->GetSpacing();  // GetSpacing() returns abs. spacing
+  m_OutputSpacing[1] *= -1.0;  // Force negative y-spacing
   m_OutputSpacing[0] *= m_OutputSpacingScale;
   m_OutputSpacing[1] *= m_OutputSpacingScale;
-  PointType extentInf, extentSup;
-  extentSup.Fill(itk::NumericTraits<double>::max());
-  extentInf.Fill(itk::NumericTraits<double>::NonpositiveMin());
 
   // Compute the extent of each input images and update the extent or the output image.
   // The extent of the output image is the intersection of all input images extents.
+  PointType extentInf, extentSup;
+  extentSup.Fill(itk::NumericTraits<double>::max());
+  extentInf.Fill(itk::NumericTraits<double>::NonpositiveMin());
   for (unsigned int imageIndex = 0 ; imageIndex < this->GetNumberOfInputs() ; imageIndex++)
     {
     ImageType * currentImage = static_cast<ImageType *>(
