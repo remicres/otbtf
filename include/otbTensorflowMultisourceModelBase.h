@@ -111,7 +111,6 @@ public:
   {
 	  auto signatures = this->GetSavedModel()->GetSignatures();
 	  tensorflow::SignatureDef signature_def;
-	  std::cout << "AVANT signature search" << std::endl;
 	  // If serving_default key exists (which is the default for TF saved model), choose it as signature
 	  // Else, choose the first one
 	  if (signatures.size() == 0){
@@ -121,10 +120,7 @@ public:
 	  if (signatures.contains(tensorflow::kDefaultServingSignatureDefKey)){
 		 signature_def = signatures.at(tensorflow::kDefaultServingSignatureDefKey);
 	  } else {
-		 std::cout << "Debug avant .begin()" << std::endl;
 		 auto debug = *(signatures.begin());
-		 std::cout << "Debug après .begin()" << std::endl;
-		 std::cout << "FIRST SIGNATUREDEF" << signatures.begin()->first << std::endl;
 		 signature_def = signatures.begin()->second;
 	  }
 

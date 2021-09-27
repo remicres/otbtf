@@ -463,7 +463,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     } // next input tensor
 
   // Run session
-  TensorListType outputs;
+  // TODO: see if we print some info about inputs/outputs of the model e.g. m_OutputTensors
   this->RunSession(inputs, outputs);
 
   // Fill the output buffer with zero value
