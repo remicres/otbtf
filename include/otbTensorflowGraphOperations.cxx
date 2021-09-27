@@ -97,7 +97,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
       nameIt != tensorsNames.end(); ++nameIt)
   {
     bool found = false;
-    std::cout << "Searching for corresponding node of  : " << (*nameIt) << std::endl;
+    std::cout << "Searching for corresponding node of  : " << (*nameIt) << "... ";
     for (auto const & layer : layers)
       // layer is a pair (name, tensor_info)
       // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
@@ -108,12 +108,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
           found = true;
 	  const tensorflow::TensorInfo& tensor_info = layer.second;
 
-	  // DEBUG
-      std::cout << "\tPrintDebugString --------------------------------";
-      std::cout << std::endl;
-      tensor_info.PrintDebugString();
-      std::cout << "\t-------------------------------------------------" << std::endl;
-
+      std::cout << "Found : " << layername << std::endl;
 
 	  // Set default to DT_FLOAT
 	  tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
