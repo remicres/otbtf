@@ -27,17 +27,14 @@
 namespace otb {
 namespace tf {
 
-// Restore a model from a path
+// Load SavedModel variables
 void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
-// Restore a model from a path
+// Save SavedModel variables
 void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
-// Load a session and a graph from a folder
-void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::unordered_set<std::string> tagsets);
-
-// Load a graph from a .meta file
-tensorflow::GraphDef LoadGraph(std::string filename);
+// Load SavedModel
+void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::vector<std::string> tagList);
 
 // Get the following attributes of the specified tensors (by name) of a graph:
 // - shape
@@ -45,7 +42,6 @@ tensorflow::GraphDef LoadGraph(std::string filename);
 // Here we assume that the node's output is a tensor
 void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::TensorInfo> layers, std::vector<std::string> & tensorsNames,
     std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes);
-
 
 // Print a lot of stuff about the specified nodes of the graph
 void PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::string> & nodesNames);

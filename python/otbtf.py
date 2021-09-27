@@ -17,6 +17,10 @@
 #   limitations under the License.
 #
 # ==========================================================================*/
+"""
+Contains stuff to help working with Tensorflow and geospatial data in the
+OTBTF framework.
+"""
 import threading
 import multiprocessing
 import time

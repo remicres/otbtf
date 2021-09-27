@@ -16,10 +16,8 @@
 #include "otbStandardFilterWatcher.h"
 #include "itkFixedArray.h"
 
-// Tensorflow stuff
-#include "tensorflow/core/public/session.h"
-#include "tensorflow/core/platform/env.h"
-#include "tensorflow/cc/saved_model/tag_constants.h"
+// Tensorflow SavedModel
+#include "tensorflow/cc/saved_model/loader.h"
 
 // Tensorflow model filter
 #include "otbTensorflowMultisourceModelFilter.h"
@@ -167,7 +165,7 @@ public:
 
     // Input model
     AddParameter(ParameterType_Group,         "model",           "model parameters");
-    AddParameter(ParameterType_Directory,     "model.dir",       "TensorFlow model_save directory");
+    AddParameter(ParameterType_Directory,     "model.dir",       "TensorFlow SavedModel directory");
     MandatoryOn                              ("model.dir");
     SetParameterDescription                  ("model.dir", "The model directory should contains the model Google Protobuf (.pb) and variables");
 
@@ -249,25 +247,14 @@ public:
   {
 
     // Load the Tensorflow bundle
-    std::unordered_set<std::string> tagSets;
-    if (HasUserValue("model.tagsets")){
-        std::vector<std::string> tagList = GetParameterStringList("model.tagsets");
-	    std::copy(tagList.begin(), tagList.end(), std::inserter(tagSets, tagSets.end())); // copy in unordered_set
-    }else{
-        tagSets = {tensorflow::kSavedModelTagServe};
-    }
-	    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, tagSets);
-
-
-
-
+    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, GetParameterStringList("model.tagsets"));
 
     // Prepare inputs
     PrepareInputs();
 
     // Setup filter
     m_TFFilter = TFModelFilterType::New();
-    m_TFFilter->SetSavedModel(& m_SavedModel);
+    m_TFFilter->SetSavedModel(&m_SavedModel);
     m_TFFilter->SetOutputTensors(GetParameterStringList("output.names"));
     m_TFFilter->SetOutputSpacingScale(GetParameterFloat("output.spcscale"));
     otbAppLogINFO("Output spacing ratio: " << m_TFFilter->GetOutputSpacingScale());
@@ -348,7 +335,7 @@ private:
   StreamingFilterType::Pointer m_StreamFilter;
   tensorflow::SavedModelBundle m_SavedModel; // must be alive during all the execution of the application !
 
-  std::vector<ProcessObjectsBundle>           m_Bundles;
+  std::vector<ProcessObjectsBundle> m_Bundles;
 
 }; // end of class
 

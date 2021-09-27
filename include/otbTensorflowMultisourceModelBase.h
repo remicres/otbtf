@@ -15,6 +15,7 @@
 #include "itkProcessObject.h"
 #include "itkNumericTraits.h"
 #include "itkSimpleDataObjectDecorator.h"
+#include "itkImageToImageFilter.h"
 
 // Tensorflow
 #include "tensorflow/core/public/session.h"
@@ -46,8 +47,7 @@ namespace otb
  * be the same. If not, an exception will be thrown during the method
  * GenerateOutputInformation().
  *
- * The TensorFlow graph and session must be set using the SetGraph() and
- * SetSession() methods.
+ * The TensorFlow SavedModel pointer must be set using the SetSavedModel() method.
  *
  * Target nodes names of the TensorFlow graph that must be triggered can be set
  * with the SetTargetNodesNames.
@@ -104,29 +104,11 @@ public:
   typedef std::vector<tensorflow::Tensor>            TensorListType;
 
   /** Set and Get the Tensorflow session and graph */
-  void SetSavedModel(tensorflow::SavedModelBundle * saved_model)      { m_SavedModel = saved_model;     }
-  tensorflow::SavedModelBundle * GetSavedModel()                { return m_SavedModel;     }
+  void SetSavedModel(tensorflow::SavedModelBundle * saved_model) {m_SavedModel = saved_model;}
+  tensorflow::SavedModelBundle * GetSavedModel() {return m_SavedModel;}
 
-  tensorflow::SignatureDef GetSignatureDef() 
-  {
-	  auto signatures = this->GetSavedModel()->GetSignatures();
-	  tensorflow::SignatureDef signature_def;
-	  // If serving_default key exists (which is the default for TF saved model), choose it as signature
-	  // Else, choose the first one
-	  if (signatures.size() == 0){
-        itkExceptionMacro("There are no available signatures for this tag-set  \n" <<
-                          "Please check which tag-set to use by running `saved_model_cli show --dir your_model_dir --all`");
-      }
-	  if (signatures.contains(tensorflow::kDefaultServingSignatureDefKey)){
-		 signature_def = signatures.at(tensorflow::kDefaultServingSignatureDefKey);
-	  } else {
-		 auto debug = *(signatures.begin());
-		 signature_def = signatures.begin()->second;
-	  }
-
-	  return signature_def;
-
-  }
+  /** Get the SignatureDef */
+  tensorflow::SignatureDef GetSignatureDef();
 
   /** Model parameters */
   void PushBackInputTensorBundle(std::string name, SizeType receptiveField, ImagePointerType image);
@@ -149,8 +131,8 @@ public:
   itkGetMacro(OutputExpressionFields, SizeListType);
 
   /** User placeholders */
-  void SetUserPlaceholders(DictType dict) { m_UserPlaceholders = dict; }
-  DictType GetUserPlaceholders()          { return m_UserPlaceholders; }
+  void SetUserPlaceholders(DictType dict) {m_UserPlaceholders = dict;}
+  DictType GetUserPlaceholders() {return m_UserPlaceholders;}
 
   /** Target nodes names */
   itkSetMacro(TargetNodesNames, StringList);
@@ -193,7 +175,7 @@ private:
   TensorShapeProtoList       m_InputTensorsShapes;      // Input tensors shapes
   TensorShapeProtoList       m_OutputTensorsShapes;     // Output tensors shapes
 
-  // Ajout
+  // Tensor names mapping
   std::map<std::string, std::string> m_UserNameToLayerNameMapping;
 
 }; // end class
