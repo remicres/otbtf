@@ -20,26 +20,52 @@ namespace otb
 template <class TInputImage, class TOutputImage>
 TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 ::TensorflowMultisourceModelBase()
- {
+{
   Superclass::SetCoordinateTolerance(itk::NumericTraits<double>::max() );
   Superclass::SetDirectionTolerance(itk::NumericTraits<double>::max() );
- }
+}
+
+template <class TInputImage, class TOutputImage>
+tensorflow::SignatureDef
+TensorflowMultisourceModelBase<TInputImage, TOutputImage>
+::GetSignatureDef()
+{
+  auto signatures = this->GetSavedModel()->GetSignatures();
+  tensorflow::SignatureDef signature_def;
+  // If serving_default key exists (which is the default for TF saved model), choose it as signature
+  // Else, choose the first one
+  if (signatures.size() == 0)
+  {
+    itkExceptionMacro("There are no available signatures for this tag-set  \n" <<
+                      "Please check which tag-set to use by running `saved_model_cli show --dir your_model_dir --all`");
+  }
+
+  if (signatures.contains(tensorflow::kDefaultServingSignatureDefKey))
+  {
+    signature_def = signatures.at(tensorflow::kDefaultServingSignatureDefKey);
+  }
+  else
+  {
+    signature_def = signatures.begin()->second;
+  }
+  return signature_def;
+}
 
 template <class TInputImage, class TOutputImage>
 void
 TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 ::PushBackInputTensorBundle(std::string placeholder, SizeType receptiveField, ImagePointerType image)
- {
+{
   Superclass::PushBackInput(image);
   m_InputReceptiveFields.push_back(receptiveField);
   m_InputPlaceholders.push_back(placeholder);
- }
+}
 
 template <class TInputImage, class TOutputImage>
 std::stringstream
 TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 ::GenerateDebugReport(DictType & inputs)
- {
+{
   // Create a debug report
   std::stringstream debugReport;
 
@@ -50,36 +76,36 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 
   // Describe inputs
   for (unsigned int i = 0 ; i < this->GetNumberOfInputs() ; i++)
-    {
+  {
     const ImagePointerType inputPtr = const_cast<TInputImage*>(this->GetInput(i));
     const RegionType reqRegion = inputPtr->GetRequestedRegion();
     debugReport << "Input #" << i << ":\n";
     debugReport << "Requested region: " << reqRegion << "\n";
     debugReport << "Tensor shape (\"" << inputs[i].first << "\": " << tf::PrintTensorShape(inputs[i].second.shape()) << "\n";
-    }
+  }
 
   // Show user placeholders
   debugReport << "User placeholders:\n" ;
   for (auto& dict: this->GetUserPlaceholders())
-    {
+  {
     debugReport << dict.first << " " << tf::PrintTensorInfos(dict.second) << "\n" << std::endl;
-    }
+  }
 
   return debugReport;
- }
+}
 
 
 template <class TInputImage, class TOutputImage>
 void
 TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 ::RunSession(DictType & inputs, TensorListType & outputs)
- {
+{
 
   // Add the user's placeholders
   for (auto& dict: this->GetUserPlaceholders())
-    {
+  {
     inputs.push_back(dict);
-    }
+  }
 
   // Run the TF session here
   // The session will initialize the outputs
@@ -103,9 +129,9 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   // Run the session, evaluating our output tensors from the graph
   auto status = this->GetSavedModel()->session.get()->Run(inputs_new, m_OutputTensors_new, m_TargetNodesNames, &outputs);
  
-  // DEBUG
 
-  if (!status.ok()) {
+  if (!status.ok())
+  {
 
     // Create a debug report
     std::stringstream debugReport = GenerateDebugReport(inputs);
@@ -114,16 +140,14 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
     itkExceptionMacro("Can't run the tensorflow session !\n" <<
                       "Tensorflow error message:\n" << status.ToString() << "\n"
                       "OTB Filter debug message:\n" << debugReport.str() );
-
   }
-
- }
+}
 
 template <class TInputImage, class TOutputImage>
 void
 TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 ::GenerateOutputInformation()
- {
+{
 
   // Check that the number of the following is the same
   // - input placeholders names
@@ -131,20 +155,20 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   // - input images
   const unsigned int nbInputs = this->GetNumberOfInputs();
   if (nbInputs != m_InputReceptiveFields.size() || nbInputs != m_InputPlaceholders.size())
-    {
+  {
     itkExceptionMacro("Number of input images is " << nbInputs <<
                       " but the number of input patches size is " << m_InputReceptiveFields.size() <<
                       " and the number of input tensors names is " << m_InputPlaceholders.size());
-    }
+  }
 
   // Check that the number of the following is the same
   // - output tensors names
   // - output expression fields
   if (m_OutputExpressionFields.size() != m_OutputTensors.size())
-    {
+  {
     itkExceptionMacro("Number of output tensors names is " << m_OutputTensors.size() <<
                       " but the number of output fields of expression is " << m_OutputExpressionFields.size());
-    }
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //                               Get tensors information
@@ -167,8 +191,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   // Get input and output tensors datatypes and shapes
   tf::GetTensorAttributes(signaturedef.inputs(), m_InputPlaceholders, m_InputTensorsShapes, m_InputTensorsDataTypes);
   tf::GetTensorAttributes(signaturedef.outputs(), m_OutputTensors, m_OutputTensorsShapes, m_OutputTensorsDataTypes);
-
- }
+}
 
 
 } // end namespace otb

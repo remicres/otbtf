@@ -15,7 +15,7 @@ if(OTB_USE_TENSORFLOW)
   find_library(TENSORFLOW_FRAMEWORK_LIB NAMES libtensorflow_framework)
 
   set(TENSORFLOW_LIBS "${TENSORFLOW_CC_LIB}" "${TENSORFLOW_FRAMEWORK_LIB}")
-
+  set(OTBTensorflow_THIRD_PARTY "this is a hack to skip header_tests")
 else()
   message("Tensorflow support disabled")
 endif()

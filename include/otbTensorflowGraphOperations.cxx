@@ -14,8 +14,9 @@
 namespace otb {
 namespace tf {
 
+
 //
-// Restore a model from a path
+// Load SavedModel variables
 //
 void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle)
 {
@@ -25,13 +26,13 @@ void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle &
   {{bundle.meta_graph_def.saver_def().filename_tensor_name(), checkpointPathTensor}};
   auto status = bundle.session->Run(feed_dict, {}, {bundle.meta_graph_def.saver_def().restore_op_name()}, nullptr);
   if (!status.ok())
-    {
+  {
     itkGenericExceptionMacro("Can't restore the input model: " << status.ToString() );
-    }
+  }
 }
 
 //
-// Restore a model from a path
+// Save SavedModel variables
 //
 void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle)
 {
@@ -41,44 +42,34 @@ void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
   {{bundle.meta_graph_def.saver_def().filename_tensor_name(), checkpointPathTensor}};
   auto status = bundle.session->Run(feed_dict, {}, {bundle.meta_graph_def.saver_def().save_tensor_name()}, nullptr);
   if (!status.ok())
-    {
+  {
     itkGenericExceptionMacro("Can't restore the input model: " << status.ToString() );
-    }
+  }
 }
 
 //
-// Load a mode from a folder
+// Load a SavedModel
 //
-void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::unordered_set<std::string> tagsets)
+void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::vector<std::string> tagList)
 {
+  // If the tag list is empty, we push back the default tag for model serving
+  if (tagList.size() == 0)
+    tagList.push_back(tensorflow::kSavedModelTagServe);
 
+  // std::vector --> std::unordered_list
+  std::unordered_set<std::string> tagSets;
+  std::copy(tagList.begin(), tagList.end(), std::inserter(tagSets, tagSets.end())); // copy in unordered_set
+
+  // Call to tensorflow::LoadSavedModel
   tensorflow::RunOptions runoptions;
   runoptions.set_trace_level(tensorflow::RunOptions_TraceLevel_FULL_TRACE);
   auto status = tensorflow::LoadSavedModel(tensorflow::SessionOptions(), runoptions,
-      path, tagsets, &bundle);
+      path, tagSets, &bundle);
   if (!status.ok())
-    {
+  {
     itkGenericExceptionMacro("Can't load the input model: " << status.ToString() );
-    }
-
+  }
 }
-
-
-//
-// Load a graph from a .meta file
-//
-tensorflow::GraphDef LoadGraph(std::string filename)
-{
-  tensorflow::MetaGraphDef meta_graph_def;
-  auto status = tensorflow::ReadBinaryProto(tensorflow::Env::Default(), filename, &meta_graph_def);
-  if (!status.ok())
-    {
-    itkGenericExceptionMacro("Can't load the input model: " << status.ToString() );
-    }
-
-  return meta_graph_def.graph_def();
-}
-
 
 // Get the following attributes of the specified tensors (by name) of a graph:
 // - shape
@@ -99,38 +90,36 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
     bool found = false;
     std::cout << "Searching for corresponding node of  : " << (*nameIt) << "... ";
     for (auto const & layer : layers)
+    {
       // layer is a pair (name, tensor_info)
       // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
-    {
       std::string layername = layer.first;
       if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
-        {
-          found = true;
-	  const tensorflow::TensorInfo& tensor_info = layer.second;
+      {
+        found = true;
+        const tensorflow::TensorInfo& tensor_info = layer.second;
 
-      std::cout << "Found : " << layername << std::endl;
+        std::cout << "Found : " << layername << std::endl;
 
-	  // Set default to DT_FLOAT
-	  tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
+        // Set default to DT_FLOAT
+        tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
 
-	  // Default (input?) tensor type
-	  ts_dt = tensor_info.dtype();
-	  dataTypes.push_back(ts_dt);
+        // Default (input?) tensor type
+        ts_dt = tensor_info.dtype();
+        dataTypes.push_back(ts_dt);
 
-	  // Get the tensor's shape
-	  // Here we assure it's a tensor, with 1 shape
-	  tensorflow::TensorShapeProto ts_shp = tensor_info.tensor_shape();
-	  shapes.push_back(ts_shp);
+        // Get the tensor's shape
+        // Here we assure it's a tensor, with 1 shape
+        tensorflow::TensorShapeProto ts_shp = tensor_info.tensor_shape();
+        shapes.push_back(ts_shp);
       }
-    }
+    } // next layer
 
     if (!found)
     {
       itkGenericExceptionMacro("Tensor name \"" << (*nameIt) << "\" not found" );
     }
-
-  }
-
+  } // next tensor name
 }
 
 //
@@ -173,7 +162,6 @@ void PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::st
       } // node name match
     } // next node name
   } // next node of the graph
-
 }
 
 } // end namespace tf

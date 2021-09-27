@@ -1,0 +1,69 @@
+image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
+
+variables:
+  OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
+  OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
+
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID             # Execute jobs in merge request context
+    - if: $CI_COMMIT_BRANCH == 'develop'   # Execute jobs when a new commit is pushed to develop branch
+    
+stages:
+  - Build
+  - Static Analysis
+  - Test
+
+.update_otbtf_src: &update_otbtf_src
+  - sudo rm -rf $OTBTF_SRC && sudo ln -s $PWD $OTBTF_SRC  # Replace local OTBTF source directory
+
+.compile_otbtf: &compile_otbtf
+  - cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
+
+build:
+  stage: Build
+  allow_failure: false
+  before_script:
+    - *update_otbtf_src
+  script:
+    - *compile_otbtf
+
+.static_analysis_base:
+  stage: Static Analysis
+  allow_failure: true
+  before_script:
+    - *update_otbtf_src
+    - sudo apt update && sudo apt install pylint flake8 cppcheck -y  # Packages for static analysis
+
+flake8:
+  extends: .static_analysis_base
+  script:
+    - python -m flake8 --max-line-length=120 $OTBTF_SRC/python
+    
+pylint:
+  extends: .static_analysis_base
+  script:
+    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $OTBTF_SRC/python
+    
+cppcheck:
+  extends: .static_analysis_base
+  script:
+#   - cppcheck --enable=all  /src/otb/otb/Modules/Remote/otbtf --check-config -I /opt/otbtf/include/OTB-7.2/ -I /usr/include/ITK-4.13/ -I /opt/otbtf/include/tf/ -I /usr/include/ -I /usr/include/boost/predef/os/ --suppress=missingIncludeSystem
+    - cppcheck --enable=all --error-exitcode=1 $OTBTF_SRC/
+
+ctest:
+  stage: Test
+  before_script:
+    - *update_otbtf_src
+  script:
+    - *compile_otbtf
+    - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
+    - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
+  after_script:
+    - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/testing  # Copy artifacts (they must be in $CI_PROJECT_DIR)
+  artifacts:
+    when: on_failure
+    paths:
+      - testing/*.*
+    expire_in: 1 week
+

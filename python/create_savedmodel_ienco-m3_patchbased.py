@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# ==========================================================================
+# =========================================================================
 #
 #   Copyright 2018-2019 Remi Cresson, Dino Ienco (IRSTEA)
 #   Copyright 2020-2021 Remi Cresson, Dino Ienco (INRAE)
@@ -17,7 +17,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-# ==========================================================================*/
+# =========================================================================
 
 # Reference:
 #
@@ -26,12 +26,12 @@
 # Satellite Data Fusion. IEEE Journal of Selected Topics in Applied Earth
 # Observations and Remote Sensing, 11(12), 4939-4949.
 
+import argparse
 from tricks import create_savedmodel
 import tensorflow.compat.v1 as tf
 import tensorflow.compat.v1.nn.rnn_cell as rnn
-tf.disable_v2_behavior()
 
-import argparse
+tf.disable_v2_behavior()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--nunits", type=int, default=1024, help="number of units")
