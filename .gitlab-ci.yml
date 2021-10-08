@@ -1,8 +1,8 @@
 image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
 
 variables:
-  OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
-  OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
+    OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
+    OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
 
 workflow:
   rules:
@@ -74,8 +74,8 @@ sr4rs:
     - cd /builds/remi.cresson/
 #    - wget https://nextcloud.inrae.fr/s/boabW9yCjdpLPGX/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
 #    - unzip sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-#    - wget -O decloud_data.zip https://nextcloud.inrae.fr/s/dpSs8rPp3Ss2tH3/download
-#    - unzip decloud_data.zip
+    - wget -O sr4rs_data.zip https://nextcloud.inrae.fr/s/qMLLyKCDieqmgWz/download
+    - unzip sr4rs_data.zip
 #    - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest --junitxml=report_sr4rs.xml otbtf/test/sr4rs_unittest.py
