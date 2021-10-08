@@ -53,6 +53,7 @@ pylint:
 cppcheck:
   stage: Static Analysis
   allow_failure: true
+  extends: .static_analysis_base
   script:
     - cppcheck --enable=all --error-exitcode=1 $OTBTF_SRC/
 
