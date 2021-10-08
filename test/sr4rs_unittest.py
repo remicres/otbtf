@@ -17,11 +17,8 @@ class SR4RSTest(unittest.TestCase):
                   "--savedmodel /builds/remi.cresson/sr4rs_sentinel2_bands4328_france2020_savedmodel/ "
                   "--output '/tmp/sr4rs.tif?&box=256:256:512:512'")
 
-        with gdal.Open("/tmp/sr4rs.tif") as reconstruct:
-            nbchannels_reconstruct = reconstruct.RasterCount
-
-        with gdal.Open("/builds/remi.cresson/sr4rs_data/baseline/sr4rs.tif") as baseline:
-            nbchannels_baseline = baseline.RasterCount
+        nbchannels_reconstruct = gdal.Open("/tmp/sr4rs.tif").RasterCount
+        nbchannels_baseline = gdal.Open("/builds/remi.cresson/sr4rs_data/baseline/sr4rs.tif").RasterCount
 
         self.assertTrue(nbchannels_reconstruct == nbchannels_baseline)
 
