@@ -88,7 +88,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
       nameIt != tensorsNames.end(); ++nameIt)
   {
     bool found = false;
-    otbAppLogINFO("Searching for corresponding node of  : " << (*nameIt) << "... ");
+    itkDebugMacro("Searching for corresponding node of  : " << (*nameIt) << "... ");
     for (auto const & layer : layers)
     {
       // layer is a pair (name, tensor_info)
@@ -99,7 +99,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
         found = true;
         const tensorflow::TensorInfo& tensor_info = layer.second;
 
-        otbAppLogINFO("Found : " << layername << "in the model");
+        itkDebugMacro("Found : " << layername << "in the model");
 
         // Set default to DT_FLOAT
         tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
