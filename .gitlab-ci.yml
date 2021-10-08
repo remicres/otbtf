@@ -20,44 +20,45 @@ stages:
 .compile_otbtf: &compile_otbtf
   - cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
 
+before_script:
+  - *update_otbtf_src
+  - *compile_otbtf
+  - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
+  - pip3 install pytest pytest-cov
+
 build:
   stage: Build
   allow_failure: false
-  before_script:
-    - *update_otbtf_src
   script:
     - *compile_otbtf
+    - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
+
 
 .static_analysis_base:
   stage: Static Analysis
   allow_failure: true
   before_script:
-    - *update_otbtf_src
     - sudo apt update && sudo apt install pylint flake8 cppcheck -y  # Packages for static analysis
 
 flake8:
   extends: .static_analysis_base
   script:
     - python -m flake8 --max-line-length=120 $OTBTF_SRC/python
-    
+
 pylint:
   extends: .static_analysis_base
   script:
     - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $OTBTF_SRC/python
-    
+
 cppcheck:
-  extends: .static_analysis_base
+  stage: Static Analysis
+  allow_failure: true
   script:
-#   - cppcheck --enable=all  /src/otb/otb/Modules/Remote/otbtf --check-config -I /opt/otbtf/include/OTB-7.2/ -I /usr/include/ITK-4.13/ -I /opt/otbtf/include/tf/ -I /usr/include/ -I /usr/include/boost/predef/os/ --suppress=missingIncludeSystem
     - cppcheck --enable=all --error-exitcode=1 $OTBTF_SRC/
 
 ctest:
   stage: Test
-  before_script:
-    - *update_otbtf_src
   script:
-    - *compile_otbtf
-    - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
     - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
   after_script:
     - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/testing  # Copy artifacts (they must be in $CI_PROJECT_DIR)
@@ -67,3 +68,19 @@ ctest:
       - testing/*.*
     expire_in: 1 week
 
+sr4rs:
+  stage: Test
+  script:
+    - cd /builds/remi.cresson/
+#    - wget https://nextcloud.inrae.fr/s/boabW9yCjdpLPGX/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+#    - unzip sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+#    - wget -O decloud_data.zip https://nextcloud.inrae.fr/s/dpSs8rPp3Ss2tH3/download
+#    - unzip decloud_data.zip
+#    - git clone https://github.com/remicres/sr4rs.git
+    - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
+    - python -m pytest --junitxml=report_sr4rs.xml otbtf/test/sr4rs_unittest.py
+  artifacts:
+    when: on_failure
+    paths:
+      - report_sr4rs.xml
+    expire_in: 1 week
