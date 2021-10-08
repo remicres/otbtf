@@ -53,7 +53,8 @@ pylint:
 cppcheck:
   stage: Static Analysis
   allow_failure: true
-  extends: .static_analysis_base
+  before_script:
+    - .static_analysis_base
   script:
     - cppcheck --enable=all --error-exitcode=1 $OTBTF_SRC/
 
@@ -73,8 +74,8 @@ sr4rs:
   stage: Test
   script:
     - cd /builds/remi.cresson/
-#    - wget https://nextcloud.inrae.fr/s/boabW9yCjdpLPGX/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-#    - unzip sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+    - wget -O https://nextcloud.inrae.fr/s/boabW9yCjdpLPGX/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+    - unzip -o sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
     - wget -O sr4rs_data.zip https://nextcloud.inrae.fr/s/qMLLyKCDieqmgWz/download
     - unzip -o sr4rs_data.zip
 #    - git clone https://github.com/remicres/sr4rs.git
