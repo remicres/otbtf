@@ -37,6 +37,8 @@ build:
 .static_analysis_base:
   stage: Static Analysis
   allow_failure: true
+  depencencies:
+    - before_script
   before_script:
     - sudo apt update && sudo apt install pylint flake8 cppcheck -y  # Packages for static analysis
 
