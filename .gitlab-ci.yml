@@ -78,7 +78,7 @@ sr4rs:
     - unzip -o sr4rs_data.zip
 #    - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
-    - python -m pytest --junitxml=$CI_PROJECT_DIR/report_sr4rs.xml otbtf/test/sr4rs_unittest.py
+    - python -m pytest --junitxml=$CI_PROJECT_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
   artifacts:
     when: on_failure
     paths:
