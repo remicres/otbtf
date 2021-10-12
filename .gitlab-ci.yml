@@ -70,7 +70,7 @@ ctest:
 sr4rs:
   stage: Test
   script:
-    - cd /builds/remi.cresson/
+    - cd $CI_PROJECT_DIR
     - wget -O sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
       https://nextcloud.inrae.fr/s/boabW9yCjdpLPGX/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
     - unzip -o sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
@@ -78,9 +78,9 @@ sr4rs:
     - unzip -o sr4rs_data.zip
 #    - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
-    - python -m pytest --junitxml=/builds/remi.cresson/report_sr4rs.xml otbtf/test/sr4rs_unittest.py
+    - python -m pytest --junitxml=$CI_PROJECT_DIR/report_sr4rs.xml otbtf/test/sr4rs_unittest.py
   artifacts:
     when: on_failure
     paths:
-      - /builds/remi.cresson/report_sr4rs.xml
+      - $CI_PROJECT_DIR/report_sr4rs.xml
     expire_in: 1 week
