@@ -23,8 +23,6 @@ and TensorFlow models.
 Starting from OTBTF >= 3.0.0, tricks is only used as a backward compatible stub
 for TF 1.X versions.
 """
-import gdal
-import numpy as np
 from otbtf import gdal_open, read_as_np_arr as read_as_np_arr_from_gdal_ds
 import tensorflow.compat.v1 as tf
 from deprecated import deprecated
