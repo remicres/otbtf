@@ -38,21 +38,21 @@ flake8:
   stage: Static Analysis
   allow_failure: true
   script:
-    - sudo apt update && sudo apt install pylint flake8 cppcheck -y  # Packages for static analysis
+    - sudo apt update && sudo apt install flake8 -y
     - python -m flake8 --max-line-length=120 $OTBTF_SRC/python
 
 pylint:
   stage: Static Analysis
   allow_failure: true
   script:
-    - sudo apt update && sudo apt install pylint flake8 cppcheck -y  # Packages for static analysis
+    - sudo apt update && sudo apt install pylint -y
     - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $OTBTF_SRC/python
 
 cppcheck:
   stage: Static Analysis
   allow_failure: true
   script:
-    - sudo apt update && sudo apt install pylint flake8 cppcheck -y  # Packages for static analysis
+    - sudo apt update && sudo apt install cppcheck -y
     - cppcheck --enable=all --error-exitcode=1 $OTBTF_SRC/
 
 ctest:
