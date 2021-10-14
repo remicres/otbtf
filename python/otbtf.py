@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # ==========================================================================
 #
-#   Copyright 2018-2019 Remi Cresson (IRSTEA)
-#   Copyright 2020 Remi Cresson (INRAE)
+#   Copyright 2018-2019 IRSTEA
+#   Copyright 2020-2021 INRAE
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #
 # ==========================================================================*/
 """
-Contains stuff to help working with Tensorflow and geospatial data in the
+Contains stuff to help working with TensorFlow and geospatial data in the
 OTBTF framework.
 """
 import threading
@@ -42,31 +42,31 @@ def gdal_open(filename):
     :param filename: raster file
     :return: a GDAL ds instance
     """
-    ds = gdal.Open(filename)
-    if ds is None:
+    gdal_ds = gdal.Open(filename)
+    if gdal_ds is None:
         raise Exception("Unable to open file {}".format(filename))
-    return ds
+    return gdal_ds
 
 
-def read_as_np_arr(ds, as_patches=True):
+def read_as_np_arr(gdal_ds, as_patches=True):
     """
     Read a GDAL raster as numpy array
-    :param ds: GDAL ds instance
+    :param gdal_ds: a GDAL dataset instance
     :param as_patches: if True, the returned numpy array has the following shape (n, psz_x, psz_x, nb_channels). If
         False, the shape is (1, psz_y, psz_x, nb_channels)
     :return: Numpy array of dim 4
     """
-    buffer = ds.ReadAsArray()
-    szx = ds.RasterXSize
+    buffer = gdal_ds.ReadAsArray()
+    size_x = gdal_ds.RasterXSize
     if len(buffer.shape) == 3:
         buffer = np.transpose(buffer, axes=(1, 2, 0))
     if not as_patches:
-        n = 1
-        szy = ds.RasterYSize
+        n_elems = 1
+        size_y = gdal_ds.RasterYSize
     else:
-        n = int(ds.RasterYSize / szx)
-        szy = szx
-    return np.float32(buffer.reshape((n, szy, szx, ds.RasterCount)))
+        n_elems = int(gdal_ds.RasterYSize / size_x)
+        size_y = size_x
+    return np.float32(buffer.reshape((n_elems, size_y, size_x, gdal_ds.RasterCount)))
 
 
 """
@@ -88,7 +88,7 @@ class Buffer:
 
     def add(self, x):
         self.container.append(x)
-        assert (self.size() <= self.max_length)
+        assert self.size() <= self.max_length
 
     def is_complete(self):
         return self.size() == self.max_length
@@ -178,7 +178,7 @@ class PatchesImagesReader(PatchesReaderBase):
         :param use_streaming: if True, the patches are read on the fly from the disc, nothing is kept in memory.
         """
 
-        assert (len(filenames_dict.values()) > 0)
+        assert len(filenames_dict.values()) > 0
 
         # ds dict
         self.ds = dict()
@@ -220,12 +220,12 @@ class PatchesImagesReader(PatchesReaderBase):
 
     def _get_ds_and_offset_from_index(self, index):
         offset = index
-        for i, ds_size in enumerate(self.ds_sizes):
+        for index, ds_size in enumerate(self.ds_sizes):
             if offset < ds_size:
                 break
             offset -= ds_size
 
-        return i, offset
+        return index, offset
 
     @staticmethod
     def _get_nb_of_patches(ds):
@@ -233,10 +233,10 @@ class PatchesImagesReader(PatchesReaderBase):
 
     @staticmethod
     def _read_extract_as_np_arr(ds, offset):
-        assert (ds is not None)
+        assert ds is not None
         psz = ds.RasterXSize
         yoff = int(offset * psz)
-        assert (yoff + psz <= ds.RasterYSize)
+        assert yoff + psz <= ds.RasterYSize
         buffer = ds.ReadAsArray(0, yoff, psz, psz)
         if len(buffer.shape) == 3:
             buffer = np.transpose(buffer, axes=(1, 2, 0))
@@ -252,8 +252,8 @@ class PatchesImagesReader(PatchesReaderBase):
              ...
              "src_key_M": np.array((psz_y_M, psz_x_M, nb_ch_M))}
         """
-        assert (0 <= index)
-        assert (index < self.size)
+        assert 0 <= index
+        assert index < self.size
 
         if not self.use_streaming:
             res = {src_key: self.patches_buffer[src_key][index, :, :, :] for src_key in self.ds}
