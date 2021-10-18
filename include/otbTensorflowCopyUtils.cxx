@@ -223,7 +223,6 @@ void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, const typename T
 
 //
 // Type-agnostic version of the 'CopyTensorToImageRegion' function
-// TODO: add some numeric types
 //
 template<class TImage>
 void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, const typename TImage::RegionType & bufferRegion,
@@ -247,7 +246,7 @@ void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, const typename T
   else if (dt == tensorflow::DT_INT16)
     CopyTensorToImageRegion<TImage, short int>(tensor, bufferRegion, outputPtr, region, channelOffset);
   else if (dt == tensorflow::DT_UINT8)
-    CopyTensorToImageRegion<TImage, char>(tensor, bufferRegion, outputPtr, region, channelOffset);
+    CopyTensorToImageRegion<TImage, unsigned char>(tensor, bufferRegion, outputPtr, region, channelOffset);
   else
     itkGenericExceptionMacro("TF DataType "<< dt << " not currently implemented !");
 
@@ -273,19 +272,22 @@ bool iequals(const std::string& a, const std::string& b)
 // -vector of float
 //
 // e.g. "true", "0.2", "14", "(1.2, 4.2, 4)"
+//
+// TODO: we could add some other types (e.g. string)
 tensorflow::Tensor ValueToTensor(std::string value)
 {
+
   std::vector<std::string> values;
   
   // Check if value is a vector or a scalar
-  const bool has_left = (value[0] == "(");
-  const bool has_right = value[value.size() - 1] == ")";
+  const bool has_left = (value[0] == '(');
+  const bool has_right = value[value.size() - 1] == ')';
   
   // Check consistency
-  bool is_vec = False;
+  bool is_vec = false;
   if (has_left || has_right)
   {
-	is_vec = True;
+	is_vec = true;
 	if (!has_left || !has_right)
 	  itkGenericExceptionMacro("Error parsing vector expression (missing parenthese ?)" << value);
   }
@@ -296,13 +298,13 @@ tensorflow::Tensor ValueToTensor(std::string value)
   else
   {
 	// Remove "(" and ")" chars
-	std::string values = value.substr(1, value.size() - 2);
+	std::string trimmed_value = value.substr(1, value.size() - 2);
 	
 	// Split string into vector using "," delimiter
 	std::regex rgx("\\s*,\\s*");
-	std::sregex_token_iterator iter{values.begin(), values.end(), rgx, -1};
+	std::sregex_token_iterator iter{trimmed_value.begin(), trimmed_value.end(), rgx, -1};
 	std::sregex_token_iterator end;
-	values = {iter, end};
+	values = std::vector<std::string>({iter, end});
   }
    
   // Find type
@@ -310,18 +312,16 @@ tensorflow::Tensor ValueToTensor(std::string value)
   std::size_t is_digit = values[0].find_first_not_of("0123456789.") == std::string::npos;
   
   // Create tensor
-  tensorflow::Tensor out;
   tensorflow::TensorShape shape({});
-  if is_digit
-	if found_dot
+  tensorflow::Tensor out(tensorflow::DT_BOOL, shape);
+  if (is_digit)
+	if (found_dot)
 	  out = tensorflow::Tensor(tensorflow::DT_FLOAT, shape);
 	else
 	  out = tensorflow::Tensor(tensorflow::DT_INT32, shape);
-  else
-    out = tensorflow::Tensor(tensorflow::DT_BOOL, shape);
 	
   // Fill tensor
-  unsigned int idx = 0
+  unsigned int idx = 0;
   for (auto& val: values)
   {
 	  
@@ -337,8 +337,7 @@ tensorflow::Tensor ValueToTensor(std::string value)
 		}
 		catch(...)
 		{
-		  itkGenericExceptionMacro("Error parsing name="
-			  << name << " with value=" << value << " as float");
+		  itkGenericExceptionMacro("Error parsing value " << value << " as float");
 		}
 	  }
 	  else
@@ -351,8 +350,7 @@ tensorflow::Tensor ValueToTensor(std::string value)
 		}
 		catch(...)
 		{
-		  itkGenericExceptionMacro("Error parsing name="
-			  << name << " with value=" << value << " as int");
+		  itkGenericExceptionMacro("Error parsing value " << value << " as int");
 		}
 	  }
 	}
@@ -370,8 +368,7 @@ tensorflow::Tensor ValueToTensor(std::string value)
 	  }
 	  else
 	  {
-		itkGenericExceptionMacro("Error parsing name="
-						<< name << " with value=" << value << " as bool");
+		itkGenericExceptionMacro("Error parsing value " << value << " as bool");
 	  }
 	  out.scalar<bool>()(idx) = val;
 	}
@@ -414,7 +411,7 @@ std::pair<std::string, tensorflow::Tensor> ExpressionToTensor(std::string expres
           << "\n\t" << expression
           << ".\nExpression must be in one of the following form:"
 		  << "\n- int32_value=1 \n- float_value=1.0 \n- bool_value=true."
-		  << "\n- float_vec=(1.0, 5.253, 2))";
+		  << "\n- float_vec=(1.0, 5.253, 2)");
     }
 
     return dict;
