@@ -231,13 +231,23 @@ void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, const typename T
 {
   tensorflow::DataType dt = tensor.dtype();
   if (dt == tensorflow::DT_FLOAT)
-    CopyTensorToImageRegion<TImage, float>        (tensor, bufferRegion, outputPtr, region, channelOffset);
+    CopyTensorToImageRegion<TImage, float>(tensor, bufferRegion, outputPtr, region, channelOffset);
   else if (dt == tensorflow::DT_DOUBLE)
-    CopyTensorToImageRegion<TImage, double>       (tensor, bufferRegion, outputPtr, region, channelOffset);
+    CopyTensorToImageRegion<TImage, double>(tensor, bufferRegion, outputPtr, region, channelOffset);
+  else if (dt == tensorflow::DT_UINT64)
+    CopyTensorToImageRegion<TImage, unsigned long long int>(tensor, bufferRegion, outputPtr, region, channelOffset);
   else if (dt == tensorflow::DT_INT64)
     CopyTensorToImageRegion<TImage, long long int>(tensor, bufferRegion, outputPtr, region, channelOffset);
+  else if (dt == tensorflow::DT_UINT32)
+    CopyTensorToImageRegion<TImage, unsigned int>(tensor, bufferRegion, outputPtr, region, channelOffset);
   else if (dt == tensorflow::DT_INT32)
-    CopyTensorToImageRegion<TImage, int>          (tensor, bufferRegion, outputPtr, region, channelOffset);
+    CopyTensorToImageRegion<TImage, int>(tensor, bufferRegion, outputPtr, region, channelOffset);
+  else if (dt == tensorflow::DT_UINT16)
+    CopyTensorToImageRegion<TImage, unsigned short int>(tensor, bufferRegion, outputPtr, region, channelOffset);
+  else if (dt == tensorflow::DT_INT16)
+    CopyTensorToImageRegion<TImage, short int>(tensor, bufferRegion, outputPtr, region, channelOffset);
+  else if (dt == tensorflow::DT_UINT8)
+    CopyTensorToImageRegion<TImage, char>(tensor, bufferRegion, outputPtr, region, channelOffset);
   else
     itkGenericExceptionMacro("TF DataType "<< dt << " not currently implemented !");
 
@@ -255,14 +265,131 @@ bool iequals(const std::string& a, const std::string& b)
   });
 }
 
+// Convert a value into a tensor
+// Following types are supported:
+// -bool
+// -int
+// -float
+// -vector of float
+//
+// e.g. "true", "0.2", "14", "(1.2, 4.2, 4)"
+tensorflow::Tensor ValueToTensor(std::string value)
+{
+  std::vector<std::string> values;
+  
+  // Check if value is a vector or a scalar
+  const bool has_left = (value[0] == "(");
+  const bool has_right = value[value.size() - 1] == ")";
+  
+  // Check consistency
+  bool is_vec = False;
+  if (has_left || has_right)
+  {
+	is_vec = True;
+	if (!has_left || !has_right)
+	  itkGenericExceptionMacro("Error parsing vector expression (missing parenthese ?)" << value);
+  }
+  
+  // Scalar --> Vector for generic processing
+  if (!is_vec)
+	values.push_back(value);
+  else
+  {
+	// Remove "(" and ")" chars
+	std::string values = value.substr(1, value.size() - 2);
+	
+	// Split string into vector using "," delimiter
+	std::regex rgx("\\s*,\\s*");
+	std::sregex_token_iterator iter{values.begin(), values.end(), rgx, -1};
+	std::sregex_token_iterator end;
+	values = {iter, end};
+  }
+   
+  // Find type
+  std::size_t found_dot = values[0].find(".") != std::string::npos;
+  std::size_t is_digit = values[0].find_first_not_of("0123456789.") == std::string::npos;
+  
+  // Create tensor
+  tensorflow::Tensor out;
+  tensorflow::TensorShape shape({});
+  if is_digit
+	if found_dot
+	  out = tensorflow::Tensor(tensorflow::DT_FLOAT, shape);
+	else
+	  out = tensorflow::Tensor(tensorflow::DT_INT32, shape);
+  else
+    out = tensorflow::Tensor(tensorflow::DT_BOOL, shape);
+	
+  // Fill tensor
+  unsigned int idx = 0
+  for (auto& val: values)
+  {
+	  
+	if (is_digit)
+	{
+	  if (found_dot)
+	  {
+		// FLOAT
+		try
+		{
+		  float val = std::stof(value);
+		  out.scalar<float>()(idx) = val;
+		}
+		catch(...)
+		{
+		  itkGenericExceptionMacro("Error parsing name="
+			  << name << " with value=" << value << " as float");
+		}
+	  }
+	  else
+	  {
+		// INT
+		try
+		{
+		  int val = std::stoi(value);
+		  out.scalar<int>()(idx) = val;
+		}
+		catch(...)
+		{
+		  itkGenericExceptionMacro("Error parsing name="
+			  << name << " with value=" << value << " as int");
+		}
+	  }
+	}
+	else
+	{
+	  // BOOL
+	  bool val = true;
+	  if (iequals(value, "true"))
+	  {
+		val = true;
+	  }
+	  else if (iequals(value, "false"))
+	  {
+		val = false;
+	  }
+	  else
+	  {
+		itkGenericExceptionMacro("Error parsing name="
+						<< name << " with value=" << value << " as bool");
+	  }
+	  out.scalar<bool>()(idx) = val;
+	}
+	idx++;
+  }
+  
+  return out;
+}
+
 // Convert an expression into a dict
 //
 // Following types are supported:
 // -bool
 // -int
 // -float
+// -vector of float
 //
-// e.g. is_training=true, droptout=0.2, nfeat=14
+// e.g. is_training=true, droptout=0.2, nfeat=14, x=(1.2, 4.2, 4)
 std::pair<std::string, tensorflow::Tensor> ExpressionToTensor(std::string expression)
 {
   std::pair<std::string, tensorflow::Tensor> dict;
@@ -277,76 +404,17 @@ std::pair<std::string, tensorflow::Tensor> ExpressionToTensor(std::string expres
 
       dict.first = name;
 
-      // Find type
-      std::size_t found_dot = value.find(".") != std::string::npos;
-      std::size_t is_digit = value.find_first_not_of("0123456789.") == std::string::npos;
-      if (is_digit)
-      {
-        if (found_dot)
-        {
-          // FLOAT
-          try
-          {
-            float val = std::stof(value);
-            tensorflow::Tensor out(tensorflow::DT_FLOAT, tensorflow::TensorShape());
-            out.scalar<float>()() = val;
-            dict.second = out;
-
-          }
-          catch(...)
-          {
-            itkGenericExceptionMacro("Error parsing name="
-                << name << " with value=" << value << " as float");
-          }
-
-        }
-        else
-        {
-          // INT
-          try
-          {
-            int val = std::stoi(value);
-            tensorflow::Tensor out(tensorflow::DT_INT32, tensorflow::TensorShape());
-            out.scalar<int>()() = val;
-            dict.second = out;
-
-          }
-          catch(...)
-          {
-            itkGenericExceptionMacro("Error parsing name="
-                << name << " with value=" << value << " as int");
-          }
-
-        }
-      }
-      else
-      {
-        // BOOL
-        bool val = true;
-        if (iequals(value, "true"))
-        {
-          val = true;
-        }
-        else if (iequals(value, "false"))
-        {
-          val = false;
-        }
-        else
-        {
-          itkGenericExceptionMacro("Error parsing name="
-                          << name << " with value=" << value << " as bool");
-        }
-        tensorflow::Tensor out(tensorflow::DT_BOOL, tensorflow::TensorShape());
-        out.scalar<bool>()() = val;
-        dict.second = out;
-      }
-
+	  // Transform value into tensorflow::Tensor
+	  dict.second = ValueToTensor(value);
+	  
     }
     else
     {
       itkGenericExceptionMacro("The following expression is not valid: "
           << "\n\t" << expression
-          << ".\nExpression must be in the form int_value=1 or float_value=1.0 or bool_value=true.");
+          << ".\nExpression must be in one of the following form:"
+		  << "\n- int32_value=1 \n- float_value=1.0 \n- bool_value=true."
+		  << "\n- float_vec=(1.0, 5.253, 2))";
     }
 
     return dict;
