@@ -364,8 +364,7 @@ ValueToTensor(std::string value)
         // FLOAT
         try
         {
-          float val = std::stof(val);
-          out.scalar<float>()(idx) = val;
+          out.scalar<float>()(idx) = std::stof(val);
         }
         catch (...)
         {
@@ -377,8 +376,7 @@ ValueToTensor(std::string value)
         // INT
         try
         {
-          int val = std::stoi(val);
-          out.scalar<int>()(idx) = val;
+          out.scalar<int>()(idx) = std::stoi(val);
         }
         catch (...)
         {
@@ -389,20 +387,20 @@ ValueToTensor(std::string value)
     else
     {
       // BOOL
-      bool val = true;
+      bool ret = true;
       if (iequals(val, "true"))
       {
-        val = true;
+        ret = true;
       }
       else if (iequals(val, "false"))
       {
-        val = false;
+        ret = false;
       }
       else
       {
         itkGenericExceptionMacro("Error parsing value " << val << " as bool");
       }
-      out.scalar<bool>()(idx) = val;
+      out.scalar<bool>()(idx) = ret;
     }
     idx++;
   }
