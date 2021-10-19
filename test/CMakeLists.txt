@@ -3,13 +3,12 @@ otb_module_test()
 # Unit tests
 set(${otb-module}Tests 
   otbTensorflowTests.cxx
-  otbTensorflowCopyUtilsTests.cxx
-  ${${otb-module}_SYSTEM_INCLUDE_DIRS}
-  ${tensorflow_include_dir})
-include_directories(${tensorflow_include_dir})
+  otbTensorflowCopyUtilsTests.cxx)
+
 add_executable(otbTensorflowTests ${${otb-module}Tests})
 
-target_link_libraries(otbTensorflowTests ${${otb-module}-Test_LIBRARIES}  ${TENSORFLOW_LIBS})
+target_include_directories(otbTensorflowTests PRIVATE ${tensorflow_include_dir})
+target_link_libraries(otbTensorflowTests ${${otb-module}-Test_LIBRARIES} ${TENSORFLOW_LIBS})
 otb_module_target_label(otbTensorflowTests)
 
 # CopyUtilsTests
