@@ -75,3 +75,34 @@ int boolValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
       && genericValueToTensorTest<bool>(tensorflow::DT_BOOL, "false", false);
 }
 
+template<typename T>
+int genericVecValueToTensorTest(tensorflow::DataType dt, std::string expr, std::vector<T> values)
+{
+  tensorflow::Tensor t = otb::tf::ValueToTensor(expr);
+  tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({}));
+  unsigned int i = 0;
+  for (auto& value: values)
+    {
+    t_ref.scalar<T>()(i) = value;
+    i++;
+    }
+
+  return compare<T>(t, t_ref);
+}
+
+int floatVecValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
+{
+  return genericVecValueToTensorTest<float>(tensorflow::DT_FLOAT, "(0.1234, -1,-20,2.56 ,3.5)", std::vector<float>({0.1234, -1, -20, 2.56 ,3.5}));
+}
+
+int intVecValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
+{
+  return genericVecValueToTensorTest<int>(tensorflow::DT_INT32, "(1234, -1,-20,256 ,35)", std::vector<int>({1234, -1, -20, 256 ,35}));
+}
+
+int boolVecValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
+{
+  return genericVecValueToTensorTest<bool>(tensorflow::DT_BOOL, "(true, false,True, False", std::vector<bool>({true, false, true, false}));
+}
+
+
