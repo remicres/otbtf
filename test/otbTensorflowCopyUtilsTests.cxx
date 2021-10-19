@@ -11,6 +11,8 @@
 =========================================================================*/
 
 #include "otbTensorflowCopyUtils.h"
+#include "tensorflow/core/framework/tensor.h"
+#include "tensorflow/core/framework/tensor_shape.h"
 #include "itkMacro.h"
 
 int compare(tensorflow::Tensor & t1, tensorflow::Tensor & t2)
