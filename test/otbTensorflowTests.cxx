@@ -17,9 +17,9 @@ void RegisterTests()
   REGISTER_TEST(floatValueToTensorTest);
   REGISTER_TEST(intValueToTensorTest);
   REGISTER_TEST(boolValueToTensorTest);
-//  REGISTER_TEST(floatVecValueToTensorTest);
-//  REGISTER_TEST(intVecValueToTensorTest);
-//  REGISTER_TEST(boolVecValueToTensorTest);
+  REGISTER_TEST(floatVecValueToTensorTest);
+  REGISTER_TEST(intVecValueToTensorTest);
+  REGISTER_TEST(boolVecValueToTensorTest);
 }
 
 
