@@ -9,6 +9,8 @@ add_executable(otbTensorflowTests ${${otb-module}Tests})
 
 target_include_directories(otbTensorflowTests PRIVATE ${tensorflow_include_dir})
 target_link_libraries(otbTensorflowTests ${${otb-module}-Test_LIBRARIES} ${${otb-module}_LIBRARIES} ${TENSORFLOW_LIBS})
+message("TENSORFLOW_LIBS:")
+message(${TENSORFLOW_LIBS})
 otb_module_target_label(otbTensorflowTests)
 
 # CopyUtilsTests

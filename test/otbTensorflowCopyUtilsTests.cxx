@@ -18,11 +18,14 @@
 int compare(tensorflow::Tensor & t1, tensorflow::Tensor & t2)
 {
   if (t1.dims() != t2.dims())
-    return false;
+    return EXIT_FAILURE;
   if (t1.dtype() != t2.dtype())
-    return false;
+    return EXIT_FAILURE;
   if (t1.NumElements() != t2.NumElements())
     return EXIT_FAILURE;
+  for (unsigned int i = 0; i < t1.NumElements(); i++)
+    if (t1.scalar<float>()(i) != t2.scalar<float>()(i))
+      return EXIT_FAILURE;
   return EXIT_SUCCESS;
 }
 
