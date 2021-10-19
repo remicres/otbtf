@@ -13,8 +13,6 @@ message("TENSORFLOW_LIBS: " ${TENSORFLOW_LIBS})
 message("tensorflow_include_dir: " ${tensorflow_include_dir})
 message("{otb-module}_LIBRARIES: " ${${otb-module}_LIBRARIES})
 message("TENSORFLOW_CC_LIB" ${TENSORFLOW_CC_LIB})
-
-_todelete_stop
 otb_module_target_label(otbTensorflowTests)
 
 # CopyUtilsTests
