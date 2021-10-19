@@ -17,7 +17,7 @@
 
 int compare(tensorflow::Tensor & t1, tensorflow::Tensor & t2)
 {
-  std::cout << "Compare " << t1 << " and " << t2 << std::endl;
+  std::cout << "Compare " << t1.DebugString() << " and " << t2.DebugString() << std::endl;
   if (t1.dims() != t2.dims())
     {
     std::cout << "dims() differ!" << std::endl;
