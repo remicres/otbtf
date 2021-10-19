@@ -6,6 +6,7 @@ set(${otb-module}Tests
   otbTensorflowCopyUtilsTests.cxx
   ${${otb-module}_SYSTEM_INCLUDE_DIRS}
   ${tensorflow_include_dir})
+include_directories(${tensorflow_include_dir})
 add_executable(otbTensorflowTests ${${otb-module}Tests})
 
 target_link_libraries(otbTensorflowTests ${${otb-module}-Test_LIBRARIES}  ${TENSORFLOW_LIBS})
