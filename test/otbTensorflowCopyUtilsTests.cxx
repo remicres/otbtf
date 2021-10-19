@@ -44,11 +44,18 @@ int compare(tensorflow::Tensor & t1, tensorflow::Tensor & t2)
   return EXIT_SUCCESS;
 }
 
+template<typename T>
+int genericValueToTensorTest(tensorflow::DataType & dt, std::string & expr, T & value)
+{
+  tensorflow::Tensor t = otb::tf::ValueToTensor(expr);
+  tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({}));
+  t_ref.scalar<T>()() = value;
+
+  return compare(t, t_ref);
+}
+
 int floatValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
 {
-  tensorflow::Tensor float_tensor = otb::tf::ValueToTensor("0.1234");
-  tensorflow::Tensor float_tensor_ref(tensorflow::DT_FLOAT, tensorflow::TensorShape({}));
-  float_tensor_ref.scalar<float>()() = 0.1234;
-
-  return compare(float_tensor, float_tensor_ref);
+  return genericValueToTensorTest<float>(tensorflow::DT_FLOAT, "0.1234", 0.1234);
 }
+
