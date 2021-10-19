@@ -8,11 +8,7 @@ set(${otb-module}Tests
 add_executable(otbTensorflowTests ${${otb-module}Tests})
 
 target_include_directories(otbTensorflowTests PRIVATE ${tensorflow_include_dir})
-target_link_libraries(otbTensorflowTests ${${otb-module}-Test_LIBRARIES} ${${otb-module}_LIBRARIES} ${TENSORFLOW_LIBS})
-message("TENSORFLOW_LIBS: " ${TENSORFLOW_LIBS})
-message("tensorflow_include_dir: " ${tensorflow_include_dir})
-message("{otb-module}_LIBRARIES: " ${${otb-module}_LIBRARIES})
-message("TENSORFLOW_CC_LIB" ${TENSORFLOW_CC_LIB})
+target_link_libraries(otbTensorflowTests ${${otb-module}-Test_LIBRARIES} ${TENSORFLOW_CC_LIB} ${TENSORFLOW_FRAMEWORK_LIB})
 otb_module_target_label(otbTensorflowTests)
 
 # CopyUtilsTests
