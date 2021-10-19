@@ -1,5 +1,21 @@
 otb_module_test()
 
+# Unit tests
+set(${otb-module}Tests 
+  otbTensorflowTests.cxx
+  otbTensorflowCopyUtilsTests.cxx)
+add_executable(otbTensorflowTests ${${otb-module}Tests})
+target_link_libraries(otbTensorflowTests ${${otb-module}-Test_LIBRARIES}  ${TENSORFLOW_LIBS})
+otb_module_target_label(otbTensorflowTests)
+
+# CopyUtilsTests
+otb_add_test(NAME floatValueToTensorTest COMMAND otbTensorflowTests floatValueToTensorTest)
+#otb_add_test(NAME intValueToTensorTest COMMAND otbTensorflowTests intValueToTensorTest)
+#otb_add_test(NAME boolValueToTensorTest COMMAND otbTensorflowTests boolValueToTensorTest)
+#otb_add_test(NAME floatVecValueToTensorTest COMMAND otbTensorflowTests floatVecValueToTensorTest)
+#otb_add_test(NAME intVecValueToTensorTest COMMAND otbTensorflowTests intVecValueToTensorTest)
+#otb_add_test(NAME boolVecValueToTensorTest COMMAND otbTensorflowTests boolVecValueToTensorTest)
+
 # Directories
 set(DATADIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 set(MODELSDIR ${CMAKE_CURRENT_SOURCE_DIR}/models)
