@@ -15,6 +15,7 @@
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "itkMacro.h"
 
+template<typename T>
 int compare(tensorflow::Tensor & t1, tensorflow::Tensor & t2)
 {
   std::cout << "Compare " << t1.DebugString() << " and " << t2.DebugString() << std::endl;
@@ -34,7 +35,7 @@ int compare(tensorflow::Tensor & t1, tensorflow::Tensor & t2)
     return EXIT_FAILURE;
     }
   for (unsigned int i = 0; i < t1.NumElements(); i++)
-    if (t1.scalar<float>()(i) != t2.scalar<float>()(i))
+    if (t1.scalar<T>()(i) != t2.scalar<T>()(i))
       {
       std::cout << "scalar " << i << " differ!" << std::endl;
       return EXIT_FAILURE;
@@ -51,11 +52,26 @@ int genericValueToTensorTest(tensorflow::DataType dt, std::string expr, T value)
   tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({}));
   t_ref.scalar<T>()() = value;
 
-  return compare(t, t_ref);
+  return compare<T>(t, t_ref);
 }
 
 int floatValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
 {
-  return genericValueToTensorTest<float>(tensorflow::DT_FLOAT, "0.1234", 0.1234);
+  return genericValueToTensorTest<float>(tensorflow::DT_FLOAT, "0.1234", 0.1234)
+      && genericValueToTensorTest<float>(tensorflow::DT_FLOAT, "-0.1234", -0.1234) ;
+}
+
+int intValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
+{
+  return genericValueToTensorTest<int>(tensorflow::DT_INT32, "1234", 1234)
+      && genericValueToTensorTest<int>(tensorflow::DT_INT32, "-1234", -1234);
+}
+
+int boolValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
+{
+  return genericValueToTensorTest<bool>(tensorflow::DT_BOOL, "true", true)
+      && genericValueToTensorTest<bool>(tensorflow::DT_BOOL, "True", true)
+      && genericValueToTensorTest<bool>(tensorflow::DT_BOOL, "False", false)
+      && genericValueToTensorTest<bool>(tensorflow::DT_BOOL, "false", false);
 }
 

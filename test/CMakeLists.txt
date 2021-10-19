@@ -13,8 +13,8 @@ otb_module_target_label(otbTensorflowTests)
 
 # CopyUtilsTests
 otb_add_test(NAME floatValueToTensorTest COMMAND otbTensorflowTests floatValueToTensorTest)
-#otb_add_test(NAME intValueToTensorTest COMMAND otbTensorflowTests intValueToTensorTest)
-#otb_add_test(NAME boolValueToTensorTest COMMAND otbTensorflowTests boolValueToTensorTest)
+otb_add_test(NAME intValueToTensorTest COMMAND otbTensorflowTests intValueToTensorTest)
+otb_add_test(NAME boolValueToTensorTest COMMAND otbTensorflowTests boolValueToTensorTest)
 #otb_add_test(NAME floatVecValueToTensorTest COMMAND otbTensorflowTests floatVecValueToTensorTest)
 #otb_add_test(NAME intVecValueToTensorTest COMMAND otbTensorflowTests intVecValueToTensorTest)
 #otb_add_test(NAME boolVecValueToTensorTest COMMAND otbTensorflowTests boolVecValueToTensorTest)
