@@ -81,7 +81,7 @@ int genericVecValueToTensorTest(tensorflow::DataType dt, std::string expr, std::
   tensorflow::Tensor t = otb::tf::ValueToTensor(expr);
   tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({}));
   unsigned int i = 0;
-  for (auto& value: values)
+  for (auto value: values)
     {
     t_ref.scalar<T>()(i) = value;
     i++;
