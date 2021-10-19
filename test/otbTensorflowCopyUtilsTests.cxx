@@ -39,6 +39,7 @@ int compare(tensorflow::Tensor & t1, tensorflow::Tensor & t2)
       std::cout << "scalar " << i << " differ!" << std::endl;
       return EXIT_FAILURE;
       }
+  // Else
   std::cout << "Tensors are equals :)" << std::endl;
   return EXIT_SUCCESS;
 }
@@ -46,7 +47,7 @@ int compare(tensorflow::Tensor & t1, tensorflow::Tensor & t2)
 int floatValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
 {
   tensorflow::Tensor float_tensor = otb::tf::ValueToTensor("0.1234");
-  tensorflow::Tensor float_tensor_ref(tensorflow::DT_BOOL, tensorflow::TensorShape({}));
+  tensorflow::Tensor float_tensor_ref(tensorflow::DT_FLOAT, tensorflow::TensorShape({}));
   float_tensor_ref.scalar<float>()() = 0.1234;
 
   return compare(float_tensor, float_tensor_ref);
