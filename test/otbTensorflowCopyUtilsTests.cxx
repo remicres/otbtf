@@ -45,7 +45,7 @@ int compare(tensorflow::Tensor & t1, tensorflow::Tensor & t2)
 }
 
 template<typename T>
-int genericValueToTensorTest(tensorflow::DataType & dt, std::string & expr, T & value)
+int genericValueToTensorTest(tensorflow::DataType dt, std::string & expr, T & value)
 {
   tensorflow::Tensor t = otb::tf::ValueToTensor(expr);
   tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({}));
