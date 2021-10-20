@@ -23,9 +23,9 @@ and TensorFlow models.
 Starting from OTBTF >= 3.0.0, tricks is only used as a backward compatible stub
 for TF 1.X versions.
 """
-from otbtf import gdal_open, read_as_np_arr as read_as_np_arr_from_gdal_ds
 import tensorflow.compat.v1 as tf
 from deprecated import deprecated
+from otbtf import gdal_open, read_as_np_arr as read_as_np_arr_from_gdal_ds
 tf.disable_v2_behavior()
 
 
@@ -90,26 +90,6 @@ def read_samples(filename):
     return read_image_as_np(filename, as_patches=True)
 
 
-@deprecated(version="3.0.0", reason="Please consider using TensorFlow >= 2 to build and save your nets")
-def CreateSavedModel(sess, inputs, outputs, directory):
-    """
-    Create a SavedModel from TF 1.X graphs
-    :param sess: The Tensorflow V1 session
-    :param inputs: List of inputs names (e.g. ["x_cnn_1:0", "x_cnn_2:0"])
-    :param outputs: List of outputs names (e.g. ["prediction:0", "features:0"])
-    :param directory: Path for the generated SavedModel
-    """
-    create_savedmodel(sess, inputs, outputs, directory)
-
-
-@deprecated(version="3.0.0", reason="Please consider using TensorFlow >= 2 to build and save your nets")
-def CheckpointToSavedModel(ckpt_path, inputs, outputs, savedmodel_path, clear_devices=False):
-    """
-    Read a Checkpoint and build a SavedModel for TF 1.X graphs
-    :param ckpt_path: Path to the checkpoint file (without the ".meta" extension)
-    :param inputs: List of inputs names (e.g. ["x_cnn_1:0", "x_cnn_2:0"])
-    :param outputs: List of outputs names (e.g. ["prediction:0", "features:0"])
-    :param savedmodel_path: Path for the generated SavedModel
-    :param clear_devices: Clear TensorFlow devices positioning (True/False)
-    """
-    ckpt_to_savedmodel(ckpt_path, inputs, outputs, savedmodel_path, clear_devices)
+# Aliases for backward compatibility
+CreateSavedModel = create_savedmodel
+CheckpointToSavedModel = ckpt_to_savedmodel
