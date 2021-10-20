@@ -368,7 +368,7 @@ ValueToTensor(std::string value)
         }
         catch (...)
         {
-          itkGenericExceptionMacro("Error parsing value " << val << " as float");
+          itkGenericExceptionMacro("Error parsing value \"" << val << "\" as float");
         }
       }
       else
@@ -380,7 +380,7 @@ ValueToTensor(std::string value)
         }
         catch (...)
         {
-          itkGenericExceptionMacro("Error parsing value " << val << " as int");
+          itkGenericExceptionMacro("Error parsing value \"" << val << "\" as int");
         }
       }
     }
@@ -398,7 +398,7 @@ ValueToTensor(std::string value)
       }
       else
       {
-        itkGenericExceptionMacro("Error parsing value " << val << " as bool");
+        itkGenericExceptionMacro("Error parsing value \"" << val << "\" as bool");
       }
       out.scalar<bool>()(idx) = ret;
     }
