@@ -89,11 +89,12 @@ class Buffer:
         """
         return len(self.container)
 
-    def add(self, x):
+    def add(self, new_element):
         """
         Add an element in the buffer
+        :param new_element: new element to add
         """
-        self.container.append(x)
+        self.container.append(new_element)
         assert self.size() <= self.max_length
 
     def is_complete(self):
@@ -190,12 +191,9 @@ class PatchesImagesReader(PatchesReaderBase):
         assert len(filenames_dict.values()) > 0
 
         # gdal_ds dict
-        self.gdal_ds = dict()
-        for src_key, src_filenames in filenames_dict.items():
-            self.gdal_ds[src_key] = []
-            for src_filename in src_filenames:
-                self.gdal_ds[src_key].append(gdal_open(src_filename))
+        self.gdal_ds = {key: [gdal_open(src_fn) for src_fn in src_fns] for key, src_fns in filenames_dict.items()}
 
+        # check number of patches in each sources
         if len(set([len(ds_list) for ds_list in self.gdal_ds.values()])) != 1:
             raise Exception("Each source must have the same number of patches images")
 
