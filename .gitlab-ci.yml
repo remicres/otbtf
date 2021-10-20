@@ -28,8 +28,6 @@ build:
   allow_failure: false
   script:
     - *compile_otbtf
-    - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
-
 
 flake8:
   stage: Static Analysis
@@ -68,9 +66,9 @@ ctest:
 
 sr4rs:
   stage: Test
-  before_script:
-    - pip3 install pytest pytest-cov
   script:
+    - *compile_otbtf
+    - pip3 install pytest pytest-cov
     - cd $CI_PROJECT_DIR
     - wget -O sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
       https://nextcloud.inrae.fr/s/boabW9yCjdpLPGX/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
