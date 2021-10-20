@@ -22,9 +22,6 @@ stages:
 
 before_script:
   - *update_otbtf_src
-  - *compile_otbtf
-  - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
-  - pip3 install pytest pytest-cov
 
 build:
   stage: Build
@@ -58,6 +55,8 @@ cppcheck:
 ctest:
   stage: Test
   script:
+    - *compile_otbtf
+    - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
     - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
   after_script:
     - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/testing  # Copy artifacts (they must be in $CI_PROJECT_DIR)
@@ -69,6 +68,8 @@ ctest:
 
 sr4rs:
   stage: Test
+  before_script:
+    - pip3 install pytest pytest-cov
   script:
     - cd $CI_PROJECT_DIR
     - wget -O sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
