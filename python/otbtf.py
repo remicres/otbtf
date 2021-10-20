@@ -24,11 +24,11 @@ OTBTF framework.
 import threading
 import multiprocessing
 import time
+import logging
+from abc import ABC, abstractmethod
 import numpy as np
 import tensorflow as tf
 import gdal
-import logging
-from abc import ABC, abstractmethod
 
 
 """
@@ -40,7 +40,7 @@ def gdal_open(filename):
     """
     Open a GDAL raster
     :param filename: raster file
-    :return: a GDAL ds instance
+    :return: a GDAL gdal_ds instance
     """
     gdal_ds = gdal.Open(filename)
     if gdal_ds is None:
@@ -84,13 +84,22 @@ class Buffer:
         self.container = []
 
     def size(self):
+        """
+        Returns the buffer size
+        """
         return len(self.container)
 
     def add(self, x):
+        """
+        Add an element in the buffer
+        """
         self.container.append(x)
         assert self.size() <= self.max_length
 
     def is_complete(self):
+        """
+        Return True if the buffer is at full capacity
+        """
         return self.size() == self.max_length
 
 
@@ -180,23 +189,23 @@ class PatchesImagesReader(PatchesReaderBase):
 
         assert len(filenames_dict.values()) > 0
 
-        # ds dict
-        self.ds = dict()
+        # gdal_ds dict
+        self.gdal_ds = dict()
         for src_key, src_filenames in filenames_dict.items():
-            self.ds[src_key] = []
+            self.gdal_ds[src_key] = []
             for src_filename in src_filenames:
-                self.ds[src_key].append(gdal_open(src_filename))
+                self.gdal_ds[src_key].append(gdal_open(src_filename))
 
-        if len(set([len(ds_list) for ds_list in self.ds.values()])) != 1:
+        if len(set([len(ds_list) for ds_list in self.gdal_ds.values()])) != 1:
             raise Exception("Each source must have the same number of patches images")
 
         # streaming on/off
         self.use_streaming = use_streaming
 
-        # ds check
-        nb_of_patches = {key: 0 for key in self.ds}
+        # gdal_ds check
+        nb_of_patches = {key: 0 for key in self.gdal_ds}
         self.nb_of_channels = dict()
-        for src_key, ds_list in self.ds.items():
+        for src_key, ds_list in self.gdal_ds.items():
             for ds in ds_list:
                 nb_of_patches[src_key] += self._get_nb_of_patches(ds)
                 if src_key not in self.nb_of_channels:
@@ -208,15 +217,15 @@ class PatchesImagesReader(PatchesReaderBase):
         if len(set(nb_of_patches.values())) != 1:
             raise Exception("Sources must have the same number of patches! Number of patches: {}".format(nb_of_patches))
 
-        # ds sizes
-        src_key_0 = list(self.ds)[0]  # first key
-        self.ds_sizes = [self._get_nb_of_patches(ds) for ds in self.ds[src_key_0]]
+        # gdal_ds sizes
+        src_key_0 = list(self.gdal_ds)[0]  # first key
+        self.ds_sizes = [self._get_nb_of_patches(ds) for ds in self.gdal_ds[src_key_0]]
         self.size = sum(self.ds_sizes)
 
         # if use_streaming is False, we store in memory all patches images
         if not self.use_streaming:
-            patches_list = {src_key: [read_as_np_arr(ds) for ds in self.ds[src_key]] for src_key in self.ds}
-            self.patches_buffer = {src_key: np.concatenate(patches_list[src_key], axis=-1) for src_key in self.ds}
+            patches_list = {src_key: [read_as_np_arr(ds) for ds in self.gdal_ds[src_key]] for src_key in self.gdal_ds}
+            self.patches_buffer = {src_key: np.concatenate(patches_list[src_key], axis=-1) for src_key in self.gdal_ds}
 
     def _get_ds_and_offset_from_index(self, index):
         offset = index
@@ -228,16 +237,16 @@ class PatchesImagesReader(PatchesReaderBase):
         return index, offset
 
     @staticmethod
-    def _get_nb_of_patches(ds):
-        return int(ds.RasterYSize / ds.RasterXSize)
+    def _get_nb_of_patches(gdal_ds):
+        return int(gdal_ds.RasterYSize / gdal_ds.RasterXSize)
 
     @staticmethod
-    def _read_extract_as_np_arr(ds, offset):
-        assert ds is not None
-        psz = ds.RasterXSize
+    def _read_extract_as_np_arr(gdal_ds, offset):
+        assert gdal_ds is not None
+        psz = gdal_ds.RasterXSize
         yoff = int(offset * psz)
-        assert yoff + psz <= ds.RasterYSize
-        buffer = ds.ReadAsArray(0, yoff, psz, psz)
+        assert yoff + psz <= gdal_ds.RasterYSize
+        buffer = gdal_ds.ReadAsArray(0, yoff, psz, psz)
         if len(buffer.shape) == 3:
             buffer = np.transpose(buffer, axes=(1, 2, 0))
         return np.float32(buffer)
@@ -256,10 +265,10 @@ class PatchesImagesReader(PatchesReaderBase):
         assert index < self.size
 
         if not self.use_streaming:
-            res = {src_key: self.patches_buffer[src_key][index, :, :, :] for src_key in self.ds}
+            res = {src_key: self.patches_buffer[src_key][index, :, :, :] for src_key in self.gdal_ds}
         else:
             i, offset = self._get_ds_and_offset_from_index(index)
-            res = {src_key: self._read_extract_as_np_arr(self.ds[src_key][i], offset) for src_key in self.ds}
+            res = {src_key: self._read_extract_as_np_arr(self.gdal_ds[src_key][i], offset) for src_key in self.gdal_ds}
 
         return res
 
@@ -282,7 +291,7 @@ class PatchesImagesReader(PatchesReaderBase):
             axis = (0, 1)  # (row, col)
 
             def _filled(value):
-                return {src_key: value * np.ones((self.nb_of_channels[src_key])) for src_key in self.ds}
+                return {src_key: value * np.ones((self.nb_of_channels[src_key])) for src_key in self.gdal_ds}
 
             _maxs = _filled(0.0)
             _mins = _filled(float("inf"))
@@ -302,7 +311,7 @@ class PatchesImagesReader(PatchesReaderBase):
                                "max": _maxs[src_key],
                                "mean": rsize * _sums[src_key],
                                "std": np.sqrt(rsize * _sqsums[src_key] - np.square(rsize * _sums[src_key]))
-                               } for src_key in self.ds}
+                               } for src_key in self.gdal_ds}
         logging.info("Stats: {}".format(stats))
         return stats
 
@@ -443,7 +452,7 @@ class Dataset:
         self.tot_wait += time.time() - t
 
         # Copy miner_buffer.container --> consumer_buffer.container
-        self.consumer_buffer.container = [elem for elem in self.miner_buffer.container]
+        self.consumer_buffer.container = self.miner_buffer.container.copy()
 
         # Clear miner_buffer.container
         self.miner_buffer.container.clear()
