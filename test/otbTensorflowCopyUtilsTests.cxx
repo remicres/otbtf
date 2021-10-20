@@ -102,7 +102,7 @@ int intVecValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
 
 int boolVecValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
 {
-  return genericVecValueToTensorTest<bool>(tensorflow::DT_BOOL, "(true, false,True, False", std::vector<bool>({true, false, true, false}));
+  return genericVecValueToTensorTest<bool>(tensorflow::DT_BOOL, "(true, false,True, False)", std::vector<bool>({true, false, true, false}));
 }
 
 
