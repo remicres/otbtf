@@ -338,7 +338,7 @@ ValueToTensor(std::string value)
   for (auto & val : values)
   {
     has_dot = has_dot || val.find(".") != std::string::npos;
-    is_digit = is_digit && val.find_first_not_of("0123456789.") == std::string::npos;
+    is_digit = is_digit && val.find_first_not_of("-0123456789.") == std::string::npos;
   }
 
   // Create tensor
