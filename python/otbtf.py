@@ -227,12 +227,12 @@ class PatchesImagesReader(PatchesReaderBase):
 
     def _get_ds_and_offset_from_index(self, index):
         offset = index
-        for index, ds_size in enumerate(self.ds_sizes):
+        for idx, ds_size in enumerate(self.ds_sizes):
             if offset < ds_size:
                 break
             offset -= ds_size
 
-        return index, offset
+        return idx, offset
 
     @staticmethod
     def _get_nb_of_patches(gdal_ds):
@@ -259,7 +259,7 @@ class PatchesImagesReader(PatchesReaderBase):
              ...
              "src_key_M": np.array((psz_y_M, psz_x_M, nb_ch_M))}
         """
-        assert 0 <= index
+        assert index >= 0
         assert index < self.size
 
         if not self.use_streaming:
@@ -485,7 +485,7 @@ class Dataset:
         """
         Generator function, used for the tf dataset
         """
-        for elem in range(self.size):
+        for _ in range(self.size):
             yield self.read_one_sample()
 
     def get_tf_dataset(self, batch_size, drop_remainder=True):
