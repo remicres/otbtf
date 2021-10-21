@@ -8,58 +8,39 @@ import gdal
 import otbApplication as otb
 
 
+def command_train_succeed(extra_opts=""):
+    root_dir = os.environ["CI_PROJECT_DIR"]
+    ckpt_dir = "/tmp/"
+
+    def _input(file_name):
+        return "{}/sr4rs_data/input/{}".format(root_dir, file_name)
+
+    command = "python {}/sr4rs/code/train.py ".format(root_dir)
+    command += "--lr_patches "
+    command += _input("DIM_SPOT6_MS_202007290959110_ORT_ORTHO-MS-193_posA_s2.jp2 ")
+    command += _input("DIM_SPOT7_MS_202004111036186_ORT_ORTHO-MS-081_posA_s2.jp2 ")
+    command += _input("DIM_SPOT7_MS_202006201000507_ORT_ORTHO-MS-054_posA_s2.jp2 ")
+    command += "--hr_patches "
+    command += _input("DIM_SPOT6_MS_202007290959110_ORT_ORTHO-MS-193_posA_s6_cal.jp2 ")
+    command += _input("DIM_SPOT7_MS_202004111036186_ORT_ORTHO-MS-081_posA_s6_cal.jp2 ")
+    command += _input("DIM_SPOT7_MS_202006201000507_ORT_ORTHO-MS-054_posA_s6_cal.jp2 ")
+    command += "--save_ckpt {} ".format(ckpt_dir)
+    command += "--depth 4 "
+    command += "--nresblocks 1 "
+    command += "--epochs 1 "
+    command += extra_opts
+    os.system(command)
+    file = Path("{}/checkpoint".format(ckpt_dir))
+    return file.is_file()
+
+
 class SR4RSv1Test(unittest.TestCase):
 
     def test_train_nostream(self):
-        root_dir = os.environ["CI_PROJECT_DIR"]
-        ckpt_file = "/tmp/sr4rs_train_ckpt"
-
-        def _input(file_name):
-            return "{}/sr4rs_data/input/{}".format(root_dir, file_name)
-
-        command = "python {}/sr4rs/code/train.py ".format(root_dir)
-        command += "--lr_patches "
-        command += _input("DIM_SPOT6_MS_202007290959110_ORT_ORTHO-MS-193_posA_s2.jp2 ")
-        command += _input("DIM_SPOT7_MS_202004111036186_ORT_ORTHO-MS-081_posA_s2.jp2 ")
-        command += _input("DIM_SPOT7_MS_202006201000507_ORT_ORTHO-MS-054_posA_s2.jp2 ")
-        command += "--hr_patches "
-        command += _input("DIM_SPOT6_MS_202007290959110_ORT_ORTHO-MS-193_posA_s6_cal.jp2 ")
-        command += _input("DIM_SPOT7_MS_202004111036186_ORT_ORTHO-MS-081_posA_s6_cal.jp2 ")
-        command += _input("DIM_SPOT7_MS_202006201000507_ORT_ORTHO-MS-054_posA_s6_cal.jp2 ")
-        command += "--save_ckpt {} ".format(ckpt_file)
-        command += "--depth 4 "
-        command += "--nresblocks 1 "
-        command += "--epochs 1 "
-        os.system(command)
-
-        file = Path("{}/checkpoint".format(ckpt_file))
-        self.assertTrue(file.is_file())
+        self.assertTrue(command_train_succeed())
 
     def test_train_stream(self):
-        root_dir = os.environ["CI_PROJECT_DIR"]
-        ckpt_file = "/tmp/sr4rs_train_ckpt"
-
-        def _input(file_name):
-            return "{}/sr4rs_data/input/{}".format(root_dir, file_name)
-
-        command = "python {}/sr4rs/code/train.py ".format(root_dir)
-        command += "--lr_patches "
-        command += _input("DIM_SPOT6_MS_202007290959110_ORT_ORTHO-MS-193_posA_s2.jp2 ")
-        command += _input("DIM_SPOT7_MS_202004111036186_ORT_ORTHO-MS-081_posA_s2.jp2 ")
-        command += _input("DIM_SPOT7_MS_202006201000507_ORT_ORTHO-MS-054_posA_s2.jp2 ")
-        command += "--hr_patches "
-        command += _input("DIM_SPOT6_MS_202007290959110_ORT_ORTHO-MS-193_posA_s6_cal.jp2 ")
-        command += _input("DIM_SPOT7_MS_202004111036186_ORT_ORTHO-MS-081_posA_s6_cal.jp2 ")
-        command += _input("DIM_SPOT7_MS_202006201000507_ORT_ORTHO-MS-054_posA_s6_cal.jp2 ")
-        command += "--save_ckpt {} ".format(ckpt_file)
-        command += "--depth 4 "
-        command += "--nresblocks 1 "
-        command += "--epochs 1 "
-        command += "--streaming"
-        os.system(command)
-
-        file = Path("{}/checkpoint".format(ckpt_file))
-        self.assertTrue(file.is_file())
+        self.assertTrue(command_train_succeed(extra_opts="--streaming"))
 
     def test_inference(self):
         root_dir = os.environ["CI_PROJECT_DIR"]
