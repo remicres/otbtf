@@ -83,6 +83,14 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
   dataTypes.clear();
   dataTypes.reserve(tensorsNames.size());
 
+  itkDebugMacro("Nodes contained in the model: ");
+  int i = 0;
+  for (auto const & layer : layers)
+    {
+      itkDebugMacro("Node "<< i << " inside the model: " << layer.first);
+      i+=1;
+    }
+
   // Get infos
   for (std::vector<std::string>::iterator nameIt = tensorsNames.begin();
       nameIt != tensorsNames.end(); ++nameIt)
@@ -99,7 +107,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
         found = true;
         const tensorflow::TensorInfo& tensor_info = layer.second;
 
-        itkDebugMacro("Found : " << layername << " in the model");
+        itkDebugMacro("Found: " << layername << " in the model");
 
         // Set default to DT_FLOAT
         tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
