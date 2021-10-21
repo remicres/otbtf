@@ -4,28 +4,33 @@
 
 Here is the list of OTBTF docker images hosted on [dockerhub](https://hub.docker.com/u/mdl4eo).
 
-| Name                          | Os            | TF     | OTB   | Description            |
-| ----------------------------- | ------------- | ------ | ----- | ---------------------- |
-| **mdl4eo/otbtf1.6:cpu**       | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   |
-| **mdl4eo/otbtf1.7:cpu**       | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   |
-| **mdl4eo/otbtf1.7:gpu**       | Ubuntu Xenial | r1.14  | 7.0.0 | GPU                    |
-| **mdl4eo/otbtf2.0:cpu**       | Ubuntu Xenial | r2.1   | 7.1.0 | CPU, no optimization   |
-| **mdl4eo/otbtf2.0:gpu**       | Ubuntu Xenial | r2.1   | 7.1.0 | GPU                    |
-| **mdl4eo/otbtf2.4:cpu-basic** | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, no optimization   |
-| **mdl4eo/otbtf2.4:cpu**       | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, few optimizations |
-| **mdl4eo/otbtf2.4:cpu-mkl**   | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, Intel MKL, AVX512 |
-| **mdl4eo/otbtf2.4:gpu**       | Ubuntu Focal  | r2.4.1 | 7.2.0 | GPU                    |
+| Name                              | Os            | TF     | OTB   | Description            | Dev files | Compute capability |
+| --------------------------------- | ------------- | ------ | ----- | ---------------------- | --------- | ------------------ |
+| **mdl4eo/otbtf1.6:cpu**           | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0        |
+| **mdl4eo/otbtf1.7:cpu**           | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0        |
+| **mdl4eo/otbtf1.7:gpu**           | Ubuntu Xenial | r1.14  | 7.0.0 | GPU                    | yes       | 5.2,6.1,7.0        |
+| **mdl4eo/otbtf2.0:cpu**           | Ubuntu Xenial | r2.1   | 7.1.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf2.0:gpu**           | Ubuntu Xenial | r2.1   | 7.1.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf2.4:cpu-basic**     | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf2.4:cpu**           | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, few optimizations | no        | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf2.4:cpu-mkl**       | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, Intel MKL, AVX512 | yes       | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf2.4:gpu**           | Ubuntu Focal  | r2.4.1 | 7.2.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf2.5:cpu-basic**     | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf2.5:cpu-basic-dev** | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf2.5:cpu**           | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, few optimization  | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf2.5:gpu**           | Ubuntu Focal  | r2.5   | 7.4.0 | GPU                    | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf2.5:gpu-dev**       | Ubuntu Focal  | r2.5   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
 
 - `cpu` tagged docker images are compiled without optimization.
-- `gpu` tagged docker images are suited for **NVIDIA GPUs**. They use CUDA/CUDNN support and are built with compute capabilities 5.2, 6.1, 7.0, 7.5. 
+- `gpu` tagged docker images are suited for **NVIDIA GPUs**. They use CUDA/CUDNN support. 
 - `cpu-mkl` tagged docker image is experimental, it is optimized for Intel CPUs with AVX512 flags.
 
-You can also find plenty of interesting OTBTF flavored images at [LaTelescop gitlab registry](https://gitlab.com/latelescop/docker/otbtf/container_registry/).
+You can also find more interesting OTBTF flavored images at [LaTelescop gitlab registry](https://gitlab.com/latelescop/docker/otbtf/container_registry/).
 
 ### Development ready images
 
-Until r2.4, all images are development-ready. For instance, you can recompile the whole OTB from `/work/otb/build/OTB/build`.
-Since r2.4, only `gpu` tagged image is development-ready, and you can recompile OTB from `/src/otb/build/OTB/build`.
+Until r2.4, all images are development-ready, and the sources are located in `/work/`.
+Since r2.4, development-ready images have the source in `/src/`.
 
 ### Build your own images
 
@@ -40,7 +45,7 @@ For instance, suppose you have some data in `/mnt/my_device/` that you want to u
 The following command shows you how to access the folder from the docker image.
 
 ```bash
-docker run -v /mnt/my_device/:/data/ -ti mdl4eo/otbtf2.4:cpu bash -c "ls /data"
+docker run -v /mnt/my_device/:/data/ -ti mdl4eo/otbtf2.5:cpu bash -c "ls /data"
 ```
 Beware of ownership issues! see the last section of this doc.
 
@@ -53,13 +58,13 @@ You can then use the OTBTF `gpu` tagged docker images with the **NVIDIA runtime*
 With Docker version earlier than 19.03 :
 
 ```bash
-docker run --runtime=nvidia -ti mdl4eo/otbtf2.4:gpu bash
+docker run --runtime=nvidia -ti mdl4eo/otbtf2.5:gpu bash
 ```
 
 With Docker version including and after 19.03 :
 
 ```bash
-docker run --gpus all -ti mdl4eo/otbtf2.4:gpu bash
+docker run --gpus all -ti mdl4eo/otbtf2.5:gpu bash
 ```
 
 You can find some details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/). 
