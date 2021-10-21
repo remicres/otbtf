@@ -88,7 +88,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
       nameIt != tensorsNames.end(); ++nameIt)
   {
     bool found = false;
-    itkDebugMacro("Searching for corresponding node of  : " << (*nameIt) << "... ");
+    itkDebugMacro("Searching for corresponding node of: " << (*nameIt) << "... ");
     for (auto const & layer : layers)
     {
       // layer is a pair (name, tensor_info)
@@ -99,7 +99,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
         found = true;
         const tensorflow::TensorInfo& tensor_info = layer.second;
 
-        itkDebugMacro("Found : " << layername << "in the model");
+        itkDebugMacro("Found : " << layername << " in the model");
 
         // Set default to DT_FLOAT
         tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
@@ -141,7 +141,7 @@ void PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::st
       {
         std::cout << "Node " << i << " : " << std::endl;
         std::cout << "\tName: " << node.name() << std::endl;
-        std::cout << "\tinput_size() : " << node.input_size() << std::endl;
+        std::cout << "\tinput_size(): " << node.input_size() << std::endl;
         std::cout << "\tPrintDebugString --------------------------------";
         std::cout << std::endl;
         node.PrintDebugString();
@@ -151,8 +151,8 @@ void PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::st
         std::cout << "\tAttributes of the node: " << std::endl;
         for (auto attr = node.attr().begin() ; attr != node.attr().end() ; attr++)
         {
-          std::cout << "\t\tKey :" << attr->first << std::endl;
-          std::cout << "\t\tValue.value_case() :" << attr->second.value_case() << std::endl;
+          std::cout << "\t\tKey: " << attr->first << std::endl;
+          std::cout << "\t\tValue.value_case(): " << attr->second.value_case() << std::endl;
           std::cout << "\t\tPrintDebugString --------------------------------";
           std::cout << std::endl;
           attr->second.PrintDebugString();
