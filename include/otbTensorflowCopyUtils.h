@@ -28,6 +28,7 @@
 
 // STD
 #include <string>
+#include <regex>
 
 namespace otb {
 namespace tf {
@@ -74,6 +75,9 @@ void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, typename TImage:
 // Copy a tensor into the image region (TValueType-agnostic version)
 template<class TImage>
 void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, const typename TImage::RegionType & bufferRegion, typename TImage::Pointer outputPtr, const typename TImage::RegionType & outputRegion, int & channelOffset);
+
+// Convert a value into a tensor
+tensorflow::Tensor ValueToTensor(std::string value);
 
 // Convert an expression into a dict
 std::pair<std::string, tensorflow::Tensor> ExpressionToTensor(std::string expression);
