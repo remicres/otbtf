@@ -12,25 +12,26 @@ class SR4RSv1Test(unittest.TestCase):
 
     def test_train(self):
         root_dir = os.environ["CI_PROJECT_DIR"]
-        ckpt_file = "/tmp/sr4rs_train_ckpt"
+ckpt_file = "/tmp/sr4rs_train_ckpt"
 
-        def _input(file_name):
-            return "{}/sr4rs_data/input/{}".format(root_dir, file_name)
+def _input(file_name):
+    return "{}/sr4rs_data/input/{}".format(root_dir, file_name)
 
-        command = "python {}/sr4rs/code/train.py ".format(root_dir)
-        command += "--lr_patches "
-        command += _input("DIM_SPOT6_MS_202007290959110_ORT_ORTHO-MS-193_posA_s2.jp2 ")
-        command += _input("DIM_SPOT7_MS_202004111036186_ORT_ORTHO-MS-081_posA_s2.jp2 ")
-        command += _input("DIM_SPOT7_MS_202006201000507_ORT_ORTHO-MS-054_posA_s2.jp2 ")
-        command += "--hr_patches "
-        command += _input("DIM_SPOT6_MS_202007290959110_ORT_ORTHO-MS-193_posA_s6_cal.jp2 ")
-        command += _input("DIM_SPOT7_MS_202004111036186_ORT_ORTHO-MS-081_posA_s6_cal.jp2 ")
-        command += _input("DIM_SPOT7_MS_202006201000507_ORT_ORTHO-MS-054_posA_s6_cal.jp2 ")
-        command += "--save_ckpt {} ".format(ckpt_file)
-        command += "--depth 4 "
-        command += "--nresblocks 1 "
-        command += "--epochs 1 "
-        os.system(command)
+command = "python {}/sr4rs/code/train.py ".format(root_dir)
+command += "--lr_patches "
+command += _input("DIM_SPOT6_MS_202007290959110_ORT_ORTHO-MS-193_posA_s2.jp2 ")
+command += _input("DIM_SPOT7_MS_202004111036186_ORT_ORTHO-MS-081_posA_s2.jp2 ")
+command += _input("DIM_SPOT7_MS_202006201000507_ORT_ORTHO-MS-054_posA_s2.jp2 ")
+command += "--hr_patches "
+command += _input("DIM_SPOT6_MS_202007290959110_ORT_ORTHO-MS-193_posA_s6_cal.jp2 ")
+command += _input("DIM_SPOT7_MS_202004111036186_ORT_ORTHO-MS-081_posA_s6_cal.jp2 ")
+command += _input("DIM_SPOT7_MS_202006201000507_ORT_ORTHO-MS-054_posA_s6_cal.jp2 ")
+command += "--save_ckpt {} ".format(ckpt_file)
+command += "--depth 4 "
+command += "--nresblocks 1 "
+command += "--epochs 1 "
+command += "--streaming"
+os.system(command)
 
         file = Path("{}/checkpoint".format(ckpt_file))
         self.assertTrue(file.is_file())
