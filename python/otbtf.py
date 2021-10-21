@@ -204,12 +204,12 @@ class PatchesImagesReader(PatchesReaderBase):
         nb_of_patches = {key: 0 for key in self.gdal_ds}
         self.nb_of_channels = dict()
         for src_key, ds_list in self.gdal_ds.items():
-            for ds in ds_list:
-                nb_of_patches[src_key] += self._get_nb_of_patches(ds)
+            for gdal_ds in ds_list:
+                nb_of_patches[src_key] += self._get_nb_of_patches(gdal_ds)
                 if src_key not in self.nb_of_channels:
-                    self.nb_of_channels[src_key] = ds.RasterCount
+                    self.nb_of_channels[src_key] = gdal_ds.RasterCount
                 else:
-                    if self.nb_of_channels[src_key] != ds.RasterCount:
+                    if self.nb_of_channels[src_key] != gdal_ds.RasterCount:
                         raise Exception("All patches images from one source must have the same number of channels!"
                                         "Error happened for source: {}".format(src_key))
         if len(set(nb_of_patches.values())) != 1:
