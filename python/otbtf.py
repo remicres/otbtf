@@ -447,9 +447,9 @@ class Dataset:
         This function dumps the miner_buffer into the consumer_buffer, and restart the miner_thread
         """
         # Wait for miner to finish his job
-        t = time.time()
+        date_t = time.time()
         self.miner_thread.join()
-        self.tot_wait += time.time() - t
+        self.tot_wait += time.time() - date_t
 
         # Copy miner_buffer.container --> consumer_buffer.container
         self.consumer_buffer.container = self.miner_buffer.container.copy()
@@ -479,9 +479,9 @@ class Dataset:
         """
         Create and starts the thread for the data collect
         """
-        t = threading.Thread(target=self._collect)
-        t.start()
-        return t
+        new_thread = threading.Thread(target=self._collect)
+        new_thread.start()
+        return new_thread
 
     def _generator(self):
         """
