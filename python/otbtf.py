@@ -194,7 +194,7 @@ class PatchesImagesReader(PatchesReaderBase):
         self.gdal_ds = {key: [gdal_open(src_fn) for src_fn in src_fns] for key, src_fns in filenames_dict.items()}
 
         # check number of patches in each sources
-        if len(set([len(ds_list) for ds_list in self.gdal_ds.values()])) != 1:
+        if len({len(ds_list) for ds_list in self.gdal_ds.values()}) != 1:
             raise Exception("Each source must have the same number of patches images")
 
         # streaming on/off
