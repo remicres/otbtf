@@ -29,7 +29,7 @@ class SR4RSv1Test(unittest.TestCase):
         command += "--save_ckpt {} ".format(ckpt_file)
         command += "--depth 4 "
         command += "--nresblocks 1 "
-        command += "--epochs 10 "
+        command += "--epochs 1 "
         os.system(command)
 
         file = Path("{}/checkpoint".format(ckpt_file))
