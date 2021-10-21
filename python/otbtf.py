@@ -404,6 +404,8 @@ class Dataset:
         logging.info("output_shapes: {}".format(self.output_shapes))
 
         # buffers
+        if self.size <= buffer_length:
+            buffer_length = self.size
         self.miner_buffer = Buffer(buffer_length)
         self.mining_lock = multiprocessing.Lock()
         self.consumer_buffer = Buffer(buffer_length)
