@@ -223,7 +223,7 @@ class PatchesImagesReader(PatchesReaderBase):
         # if use_streaming is False, we store in memory all patches images
         if not self.use_streaming:
             patches_list = {src_key: [read_as_np_arr(ds) for ds in self.gdal_ds[src_key]] for src_key in self.gdal_ds}
-            self.patches_buffer = {src_key: np.concatenate(patches_list[src_key], axis=-1) for src_key in self.gdal_ds}
+            self.patches_buffer = {src_key: np.concatenate(patches_list[src_key], axis=0) for src_key in self.gdal_ds}
 
     def _get_ds_and_offset_from_index(self, index):
         offset = index
