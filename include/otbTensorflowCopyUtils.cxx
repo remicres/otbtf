@@ -43,6 +43,7 @@ PrintTensorInfos(const tensorflow::Tensor & tensor)
   s << "shape is " << PrintTensorShape(tensor.shape());
   // Data type
   s << " data type is " << tensor.dtype();
+  s << " (" << tf::GetDataTypeAsString(tensor.dtype()) << ")";
   return s.str();
 }
 
@@ -342,7 +343,7 @@ ValueToTensor(std::string value)
   }
 
   // Create tensor
-  tensorflow::TensorShape shape({});
+  tensorflow::TensorShape shape({values.size()});
   tensorflow::Tensor      out(tensorflow::DT_BOOL, shape);
   if (is_digit)
   {
@@ -364,7 +365,7 @@ ValueToTensor(std::string value)
         // FLOAT
         try
         {
-          out.scalar<float>()(idx) = std::stof(val);
+          out.flat<float>()(idx) = std::stof(val);
         }
         catch (...)
         {
@@ -376,7 +377,7 @@ ValueToTensor(std::string value)
         // INT
         try
         {
-          out.scalar<int>()(idx) = std::stoi(val);
+          out.flat<int>()(idx) = std::stoi(val);
         }
         catch (...)
         {
@@ -400,10 +401,11 @@ ValueToTensor(std::string value)
       {
         itkGenericExceptionMacro("Error parsing value \"" << val << "\" as bool");
       }
-      out.scalar<bool>()(idx) = ret;
+      out.flat<bool>()(idx) = ret;
     }
     idx++;
   }
+  itkDebugMacro("Returning tensor: "<< out.DebugString());
 
   return out;
 }
