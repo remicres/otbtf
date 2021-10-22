@@ -49,7 +49,7 @@ int genericValueToTensorTest(tensorflow::DataType dt, std::string expr, T value)
 {
   tensorflow::Tensor t = otb::tf::ValueToTensor(expr);
   tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({}));
-  t_ref.flat<T>()() = value;
+  t_ref.scalar<T>()() = value;
 
   return compare<T>(t, t_ref);
 }
@@ -75,10 +75,10 @@ int boolValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
 }
 
 template<typename T>
-int genericVecValueToTensorTest(tensorflow::DataType dt, std::string expr, std::vector<T> values)
+int genericVecValueToTensorTest(tensorflow::DataType dt, std::string expr, std::vector<T> values, std::size_t size)
 {
   tensorflow::Tensor t = otb::tf::ValueToTensor(expr);
-  tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({}));
+  tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({size}));
   unsigned int i = 0;
   for (auto value: values)
     {
@@ -91,17 +91,26 @@ int genericVecValueToTensorTest(tensorflow::DataType dt, std::string expr, std::
 
 int floatVecValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
 {
-  return genericVecValueToTensorTest<float>(tensorflow::DT_FLOAT, "(0.1234, -1,-20,2.56 ,3.5)", std::vector<float>({0.1234, -1, -20, 2.56 ,3.5}));
+  return genericVecValueToTensorTest<float>(tensorflow::DT_FLOAT,
+                                            "(0.1234, -1,-20,2.56 ,3.5)",
+                                            std::vector<float>({0.1234, -1, -20, 2.56 ,3.5}),
+                                            5);
 }
 
 int intVecValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
 {
-  return genericVecValueToTensorTest<int>(tensorflow::DT_INT32, "(1234, -1,-20,256 ,35)", std::vector<int>({1234, -1, -20, 256 ,35}));
+  return genericVecValueToTensorTest<int>(tensorflow::DT_INT32,
+                                          "(1234, -1,-20,256 ,35)",
+                                          std::vector<int>({1234, -1, -20, 256 ,35}),
+                                          5);
 }
 
 int boolVecValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
 {
-  return genericVecValueToTensorTest<bool>(tensorflow::DT_BOOL, "(true, false,True, False)", std::vector<bool>({true, false, true, false}));
+  return genericVecValueToTensorTest<bool>(tensorflow::DT_BOOL,
+                                           "(true, false,True, False)",
+                                           std::vector<bool>({true, false, true, false}),
+                                           5);
 }
 
 
