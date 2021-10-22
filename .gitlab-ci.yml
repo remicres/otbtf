@@ -1,4 +1,4 @@
-image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
+image: mdl4eo/otbtf2.5:cpu-basic-dev
 
 variables:
     OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
