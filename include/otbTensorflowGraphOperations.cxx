@@ -117,7 +117,10 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
 
     if (!found)
     {
-      itkGenericExceptionMacro("Tensor name \"" << (*nameIt) << "\" not found" );
+      itkGenericExceptionMacro("Tensor name \"" << (*nameIt) << "\" not found. \n" <<
+                               "You can list all inputs/outputs of your SavedModel by " <<
+                               "running: \n\t `saved_model_cli show --dir your_model_dir --all`");
+
     }
   } // next tensor name
 }
