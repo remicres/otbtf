@@ -27,6 +27,9 @@ tensorflow::DataType GetTensorflowDataType();
 template<class Type>
 bool HasSameDataType(const tensorflow::Tensor & tensor);
 
+// Return datatype as string
+tensorflow::string GetDataTypeAsString(tensorflow::DataType dt);
+
 } // end namespace tf
 } // end namespace otb
 
