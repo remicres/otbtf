@@ -80,5 +80,13 @@ bool HasSameDataType(const tensorflow::Tensor & tensor)
   return GetTensorflowDataType<Type>() == tensor.dtype();
 }
 
+//
+// Return the datatype as string
+//
+tensorflow::string GetDataTypeAsString(tensorflow::DataType dt)
+{
+  return tensorflow::DataTypeString(dt);
+}
+
 } // end namespace tf
 } // end namespace otb
