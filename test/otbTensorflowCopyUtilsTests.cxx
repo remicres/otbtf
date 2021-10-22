@@ -9,7 +9,6 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-
 #include "otbTensorflowCopyUtils.h"
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/tensor_shape.h"

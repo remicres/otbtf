@@ -9,7 +9,6 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-
 #include "otbTestMain.h"
 
 void RegisterTests()
