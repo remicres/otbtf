@@ -48,7 +48,7 @@ template<typename T>
 int genericValueToTensorTest(tensorflow::DataType dt, std::string expr, T value)
 {
   tensorflow::Tensor t = otb::tf::ValueToTensor(expr);
-  tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({}));
+  tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({1}));
   t_ref.scalar<T>()() = value;
 
   return compare<T>(t, t_ref);
@@ -110,7 +110,7 @@ int boolVecValueToTensorTest(int itkNotUsed(argc), char * itkNotUsed(argv)[])
   return genericVecValueToTensorTest<bool>(tensorflow::DT_BOOL,
                                            "(true, false,True, False)",
                                            std::vector<bool>({true, false, true, false}),
-                                           5);
+                                           4);
 }
 
 
