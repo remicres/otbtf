@@ -36,8 +36,9 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   // Else, choose the first one
   if (signatures.size() == 0)
   {
-    itkExceptionMacro("There are no available signatures for this tag-set  \n" <<
-                      "Please check which tag-set to use by running `saved_model_cli show --dir your_model_dir --all`");
+    itkExceptionMacro("There are no available signatures for this tag-set. \n" <<
+                      "Please check which tag-set to use by running  "<<
+                      "`saved_model_cli show --dir your_model_dir --all`");
   }
 
   if (signatures.contains(tensorflow::kDefaultServingSignatureDefKey))
@@ -81,14 +82,14 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
     const RegionType reqRegion = inputPtr->GetRequestedRegion();
     debugReport << "Input #" << i << ":\n";
     debugReport << "Requested region: " << reqRegion << "\n";
-    debugReport << "Tensor shape (\"" << inputs[i].first << "\": " << tf::PrintTensorShape(inputs[i].second.shape()) << "\n";
+    debugReport << "Tensor \"" << inputs[i].first << "\": " << tf::PrintTensorInfos(inputs[i].second) << "\n";
   }
 
   // Show user placeholders
   debugReport << "User placeholders:\n" ;
   for (auto& dict: this->GetUserPlaceholders())
   {
-    debugReport << dict.first << " " << tf::PrintTensorInfos(dict.second) << "\n" << std::endl;
+    debugReport << "Tensor \"" << dict.first << "\": " << tf::PrintTensorInfos(dict.second) << "\n" << std::endl;
   }
 
   return debugReport;
