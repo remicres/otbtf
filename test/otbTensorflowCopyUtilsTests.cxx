@@ -34,7 +34,7 @@ int compare(tensorflow::Tensor & t1, tensorflow::Tensor & t2)
     return EXIT_FAILURE;
     }
   for (unsigned int i = 0; i < t1.NumElements(); i++)
-    if (t1.scalar<T>()(i) != t2.scalar<T>()(i))
+    if (t1.flat<T>()(i) != t2.flat<T>()(i))
       {
       std::cout << "scalar " << i << " differ!" << std::endl;
       return EXIT_FAILURE;
@@ -49,7 +49,7 @@ int genericValueToTensorTest(tensorflow::DataType dt, std::string expr, T value)
 {
   tensorflow::Tensor t = otb::tf::ValueToTensor(expr);
   tensorflow::Tensor t_ref(dt, tensorflow::TensorShape({}));
-  t_ref.scalar<T>()() = value;
+  t_ref.flat<T>()() = value;
 
   return compare<T>(t, t_ref);
 }
@@ -82,7 +82,7 @@ int genericVecValueToTensorTest(tensorflow::DataType dt, std::string expr, std::
   unsigned int i = 0;
   for (auto value: values)
     {
-    t_ref.scalar<T>()(i) = value;
+    t_ref.flat<T>()(i) = value;
     i++;
     }
 
