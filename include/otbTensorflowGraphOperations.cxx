@@ -112,7 +112,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
       {
         if (j == k)
         {
-          layerNames.push_back(layer.first);
+          layerNames.push_back(layer.second.name());
           tensor_info = layer.second;
           itkDebugMacro("Input " << k << "corresponds to" <<  layer.first << " in the model");
         }
@@ -132,9 +132,9 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
         if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
         {
           found = true;
-          layerNames.push_back(layername);
+          layerNames.push_back(layer.second.name());
           tensor_info = layer.second;
-          itkDebugMacro("Found: " << layername << " in the model");
+          itkDebugMacro("Found: " << layer.second.name() << " in the model");
         }
       } // next layer
     } //end else
