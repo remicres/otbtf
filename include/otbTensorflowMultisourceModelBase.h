@@ -175,8 +175,9 @@ private:
   TensorShapeProtoList       m_InputTensorsShapes;      // Input tensors shapes
   TensorShapeProtoList       m_OutputTensorsShapes;     // Output tensors shapes
 
-  // Tensor names mapping
-  std::map<std::string, std::string> m_UserNameToLayerNameMapping;
+  // Input/output layer names inside the model
+  StringList m_InputLayers;                             // List of input names, as contained in the model
+  StringList m_OutputLayers;                            // List of output names, as contained in the model
 
 }; // end class
 
