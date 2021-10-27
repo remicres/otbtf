@@ -100,7 +100,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
       nameIt != tensorsNames.end(); ++nameIt)
   {
     bool found = false;
-    const tensorflow::TensorInfo& tensor_info;
+    tensorflow::TensorInfo tensor_info;
 
     // If the user didn't specify the placeholdername, choose the kth layer inside the model
     if (nameIt->size() == 0)
