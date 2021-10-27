@@ -72,65 +72,6 @@ void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
 }
 
 
-// Get the "real" name of the specified tensors, i.e. the names of the layer inside the model
-void GetLayerNamesFromUserNames(const tensorflow::protobuf::Map<std::string, tensorflow::TensorInfo> layers, std::vector<std::string> & tensorsNames,
-    std::vector<std::string> & layerNames)
-{
-  itkDebugMacro("Nodes contained in the model: ");
-  int i = 0;
-  for (auto const & layer : layers)
-    {
-      itkDebugMacro("Node "<< i << " inside the model: " << layer.first);
-      i+=1;
-    }
-
-  // Get infos
-  int k = 0;  // counter used for tensorsNames
-  for (std::vector<std::string>::iterator nameIt = tensorsNames.begin();
-      nameIt != tensorsNames.end(); ++nameIt)
-  {
-    bool found = false;
-
-    // If the user didn't specify the placeholdername, choose the kth layer inside the model
-    if (nameIt->size() == 0)
-    {
-      found = true;
-      itkDebugMacro("Input " << k << "corresponds to" <<  layers[k].first << " in the model");
-      tensorsNames.push_back(layers[k].first);
-    }
-
-    // Else, if the user specified the placeholdername, find the corresponding layer inside the model
-    else
-    {
-      itkDebugMacro("Searching for corresponding node of: " << (*nameIt) << "... ");
-      for (auto const & layer : layers)
-      {
-        // layer is a pair (name, tensor_info)
-        // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
-        std::string layername = layer.first;
-        if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
-        {
-          found = true;
-          itkDebugMacro("Found: " << layername << " in the model");
-          tensorsNames.push_back(layers[k].first);}
-        }
-      } // next layer
-    } //end else
-
-    k+=1;
-
-    if (!found)
-    {
-      itkGenericExceptionMacro("Tensor name \"" << (*nameIt) << "\" not found. \n" <<
-                               "You can list all inputs/outputs of your SavedModel by " <<
-                               "running: \n\t `saved_model_cli show --dir your_model_dir --all`");
-
-    }
-  }
-}
-
-
-
 
 // Get the following attributes of the specified tensors (by name) of a graph:
 // - layer name, as specified in the model
