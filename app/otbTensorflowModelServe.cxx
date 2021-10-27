@@ -123,6 +123,7 @@ public:
     AddParameter(ParameterType_Int,            ss_key_dims_y.str(), ss_desc_dims_y.str());
     SetMinimumParameterIntValue               (ss_key_dims_y.str(), 1);
     AddParameter(ParameterType_String,         ss_key_ph.str(),     ss_desc_ph.str());
+    MandatoryOff                              (ss_key_ph.str();
 
     // Add a new bundle
     ProcessObjectsBundle bundle;

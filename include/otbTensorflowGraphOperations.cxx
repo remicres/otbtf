@@ -71,11 +71,73 @@ void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bu
   }
 }
 
+
+// Get the "real" name of the specified tensors, i.e. the names of the layer inside the model
+void GetLayerNamesFromUserNames(const tensorflow::protobuf::Map<std::string, tensorflow::TensorInfo> layers, std::vector<std::string> & tensorsNames,
+    std::vector<std::string> & layerNames)
+{
+  itkDebugMacro("Nodes contained in the model: ");
+  int i = 0;
+  for (auto const & layer : layers)
+    {
+      itkDebugMacro("Node "<< i << " inside the model: " << layer.first);
+      i+=1;
+    }
+
+  // Get infos
+  int k = 0;  // counter used for tensorsNames
+  for (std::vector<std::string>::iterator nameIt = tensorsNames.begin();
+      nameIt != tensorsNames.end(); ++nameIt)
+  {
+    bool found = false;
+
+    // If the user didn't specify the placeholdername, choose the kth layer inside the model
+    if (nameIt->size() == 0)
+    {
+      found = true;
+      itkDebugMacro("Input " << k << "corresponds to" <<  layers[k].first << " in the model");
+      tensorsNames.push_back(layers[k].first);
+    }
+
+    // Else, if the user specified the placeholdername, find the corresponding layer inside the model
+    else
+    {
+      itkDebugMacro("Searching for corresponding node of: " << (*nameIt) << "... ");
+      for (auto const & layer : layers)
+      {
+        // layer is a pair (name, tensor_info)
+        // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
+        std::string layername = layer.first;
+        if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
+        {
+          found = true;
+          itkDebugMacro("Found: " << layername << " in the model");
+          tensorsNames.push_back(layers[k].first);}
+        }
+      } // next layer
+    } //end else
+
+    k+=1;
+
+    if (!found)
+    {
+      itkGenericExceptionMacro("Tensor name \"" << (*nameIt) << "\" not found. \n" <<
+                               "You can list all inputs/outputs of your SavedModel by " <<
+                               "running: \n\t `saved_model_cli show --dir your_model_dir --all`");
+
+    }
+  }
+}
+
+
+
+
 // Get the following attributes of the specified tensors (by name) of a graph:
+// - layer name, as specified in the model
 // - shape
 // - datatype
 void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::TensorInfo> layers, std::vector<std::string> & tensorsNames,
-    std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes)
+    std::vector<std::string> & layerNames, std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes)
 {
   // Allocation
   shapes.clear();
@@ -92,36 +154,41 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
     }
 
   // Get infos
+  int k = 0;  // counter used for tensorsNames
   for (std::vector<std::string>::iterator nameIt = tensorsNames.begin();
       nameIt != tensorsNames.end(); ++nameIt)
   {
     bool found = false;
-    itkDebugMacro("Searching for corresponding node of: " << (*nameIt) << "... ");
-    for (auto const & layer : layers)
+
+    // If the user didn't specify the placeholdername, choose the kth layer inside the model
+    if (nameIt->size() == 0)
     {
-      // layer is a pair (name, tensor_info)
-      // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
-      std::string layername = layer.first;
-      if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
+      found = true;
+      layerNames.push_back(layers[k].first); // TODO modifier ce layers[k]
+      const tensorflow::TensorInfo& tensor_info = layers[k].second;
+      itkDebugMacro("Input " << k << "corresponds to" <<  layers[k].first << " in the model");
+    }
+
+    // Else, if the user specified the placeholdername, find the corresponding layer inside the model
+    else
+    {
+      itkDebugMacro("Searching for corresponding node of: " << (*nameIt) << "... ");
+      for (auto const & layer : layers)
       {
-        found = true;
-        const tensorflow::TensorInfo& tensor_info = layer.second;
+        // layer is a pair (name, tensor_info)
+        // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
+        std::string layername = layer.first;
+        if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
+        {
+          found = true;
+          layerNames.push_back(layername);
+          const tensorflow::TensorInfo& tensor_info = layer.second;
+          itkDebugMacro("Found: " << layername << " in the model");
+        }
+      } // next layer
+    } //end else
 
-        itkDebugMacro("Found: " << layername << " in the model");
-
-        // Set default to DT_FLOAT
-        tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
-
-        // Default (input?) tensor type
-        ts_dt = tensor_info.dtype();
-        dataTypes.push_back(ts_dt);
-
-        // Get the tensor's shape
-        // Here we assure it's a tensor, with 1 shape
-        tensorflow::TensorShapeProto ts_shp = tensor_info.tensor_shape();
-        shapes.push_back(ts_shp);
-      }
-    } // next layer
+    k+=1;
 
     if (!found)
     {
@@ -130,6 +197,18 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
                                "running: \n\t `saved_model_cli show --dir your_model_dir --all`");
 
     }
+
+    // Set default to DT_FLOAT
+    tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
+
+    // Default (input?) tensor type
+    ts_dt = tensor_info.dtype();
+    dataTypes.push_back(ts_dt);
+
+    // Get the tensor's shape
+    // Here we assure it's a tensor, with 1 shape
+    tensorflow::TensorShapeProto ts_shp = tensor_info.tensor_shape();
+    shapes.push_back(ts_shp);
   } // next tensor name
 }
 

@@ -111,25 +111,19 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   // Run the TF session here
   // The session will initialize the outputs
 
-  // Inputs corresponds to the names of placeholder, as specified when calling TensorFlowModelServe application
-  // Decloud example: For TF1 model, it is specified by the user as "tower_0:s2_t". For TF2 model, it must be specified by the user as "s2_t"
-  // Thus, for TF2, we must transorm that to "serving_default_s2_t"
+  // `inputs` corresponds to a mapping {name, tensor}, with the name being specified by the user when calling TensorFlowModelServe
+  // we must adapt it to `inputs_new`, that corresponds to a mapping {layerName, tensor}, with the layerName being from the model
   DictType inputs_new;
+  int k = 0;
   for (auto& dict: inputs)
   {
-    DictElementType element = {m_UserNameToLayerNameMapping[dict.first], dict.second};
+    DictElementType element = {m_InputLayers[k], dict.second};
     inputs_new.push_back(element);
-  }
-
-  StringList m_OutputTensors_new;
-  for (auto& name: m_OutputTensors)
-  {
-    m_OutputTensors_new.push_back(m_UserNameToLayerNameMapping[name]);
+    k+=1;
   }
 
   // Run the session, evaluating our output tensors from the graph
-  auto status = this->GetSavedModel()->session.get()->Run(inputs_new, m_OutputTensors_new, m_TargetNodesNames, &outputs);
- 
+  auto status = this->GetSavedModel()->session.get()->Run(inputs_new, m_OutputLayers, m_TargetNodesNames, &outputs);
 
   if (!status.ok())
   {
@@ -176,22 +170,15 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   //////////////////////////////////////////////////////////////////////////////////////////
   // Set all subelement of the model
   auto signaturedef = this->GetSignatureDef();
-  for (auto& output: signaturedef.outputs())
-  { 
-    std::string userName = output.first.substr(0, output.first.find(":"));
-    std::string layerName = output.second.name();
-    m_UserNameToLayerNameMapping[userName] = layerName;
-  }
-  for (auto& input: signaturedef.inputs())
-  { 
-    std::string userName = input.first.substr(0, input.first.find(":"));
-    std::string layerName = input.second.name();
-    m_UserNameToLayerNameMapping[userName] = layerName;
-  }
 
-  // Get input and output tensors datatypes and shapes
-  tf::GetTensorAttributes(signaturedef.inputs(), m_InputPlaceholders, m_InputTensorsShapes, m_InputTensorsDataTypes);
-  tf::GetTensorAttributes(signaturedef.outputs(), m_OutputTensors, m_OutputTensorsShapes, m_OutputTensorsDataTypes);
+  // Given the inputs/outputs names that the user specified, get the names of the inputs/outputs contained in the model
+  // and other infos (shapes, dtypes)
+  // For example, for output names specified by the user m_OutputTensors = ['s2t', 's2t_pad'],
+  // this will return m_OutputLayers = ['PartitionedCall:0', 'PartitionedCall:1']
+  // In case the user hasn't named the output, e.g.  m_OutputTensors = [''],
+  // this will return the first output m_OutputLayers = ['PartitionedCall:0']
+  tf::GetTensorAttributes(signaturedef.inputs(), m_InputPlaceholders, m_InputLayers, m_InputTensorsShapes, m_InputTensorsDataTypes);
+  tf::GetTensorAttributes(signaturedef.outputs(), m_OutputTensors, m_OutputLayers, m_OutputTensorsShapes, m_OutputTensorsDataTypes);
 }
 
 
