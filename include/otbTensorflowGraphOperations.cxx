@@ -159,14 +159,24 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
       nameIt != tensorsNames.end(); ++nameIt)
   {
     bool found = false;
+    const tensorflow::TensorInfo& tensor_info;
 
     // If the user didn't specify the placeholdername, choose the kth layer inside the model
     if (nameIt->size() == 0)
     {
       found = true;
-      layerNames.push_back(layers[k].first); // TODO modifier ce layers[k]
-      const tensorflow::TensorInfo& tensor_info = layers[k].second;
-      itkDebugMacro("Input " << k << "corresponds to" <<  layers[k].first << " in the model");
+      // select the k-th element of `layers`
+      int j = 0;
+      for (auto const & layer : layers)
+      {
+        if (j == k)
+        {
+          layerNames.push_back(layer.first);
+          tensor_info = layer.second;
+          itkDebugMacro("Input " << k << "corresponds to" <<  layer.first << " in the model");
+        }
+        j+=1;
+      }
     }
 
     // Else, if the user specified the placeholdername, find the corresponding layer inside the model
@@ -182,7 +192,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
         {
           found = true;
           layerNames.push_back(layername);
-          const tensorflow::TensorInfo& tensor_info = layer.second;
+          tensor_info = layer.second;
           itkDebugMacro("Found: " << layername << " in the model");
         }
       } // next layer
