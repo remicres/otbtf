@@ -32,8 +32,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 {
   auto signatures = this->GetSavedModel()->GetSignatures();
   tensorflow::SignatureDef signature_def;
-  // If serving_default key exists (which is the default for TF saved model), choose it as signature
-  // Else, choose the first one
+
   if (signatures.size() == 0)
   {
     itkExceptionMacro("There are no available signatures for this tag-set. \n" <<
@@ -41,6 +40,8 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
                       "`saved_model_cli show --dir your_model_dir --all`");
   }
 
+  // If serving_default key exists (which is the default for TF saved model), choose it as signature
+  // Else, choose the first one
   if (signatures.contains(tensorflow::kDefaultServingSignatureDefKey))
   {
     signature_def = signatures.at(tensorflow::kDefaultServingSignatureDefKey);
@@ -159,7 +160,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   // When the user specifies the output names, check that the number of the following is the same
   // - output tensors names
   // - output expression fields
-  if (m_OutputTensors.size() != 0) and (m_OutputExpressionFields.size() != m_OutputTensors.size()))
+  if ((m_OutputTensors.size() != 0) and (m_OutputExpressionFields.size() != m_OutputTensors.size()))
   {
     itkExceptionMacro("Number of output tensors names is " << m_OutputTensors.size() <<
                       " but the number of output fields of expression is " << m_OutputExpressionFields.size());
@@ -170,6 +171,12 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   //////////////////////////////////////////////////////////////////////////////////////////
   // Set all subelement of the model
   auto signaturedef = this->GetSignatureDef();
+
+  // When the user doesn't specify output.names, m_OutputTensors defaults to an empty string "". We change it to a
+  // list containing an empty string [""]
+  if (m_OutputTensors.size() == 0)
+    m_OutputTensors = {""};
+
 
   // Given the inputs/outputs names that the user specified, get the names of the inputs/outputs contained in the model
   // and other infos (shapes, dtypes)
