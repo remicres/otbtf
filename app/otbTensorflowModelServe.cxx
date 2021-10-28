@@ -185,7 +185,7 @@ public:
     SetDefaultParameterFloat                 ("output.spcscale", 1.0);
     SetParameterDescription                  ("output.spcscale", "The output image size/scale and spacing*scale where size and spacing corresponds to the first input");
     AddParameter(ParameterType_StringList,    "output.names",    "Names of the output tensors");
-    MandatoryOff                             ("output.names");
+    SetDefaultParameterString                ("output.names", "");
 
     // Output Field of Expression
     AddParameter(ParameterType_Int,           "output.efieldx", "The output expression field (width)");
