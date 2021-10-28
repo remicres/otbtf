@@ -156,10 +156,10 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
                       " and the number of input tensors names is " << m_InputPlaceholders.size());
   }
 
-  // Check that the number of the following is the same
+  // When the user specifies the output names, check that the number of the following is the same
   // - output tensors names
   // - output expression fields
-  if (m_OutputExpressionFields.size() != m_OutputTensors.size())
+  if (m_OutputTensors.size() != 0) and (m_OutputExpressionFields.size() != m_OutputTensors.size()))
   {
     itkExceptionMacro("Number of output tensors names is " << m_OutputTensors.size() <<
                       " but the number of output fields of expression is " << m_OutputExpressionFields.size());
