@@ -40,7 +40,7 @@ def gdal_open(filename):
     """
     Open a GDAL raster
     :param filename: raster file
-    :return: a GDAL gdal_ds instance
+    :return: a GDAL dataset instance
     """
     gdal_ds = gdal.Open(filename)
     if gdal_ds is None:
