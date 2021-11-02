@@ -491,7 +491,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     catch( itk::ExceptionObject & err )
       {
       std::stringstream debugMsg = this->GenerateDebugReport(inputs);
-      itkExceptionMacro("Error occured during tensor to image conversion.\n"
+      itkExceptionMacro("Error occurred during tensor to image conversion.\n"
           << "Context: " << debugMsg.str()
           << "Error:" << err);
       }

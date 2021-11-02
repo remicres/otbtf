@@ -154,7 +154,7 @@ TensorflowSampler<TInputImage, TVectorData>
     m_OutputPatchImages.push_back(newImage);
   }
 
-  itk::ProgressReporter progess(this, 0, nTotal);
+  itk::ProgressReporter progress(this, 0, nTotal);
 
   // Iterate on the vector data
   itVector.GoToBegin();
@@ -218,8 +218,8 @@ TensorflowSampler<TInputImage, TVectorData>
         rejected++;
       }
 
-      // Update progres
-      progess.CompletedPixel();
+      // Update progress
+      progress.CompletedPixel();
 
     }
 
