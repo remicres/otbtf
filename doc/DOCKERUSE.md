@@ -107,7 +107,7 @@ This section is largely inspired from the [moringa docker help](https://gitlab.i
 
 ## Useful diagnostic commands
 
-Here are some usefull commands.
+Here are some useful commands.
 
 ```bash
 docker info         # System info

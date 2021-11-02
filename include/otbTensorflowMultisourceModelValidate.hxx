@@ -98,7 +98,7 @@ TensorflowMultisourceModelValidate<TInputImage>
 /**
  * Perform the validation
  * The session is ran over the entire set of batches.
- * Output is then validated agains the references images,
+ * Output is then validated against the references images,
  * and a confusion matrix is built.
  */
 template <class TInputImage>

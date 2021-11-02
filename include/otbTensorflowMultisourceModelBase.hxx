@@ -113,7 +113,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 
   // Inputs corresponds to the names of placeholder, as specified when calling TensorFlowModelServe application
   // Decloud example: For TF1 model, it is specified by the user as "tower_0:s2_t". For TF2 model, it must be specified by the user as "s2_t"
-  // Thus, for TF2, we must transorm that to "serving_default_s2_t"
+  // Thus, for TF2, we must transform that to "serving_default_s2_t"
   DictType inputs_new;
   for (auto& dict: inputs)
   {
