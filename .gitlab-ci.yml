@@ -43,6 +43,12 @@ pylint:
     - sudo apt update && sudo apt install pylint -y
     - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $OTBTF_SRC/python
 
+codespell:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+    - sudo pip install codespell && codespell
+    
 cppcheck:
   stage: Static Analysis
   allow_failure: true
