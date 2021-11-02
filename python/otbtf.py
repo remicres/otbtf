@@ -31,9 +31,7 @@ import tensorflow as tf
 import gdal
 
 
-"""
-------------------------------------------------------- Helpers --------------------------------------------------------
-"""
+# ----------------------------------------------------- Helpers --------------------------------------------------------
 
 
 def gdal_open(filename):
@@ -69,9 +67,7 @@ def read_as_np_arr(gdal_ds, as_patches=True):
     return np.float32(buffer.reshape((n_elems, size_y, size_x, gdal_ds.RasterCount)))
 
 
-"""
----------------------------------------------------- Buffer class ------------------------------------------------------
-"""
+# -------------------------------------------------- Buffer class ------------------------------------------------------
 
 
 class Buffer:
@@ -104,9 +100,7 @@ class Buffer:
         return self.size() == self.max_length
 
 
-"""
------------------------------------------------- PatchesReaderBase class -----------------------------------------------
-"""
+# ---------------------------------------------- PatchesReaderBase class -----------------------------------------------
 
 
 class PatchesReaderBase(ABC):
@@ -120,7 +114,6 @@ class PatchesReaderBase(ABC):
         Return one sample.
         :return One sample instance, whatever the sample structure is (dict, numpy array, ...)
         """
-        pass
 
     @abstractmethod
     def get_stats(self) -> dict:
@@ -143,7 +136,6 @@ class PatchesReaderBase(ABC):
             "std": np.array([...])},
         }
         """
-        pass
 
     @abstractmethod
     def get_size(self):
@@ -151,12 +143,9 @@ class PatchesReaderBase(ABC):
         Returns the total number of samples
         :return: number of samples (int)
         """
-        pass
 
 
-"""
------------------------------------------------ PatchesImagesReader class ----------------------------------------------
-"""
+# --------------------------------------------- PatchesImagesReader class ----------------------------------------------
 
 
 class PatchesImagesReader(PatchesReaderBase):
@@ -227,6 +216,7 @@ class PatchesImagesReader(PatchesReaderBase):
 
     def _get_ds_and_offset_from_index(self, index):
         offset = index
+        idx = None
         for idx, ds_size in enumerate(self.ds_sizes):
             if offset < ds_size:
                 break
@@ -310,16 +300,14 @@ class PatchesImagesReader(PatchesReaderBase):
                                "mean": rsize * _sums[src_key],
                                "std": np.sqrt(rsize * _sqsums[src_key] - np.square(rsize * _sums[src_key]))
                                } for src_key in self.gdal_ds}
-        logging.info("Stats: {}".format(stats))
+        logging.info("Stats: {}", stats)
         return stats
 
     def get_size(self):
         return self.size
 
 
-"""
-------------------------------------------------- IteratorBase class ---------------------------------------------------
-"""
+# ----------------------------------------------- IteratorBase class ---------------------------------------------------
 
 
 class IteratorBase(ABC):
@@ -331,9 +319,7 @@ class IteratorBase(ABC):
         pass
 
 
-"""
------------------------------------------------- RandomIterator class --------------------------------------------------
-"""
+# ---------------------------------------------- RandomIterator class --------------------------------------------------
 
 
 class RandomIterator(IteratorBase):
@@ -363,9 +349,7 @@ class RandomIterator(IteratorBase):
         np.random.shuffle(self.indices)
 
 
-"""
---------------------------------------------------- Dataset class ------------------------------------------------------
-"""
+# ------------------------------------------------- Dataset class ------------------------------------------------------
 
 
 class Dataset:
@@ -400,8 +384,8 @@ class Dataset:
             self.output_shapes[src_key] = np_arr.shape
             self.output_types[src_key] = tf.dtypes.as_dtype(np_arr.dtype)
 
-        logging.info("output_types: {}".format(self.output_types))
-        logging.info("output_shapes: {}".format(self.output_shapes))
+        logging.info("output_types: {}", self.output_types)
+        logging.info("output_shapes: {}", self.output_shapes)
 
         # buffers
         if self.size <= buffer_length:
@@ -467,13 +451,10 @@ class Dataset:
         """
         # Fill the miner_container until it's full
         while not self.miner_buffer.is_complete():
-            try:
-                index = next(self.iterator)
-                with self.mining_lock:
-                    new_sample = self.patches_reader.get_sample(index=index)
-                    self.miner_buffer.add(new_sample)
-            except Exception as e:
-                logging.warning("Error during collecting samples: {}".format(e))
+            index = next(self.iterator)
+            with self.mining_lock:
+                new_sample = self.patches_reader.get_sample(index=index)
+                self.miner_buffer.add(new_sample)
 
     def _summon_miner_thread(self):
         """
@@ -499,7 +480,7 @@ class Dataset:
         """
         if batch_size <= 2 * self.miner_buffer.max_length:
             logging.warning("Batch size is {} but dataset buffer has {} elements. Consider using a larger dataset "
-                            "buffer to avoid I/O bottleneck".format(batch_size, self.miner_buffer.max_length))
+                            "buffer to avoid I/O bottleneck", batch_size, self.miner_buffer.max_length)
         return self.tf_dataset.batch(batch_size, drop_remainder=drop_remainder)
 
     def get_total_wait_in_seconds(self):
@@ -510,9 +491,7 @@ class Dataset:
         return self.tot_wait
 
 
-"""
-------------------------------------------- DatasetFromPatchesImages class ---------------------------------------------
-"""
+# ----------------------------------------- DatasetFromPatchesImages class ---------------------------------------------
 
 
 class DatasetFromPatchesImages(Dataset):
