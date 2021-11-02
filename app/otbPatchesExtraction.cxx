@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -136,10 +136,6 @@ public:
     }
   }
 
-  void DoUpdateParameters()
-  {
-  }
-
   void DoInit()
   {
 
@@ -237,6 +233,12 @@ public:
     }
 
   }
+  
+  
+  void DoUpdateParameters()
+  {
+  }
+
 private:
   std::vector<SourceBundle> m_Bundles;
 
@@ -245,4 +247,4 @@ private:
 } // end namespace wrapper
 } // end namespace otb
 
-OTB_APPLICATION_EXPORT( otb::Wrapper::PatchesExtraction )
+OTB_APPLICATION_EXPORT(otb::Wrapper::PatchesExtraction)

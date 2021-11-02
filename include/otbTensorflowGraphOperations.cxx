@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -109,11 +109,8 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
 
         itkDebugMacro("Found: " << layername << " in the model");
 
-        // Set default to DT_FLOAT
-        tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
-
         // Default (input?) tensor type
-        ts_dt = tensor_info.dtype();
+        tensorflow::DataType ts_dt = tensor_info.dtype();
         dataTypes.push_back(ts_dt);
 
         // Get the tensor's shape
