@@ -28,7 +28,10 @@ keras in Tensorflow 2).
 import argparse
 from tricks import ckpt_to_savedmodel
 
-if __name__ == "__main__":
+def main():
+    """
+    Main function
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--ckpt", help="Checkpoint file (without the \".meta\" extension)", required=True)
     parser.add_argument("--inputs", help="Inputs names (e.g. [\"x_cnn_1:0\", \"x_cnn_2:0\"])", required=True, nargs='+')
@@ -44,3 +47,6 @@ if __name__ == "__main__":
                        outputs=params.outputs,
                        savedmodel_path=params.model,
                        clear_devices=params.clear_devices)
+
+if __name__ == "__main__":
+    main()
