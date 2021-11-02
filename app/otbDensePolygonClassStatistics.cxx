@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -37,15 +37,14 @@ class DensePolygonClassStatistics : public Application
 {
 public:
   /** Standard class typedefs. */
-  typedef DensePolygonClassStatistics        Self;
+  typedef DensePolygonClassStatistics   Self;
   typedef Application                   Superclass;
   typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Standard macro */
   itkNewMacro(Self);
-
-  itkTypeMacro(DensePolygonClassStatistics, otb::Application);
+  itkTypeMacro(DensePolygonClassStatistics, Application);
 
   /** DataObjects typedef */
   typedef UInt32ImageType                           LabelImageType;
@@ -67,14 +66,7 @@ public:
 
   typedef otb::StatisticsXMLFileWriter<FloatVectorImageType::PixelType>           StatWriterType;
 
-
-private:
-  DensePolygonClassStatistics()
-    {
-   
-    }
-
-  void DoInit() override
+  void DoInit()
   {
     SetName("DensePolygonClassStatistics");
     SetDescription("Computes statistics on a training polygon set.");
@@ -118,7 +110,7 @@ private:
     SetOfficialDocLink();
   }
 
-  void DoUpdateParameters() override
+  void DoUpdateParameters()
   {
      if ( HasValue("vec") )
       {
@@ -164,7 +156,7 @@ private:
        }
   }
 
-  void DoExecute() override
+  void DoExecute()
   {
 
   // Filters
@@ -261,7 +253,6 @@ private:
   statWriter->Update();
 
   }
-  
 
 };
 
