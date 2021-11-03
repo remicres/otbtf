@@ -54,7 +54,7 @@ cppcheck:
   allow_failure: true
   script:
     - sudo apt update && sudo apt install cppcheck -y
-    - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction --inline-suppr --force .
+    - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
 ctest:
   stage: Test
