@@ -11,7 +11,6 @@
 =========================================================================*/
 #include "otbTestMain.h"
 
-// cppcheck-suppress unusedFunction
 void RegisterTests()
 {
   REGISTER_TEST(floatValueToTensorTest);
