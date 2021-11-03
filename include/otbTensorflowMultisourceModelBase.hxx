@@ -23,6 +23,8 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 {
   Superclass::SetCoordinateTolerance(itk::NumericTraits<double>::max() );
   Superclass::SetDirectionTolerance(itk::NumericTraits<double>::max() );
+  
+  m_SavedModel = NULL;
 }
 
 template <class TInputImage, class TOutputImage>
@@ -103,10 +105,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 {
 
   // Add the user's placeholders
-  for (auto& dict: this->GetUserPlaceholders())
-  {
-    inputs.push_back(dict);
-  }
+  std::copy(this->GetUserPlaceholders().begin(), this->GetUserPlaceholders().end(), inputs.begin());
 
   // Run the TF session here
   // The session will initialize the outputs
@@ -115,20 +114,15 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   // Decloud example: For TF1 model, it is specified by the user as "tower_0:s2_t". For TF2 model, it must be specified by the user as "s2_t"
   // Thus, for TF2, we must transform that to "serving_default_s2_t"
   DictType inputs_new;
-  for (auto& dict: inputs)
-  {
-    DictElementType element = {m_UserNameToLayerNameMapping[dict.first], dict.second};
-    inputs_new.push_back(element);
-  }
+  std::transform(inputs.begin(), inputs.end(), inputs_new.begin(),
+                 [this](DictElementType dict) -> DictElementType {return {this->m_UserNameToLayerNameMapping[dict.first], dict.second}; });
 
-  StringList m_OutputTensors_new;
-  for (auto& name: m_OutputTensors)
-  {
-    m_OutputTensors_new.push_back(m_UserNameToLayerNameMapping[name]);
-  }
+  StringList outputTensors_new;
+  std::transform(m_OutputTensors.begin(), m_OutputTensors.end(), outputTensors_new.begin(),
+                 [this](std::string name) -> std::string {return this->m_UserNameToLayerNameMapping[name]; });
 
   // Run the session, evaluating our output tensors from the graph
-  auto status = this->GetSavedModel()->session.get()->Run(inputs_new, m_OutputTensors_new, m_TargetNodesNames, &outputs);
+  auto status = this->GetSavedModel()->session.get()->Run(inputs_new, outputTensors_new, m_TargetNodesNames, &outputs);
  
 
   if (!status.ok())

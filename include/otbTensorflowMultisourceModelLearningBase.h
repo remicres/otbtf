@@ -100,7 +100,7 @@ protected:
   TensorflowMultisourceModelLearningBase();
   virtual ~TensorflowMultisourceModelLearningBase() {};
 
-  virtual void GenerateOutputInformation(void);
+  virtual void GenerateOutputInformation(void) override;
 
   virtual void GenerateInputRequestedRegion();
 

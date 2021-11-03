@@ -25,9 +25,9 @@ namespace otb
 {
 
 /*
- * This is a simple helper to create images concatenation.
+ * This is a helper for images concatenation.
  * Images must have the same size.
- * This is basically the common input type used in every OTB-TF applications.
+ * This is the common input type used in every OTB-TF applications.
  */
 template<class TImage>
 class TensorflowSource
@@ -60,7 +60,7 @@ public:
   // Get the source output
   FloatVectorImagePointerType Get();
 
-  TensorflowSource(){};
+  TensorflowSource();
   virtual ~TensorflowSource (){};
 
 private:

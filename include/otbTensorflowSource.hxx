@@ -18,11 +18,20 @@ namespace otb
 {
 
 //
+// Constructor
+//
+template <class TImage>
+TensorflowSource<TImage>
+::TensorflowSource()
+{}
+
+//
 // Prepare the big stack of images
 //
 template <class TImage>
 void
-TensorflowSource<TImage>::Set(FloatVectorImageListType * inputList)
+TensorflowSource<TImage>
+::Set(FloatVectorImageListType * inputList)
 {
   // Create one stack for input images list
   m_Concatener    = ListConcatenerFilterType::New();

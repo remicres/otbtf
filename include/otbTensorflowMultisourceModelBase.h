@@ -131,7 +131,7 @@ public:
   itkGetMacro(OutputExpressionFields, SizeListType);
 
   /** User placeholders */
-  void SetUserPlaceholders(DictType dict) {m_UserPlaceholders = dict;}
+  void SetUserPlaceholders(const DictType & dict) {m_UserPlaceholders = dict;}
   DictType GetUserPlaceholders() {return m_UserPlaceholders;}
 
   /** Target nodes names */
