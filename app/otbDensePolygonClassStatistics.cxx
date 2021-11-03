@@ -9,18 +9,24 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include "otbWrapperApplication.h"
+#include "itkFixedArray.h"
+#include "itkObjectFactory.h"
 #include "otbWrapperApplicationFactory.h"
 
+// Application engine
+#include "otbStandardFilterWatcher.h"
+#include "itkFixedArray.h"
+
+// Filters
 #include "otbStatisticsXMLFileWriter.h"
 #include "otbWrapperElevationParametersHandler.h"
-
 #include "otbVectorDataToLabelImageFilter.h"
 #include "otbImageToNoDataMaskFilter.h"
 #include "otbStreamingStatisticsMapFromLabelImageFilter.h"
 #include "otbVectorDataIntoImageProjectionFilter.h"
 #include "otbImageToVectorImageCastFilter.h"
 
+// OGR
 #include "otbOGR.h"
 
 namespace otb
@@ -80,7 +86,6 @@ public:
       "  - number of samples per geometry\n");
     SetDocLimitations("None");
     SetDocAuthors("Remi Cresson");
-    SetDocSeeAlso(" ");
 
     AddDocTag(Tags::Learning);
 
@@ -107,66 +112,10 @@ public:
     SetDocExampleParameterValue("field", "label");
     SetDocExampleParameterValue("out","polygonStat.xml");
 
-    SetOfficialDocLink();
-  }
-
-  void DoUpdateParameters()
-  {
-     if ( HasValue("vec") )
-      {
-      std::string vectorFile = GetParameterString("vec");
-      ogr::DataSource::Pointer ogrDS =
-        ogr::DataSource::New(vectorFile, ogr::DataSource::Modes::Read);
-      ogr::Layer layer = ogrDS->GetLayer(0);
-      ogr::Feature feature = layer.ogr().GetNextFeature();
-
-      ClearChoices("field");
-      
-      for(int iField=0; iField<feature.ogr().GetFieldCount(); iField++)
-        {
-        std::string key, item = feature.ogr().GetFieldDefnRef(iField)->GetNameRef();
-        key = item;
-        std::string::iterator end = std::remove_if(key.begin(),key.end(),IsNotAlphaNum);
-        std::transform(key.begin(), end, key.begin(), tolower);
-        
-        OGRFieldType fieldType = feature.ogr().GetFieldDefnRef(iField)->GetType();
-        
-        if(fieldType == OFTString || fieldType == OFTInteger || fieldType == OFTInteger64)
-          {
-          std::string tmpKey="field."+key.substr(0, end - key.begin());
-          AddChoice(tmpKey,item);
-          }
-        }
-      }
-
-     // Check that the extension of the output parameter is XML (mandatory for
-     // StatisticsXMLFileWriter)
-     // Check it here to trigger the error before polygons analysis
-     
-     if ( HasValue("out") )
-       {
-       // Store filename extension
-       // Check that the right extension is given : expected .xml
-       const std::string extension = itksys::SystemTools::GetFilenameLastExtension(this->GetParameterString("out"));
-
-       if (itksys::SystemTools::LowerCase(extension) != ".xml")
-         {
-         otbAppLogFATAL( << extension << " is a wrong extension for parameter \"out\": Expected .xml" );
-         }
-       }
   }
 
   void DoExecute()
   {
-
-  // Filters
-  VectorDataReprojFilterType::Pointer m_VectorDataReprojectionFilter;
-  RasterizeFilterType::Pointer m_RasterizeFIDFilter;
-  RasterizeFilterType::Pointer m_RasterizeClassFilter;
-  NoDataMaskFilterType::Pointer m_NoDataFilter;
-  CastFilterType::Pointer m_NoDataCastFilter;
-  StatsFilterType::Pointer m_FIDStatsFilter;
-  StatsFilterType::Pointer m_ClassStatsFilter;
 
   // Retrieve the field name
   std::vector<int> selectedCFieldIdx = GetSelectedItems("field");
@@ -246,13 +195,72 @@ public:
   fidMap.erase(intNoData);
   classMap.erase(intNoData);
 
-  StatWriterType::Pointer statWriter = StatWriterType::New();
-  statWriter->SetFileName(this->GetParameterString("out"));
-  statWriter->AddInputMap<StatsFilterType::LabelPopulationMapType>("samplesPerClass",classMap);
-  statWriter->AddInputMap<StatsFilterType::LabelPopulationMapType>("samplesPerVector",fidMap);
-  statWriter->Update();
+  m_StatWriter = StatWriterType::New();
+  m_StatWriter->SetFileName(this->GetParameterString("out"));
+  m_StatWriter->AddInputMap<StatsFilterType::LabelPopulationMapType>("samplesPerClass", classMap);
+  m_StatWriter->AddInputMap<StatsFilterType::LabelPopulationMapType>("samplesPerVector", fidMap);
+  m_StatWriter->Update();
 
   }
+
+  void DoUpdateParameters()
+  {
+     if (HasValue("vec"))
+      {
+      std::string vectorFile = GetParameterString("vec");
+      ogr::DataSource::Pointer ogrDS =
+        ogr::DataSource::New(vectorFile, ogr::DataSource::Modes::Read);
+      ogr::Layer layer = ogrDS->GetLayer(0);
+      ogr::Feature feature = layer.ogr().GetNextFeature();
+
+      ClearChoices("field");
+
+      for(int iField=0; iField<feature.ogr().GetFieldCount(); iField++)
+        {
+        std::string key, item = feature.ogr().GetFieldDefnRef(iField)->GetNameRef();
+        key = item;
+        std::string::iterator end = std::remove_if(key.begin(),key.end(),IsNotAlphaNum);
+        std::transform(key.begin(), end, key.begin(), tolower);
+
+        OGRFieldType fieldType = feature.ogr().GetFieldDefnRef(iField)->GetType();
+
+        if(fieldType == OFTString || fieldType == OFTInteger || fieldType == OFTInteger64)
+          {
+          std::string tmpKey="field."+key.substr(0, end - key.begin());
+          AddChoice(tmpKey,item);
+          }
+        }
+      }
+
+     // Check that the extension of the output parameter is XML (mandatory for
+     // StatisticsXMLFileWriter)
+     // Check it here to trigger the error before polygons analysis
+
+     if (HasValue("out"))
+       {
+       // Store filename extension
+       // Check that the right extension is given : expected .xml
+       const std::string extension = itksys::SystemTools::GetFilenameLastExtension(this->GetParameterString("out"));
+
+       if (itksys::SystemTools::LowerCase(extension) != ".xml")
+         {
+         otbAppLogFATAL( << extension << " is a wrong extension for parameter \"out\": Expected .xml" );
+         }
+       }
+  }
+
+
+
+private:
+  // Filters
+  VectorDataReprojFilterType::Pointer m_VectorDataReprojectionFilter;
+  RasterizeFilterType::Pointer m_RasterizeFIDFilter;
+  RasterizeFilterType::Pointer m_RasterizeClassFilter;
+  NoDataMaskFilterType::Pointer m_NoDataFilter;
+  CastFilterType::Pointer m_NoDataCastFilter;
+  StatsFilterType::Pointer m_FIDStatsFilter;
+  StatsFilterType::Pointer m_ClassStatsFilter;
+  StatWriterType::Pointer m_StatWriter;
 
 };
 
