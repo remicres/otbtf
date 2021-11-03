@@ -133,7 +133,6 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
 //
 // Print a lot of stuff about the specified nodes of the graph
 //
-// cppcheck-suppress unusedFunction
 void PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::string> & nodesNames)
 {
   std::cout << "Go through graph:" << std::endl;
