@@ -105,7 +105,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 {
 
   // Add the user's placeholders
-  std::copy(this->GetUserPlaceholders().begin(), this->GetUserPlaceholders().end(), inputs.begin());
+  std::copy(this->GetUserPlaceholders().begin(), this->GetUserPlaceholders().end(), std::back_inserter(inputs));
 
   // Run the TF session here
   // The session will initialize the outputs
@@ -114,11 +114,11 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   // Decloud example: For TF1 model, it is specified by the user as "tower_0:s2_t". For TF2 model, it must be specified by the user as "s2_t"
   // Thus, for TF2, we must transform that to "serving_default_s2_t"
   DictType inputs_new;
-  std::transform(inputs.begin(), inputs.end(), inputs_new.begin(),
+  std::transform(inputs.begin(), inputs.end(), std::back_inserter(inputs_new),
                  [this](DictElementType dict) -> DictElementType {return {this->m_UserNameToLayerNameMapping[dict.first], dict.second}; });
 
   StringList outputTensors_new;
-  std::transform(m_OutputTensors.begin(), m_OutputTensors.end(), outputTensors_new.begin(),
+  std::transform(m_OutputTensors.begin(), m_OutputTensors.end(), std::back_inserter(outputTensors_new),
                  [this](std::string name) -> std::string {return this->m_UserNameToLayerNameMapping[name]; });
 
   // Run the session, evaluating our output tensors from the graph
