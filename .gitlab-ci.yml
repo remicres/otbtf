@@ -65,10 +65,10 @@ ctest:
   after_script:
     - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/testing  # Copy artifacts (they must be in $CI_PROJECT_DIR)
   artifacts:
-    when: on_failure
     paths:
       - testing/*.*
     expire_in: 1 week
+#    when: on_failure
 
 sr4rs:
   stage: Test
