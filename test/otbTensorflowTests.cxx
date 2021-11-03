@@ -11,6 +11,7 @@
 =========================================================================*/
 #include "otbTestMain.h"
 
+// cppcheck-suppress unusedFunction
 void RegisterTests()
 {
   REGISTER_TEST(floatValueToTensorTest);
@@ -20,5 +21,4 @@ void RegisterTests()
   REGISTER_TEST(intVecValueToTensorTest);
   REGISTER_TEST(boolVecValueToTensorTest);
 }
-
 
