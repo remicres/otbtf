@@ -35,7 +35,7 @@ class LabelImageSampleSelection : public Application
 {
 public:
   /** Standard class typedefs. */
-  typedef LabelImageSampleSelection          Self;
+  typedef LabelImageSampleSelection           Self;
   typedef Application                         Superclass;
   typedef itk::SmartPointer<Self>             Pointer;
   typedef itk::SmartPointer<const Self>       ConstPointer;
@@ -385,4 +385,4 @@ private:
 } // end namespace wrapper
 } // end namespace otb
 
-OTB_APPLICATION_EXPORT( otb::Wrapper::LabelImageSampleSelection )
+OTB_APPLICATION_EXPORT(otb::Wrapper::LabelImageSampleSelection)
