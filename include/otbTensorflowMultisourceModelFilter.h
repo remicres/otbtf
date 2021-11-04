@@ -26,6 +26,9 @@
 #include "itkMetaDataObject.h"
 #include "otbMetaDataKey.h"
 
+// OTB log
+#include "otbMacro.h"
+
 namespace otb
 {
 

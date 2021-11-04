@@ -24,6 +24,9 @@
 // ITK exception
 #include "itkMacro.h"
 
+// OTB log
+#include "otbMacro.h"
+
 namespace otb {
 namespace tf {
 

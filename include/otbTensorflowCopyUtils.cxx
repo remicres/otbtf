@@ -405,7 +405,7 @@ ValueToTensor(std::string value)
     }
     idx++;
   }
-  itkDebugMacro("Returning tensor: "<< out.DebugString());
+  otbLogMacro(Debug, "Returning tensor: "<< out.DebugString());
 
   return out;
 }
