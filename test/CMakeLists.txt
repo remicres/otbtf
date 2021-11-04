@@ -69,6 +69,7 @@ otb_test_application(NAME TensorflowModelTrainCNN16x16PB
   -training.targetnodes "optimizer"
   -validation.mode "class"
   )
+  set_tests_properties(TensorflowModelTrainCNN16x16PB PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG;$ENV{OTB_LOGGER_LEVEL}")
 
 #----------- Model serving : 1-branch CNN (16x16) Patch-Based ----------------
 otb_test_application(NAME TensorflowModelServeCNN16x16PB
