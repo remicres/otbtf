@@ -90,9 +90,14 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
   int i = 0;
   for (auto const & layer : layers)
     {
-      otbLogMacro(Debug,  << "Node "<< i << " inside the model: " << layer.first);
+      otbLogMacro(Debug,  << "\tNode "<< i << " inside the model: " << layer.first);
       i+=1;
     }
+
+  // When the user doesn't specify output.names, m_OutputTensors defaults to an empty list that we can not iterate over.
+   // We change it to a list containing an empty string [""]
+  if (tensorsNames.size() == 0)
+    tensorsNames.push_back("");
 
   // Get infos
   int k = 0;  // counter used for tensorsNames
