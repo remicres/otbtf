@@ -164,11 +164,8 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
                                                 << "running: \n\t `saved_model_cli show --dir your_model_dir --all`");
     }
 
-    // Set default to DT_FLOAT
-    tensorflow::DataType ts_dt = tensorflow::DT_FLOAT;
-
-    // Default (input?) tensor type
-    ts_dt = tensor_info.dtype();
+    // Default tensor type
+    tensorflow::DataType ts_dt = tensor_info.dtype();
     dataTypes.push_back(ts_dt);
 
     // Get the tensor's shape
