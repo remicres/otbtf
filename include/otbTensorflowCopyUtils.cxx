@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -216,10 +216,12 @@ CopyTensorToImageRegion(const tensorflow::Tensor &          tensor,
   const tensorflow::int64 nElmI = bufferRegion.GetNumberOfPixels() * outputDimSize_C;
   if (nElmI != nElmT)
   {
-    itkGenericExceptionMacro("Number of elements in the tensor is "
-                             << nElmT << " but image outputRegion has " << nElmI << " values to fill.\nBuffer region:\n"
-                             << bufferRegion << "\nNumber of components: " << outputDimSize_C << "\nTensor shape:\n "
-                             << PrintTensorShape(tensor.shape()) << "\nPlease check the input(s) field of view (FOV), "
+    itkGenericExceptionMacro("Number of elements in the tensor is " << nElmT 
+                             << " but image outputRegion has " << nElmI << " values to fill.\n"
+                             << "Buffer region is: \n" << bufferRegion << "\n"
+                             << "Number of components in the output image: " << outputDimSize_C << "\n"
+                             << "Tensor shape: " << PrintTensorShape(tensor.shape()) << "\n"
+                             << "Please check the input(s) field of view (FOV), "
                              << "the output field of expression (FOE), and the  "
                              << "output spacing scale if you run the model in fully "
                              << "convolutional mode (how many strides in your model?)");
@@ -313,7 +315,7 @@ ValueToTensor(std::string value)
   {
     is_vec = true;
     if (!has_left || !has_right)
-      itkGenericExceptionMacro("Error parsing vector expression (missing parenthese ?)" << value);
+      itkGenericExceptionMacro("Error parsing vector expression (missing parentheses ?)" << value);
   }
 
   // Scalar --> Vector for generic processing

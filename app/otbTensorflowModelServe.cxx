@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -61,10 +61,6 @@ public:
 
   /** Typedefs for images */
   typedef FloatVectorImageType::SizeType SizeType;
-
-  void DoUpdateParameters()
-  {
-  }
 
   //
   // Store stuff related to one source
@@ -331,6 +327,11 @@ public:
       otbAppLogINFO("Tiling disabled");
       SetParameterOutputImage("out", m_TFFilter->GetOutput());
     }
+  }
+  
+
+  void DoUpdateParameters()
+  {
   }
 
 private:
