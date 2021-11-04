@@ -86,11 +86,11 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
   dataTypes.clear();
   dataTypes.reserve(tensorsNames.size());
 
-  otbLogMacro(Debug, "Nodes contained in the model: ");
+  otbLogMacro(Debug,  <<  << "Nodes contained in the model: ");
   int i = 0;
   for (auto const & layer : layers)
     {
-      otbLogMacro(Debug, "Node "<< i << " inside the model: " << layer.first);
+      otbLogMacro(Debug,  <<  << "Node "<< i << " inside the model: " << layer.first);
       i+=1;
     }
 
@@ -114,7 +114,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
         {
           layerNames.push_back(layer.second.name());
           tensor_info = layer.second;
-          otbLogMacro(Debug, "Input " << k << "corresponds to" <<  layer.first << " in the model");
+          otbLogMacro(Debug,  << "Input " << k << "corresponds to" <<  layer.first << " in the model");
         }
         j+=1;
       }
@@ -123,7 +123,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
     // Else, if the user specified the placeholdername, find the corresponding layer inside the model
     else
     {
-      otbLogMacro(Debug, "Searching for corresponding node of: " << (*nameIt) << "... ");
+      otbLogMacro(Debug,  << "Searching for corresponding node of: " << (*nameIt) << "... ");
       for (auto const & layer : layers)
       {
         // layer is a pair (name, tensor_info)
@@ -134,7 +134,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
           found = true;
           layerNames.push_back(layer.second.name());
           tensor_info = layer.second;
-          otbLogMacro(Debug, "Found: " << layer.second.name() << " in the model");
+          otbLogMacro(Debug,  << "Found: " << layer.second.name() << " in the model");
         }
       } // next layer
     } //end else
