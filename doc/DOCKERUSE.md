@@ -77,7 +77,7 @@ Be careful though, these infos might be a bit outdated...
 1. Install [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#manual-installation-steps) (Windows Subsystem for Linux)
 2. Install [docker desktop](https://www.docker.com/products/docker-desktop)
 3. Start **docker desktop** and **enable WSL2** from *Settings* > *General* then tick the box *Use the WSL2 based engine*
-3. Open a **cmd.exe** or **PowerShell** terminal, and type `docker create --name otbtf-cpu --interactive --tty mdl4eo/otbtf2.4:cpu`
+3. Open a **cmd.exe** or **PowerShell** terminal, and type `docker create --name otbtf-cpu --interactive --tty mdl4eo/otbtf2.5:cpu`
 4. Open **docker desktop**, and check that the docker is running in the **Container/Apps** menu
 ![Docker desktop, after the docker image is downloaded and ready to use](images/docker_desktop_1.jpeg)
 5. From **docker desktop**, click on the icon highlighted as shown below, and use the bash terminal that should pop up!
@@ -107,7 +107,7 @@ This section is largely inspired from the [moringa docker help](https://gitlab.i
 
 ## Useful diagnostic commands
 
-Here are some usefull commands.
+Here are some useful commands.
 
 ```bash
 docker info         # System info
@@ -126,12 +126,12 @@ sudo systemctl {status,enable,disable,start,stop} docker
 Run a simple command in a one-shot container:
 
 ```bash
-docker run mdl4eo/otbtf2.4:cpu otbcli_PatchesExtraction
+docker run mdl4eo/otbtf2.5:cpu otbcli_PatchesExtraction
 ```
 
 You can also use the image in interactive mode with bash:
 ```bash
-docker run -ti mdl4eo/otbtf2.4:cpu bash
+docker run -ti mdl4eo/otbtf2.5:cpu bash
 ```
 
 ### Persistent container
@@ -141,7 +141,7 @@ Beware of ownership issues, see the last section of this doc.
 
 ```bash
 docker create --interactive --tty --volume /home/$USER:/home/otbuser/ \
-    --name otbtf mdl4eo/otbtf2.4:cpu /bin/bash
+    --name otbtf mdl4eo/otbtf2.5:cpu /bin/bash
 ```
 
 ### Interactive session
@@ -205,7 +205,7 @@ Create a named container (here with your HOME as volume), Docker will automatica
 
 ```bash
 docker create --interactive --tty --volume /home/$USER:/home/otbuser \
-    --name otbtf mdl4eo/otbtf2.4:cpu /bin/bash
+    --name otbtf mdl4eo/otbtf2.5:cpu /bin/bash
 ```
 
 Start a background container process:
