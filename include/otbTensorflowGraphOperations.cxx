@@ -86,11 +86,11 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
   dataTypes.clear();
   dataTypes.reserve(tensorsNames.size());
 
-  otbLogMacro(Debug,  <<  << "Nodes contained in the model: ");
+  otbLogMacro(Debug,  << "Nodes contained in the model: ");
   int i = 0;
   for (auto const & layer : layers)
     {
-      otbLogMacro(Debug,  <<  << "Node "<< i << " inside the model: " << layer.first);
+      otbLogMacro(Debug,  << "Node "<< i << " inside the model: " << layer.first);
       i+=1;
     }
 
