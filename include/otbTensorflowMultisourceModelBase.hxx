@@ -157,26 +157,11 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
                       " and the number of input tensors names is " << m_InputPlaceholders.size());
   }
 
-  // When the user specifies the output names, check that the number of the following is the same
-  // - output tensors names
-  // - output expression fields
-  if ((m_OutputTensors.size() != 0) and (m_OutputExpressionFields.size() != m_OutputTensors.size()))
-  {
-    itkExceptionMacro("Number of output tensors names is " << m_OutputTensors.size() <<
-                      " but the number of output fields of expression is " << m_OutputExpressionFields.size());
-  }
-
   //////////////////////////////////////////////////////////////////////////////////////////
   //                               Get tensors information
   //////////////////////////////////////////////////////////////////////////////////////////
   // Set all subelement of the model
   auto signaturedef = this->GetSignatureDef();
-
-  // When the user doesn't specify output.names, m_OutputTensors defaults to an empty string "". We change it to a
-  // list containing an empty string [""]
-  if (m_OutputTensors.size() == 0)
-    m_OutputTensors = {""};
-
 
   // Given the inputs/outputs names that the user specified, get the names of the inputs/outputs contained in the model
   // and other infos (shapes, dtypes)
