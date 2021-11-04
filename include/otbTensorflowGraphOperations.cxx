@@ -149,7 +149,7 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
 
     if (!found)
     {
-      itkGenericExceptionMacro("Tensor name \"" << (*nameIt) << "\" not found. \n"
+      itkGenericExceptionMacro("Tensor name \"" << name << "\" not found. \n"
                                                 << "You can list all inputs/outputs of your SavedModel by "
                                                 << "running: \n\t `saved_model_cli show --dir your_model_dir --all`");
     }
@@ -178,9 +178,9 @@ PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::string>
     tensorflow::NodeDef node = graph.node(i);
     std::cout << i << "\t" << node.name() << std::endl;
 
-    for (std::vector<std::string>::iterator nameIt = nodesNames.begin(); nameIt != nodesNames.end(); ++nameIt)
+    for (auto const & name: nodesNames)
     {
-      if (node.name().compare((*nameIt)) == 0)
+      if (node.name().compare(name) == 0)
       {
         std::cout << "Node " << i << " : " << std::endl;
         std::cout << "\tName: " << node.name() << std::endl;
