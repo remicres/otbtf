@@ -114,7 +114,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
         {
           layerNames.push_back(layer.second.name());
           tensor_info = layer.second;
-          otbLogMacro(Debug,  << "Input " << k << "corresponds to" <<  layer.first << " in the model");
+          otbLogMacro(Debug,  << "Input " << k << " corresponds to " <<  layer.first << " in the model");
         }
         j+=1;
       }
