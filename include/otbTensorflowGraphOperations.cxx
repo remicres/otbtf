@@ -82,9 +82,8 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
 {
   // Allocation
   shapes.clear();
-  shapes.reserve(tensorsNames.size());
   dataTypes.clear();
-  dataTypes.reserve(tensorsNames.size());
+  layers.clear();
 
   otbLogMacro(Debug,  << "Nodes contained in the model: ");
   int i = 0;
