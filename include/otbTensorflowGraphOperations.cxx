@@ -122,18 +122,11 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
     {
       found = true;
       // select the k-th element of `layers`
-      int j = 0;
-      for (auto const & layer : layers)
-      {
-
-        if (j == k)
-        {
-          layerNames.push_back(layer.second.name());
-          tensor_info = layer.second;
-          otbLogMacro(Debug, << "Input " << k << " corresponds to " << layer.first << " in the model");
-        }
-        j += 1;
-      }
+      auto it = layers.begin();
+      std::advance(it, k);
+      layerNames.push_back(it->second.name());
+      tensor_info = it->second;
+      otbLogMacro(Debug, << "Input " << k << " corresponds to " << it->first << " in the model");
     }
 
     // Else, if the user specified the placeholdername, find the corresponding layer inside the model
