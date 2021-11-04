@@ -94,13 +94,10 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
   dataTypes.clear();
   layerNames.clear();
 
+  // Debug infos
   otbLogMacro(Debug, << "Nodes contained in the model: ");
-  int i = 0;
   for (auto const & layer : layers)
-  {
-    otbLogMacro(Debug, << "\tNode " << i << " inside the model: " << layer.first);
-    i += 1;
-  }
+    otbLogMacro(Debug, << "\t" << layer.first);
 
   // When the user doesn't specify output.names, m_OutputTensors defaults to an empty list that we can not iterate over.
   // We change it to a list containing an empty string [""]
@@ -110,15 +107,15 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
     tensorsNames.push_back("");
   }
 
-  // Get infos
+  // Next, we fill layerNames
   int k = 0; // counter used for tensorsNames
-  for (std::vector<std::string>::iterator nameIt = tensorsNames.begin(); nameIt != tensorsNames.end(); ++nameIt)
+  for (auto const & name: tensorsNames)
   {
     bool                   found = false;
     tensorflow::TensorInfo tensor_info;
 
     // If the user didn't specify the placeholdername, choose the kth layer inside the model
-    if (nameIt->size() == 0)
+    if (name.size() == 0)
     {
       found = true;
       // select the k-th element of `layers`
@@ -132,13 +129,13 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
     // Else, if the user specified the placeholdername, find the corresponding layer inside the model
     else
     {
-      otbLogMacro(Debug, << "Searching for corresponding node of: " << (*nameIt) << "... ");
+      otbLogMacro(Debug, << "Searching for corresponding node of: " << name << "... ");
       for (auto const & layer : layers)
       {
         // layer is a pair (name, tensor_info)
         // cf https://stackoverflow.com/questions/63181951/how-to-get-graph-or-graphdef-from-a-given-model
         std::string layername = layer.first;
-        if (layername.substr(0, layername.find(":")).compare((*nameIt)) == 0)
+        if (layername.substr(0, layername.find(":")).compare(name) == 0)
         {
           found = true;
           layerNames.push_back(layer.second.name());
@@ -146,7 +143,7 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
           otbLogMacro(Debug, << "Found: " << layer.second.name() << " in the model");
         }
       } // next layer
-    }   // end else
+    } // end else
 
     k += 1;
 
