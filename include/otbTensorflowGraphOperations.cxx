@@ -169,7 +169,7 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
 // Print a lot of stuff about the specified nodes of the graph
 //
 void
-PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::string> & nodesNames)
+PrintNodeAttributes(const tensorflow::GraphDef & graph, const std::vector<std::string> & nodesNames)
 {
   std::cout << "Go through graph:" << std::endl;
   std::cout << "#\tname" << std::endl;

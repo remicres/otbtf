@@ -47,7 +47,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
     std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes);
 
 // Print a lot of stuff about the specified nodes of the graph
-void PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::string> & nodesNames);
+void PrintNodeAttributes(const tensorflow::GraphDef & graph, const std::vector<std::string> & nodesNames);
 
 } // end namespace tf
 } // end namespace otb
