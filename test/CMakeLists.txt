@@ -49,6 +49,7 @@ set(MODEL4_FC_OUT apTvClTensorflowModelServeFCNN64x64to32x32.tif)
 set(MODEL1_SAVED model1_updated)
 
 #----------- Model training : 1-branch CNN (16x16) Patch-Based ----------------
+set(ENV{OTB_LOGGER_LEVEL} DEBUG)
 otb_test_application(NAME TensorflowModelTrainCNN16x16PB
   APP  TensorflowModelTrain
   OPTIONS 
