@@ -63,7 +63,7 @@ def RnnAttention(x, nunits, nlayer, n_dims, n_timetamps, is_training_ph):
             cell = rnn.GRUCell(nunits)
             cells.append(cell)
         cell = tf.compat.v1.contrib.rnn.MultiRNNCell(cells)
-        # SIGNLE LAYER: single GRUCell, nunits hidden units each
+        # SINGLE LAYER: single GRUCell, nunits hidden units each
     else:
         cell = rnn.GRUCell(nunits)
     outputs, _ = tf.compat.v1.nn.static_rnn(cell, x, dtype="float32")

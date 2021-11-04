@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -491,7 +491,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     catch( itk::ExceptionObject & err )
       {
       std::stringstream debugMsg = this->GenerateDebugReport(inputs);
-      itkExceptionMacro("Error occured during tensor to image conversion.\n"
+      itkExceptionMacro("Error occurred during tensor to image conversion.\n"
           << "Context: " << debugMsg.str()
           << "Error:" << err);
       }

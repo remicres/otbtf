@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -23,6 +23,8 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 {
   Superclass::SetCoordinateTolerance(itk::NumericTraits<double>::max() );
   Superclass::SetDirectionTolerance(itk::NumericTraits<double>::max() );
+  
+  m_SavedModel = NULL;
 }
 
 template <class TInputImage, class TOutputImage>
@@ -36,7 +38,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
   if (signatures.size() == 0)
   {
     itkExceptionMacro("There are no available signatures for this tag-set. \n" <<
-                      "Please check which tag-set to use by running  "<<
+                      "Please check which tag-set to use by running "<<
                       "`saved_model_cli show --dir your_model_dir --all`");
   }
 
@@ -104,10 +106,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 {
 
   // Add the user's placeholders
-  for (auto& dict: this->GetUserPlaceholders())
-  {
-    inputs.push_back(dict);
-  }
+  std::copy(this->GetUserPlaceholders().begin(), this->GetUserPlaceholders().end(), std::back_inserter(inputs));
 
   // Run the TF session here
   // The session will initialize the outputs
