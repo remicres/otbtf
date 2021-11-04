@@ -142,7 +142,7 @@ set_tests_properties(apTvClTensorflowModelServeFCNN16x16FC PROPERTIES ENVIRONMEN
 
 #----------- Model serving : 1-branch FCNN (64x64)-->(32x32), Fully-conv ----------------
 set(ENV{OTB_TF_NSOURCES} 1)
-otb_test_application(NAME apTvClTensorflowModelServeFCNN64x64to32x32.tif
+otb_test_application(NAME apTvClTensorflowModelServeFCNN64x64to32x32
   APP  TensorflowModelServe
   OPTIONS -source1.il ${IMAGEPXS2}
   -source1.rfieldx 64 -source1.rfieldy 64 -source1.placeholder x
