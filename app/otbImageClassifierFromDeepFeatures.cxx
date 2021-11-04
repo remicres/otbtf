@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -61,7 +61,6 @@ private:
 
     // Populate group
     ShareParameter(ss_key_group.str(), "tfmodel." + ss_key_group.str(), ss_desc_group.str());
-
   }
 
 
@@ -107,9 +106,7 @@ private:
     ShareParameter("out"        , "classif.out"        , "Output image"        , "Output image"        );
     ShareParameter("confmap"    , "classif.confmap"    , "Confidence map image", "Confidence map image");
     ShareParameter("ram"        , "classif.ram"        , "Ram"                 , "Ram"                 );
-
   }
-
 
   void DoUpdateParameters()
   {
@@ -122,12 +119,8 @@ private:
     GetInternalApplication("classif")->SetParameterInputImage("in", GetInternalApplication("tfmodel")->GetParameterOutputImage("out"));
     UpdateInternalParameters("classif");
     ExecuteInternal("classif");
-  }   // DOExecute()
-
-  void AfterExecuteAndWriteOutputs()
-  {
-    // Nothing to do
   }
+
 };
 } // namespace Wrapper
 } // namespace otb

@@ -91,5 +91,6 @@ def read_samples(filename):
 
 
 # Aliases for backward compatibility
+# pylint: disable=invalid-name
 CreateSavedModel = create_savedmodel
 CheckpointToSavedModel = ckpt_to_savedmodel

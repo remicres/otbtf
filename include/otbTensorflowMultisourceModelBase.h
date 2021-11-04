@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -131,7 +131,7 @@ public:
   itkGetMacro(OutputExpressionFields, SizeListType);
 
   /** User placeholders */
-  void SetUserPlaceholders(DictType dict) {m_UserPlaceholders = dict;}
+  void SetUserPlaceholders(const DictType & dict) {m_UserPlaceholders = dict;}
   DictType GetUserPlaceholders() {return m_UserPlaceholders;}
 
   /** Target nodes names */
