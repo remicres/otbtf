@@ -15,6 +15,9 @@
 // ITK exception
 #include "itkMacro.h"
 
+// OTB log
+#include "otbMacro.h"
+
 // ITK image iterators
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionConstIterator.h"
