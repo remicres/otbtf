@@ -87,7 +87,7 @@ otb_test_application(NAME PatchesExtractionEven
   -source1.il ${IMAGEPXS2}
   -source1.patchsizex 32
   -source1.patchsizey 32
-  -source1.out ${PATCHESIMG_01}
+  -source1.out ${TEMP}/${PATCHESIMG_01}
   -vec ${PATCHESPOS_01}
   -field id
   VALID --compare-image ${EPSILON_6}
@@ -102,7 +102,7 @@ otb_test_application(NAME PatchesExtractionOdd
   -source1.il ${IMAGEPXS2}
   -source1.patchsizex 33
   -source1.patchsizey 33
-  -source1.out ${PATCHESIMG_11}
+  -source1.out ${TEMP}/${PATCHESIMG_11}
   -vec ${PATCHESPOS_11}
   -field id
   VALID --compare-image ${EPSILON_6}
