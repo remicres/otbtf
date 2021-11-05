@@ -241,6 +241,10 @@ public:
     int userOffX = GetParameterInt("grid.offsetx");
     int userOffY = GetParameterInt("grid.offsety");
 
+    // Tell if the patch size is odd or even
+    const bool isEven = GetParameterInt("grid.psize") % 2 == 0;
+    otbAppLogINFO("Patch size is even: " << isEven);
+
     // Explicit streaming over the morphed mask, based on the RAM parameter
     typedef otb::RAMDrivenStrippedStreamingManager<UInt8ImageType> StreamingManagerType;
     StreamingManagerType::Pointer m_StreamingManager = StreamingManagerType::New();
@@ -316,9 +320,13 @@ public:
             // Compute coordinates
             UInt8ImageType::PointType geo;
             inputImage->TransformIndexToPhysicalPoint(inIt.GetIndex(), geo);
-            DataNodeType::PointType point;
-            point[0] = geo[0];
-            point[1] = geo[1];
+
+            // Update geo if we want the corner or the center
+            if (isEven)
+            {
+              geo[0] -= 0.5 * std::abs(inputImage->GetSpacing()[0]);
+              geo[1] -= 0.5 * std::abs(inputImage->GetSpacing()[1]);
+            }
 
             // Lambda call
             lambda(pos, geo);
