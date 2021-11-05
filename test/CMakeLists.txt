@@ -63,7 +63,7 @@ otb_test_application(NAME PatchesSelectionEven
   OPTIONS 
   -in ${IMAGEPXS2}
   -grid.step 32
-  -grip.psize 32
+  -grid.psize 32
   -outtrain ${PATCHESPOS_01}
   -outvalid ${PATCHESPOS_02}
   )
@@ -74,7 +74,7 @@ otb_test_application(NAME PatchesSelectionOdd
   OPTIONS 
   -in ${IMAGEPXS2}
   -grid.step 32
-  -grip.psize 33
+  -grid.psize 33
   -outtrain ${PATCHESPOS_11}
   -outvalid ${PATCHESPOS_12}
   )
