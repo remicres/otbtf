@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -407,7 +407,7 @@ ValueToTensor(std::string value)
     }
     idx++;
   }
-  itkDebugMacro("Returning tensor: "<< out.DebugString());
+  otbLogMacro(Debug,  << "Returning tensor: "<< out.DebugString());
 
   return out;
 }

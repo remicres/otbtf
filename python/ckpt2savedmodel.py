@@ -28,6 +28,7 @@ keras in Tensorflow 2).
 import argparse
 from tricks import ckpt_to_savedmodel
 
+
 def main():
     """
     Main function
@@ -47,6 +48,7 @@ def main():
                        outputs=params.outputs,
                        savedmodel_path=params.model,
                        clear_devices=params.clear_devices)
+
 
 if __name__ == "__main__":
     main()

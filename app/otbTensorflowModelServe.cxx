@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -62,10 +62,6 @@ public:
   /** Typedefs for images */
   typedef FloatVectorImageType::SizeType SizeType;
 
-  void DoUpdateParameters()
-  {
-  }
-
   //
   // Store stuff related to one source
   //
@@ -120,9 +116,12 @@ public:
     AddParameter(ParameterType_InputImageList, ss_key_in.str(),     ss_desc_in.str() );
     AddParameter(ParameterType_Int,            ss_key_dims_x.str(), ss_desc_dims_x.str());
     SetMinimumParameterIntValue               (ss_key_dims_x.str(), 1);
+    SetDefaultParameterInt                    (ss_key_dims_x.str(), 1);
     AddParameter(ParameterType_Int,            ss_key_dims_y.str(), ss_desc_dims_y.str());
     SetMinimumParameterIntValue               (ss_key_dims_y.str(), 1);
+    SetDefaultParameterInt                    (ss_key_dims_y.str(), 1);
     AddParameter(ParameterType_String,         ss_key_ph.str(),     ss_desc_ph.str());
+    MandatoryOff                              (ss_key_ph.str());
 
     // Add a new bundle
     ProcessObjectsBundle bundle;
@@ -184,7 +183,7 @@ public:
     SetDefaultParameterFloat                 ("output.spcscale", 1.0);
     SetParameterDescription                  ("output.spcscale", "The output image size/scale and spacing*scale where size and spacing corresponds to the first input");
     AddParameter(ParameterType_StringList,    "output.names",    "Names of the output tensors");
-    MandatoryOn                              ("output.names");
+    MandatoryOff                            ("output.names");
 
     // Output Field of Expression
     AddParameter(ParameterType_Int,           "output.efieldx", "The output expression field (width)");
@@ -328,6 +327,11 @@ public:
       otbAppLogINFO("Tiling disabled");
       SetParameterOutputImage("out", m_TFFilter->GetOutput());
     }
+  }
+  
+
+  void DoUpdateParameters()
+  {
   }
 
 private:

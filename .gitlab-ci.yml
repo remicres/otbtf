@@ -41,7 +41,7 @@ pylint:
   allow_failure: true
   script:
     - sudo apt update && sudo apt install pylint -y
-    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 $OTBTF_SRC/python
+    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 --logging-format-style=new $OTBTF_SRC/python
 
 codespell:
   stage: Static Analysis
@@ -54,7 +54,7 @@ cppcheck:
   allow_failure: true
   script:
     - sudo apt update && sudo apt install cppcheck -y
-    - cppcheck --enable=all --error-exitcode=1 $OTBTF_SRC/
+    - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
 ctest:
   stage: Test

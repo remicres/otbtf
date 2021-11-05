@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -24,6 +24,9 @@
 // ITK exception
 #include "itkMacro.h"
 
+// OTB log
+#include "otbMacro.h"
+
 namespace otb {
 namespace tf {
 
@@ -44,7 +47,7 @@ void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow
     std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes);
 
 // Print a lot of stuff about the specified nodes of the graph
-void PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::string> & nodesNames);
+void PrintNodeAttributes(const tensorflow::GraphDef & graph, const std::vector<std::string> & nodesNames);
 
 } // end namespace tf
 } // end namespace otb

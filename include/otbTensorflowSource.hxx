@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -18,11 +18,20 @@ namespace otb
 {
 
 //
+// Constructor
+//
+template <class TImage>
+TensorflowSource<TImage>
+::TensorflowSource()
+{}
+
+//
 // Prepare the big stack of images
 //
 template <class TImage>
 void
-TensorflowSource<TImage>::Set(FloatVectorImageListType * inputList)
+TensorflowSource<TImage>
+::Set(FloatVectorImageListType * inputList)
 {
   // Create one stack for input images list
   m_Concatener    = ListConcatenerFilterType::New();

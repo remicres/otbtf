@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -14,6 +14,9 @@
 
 // ITK exception
 #include "itkMacro.h"
+
+// OTB log
+#include "otbMacro.h"
 
 // ITK image iterators
 #include "itkImageRegionIterator.h"

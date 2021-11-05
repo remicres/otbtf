@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -333,7 +333,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     if (!OutputRegionToInputRegion(requestedRegion, inRegion, inputImage) )
       {
       // Image does not overlap requested region: set requested region to null
-      itkDebugMacro( <<  "Image #" << i << " :\n" << inRegion << " is outside the requested region");
+      otbLogMacro(Debug,  << "Image #" << i << " :\n" << inRegion << " is outside the requested region");
       inRegion.GetModifiableIndex().Fill(0);
       inRegion.GetModifiableSize().Fill(0);
       }
