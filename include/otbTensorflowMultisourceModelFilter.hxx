@@ -280,7 +280,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
       // we assume that the dimensions are [batch, x, y]
       nComponents = 1;
       }
-    else if (1 <= dim_size && dim_size <= 4)
+    else if (1 < dim_size && dim_size <= 4)
       {
       // Else the number of components per pixel is the last dimension of the tensor
       // [None, c] --> c
