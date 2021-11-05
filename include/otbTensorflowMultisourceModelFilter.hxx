@@ -271,16 +271,35 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   unsigned int outputPixelSize = 0;
   for (auto& protoShape: this->GetOutputTensorsShapes())
     {
-    // The number of components per pixel is the last dimension of the tensor
+    // Find the number of components
     int dim_size = protoShape.dim_size();
     unsigned int nComponents = 1;
-    if (1 < dim_size && dim_size <= 4)
+    if (dim_size == 3)
       {
+      // In the specific case of tensors of size [None, None, None],
+      // we assume that the dimensions are [batch, x, y]
+      nComponents = 1;
+      }
+    else if (1 <= dim_size && dim_size <= 4)
+      {
+      // Else the number of components per pixel is the last dimension of the tensor
+      // [None, c] --> c
+      // [None, None, None, c] --> c
       nComponents = protoShape.dim(dim_size-1).size();
       }
-    else if (dim_size > 4)
+    else
       {
-      itkExceptionMacro("Dim_size=" << dim_size << " currently not supported.");
+      itkExceptionMacro("Dim_size=" << dim_size << " currently not supported. "
+          "Keep in mind that output tensors must have 1, 2, 3 or 4 dimensions. "
+          "In the case of 1-dimensional tensor, the first dimension is for the batch, "
+          "and we assume that the output tensor has 1 channel. "
+          "In the case of 2-dimensional tensor, the first dimension is for the batch, "
+          "and the second is the number of components. "
+          "In the case of 3-dimensional tensor, the first dimension is for the batch, "
+          "and other dims are for (x, y). "
+          "In the case of 4-dimensional tensor, the first dimension is for the batch, "
+          "and the second and the third are for (x, y). The last is for the number of "
+          "channels. ");
       }
     outputPixelSize += nComponents;
     }
