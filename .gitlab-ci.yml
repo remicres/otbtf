@@ -68,7 +68,7 @@ ctest:
     paths:
       - testing/*.*
     expire_in: 1 week
-#    when: on_failure
+    when: on_failure
 
 sr4rs:
   stage: Test
