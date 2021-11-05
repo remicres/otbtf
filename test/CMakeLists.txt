@@ -49,6 +49,7 @@ set(MODEL4_FC_OUT apTvClTensorflowModelServeFCNN64x64to32x32.tif)
 set(MODEL1_SAVED model1_updated)
 
 #----------- Model training : 1-branch CNN (16x16) Patch-Based ----------------
+set(ENV{OTB_LOGGER_LEVEL} DEBUG)
 otb_test_application(NAME TensorflowModelTrainCNN16x16PB
   APP  TensorflowModelTrain
   OPTIONS 
@@ -68,6 +69,7 @@ otb_test_application(NAME TensorflowModelTrainCNN16x16PB
   -training.targetnodes "optimizer"
   -validation.mode "class"
   )
+set_tests_properties(TensorflowModelTrainCNN16x16PB PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG;$ENV{OTB_LOGGER_LEVEL}")
 
 #----------- Model serving : 1-branch CNN (16x16) Patch-Based ----------------
 otb_test_application(NAME TensorflowModelServeCNN16x16PB
@@ -79,6 +81,7 @@ otb_test_application(NAME TensorflowModelServeCNN16x16PB
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${MODEL1_PB_OUT}
   ${TEMP}/${MODEL1_PB_OUT})
+set_tests_properties(TensorflowModelServeCNN16x16PB PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG}")
 
 #----------- Model serving : 2-branch CNN (8x8, 32x32) Patch-Based ----------------
 otb_test_application(NAME apTvClTensorflowModelServeCNN8x8_32x32PB
@@ -92,7 +95,8 @@ otb_test_application(NAME apTvClTensorflowModelServeCNN8x8_32x32PB
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${MODEL2_PB_OUT}
   ${TEMP}/${MODEL2_PB_OUT})
-set_tests_properties(apTvClTensorflowModelServeCNN8x8_32x32PB PROPERTIES ENVIRONMENT "OTB_TF_NSOURCES=2;$ENV{OTB_TF_NSOURCES}")
+set_tests_properties(apTvClTensorflowModelServeCNN8x8_32x32PB PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG;OTB_TF_NSOURCES=2;$ENV{OTB_TF_NSOURCES}")
+
 
 #----------- Model serving : 2-branch CNN (8x8, 32x32) Fully-Conv ----------------
 set(ENV{OTB_TF_NSOURCES} 2)
@@ -107,7 +111,7 @@ otb_test_application(NAME apTvClTensorflowModelServeCNN8x8_32x32FC
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${MODEL2_FC_OUT}
   ${TEMP}/${MODEL2_FC_OUT})
-set_tests_properties(apTvClTensorflowModelServeCNN8x8_32x32FC PROPERTIES ENVIRONMENT "OTB_TF_NSOURCES=2;$ENV{OTB_TF_NSOURCES}")
+set_tests_properties(apTvClTensorflowModelServeCNN8x8_32x32FC PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG;OTB_TF_NSOURCES=2;$ENV{OTB_TF_NSOURCES}")
 
 #----------- Model serving : 1-branch FCNN (16x16) Patch-Based ----------------
 set(ENV{OTB_TF_NSOURCES} 1)
@@ -120,6 +124,8 @@ otb_test_application(NAME apTvClTensorflowModelServeFCNN16x16PB
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${MODEL3_PB_OUT}
   ${TEMP}/${MODEL3_PB_OUT})
+set_tests_properties(apTvClTensorflowModelServeFCNN16x16PB PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG}")
+
 
 #----------- Model serving : 1-branch FCNN (16x16) Fully-conv ----------------
 set(ENV{OTB_TF_NSOURCES} 1)
@@ -132,10 +138,11 @@ otb_test_application(NAME apTvClTensorflowModelServeFCNN16x16FC
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${MODEL3_FC_OUT}
   ${TEMP}/${MODEL3_FC_OUT})
+set_tests_properties(apTvClTensorflowModelServeFCNN16x16FC PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG}")
 
 #----------- Model serving : 1-branch FCNN (64x64)-->(32x32), Fully-conv ----------------
 set(ENV{OTB_TF_NSOURCES} 1)
-otb_test_application(NAME apTvClTensorflowModelServeFCNN64x64to32x32.tif
+otb_test_application(NAME apTvClTensorflowModelServeFCNN64x64to32x32
   APP  TensorflowModelServe
   OPTIONS -source1.il ${IMAGEPXS2}
   -source1.rfieldx 64 -source1.rfieldy 64 -source1.placeholder x
@@ -145,5 +152,6 @@ otb_test_application(NAME apTvClTensorflowModelServeFCNN64x64to32x32.tif
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${MODEL4_FC_OUT}
   ${TEMP}/${MODEL4_FC_OUT})
+set_tests_properties(apTvClTensorflowModelServeFCNN64x64to32x32 PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG}")
 
 

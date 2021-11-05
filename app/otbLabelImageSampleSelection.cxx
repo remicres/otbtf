@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2020 INRAE
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -35,7 +35,7 @@ class LabelImageSampleSelection : public Application
 {
 public:
   /** Standard class typedefs. */
-  typedef LabelImageSampleSelection          Self;
+  typedef LabelImageSampleSelection           Self;
   typedef Application                         Superclass;
   typedef itk::SmartPointer<Self>             Pointer;
   typedef itk::SmartPointer<const Self>       ConstPointer;
@@ -385,4 +385,4 @@ private:
 } // end namespace wrapper
 } // end namespace otb
 
-OTB_APPLICATION_EXPORT( otb::Wrapper::LabelImageSampleSelection )
+OTB_APPLICATION_EXPORT(otb::Wrapper::LabelImageSampleSelection)
