@@ -92,7 +92,7 @@ otb_test_application(NAME PatchesExtractionEven
   -field id
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${PATCHESIMG_01}
-  ${TEMP}/${PATCHESIMG_01})
+  ${TEMP}/${PATCHESIMG_01}
   )
 
 # Odd patches
@@ -107,7 +107,7 @@ otb_test_application(NAME PatchesExtractionOdd
   -field id
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${PATCHESIMG_11}
-  ${TEMP}/${PATCHESIMG_11})
+  ${TEMP}/${PATCHESIMG_11}
   )
 
 #----------- Model training : 1-branch CNN (16x16) Patch-Based ----------------
