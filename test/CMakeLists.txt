@@ -32,6 +32,8 @@ set(PATCHESA ${DATADIR}/Sentinel-2_B4328_10m_patches_A.jp2)
 set(PATCHESB ${DATADIR}/Sentinel-2_B4328_10m_patches_B.jp2)
 set(LABELSA ${DATADIR}/Sentinel-2_B4328_10m_labels_A.tif)
 set(LABELSB ${DATADIR}/Sentinel-2_B4328_10m_labels_B.tif)
+set(PATCHES01 ${DATADIR}/Sentinel-2_B4328_10m_patches_A.jp2)
+set(PATCHES11 ${DATADIR}/Sentinel-2_B4328_10m_patches_B.jp2)
 
 # Input models
 set(MODEL1 ${MODELSDIR}/model1)
@@ -47,6 +49,66 @@ set(MODEL3_PB_OUT apTvClTensorflowModelServeFCNN16x16PB.tif)
 set(MODEL3_FC_OUT apTvClTensorflowModelServeFCNN16x16FC.tif)
 set(MODEL4_FC_OUT apTvClTensorflowModelServeFCNN64x64to32x32.tif)
 set(MODEL1_SAVED model1_updated)
+set(PATCHESIMG_01 patchimg_01.tif)
+set(PATCHESIMG_11 patchimg_11.tif)
+
+#----------- Patches selection ----------------
+set(PATCHESPOS_01 ${TEMP}/out_train_32.gpkg)
+set(PATCHESPOS_02 ${TEMP}/out_valid_32.gpkg)
+set(PATCHESPOS_11 ${TEMP}/out_train_33.gpkg)
+set(PATCHESPOS_12 ${TEMP}/out_valid_33.gpkg)
+# Even patches
+otb_test_application(NAME PatchesSelectionEven
+  APP  PatchesSelection
+  OPTIONS 
+  -in ${IMAGEPXS2}
+  -grid.step 32
+  -grid.psize 32
+  -outtrain ${PATCHESPOS_01}
+  -outvalid ${PATCHESPOS_02}
+  )
+  
+# Odd patches
+otb_test_application(NAME PatchesSelectionOdd
+  APP  PatchesSelection
+  OPTIONS 
+  -in ${IMAGEPXS2}
+  -grid.step 32
+  -grid.psize 33
+  -outtrain ${PATCHESPOS_11}
+  -outvalid ${PATCHESPOS_12}
+  )
+
+#----------- Patches extraction ----------------
+# Even patches
+otb_test_application(NAME PatchesExtractionEven
+  APP  PatchesExtraction
+  OPTIONS 
+  -source1.il ${IMAGEPXS2}
+  -source1.patchsizex 32
+  -source1.patchsizey 32
+  -source1.out ${TEMP}/${PATCHESIMG_01}
+  -vec ${PATCHESPOS_01}
+  -field id
+  VALID --compare-image ${EPSILON_6}
+  ${DATADIR}/${PATCHESIMG_01}
+  ${TEMP}/${PATCHESIMG_01}
+  )
+
+# Odd patches
+otb_test_application(NAME PatchesExtractionOdd
+  APP  PatchesExtraction
+  OPTIONS 
+  -source1.il ${IMAGEPXS2}
+  -source1.patchsizex 33
+  -source1.patchsizey 33
+  -source1.out ${TEMP}/${PATCHESIMG_11}
+  -vec ${PATCHESPOS_11}
+  -field id
+  VALID --compare-image ${EPSILON_6}
+  ${DATADIR}/${PATCHESIMG_11}
+  ${TEMP}/${PATCHESIMG_11}
+  )
 
 #----------- Model training : 1-branch CNN (16x16) Patch-Based ----------------
 set(ENV{OTB_LOGGER_LEVEL} DEBUG)
