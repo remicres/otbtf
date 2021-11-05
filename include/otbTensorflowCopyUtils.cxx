@@ -181,6 +181,8 @@ GetNumberOfChannelsForOutputTensor(const tensorflow::Tensor & tensor)
   const int                     nDims = shape.dims();
   if (nDims == 1)
     return 1;
+  if (nDims == 3)
+    return 1;
   return shape.dim_size(nDims - 1);
 }
 
