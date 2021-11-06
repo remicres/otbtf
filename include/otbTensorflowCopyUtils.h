@@ -68,8 +68,9 @@ void SampleCenteredPatch(const typename TImage::Pointer inputPtr, const typename
 template<class TImage>
 void SampleCenteredPatch(const typename TImage::Pointer inputPtr, const typename TImage::PointType & centerCoord, const typename TImage::SizeType & patchSize, tensorflow::Tensor & tensor, unsigned int elemIdx);
 
-// Return the number of channels that the output tensor will occupy in the output image
-tensorflow::int64 GetNumberOfChannelsForOutputTensor(const tensorflow::Tensor & tensor);
+// Return the number of channels from the TensorflowShapeProto
+template<class T>
+tensorflow::int64 GetNumberOfChannelsFromShapeProto(const T & proto);
 
 // Copy a tensor into the image region
 template<class TImage, class TValueType>
