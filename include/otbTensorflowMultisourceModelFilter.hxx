@@ -286,7 +286,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
           "and the second and the third are for (x, y). The last is for the number of "
           "channels. ");
       }
-    unsigned int nComponents = tf::GetNumberOfChannelsFromShapeProto<tensorflow::TensorShapeProto>(protoShape);
+    unsigned int nComponents = tf::GetNumberOfChannelsFromShapeProto(protoShape);
     outputPixelSize += nComponents;
     }
 

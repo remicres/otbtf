@@ -174,9 +174,8 @@ SampleCenteredPatch(const typename TImage::Pointer     inputPtr,
 // shape {n, x, y}    --> 1 (e.g. a mono-channel patch)
 // shape {n, x, y, c} --> c (e.g. a multi-channel patch)
 //
-template<class T>
 tensorflow::int64
-GetNumberOfChannelsFromShapeProto(const T & proto)
+GetNumberOfChannelsFromShapeProto(const tensorflow::TensorShapeProto & proto)
 {
   const int nDims = proto.dim_size();
   if (nDims == 1)
@@ -209,7 +208,7 @@ CopyTensorToImageRegion(const tensorflow::Tensor &          tensor,
   // Get the number of component of the output image
   tensorflow::TensorShapeProto proto;
   tensor.shape().AsProto(&proto);
-  const tensorflow::int64 outputDimSize_C = GetNumberOfChannelsFromShapeProto<tensorflow::TensorShapeProto>(proto);
+  const tensorflow::int64 outputDimSize_C = GetNumberOfChannelsFromShapeProto(proto);
 
   // Number of columns (size x of the buffer)
   const tensorflow::int64 nCols = bufferRegion.GetSize(0);
