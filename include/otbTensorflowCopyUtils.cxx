@@ -167,33 +167,32 @@ SampleCenteredPatch(const typename TImage::Pointer     inputPtr,
   SampleCenteredPatch<TImage>(inputPtr, centerIndex, patchSize, tensor, elemIdx);
 }
 
-// Return the number of channels that the output tensor will occupy in the output image
 //
+// Return the number of channels from the TensorShapeProto
 // shape {n}          --> 1 (e.g. a label)
-// shape {n, c}       --> c (e.g. a vector)
-// shape {x, y, c}    --> c (e.g. a patch)
-// shape {n, x, y, c} --> c (e.g. some patches)
+// shape {n, c}       --> c (e.g. a pixel)
+// shape {n, x, y}    --> 1 (e.g. a mono-channel patch)
+// shape {n, x, y, c} --> c (e.g. a multi-channel patch)
 //
+template<class T>
 tensorflow::int64
-GetNumberOfChannelsForOutputTensor(const tensorflow::Tensor & tensor)
+GetNumberOfChannelsFromShapeProto(const T & proto)
 {
-  const tensorflow::TensorShape shape = tensor.shape();
-  const int                     nDims = shape.dims();
+  const int nDims = proto.dim_size();
   if (nDims == 1)
+    // e.g. a batch prediction, as flat tensor
     return 1;
   if (nDims == 3)
+    // typically when the last dimension in squeezed following a
+    // computation that does not keep dimensions (e.g. reduce_sum, etc.)
     return 1;
-  return shape.dim_size(nDims - 1);
+  // any other dimension: we assume that the last dimension represent the
+  // number of channels in the output image.
+  return proto.dim(nDims - 1).size();
 }
 
 //
 // Copy a tensor into the image region
-// TODO: Enable to change mapping from source tensor to image to make it more generic
-//
-// Right now, only the following output tensor shapes can be processed:
-// shape {n}          --> 1 (e.g. a label)
-// shape {n, c}       --> c (e.g. a vector)
-// shape {x, y, c}    --> c (e.g. a multichannel image)
 //
 template <class TImage, class TValueType>
 void
@@ -207,8 +206,10 @@ CopyTensorToImageRegion(const tensorflow::Tensor &          tensor,
   // Flatten the tensor
   auto tFlat = tensor.flat<TValueType>();
 
-  // Get the size of the last component of the tensor (see 'GetNumberOfChannelsForOutputTensor(...)')
-  const tensorflow::int64 outputDimSize_C = GetNumberOfChannelsForOutputTensor(tensor);
+  // Get the number of component of the output image
+  tensorflow::TensorShapeProto proto;
+  tensor.shape().AsProto(&proto);
+  const tensorflow::int64 outputDimSize_C = GetNumberOfChannelsFromShapeProto<tensorflow::TensorShapeProto>(proto);
 
   // Number of columns (size x of the buffer)
   const tensorflow::int64 nCols = bufferRegion.GetSize(0);
