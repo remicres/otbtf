@@ -17,11 +17,6 @@
 // Iterator
 #include "itkImageRegionConstIteratorWithOnlyIndex.h"
 
-// Tensorflow helpers
-#include "otbTensorflowGraphOperations.h"
-#include "otbTensorflowDataTypeBridge.h"
-#include "otbTensorflowCopyUtils.h"
-
 // Tile hint
 #include "itkMetaDataObject.h"
 #include "otbMetaDataKey.h"
