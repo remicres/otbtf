@@ -274,7 +274,12 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     // Find the number of components
     int dim_size = protoShape.dim_size();
     unsigned int nComponents = 1;
-    if (dim_size == 3)
+    if (dim_size == 1)
+    {
+      // The output is a flatten tensor
+      nComponents = 1;
+    }
+    else if (dim_size == 3)
       {
       // In the specific case of tensors of size [None, None, None],
       // we assume that the dimensions are [batch, x, y]
