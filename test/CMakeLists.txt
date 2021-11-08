@@ -40,6 +40,7 @@ set(MODEL1 ${MODELSDIR}/model1)
 set(MODEL2 ${MODELSDIR}/model2)
 set(MODEL3 ${MODELSDIR}/model3)
 set(MODEL4 ${MODELSDIR}/model4)
+set(MODEL5 ${MODELSDIR}/model5)
 
 # Output images and baselines
 set(MODEL1_PB_OUT apTvClTensorflowModelServeCNN16x16PB.tif)
@@ -51,6 +52,7 @@ set(MODEL4_FC_OUT apTvClTensorflowModelServeFCNN64x64to32x32.tif)
 set(MODEL1_SAVED model1_updated)
 set(PATCHESIMG_01 patchimg_01.tif)
 set(PATCHESIMG_11 patchimg_11.tif)
+set(MODEL5_OUT reduce_sum.tif)
 
 #----------- Patches selection ----------------
 set(PATCHESPOS_01 ${TEMP}/out_train_32.gpkg)
@@ -215,5 +217,45 @@ otb_test_application(NAME apTvClTensorflowModelServeFCNN64x64to32x32
   ${DATADIR}/${MODEL4_FC_OUT}
   ${TEMP}/${MODEL4_FC_OUT})
 set_tests_properties(apTvClTensorflowModelServeFCNN64x64to32x32 PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG}")
+
+#----------- Test various output tensor shapes ----------------
+# We test the following output shapes on one monochannel image:
+# [None]
+# [None, 1]
+# [None, None, None]
+# [None, None, None, 1]
+set(ENV{OTB_TF_NSOURCES} 1)
+otb_test_application(NAME outputTensorShapesTest1pb
+  APP  TensorflowModelServe
+  OPTIONS -source1.il ${IMAGEPAN} -model.dir ${MODEL5} -out ${TEMP}/${MODEL5_OUT} -output.names "tf.reshape"
+  VALID --compare-image ${EPSILON_6} ${IMAGEPAN} ${TEMP}/${MODEL5_OUT})
+otb_test_application(NAME outputTensorShapesTest1fc
+  APP  TensorflowModelServe
+  OPTIONS -source1.il ${IMAGEPAN} -model.dir ${MODEL5} -model.fullyconv on -out ${TEMP}/${MODEL5_OUT} -output.names "tf.reshape"
+  VALID --compare-image ${EPSILON_6} ${IMAGEPAN} ${TEMP}/${MODEL5_OUT})
+otb_test_application(NAME outputTensorShapesTest2pb
+  APP  TensorflowModelServe
+  OPTIONS -source1.il ${IMAGEPAN} -model.dir ${MODEL5} -out ${TEMP}/${MODEL5_OUT} -output.names "tf.reshape_1"
+  VALID --compare-image ${EPSILON_6} ${IMAGEPAN} ${TEMP}/${MODEL5_OUT})
+otb_test_application(NAME outputTensorShapesTest2fc
+  APP  TensorflowModelServe
+  OPTIONS -source1.il ${IMAGEPAN} -model.dir ${MODEL5} -model.fullyconv on -out ${TEMP}/${MODEL5_OUT} -output.names "tf.reshape_1"
+  VALID --compare-image ${EPSILON_6} ${IMAGEPAN} ${TEMP}/${MODEL5_OUT})
+otb_test_application(NAME outputTensorShapesTest3pb
+  APP  TensorflowModelServe
+  OPTIONS -source1.il ${IMAGEPAN} -model.dir ${MODEL5} -out ${TEMP}/${MODEL5_OUT} -output.names "tf.reshape_2"
+  VALID --compare-image ${EPSILON_6} ${IMAGEPAN} ${TEMP}/${MODEL5_OUT})
+otb_test_application(NAME outputTensorShapesTest3fc
+  APP  TensorflowModelServe
+  OPTIONS -source1.il ${IMAGEPAN} -model.dir ${MODEL5} -model.fullyconv on -out ${TEMP}/${MODEL5_OUT} -output.names "tf.reshape_2"
+  VALID --compare-image ${EPSILON_6} ${IMAGEPAN} ${TEMP}/${MODEL5_OUT})
+otb_test_application(NAME outputTensorShapesTest4pb
+  APP  TensorflowModelServe
+  OPTIONS -source1.il ${IMAGEPAN} -model.dir ${MODEL5} -out ${TEMP}/${MODEL5_OUT} -output.names "tf.reshape_3"
+  VALID --compare-image ${EPSILON_6} ${IMAGEPAN} ${TEMP}/${MODEL5_OUT})
+otb_test_application(NAME outputTensorShapesTest4fc
+  APP  TensorflowModelServe
+  OPTIONS -source1.il ${IMAGEPAN} -model.dir ${MODEL5} -model.fullyconv on -out ${TEMP}/${MODEL5_OUT} -output.names "tf.reshape_3"
+  VALID --compare-image ${EPSILON_6} ${IMAGEPAN} ${TEMP}/${MODEL5_OUT})
 
 

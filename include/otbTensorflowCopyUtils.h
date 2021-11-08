@@ -25,6 +25,7 @@
 // tensorflow::tensor
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/tensor_shape.h"
+#include "tensorflow/core/framework/tensor_shape.pb.h"
 
 // tensorflow::datatype <--> ImageType::InternalPixelType
 #include "otbTensorflowDataTypeBridge.h"
@@ -68,8 +69,8 @@ void SampleCenteredPatch(const typename TImage::Pointer inputPtr, const typename
 template<class TImage>
 void SampleCenteredPatch(const typename TImage::Pointer inputPtr, const typename TImage::PointType & centerCoord, const typename TImage::SizeType & patchSize, tensorflow::Tensor & tensor, unsigned int elemIdx);
 
-// Return the number of channels that the output tensor will occupy in the output image
-tensorflow::int64 GetNumberOfChannelsForOutputTensor(const tensorflow::Tensor & tensor);
+// Return the number of channels from the TensorflowShapeProto
+tensorflow::int64 GetNumberOfChannelsFromShapeProto(const tensorflow::TensorShapeProto & proto);
 
 // Copy a tensor into the image region
 template<class TImage, class TValueType>
