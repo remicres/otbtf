@@ -271,17 +271,22 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   unsigned int outputPixelSize = 0;
   for (auto& protoShape: this->GetOutputTensorsShapes())
     {
-    // The number of components per pixel is the last dimension of the tensor
-    int dim_size = protoShape.dim_size();
-    unsigned int nComponents = 1;
-    if (1 < dim_size && dim_size <= 4)
+    // Find the number of components
+    if (protoShape.dim_size() > 4)
       {
-      nComponents = protoShape.dim(dim_size-1).size();
+      itkExceptionMacro("dim_size=" << protoShape.dim_size() << " currently not supported. "
+          "Keep in mind that output tensors must have 1, 2, 3 or 4 dimensions. "
+          "In the case of 1-dimensional tensor, the first dimension is for the batch, "
+          "and we assume that the output tensor has 1 channel. "
+          "In the case of 2-dimensional tensor, the first dimension is for the batch, "
+          "and the second is the number of components. "
+          "In the case of 3-dimensional tensor, the first dimension is for the batch, "
+          "and other dims are for (x, y). "
+          "In the case of 4-dimensional tensor, the first dimension is for the batch, "
+          "and the second and the third are for (x, y). The last is for the number of "
+          "channels. ");
       }
-    else if (dim_size > 4)
-      {
-      itkExceptionMacro("Dim_size=" << dim_size << " currently not supported.");
-      }
+    unsigned int nComponents = tf::GetNumberOfChannelsFromShapeProto(protoShape);
     outputPixelSize += nComponents;
     }
 
