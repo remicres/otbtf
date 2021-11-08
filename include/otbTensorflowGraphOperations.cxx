@@ -109,7 +109,7 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
 
   // Next, we fill layerNames
   int k = 0; // counter used for tensorsNames
-  for (auto const & name: tensorsNames)
+  for (auto const & name : tensorsNames)
   {
     bool                   found = false;
     tensorflow::TensorInfo tensor_info;
@@ -143,7 +143,7 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
           otbLogMacro(Debug, << "Found: " << layer.second.name() << " in the model");
         }
       } // next layer
-    } // end else
+    }   // end else
 
     k += 1;
 
@@ -178,7 +178,7 @@ PrintNodeAttributes(const tensorflow::GraphDef & graph, const std::vector<std::s
     tensorflow::NodeDef node = graph.node(i);
     std::cout << i << "\t" << node.name() << std::endl;
 
-    for (auto const & name: nodesNames)
+    for (auto const & name : nodesNames)
     {
       if (node.name().compare(name) == 0)
       {

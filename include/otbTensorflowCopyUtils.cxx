@@ -218,9 +218,10 @@ CopyTensorToImageRegion(const tensorflow::Tensor &          tensor,
   const tensorflow::int64 nElmI = bufferRegion.GetNumberOfPixels() * outputDimSize_C;
   if (nElmI != nElmT)
   {
-    itkGenericExceptionMacro("Number of elements in the tensor is " << nElmT 
-                             << " but image outputRegion has " << nElmI << " values to fill.\n"
-                             << "Buffer region is: \n" << bufferRegion << "\n"
+    itkGenericExceptionMacro("Number of elements in the tensor is "
+                             << nElmT << " but image outputRegion has " << nElmI << " values to fill.\n"
+                             << "Buffer region is: \n"
+                             << bufferRegion << "\n"
                              << "Number of components in the output image: " << outputDimSize_C << "\n"
                              << "Tensor shape: " << PrintTensorShape(tensor.shape()) << "\n"
                              << "Please check the input(s) field of view (FOV), "
@@ -347,7 +348,7 @@ ValueToTensor(std::string value)
   }
 
   // Create tensor
-  tensorflow::TensorShape shape({values.size()});
+  tensorflow::TensorShape shape({ values.size() });
   tensorflow::Tensor      out(tensorflow::DT_BOOL, shape);
   if (is_digit)
   {
@@ -409,7 +410,7 @@ ValueToTensor(std::string value)
     }
     idx++;
   }
-  otbLogMacro(Debug,  << "Returning tensor: "<< out.DebugString());
+  otbLogMacro(Debug, << "Returning tensor: " << out.DebugString());
 
   return out;
 }

@@ -34,11 +34,9 @@ namespace otb
  * \ingroup OTBTensorflow
  */
 template <class TInputImage>
-class ITK_EXPORT TensorflowMultisourceModelTrain :
-public TensorflowMultisourceModelLearningBase<TInputImage>
+class ITK_EXPORT TensorflowMultisourceModelTrain : public TensorflowMultisourceModelLearningBase<TInputImage>
 {
 public:
-
   /** Standard class typedefs. */
   typedef TensorflowMultisourceModelTrain                     Self;
   typedef TensorflowMultisourceModelLearningBase<TInputImage> Superclass;
@@ -52,25 +50,27 @@ public:
   itkTypeMacro(TensorflowMultisourceModelTrain, TensorflowMultisourceModelLearningBase);
 
   /** Superclass typedefs */
-  typedef typename Superclass::DictType          DictType;
-  typedef typename Superclass::TensorListType    TensorListType;
-  typedef typename Superclass::IndexValueType    IndexValueType;
-  typedef typename Superclass::IndexListType     IndexListType;
+  typedef typename Superclass::DictType       DictType;
+  typedef typename Superclass::TensorListType TensorListType;
+  typedef typename Superclass::IndexValueType IndexValueType;
+  typedef typename Superclass::IndexListType  IndexListType;
 
 
 protected:
   TensorflowMultisourceModelTrain();
-  virtual ~TensorflowMultisourceModelTrain() {};
+  virtual ~TensorflowMultisourceModelTrain(){};
 
-  virtual void GenerateData();
-  virtual void ProcessBatch(DictType & inputs, const IndexValueType & sampleStart,
-      const IndexValueType & batchSize);
+  virtual void
+  GenerateData();
+  virtual void
+  ProcessBatch(DictType & inputs, const IndexValueType & sampleStart, const IndexValueType & batchSize);
 
 private:
-  TensorflowMultisourceModelTrain(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
+  TensorflowMultisourceModelTrain(const Self &); // purposely not implemented
+  void
+  operator=(const Self &); // purposely not implemented
 
-  IndexListType     m_RandomIndices;           // Reordered indices
+  IndexListType m_RandomIndices; // Reordered indices
 
 }; // end class
 

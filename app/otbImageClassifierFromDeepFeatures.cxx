@@ -34,23 +34,23 @@ class ImageClassifierFromDeepFeatures : public CompositeApplication
 {
 public:
   /** Standard class typedefs. */
-  typedef ImageClassifierFromDeepFeatures              Self;
-  typedef Application                         Superclass;
-  typedef itk::SmartPointer<Self>             Pointer;
-  typedef itk::SmartPointer<const Self>       ConstPointer;
+  typedef ImageClassifierFromDeepFeatures Self;
+  typedef Application                     Superclass;
+  typedef itk::SmartPointer<Self>         Pointer;
+  typedef itk::SmartPointer<const Self>   ConstPointer;
 
   /** Standard macro */
   itkNewMacro(Self);
   itkTypeMacro(ImageClassifierFromDeepFeatures, otb::Wrapper::CompositeApplication);
 
 private:
-
   //
   // Add an input source, which includes:
   // -an input image list
   // -an input patchsize (dimensions of samples)
   //
-  void AddAnInputImage(int inputNumber = 0)
+  void
+  AddAnInputImage(int inputNumber = 0)
   {
     inputNumber++;
 
@@ -64,7 +64,8 @@ private:
   }
 
 
-  void DoInit()
+  void
+  DoInit()
   {
 
     SetName("ImageClassifierFromDeepFeatures");
@@ -81,48 +82,48 @@ private:
     ClearApplications();
 
     // Add applications
-    AddApplication("ImageClassifier",      "classif", "Images classifier"  );
-    AddApplication("TensorflowModelServe", "tfmodel", "Serve the TF model" );
+    AddApplication("ImageClassifier", "classif", "Images classifier");
+    AddApplication("TensorflowModelServe", "tfmodel", "Serve the TF model");
 
     // Model shared parameters
     AddAnInputImage();
-    for (int i = 1; i < tf::GetNumberOfSources() ; i++)
+    for (int i = 1; i < tf::GetNumberOfSources(); i++)
     {
       AddAnInputImage(i);
     }
-    ShareParameter("deepmodel",  "tfmodel.model",
-        "Deep net model parameters",      "Deep net model parameters");
-    ShareParameter("output",     "tfmodel.output",
-        "Deep net outputs parameters",
-        "Deep net outputs parameters");
-    ShareParameter("optim", "tfmodel.optim",
-        "This group of parameters allows optimization of processing time",
-        "This group of parameters allows optimization of processing time");
+    ShareParameter("deepmodel", "tfmodel.model", "Deep net model parameters", "Deep net model parameters");
+    ShareParameter("output", "tfmodel.output", "Deep net outputs parameters", "Deep net outputs parameters");
+    ShareParameter("optim",
+                   "tfmodel.optim",
+                   "This group of parameters allows optimization of processing time",
+                   "This group of parameters allows optimization of processing time");
 
     // Classify shared parameters
-    ShareParameter("model"      , "classif.model"      , "Model file"          , "Model file"          );
-    ShareParameter("imstat"     , "classif.imstat"     , "Statistics file"     , "Statistics file"     );
-    ShareParameter("nodatalabel", "classif.nodatalabel", "Label mask value"    , "Label mask value"    );
-    ShareParameter("out"        , "classif.out"        , "Output image"        , "Output image"        );
-    ShareParameter("confmap"    , "classif.confmap"    , "Confidence map image", "Confidence map image");
-    ShareParameter("ram"        , "classif.ram"        , "Ram"                 , "Ram"                 );
+    ShareParameter("model", "classif.model", "Model file", "Model file");
+    ShareParameter("imstat", "classif.imstat", "Statistics file", "Statistics file");
+    ShareParameter("nodatalabel", "classif.nodatalabel", "Label mask value", "Label mask value");
+    ShareParameter("out", "classif.out", "Output image", "Output image");
+    ShareParameter("confmap", "classif.confmap", "Confidence map image", "Confidence map image");
+    ShareParameter("ram", "classif.ram", "Ram", "Ram");
   }
 
-  void DoUpdateParameters()
+  void
+  DoUpdateParameters()
   {
     UpdateInternalParameters("classif");
   }
 
-  void DoExecute()
+  void
+  DoExecute()
   {
     ExecuteInternal("tfmodel");
-    GetInternalApplication("classif")->SetParameterInputImage("in", GetInternalApplication("tfmodel")->GetParameterOutputImage("out"));
+    GetInternalApplication("classif")->SetParameterInputImage(
+      "in", GetInternalApplication("tfmodel")->GetParameterOutputImage("out"));
     UpdateInternalParameters("classif");
     ExecuteInternal("classif");
   }
-
 };
 } // namespace Wrapper
 } // namespace otb
 
-OTB_APPLICATION_EXPORT( otb::Wrapper::ImageClassifierFromDeepFeatures )
+OTB_APPLICATION_EXPORT(otb::Wrapper::ImageClassifierFromDeepFeatures)
