@@ -1,0 +1,92 @@
+image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
+
+variables:
+    OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
+    OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
+
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID             # Execute jobs in merge request context
+    - if: $CI_COMMIT_BRANCH == 'develop'   # Execute jobs when a new commit is pushed to develop branch
+    
+stages:
+  - Build
+  - Static Analysis
+  - Test
+
+.update_otbtf_src: &update_otbtf_src
+  - sudo rm -rf $OTBTF_SRC && sudo ln -s $PWD $OTBTF_SRC  # Replace local OTBTF source directory
+
+.compile_otbtf: &compile_otbtf
+  - cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
+
+before_script:
+  - *update_otbtf_src
+
+build:
+  stage: Build
+  allow_failure: false
+  script:
+    - *compile_otbtf
+
+flake8:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+    - sudo apt update && sudo apt install flake8 -y
+    - python -m flake8 --max-line-length=120 $OTBTF_SRC/python
+
+pylint:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+    - sudo apt update && sudo apt install pylint -y
+    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 --logging-format-style=new $OTBTF_SRC/python
+
+codespell:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+    - sudo pip install codespell && codespell
+    
+cppcheck:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+    - sudo apt update && sudo apt install cppcheck -y
+    - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
+
+ctest:
+  stage: Test
+  script:
+    - *compile_otbtf
+    - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
+    - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
+  after_script:
+    - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/testing  # Copy artifacts (they must be in $CI_PROJECT_DIR)
+  artifacts:
+    paths:
+      - testing/*.*
+    expire_in: 1 week
+    when: on_failure
+
+sr4rs:
+  stage: Test
+  script:
+    - *compile_otbtf
+    - pip3 install pytest pytest-cov
+    - cd $CI_PROJECT_DIR
+    - wget -O sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+      https://nextcloud.inrae.fr/s/boabW9yCjdpLPGX/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+    - unzip -o sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+    - wget -O sr4rs_data.zip https://nextcloud.inrae.fr/s/qMLLyKCDieqmgWz/download
+    - unzip -o sr4rs_data.zip
+    - rm -rf sr4rs
+    - git clone https://github.com/remicres/sr4rs.git
+    - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
+    - python -m pytest --junitxml=$CI_PROJECT_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
+  artifacts:
+    when: on_failure
+    paths:
+      - $CI_PROJECT_DIR/report_sr4rs.xml
+    expire_in: 1 week

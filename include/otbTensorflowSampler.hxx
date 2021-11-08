@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -18,36 +18,35 @@ namespace otb
 {
 
 template <class TInputImage, class TVectorData>
-TensorflowSampler<TInputImage, TVectorData>
-::TensorflowSampler()
- {
+TensorflowSampler<TInputImage, TVectorData>::TensorflowSampler()
+{
   m_NumberOfAcceptedSamples = 0;
   m_NumberOfRejectedSamples = 0;
   m_RejectPatchesWithNodata = false;
- }
+}
 
 template <class TInputImage, class TVectorData>
 void
-TensorflowSampler<TInputImage, TVectorData>
-::PushBackInputWithPatchSize(const ImageType *input, SizeType & patchSize, InternalPixelType nodataval)
- {
-  this->ProcessObject::PushBackInput(const_cast<ImageType*>(input));
+TensorflowSampler<TInputImage, TVectorData>::PushBackInputWithPatchSize(const ImageType * input,
+                                                                        SizeType &        patchSize,
+                                                                        InternalPixelType nodataval)
+{
+  this->ProcessObject::PushBackInput(const_cast<ImageType *>(input));
   m_PatchSizes.push_back(patchSize);
   m_NoDataValues.push_back(nodataval);
- }
+}
 
 template <class TInputImage, class TVectorData>
-const TInputImage*
-TensorflowSampler<TInputImage, TVectorData>
-::GetInput(unsigned int index)
- {
+const TInputImage *
+TensorflowSampler<TInputImage, TVectorData>::GetInput(unsigned int index)
+{
   if (this->GetNumberOfInputs() < 1)
   {
     itkExceptionMacro("Input not set");
   }
 
-  return static_cast<const ImageType*>(this->ProcessObject::GetInput(index));
- }
+  return static_cast<const ImageType *>(this->ProcessObject::GetInput(index));
+}
 
 
 /**
@@ -55,9 +54,10 @@ TensorflowSampler<TInputImage, TVectorData>
  */
 template <class TInputImage, class TVectorData>
 void
-TensorflowSampler<TInputImage, TVectorData>
-::ResizeImage(ImagePointerType & image, SizeType & patchSize, unsigned int nbSamples)
- {
+TensorflowSampler<TInputImage, TVectorData>::ResizeImage(ImagePointerType & image,
+                                                         SizeType &         patchSize,
+                                                         unsigned int       nbSamples)
+{
   // New image region
   RegionType region;
   region.SetSize(0, patchSize[0]);
@@ -71,16 +71,18 @@ TensorflowSampler<TInputImage, TVectorData>
 
   // Assign
   image = resizer->GetOutput();
- }
+}
 
 /**
  * Allocate an image given a patch size and a number of samples
  */
 template <class TInputImage, class TVectorData>
 void
-TensorflowSampler<TInputImage, TVectorData>
-::AllocateImage(ImagePointerType & image, SizeType & patchSize, unsigned int nbSamples, unsigned int nbComponents)
- {
+TensorflowSampler<TInputImage, TVectorData>::AllocateImage(ImagePointerType & image,
+                                                           SizeType &         patchSize,
+                                                           unsigned int       nbSamples,
+                                                           unsigned int       nbComponents)
+{
   // Image region
   RegionType region;
   region.SetSize(0, patchSize[0]);
@@ -91,16 +93,15 @@ TensorflowSampler<TInputImage, TVectorData>
   image->SetNumberOfComponentsPerPixel(nbComponents);
   image->SetRegions(region);
   image->Allocate();
- }
+}
 
 /**
  * Do the work
  */
 template <class TInputImage, class TVectorData>
 void
-TensorflowSampler<TInputImage, TVectorData>
-::Update()
- {
+TensorflowSampler<TInputImage, TVectorData>::Update()
+{
 
   // Check number of inputs
   if (this->GetNumberOfInputs() != m_PatchSizes.size())
@@ -109,8 +110,8 @@ TensorflowSampler<TInputImage, TVectorData>
   }
 
   // Count points
-  unsigned int nTotal = 0;
-  unsigned int geomId = 0;
+  unsigned int     nTotal = 0;
+  unsigned int     geomId = 0;
   TreeIteratorType itVector(m_InputVectorData->GetDataTree());
   itVector.GoToBegin();
   while (!itVector.IsAtEnd())
@@ -146,7 +147,7 @@ TensorflowSampler<TInputImage, TVectorData>
   const unsigned int nbInputs = this->GetNumberOfInputs();
   m_OutputPatchImages.clear();
   m_OutputPatchImages.reserve(nbInputs);
-  for (unsigned int i = 0 ; i < nbInputs ; i++)
+  for (unsigned int i = 0; i < nbInputs; i++)
   {
     ImagePointerType newImage;
     AllocateImage(newImage, m_PatchSizes[i], nTotal, GetInput(i)->GetNumberOfComponentsPerPixel());
@@ -154,13 +155,13 @@ TensorflowSampler<TInputImage, TVectorData>
     m_OutputPatchImages.push_back(newImage);
   }
 
-  itk::ProgressReporter progess(this, 0, nTotal);
+  itk::ProgressReporter progress(this, 0, nTotal);
 
   // Iterate on the vector data
   itVector.GoToBegin();
   unsigned long count = 0;
   unsigned long rejected = 0;
-  IndexType labelIndex;
+  IndexType     labelIndex;
   labelIndex[0] = 0;
   PixelType labelPix;
   labelPix.SetSize(1);
@@ -169,13 +170,13 @@ TensorflowSampler<TInputImage, TVectorData>
     if (!itVector.Get()->IsRoot() && !itVector.Get()->IsDocument() && !itVector.Get()->IsFolder())
     {
       DataNodePointer currentGeometry = itVector.Get();
-      PointType point = currentGeometry->GetPoint();
+      PointType       point = currentGeometry->GetPoint();
 
       // Get the label value
       labelPix[0] = static_cast<InternalPixelType>(currentGeometry->GetFieldAsInt(m_Field));
 
       bool hasBeenSampled = true;
-      for (unsigned int i = 0 ; i < nbInputs ; i++)
+      for (unsigned int i = 0; i < nbInputs; i++)
       {
         // Get input
         ImagePointerType inputPtr = const_cast<ImageType *>(this->GetInput(i));
@@ -188,7 +189,7 @@ TensorflowSampler<TInputImage, TVectorData>
         }
         // Check if the sampled patch contains a no-data value
         if (m_RejectPatchesWithNodata && hasBeenSampled)
-          {
+        {
           IndexType outIndex;
           outIndex[0] = 0;
           outIndex[1] = count * m_PatchSizes[i][1];
@@ -196,13 +197,13 @@ TensorflowSampler<TInputImage, TVectorData>
 
           IteratorType it(m_OutputPatchImages[i], region);
           for (it.GoToBegin(); !it.IsAtEnd(); ++it)
-            {
+          {
             PixelType pix = it.Get();
-            for (unsigned int band = 0 ; band < pix.Size() ; band++)
+            for (unsigned int band = 0; band < pix.Size(); band++)
               if (pix[band] == m_NoDataValues[i])
                 hasBeenSampled = false;
-            }
           }
+        }
       } // Next input
       if (hasBeenSampled)
       {
@@ -218,9 +219,8 @@ TensorflowSampler<TInputImage, TVectorData>
         rejected++;
       }
 
-      // Update progres
-      progess.CompletedPixel();
-
+      // Update progress
+      progress.CompletedPixel();
     }
 
     ++itVector;
@@ -228,7 +228,7 @@ TensorflowSampler<TInputImage, TVectorData>
 
   // Resize output images
   ResizeImage(m_OutputLabelImage, labelPatchSize, count);
-  for (unsigned int i = 0 ; i < nbInputs ; i++)
+  for (unsigned int i = 0; i < nbInputs; i++)
   {
     ResizeImage(m_OutputPatchImages[i], m_PatchSizes[i], count);
   }
@@ -236,8 +236,7 @@ TensorflowSampler<TInputImage, TVectorData>
   // Update number of samples produced
   m_NumberOfAcceptedSamples = count;
   m_NumberOfRejectedSamples = rejected;
-
- }
+}
 
 } // end namespace otb
 

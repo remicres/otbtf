@@ -59,7 +59,7 @@ When using a model in OTBTF, the important thing is to know the following parame
 
 ![Schema](doc/images/schema.png)
 
-The **scale factor** descibes the physical change of spacing of the outputs, typically introduced in the model by non unitary strides in pooling or convolution operators.
+The **scale factor** describes the physical change of spacing of the outputs, typically introduced in the model by non unitary strides in pooling or convolution operators.
 For each output, it is expressed relatively to one single input of the model called the _reference input source_.
 Additionally, the names of the _target nodes_ must be known (e.g. "optimizer").
 Also, the names of _user placeholders_, typically scalars placeholders that are used to control some parameters of the model, must be know (e.g. "dropout_rate").
@@ -356,7 +356,7 @@ But here, we will just perform some fine tuning of our model.
 The **SavedModel** is located in the `outmodel` directory.
 Our model is quite basic: it has two input placeholders, **x1** and **y1** respectively for input patches (with size 16x16) and input reference labels (with size 1x1).
 We named **prediction** the tensor that predict the labels and the optimizer that perform the stochastic gradient descent is an operator named **optimizer**.
-We perform the fine tuning and we export the new model variables directly in the _outmodel/variables_ folder, overwritting the existing variables of the model.
+We perform the fine tuning and we export the new model variables directly in the _outmodel/variables_ folder, overwriting the existing variables of the model.
 We use the **TensorflowModelTrain** application to perform the training of this existing model.
 ```
 otbcli_TensorflowModelTrain -model.dir /path/to/oursavedmodel -training.targetnodesnames optimizer -training.source1.il samp_patches.tif -training.source1.patchsizex 16 -training.source1.patchsizey 16 -training.source1.placeholder x1 -training.source2.il samp_labels.tif -training.source2.patchsizex 1 -training.source2.patchsizey 1 -training.source2.placeholder y1 -model.saveto /path/to/oursavedmodel/variables/variables

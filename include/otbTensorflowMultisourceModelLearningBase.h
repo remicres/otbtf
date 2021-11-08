@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -53,37 +53,35 @@ namespace otb
  * \ingroup OTBTensorflow
  */
 template <class TInputImage>
-class ITK_EXPORT TensorflowMultisourceModelLearningBase :
-public TensorflowMultisourceModelBase<TInputImage>
+class ITK_EXPORT TensorflowMultisourceModelLearningBase : public TensorflowMultisourceModelBase<TInputImage>
 {
 public:
-
   /** Standard class typedefs. */
-  typedef TensorflowMultisourceModelLearningBase       Self;
-  typedef TensorflowMultisourceModelBase<TInputImage>  Superclass;
-  typedef itk::SmartPointer<Self>                      Pointer;
-  typedef itk::SmartPointer<const Self>                ConstPointer;
+  typedef TensorflowMultisourceModelLearningBase      Self;
+  typedef TensorflowMultisourceModelBase<TInputImage> Superclass;
+  typedef itk::SmartPointer<Self>                     Pointer;
+  typedef itk::SmartPointer<const Self>               ConstPointer;
 
   /** Run-time type information (and related methods). */
   itkTypeMacro(TensorflowMultisourceModelLearningBase, TensorflowMultisourceModelBase);
 
   /** Images typedefs */
-  typedef typename Superclass::ImageType         ImageType;
-  typedef typename Superclass::ImagePointerType  ImagePointerType;
-  typedef typename Superclass::RegionType        RegionType;
-  typedef typename Superclass::SizeType          SizeType;
-  typedef typename Superclass::IndexType         IndexType;
+  typedef typename Superclass::ImageType        ImageType;
+  typedef typename Superclass::ImagePointerType ImagePointerType;
+  typedef typename Superclass::RegionType       RegionType;
+  typedef typename Superclass::SizeType         SizeType;
+  typedef typename Superclass::IndexType        IndexType;
 
   /* Typedefs for parameters */
-  typedef typename Superclass::DictType          DictType;
-  typedef typename Superclass::DictElementType   DictElementType;
-  typedef typename Superclass::StringList        StringList;
-  typedef typename Superclass::SizeListType      SizeListType;
-  typedef typename Superclass::TensorListType    TensorListType;
+  typedef typename Superclass::DictType        DictType;
+  typedef typename Superclass::DictElementType DictElementType;
+  typedef typename Superclass::StringList      StringList;
+  typedef typename Superclass::SizeListType    SizeListType;
+  typedef typename Superclass::TensorListType  TensorListType;
 
   /* Typedefs for index */
-  typedef typename ImageType::IndexValueType     IndexValueType;
-  typedef std::vector<IndexValueType>            IndexListType;
+  typedef typename ImageType::IndexValueType IndexValueType;
+  typedef std::vector<IndexValueType>        IndexListType;
 
   // Batch size
   itkSetMacro(BatchSize, IndexValueType);
@@ -98,29 +96,36 @@ public:
 
 protected:
   TensorflowMultisourceModelLearningBase();
-  virtual ~TensorflowMultisourceModelLearningBase() {};
+  virtual ~TensorflowMultisourceModelLearningBase(){};
 
-  virtual void GenerateOutputInformation(void);
+  virtual void
+  GenerateOutputInformation(void) override;
 
-  virtual void GenerateInputRequestedRegion();
+  virtual void
+  GenerateInputRequestedRegion();
 
-  virtual void GenerateData();
+  virtual void
+  GenerateData();
 
-  virtual void PopulateInputTensors(DictType & inputs, const IndexValueType & sampleStart,
-      const IndexValueType & batchSize, const IndexListType & order);
+  virtual void
+  PopulateInputTensors(DictType &             inputs,
+                       const IndexValueType & sampleStart,
+                       const IndexValueType & batchSize,
+                       const IndexListType &  order);
 
-  virtual void ProcessBatch(DictType & inputs, const IndexValueType & sampleStart,
-      const IndexValueType & batchSize) = 0;
+  virtual void
+  ProcessBatch(DictType & inputs, const IndexValueType & sampleStart, const IndexValueType & batchSize) = 0;
 
 private:
-  TensorflowMultisourceModelLearningBase(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
+  TensorflowMultisourceModelLearningBase(const Self &); // purposely not implemented
+  void
+  operator=(const Self &); // purposely not implemented
 
-  unsigned int          m_BatchSize;       // Batch size
-  bool                  m_UseStreaming;    // Use streaming on/off
+  unsigned int m_BatchSize;    // Batch size
+  bool         m_UseStreaming; // Use streaming on/off
 
   // Read only
-  IndexValueType        m_NumberOfSamples; // Number of samples
+  IndexValueType m_NumberOfSamples; // Number of samples
 
 }; // end class
 

@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -19,13 +19,15 @@ namespace tf
 //
 // Update the distribution of the patch located at the specified location
 //
-template<class TImage, class TDistribution>
-bool UpdateDistributionFromPatch(const typename TImage::Pointer inPtr,
-    typename TImage::PointType point, typename TImage::SizeType patchSize,
-    TDistribution & dist)
+template <class TImage, class TDistribution>
+bool
+UpdateDistributionFromPatch(const typename TImage::Pointer inPtr,
+                            typename TImage::PointType     point,
+                            typename TImage::SizeType      patchSize,
+                            TDistribution &                dist)
 {
   typename TImage::IndexType index;
-  bool canTransform = inPtr->TransformPhysicalPointToIndex(point, index);
+  bool                       canTransform = inPtr->TransformPhysicalPointToIndex(point, index);
   if (canTransform)
   {
     index[0] -= patchSize[0] / 2;
@@ -38,7 +40,7 @@ bool UpdateDistributionFromPatch(const typename TImage::Pointer inPtr,
       // Fill patch
       PropagateRequestedRegion<TImage>(inPtr, inPatchRegion);
 
-      typename itk::ImageRegionConstIterator<TImage> inIt (inPtr, inPatchRegion);
+      typename itk::ImageRegionConstIterator<TImage> inIt(inPtr, inPatchRegion);
       for (inIt.GoToBegin(); !inIt.IsAtEnd(); ++inIt)
       {
         dist.Update(inIt.Get());
@@ -47,7 +49,6 @@ bool UpdateDistributionFromPatch(const typename TImage::Pointer inPtr,
     }
   }
   return false;
-
 }
 
 

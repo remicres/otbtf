@@ -74,7 +74,7 @@ docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia
 
 ### Build for another machine and save TF compiled files 
 ```bash
-# Use same ubuntu and CUDA version than your target machine, beware of CC optimization and CPU compatibilty
+# Use same ubuntu and CUDA version than your target machine, beware of CC optimization and CPU compatibility
 # (set env variable CC_OPT_FLAGS and avoid "-march=native" if your Docker's CPU is optimized with AVX2/AVX512 but your target CPU isn't)
 docker build --network='host' -t otbtf:custom --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 \
     --build-arg TF=v2.5.0 --build-arg ZIP_TF_BIN=true .
@@ -146,7 +146,7 @@ $ mapla
 ```
 
 ## Common errors
-Buid :  
+Build :  
 `Error response from daemon: manifest for nvidia/cuda:11.0-cudnn8-devel-ubuntu20.04 not found: manifest unknown: manifest unknown`  
 => Image is missing from dockerhub
 

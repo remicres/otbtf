@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # ==========================================================================
 #
-#   Copyright 2018-2019 Remi Cresson (IRSTEA)
-#   Copyright 2020 Remi Cresson (INRAE)
+#   Copyright 2018-2019 IRSTEA
+#   Copyright 2020-2021 INRAE
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,57 +17,57 @@
 #   limitations under the License.
 #
 # ==========================================================================*/
+"""
+Contains stuff to help working with TensorFlow and geospatial data in the
+OTBTF framework.
+"""
 import threading
 import multiprocessing
 import time
+import logging
+from abc import ABC, abstractmethod
 import numpy as np
 import tensorflow as tf
 import gdal
-import logging
-from abc import ABC, abstractmethod
 
 
-"""
-------------------------------------------------------- Helpers --------------------------------------------------------
-"""
+# ----------------------------------------------------- Helpers --------------------------------------------------------
 
 
 def gdal_open(filename):
     """
     Open a GDAL raster
     :param filename: raster file
-    :return: a GDAL ds instance
+    :return: a GDAL dataset instance
     """
-    ds = gdal.Open(filename)
-    if ds is None:
+    gdal_ds = gdal.Open(filename)
+    if gdal_ds is None:
         raise Exception("Unable to open file {}".format(filename))
-    return ds
+    return gdal_ds
 
 
-def read_as_np_arr(ds, as_patches=True):
+def read_as_np_arr(gdal_ds, as_patches=True):
     """
     Read a GDAL raster as numpy array
-    :param ds: GDAL ds instance
+    :param gdal_ds: a GDAL dataset instance
     :param as_patches: if True, the returned numpy array has the following shape (n, psz_x, psz_x, nb_channels). If
         False, the shape is (1, psz_y, psz_x, nb_channels)
     :return: Numpy array of dim 4
     """
-    buffer = ds.ReadAsArray()
-    szx = ds.RasterXSize
+    buffer = gdal_ds.ReadAsArray()
+    size_x = gdal_ds.RasterXSize
     if len(buffer.shape) == 3:
         buffer = np.transpose(buffer, axes=(1, 2, 0))
     if not as_patches:
-        n = 1
-        szy = ds.RasterYSize
+        n_elems = 1
+        size_y = gdal_ds.RasterYSize
     else:
-        n = int(ds.RasterYSize / szx)
-        szy = szx
-    return np.float32(buffer.reshape((n, szy, szx, ds.RasterCount)))
+        n_elems = int(gdal_ds.RasterYSize / size_x)
+        size_y = size_x
+    return np.float32(buffer.reshape((n_elems, size_y, size_x, gdal_ds.RasterCount)))
 
 
-"""
----------------------------------------------------- Buffer class ------------------------------------------------------
-"""
+# -------------------------------------------------- Buffer class ------------------------------------------------------
 
 
 class Buffer:
@@ -80,19 +80,27 @@ class Buffer:
         self.container = []
 
     def size(self):
+        """
+        Returns the buffer size
+        """
         return len(self.container)
 
-    def add(self, x):
-        self.container.append(x)
-        assert (self.size() <= self.max_length)
+    def add(self, new_element):
+        """
+        Add an element in the buffer
+        :param new_element: new element to add
+        """
+        self.container.append(new_element)
+        assert self.size() <= self.max_length
 
     def is_complete(self):
+        """
+        Return True if the buffer is at full capacity
+        """
         return self.size() == self.max_length
 
 
-"""
------------------------------------------------- PatchesReaderBase class -----------------------------------------------
-"""
+# ---------------------------------------------- PatchesReaderBase class -----------------------------------------------
 
 
 class PatchesReaderBase(ABC):
@@ -106,7 +114,6 @@ class PatchesReaderBase(ABC):
         Return one sample.
         :return One sample instance, whatever the sample structure is (dict, numpy array, ...)
         """
-        pass
 
     @abstractmethod
     def get_stats(self) -> dict:
@@ -129,7 +136,6 @@ class PatchesReaderBase(ABC):
             "std": np.array([...])},
         }
         """
-        pass
 
     @abstractmethod
     def get_size(self):
@@ -137,12 +143,9 @@ class PatchesReaderBase(ABC):
         Returns the total number of samples
         :return: number of samples (int)
         """
-        pass
 
 
-"""
------------------------------------------------ PatchesImagesReader class ----------------------------------------------
-"""
+# --------------------------------------------- PatchesImagesReader class ----------------------------------------------
 
 
 class PatchesImagesReader(PatchesReaderBase):
@@ -174,66 +177,64 @@ class PatchesImagesReader(PatchesReaderBase):
         :param use_streaming: if True, the patches are read on the fly from the disc, nothing is kept in memory.
         """
 
-        assert (len(filenames_dict.values()) > 0)
+        assert len(filenames_dict.values()) > 0
 
-        # ds dict
-        self.ds = dict()
-        for src_key, src_filenames in filenames_dict.items():
-            self.ds[src_key] = []
-            for src_filename in src_filenames:
-                self.ds[src_key].append(gdal_open(src_filename))
+        # gdal_ds dict
+        self.gdal_ds = {key: [gdal_open(src_fn) for src_fn in src_fns] for key, src_fns in filenames_dict.items()}
 
-        if len(set([len(ds_list) for ds_list in self.ds.values()])) != 1:
+        # check number of patches in each sources
+        if len({len(ds_list) for ds_list in self.gdal_ds.values()}) != 1:
             raise Exception("Each source must have the same number of patches images")
 
         # streaming on/off
         self.use_streaming = use_streaming
 
-        # ds check
-        nb_of_patches = {key: 0 for key in self.ds}
+        # gdal_ds check
+        nb_of_patches = {key: 0 for key in self.gdal_ds}
         self.nb_of_channels = dict()
-        for src_key, ds_list in self.ds.items():
-            for ds in ds_list:
-                nb_of_patches[src_key] += self._get_nb_of_patches(ds)
+        for src_key, ds_list in self.gdal_ds.items():
+            for gdal_ds in ds_list:
+                nb_of_patches[src_key] += self._get_nb_of_patches(gdal_ds)
                 if src_key not in self.nb_of_channels:
-                    self.nb_of_channels[src_key] = ds.RasterCount
+                    self.nb_of_channels[src_key] = gdal_ds.RasterCount
                 else:
-                    if self.nb_of_channels[src_key] != ds.RasterCount:
+                    if self.nb_of_channels[src_key] != gdal_ds.RasterCount:
                         raise Exception("All patches images from one source must have the same number of channels!"
                                         "Error happened for source: {}".format(src_key))
         if len(set(nb_of_patches.values())) != 1:
             raise Exception("Sources must have the same number of patches! Number of patches: {}".format(nb_of_patches))
 
-        # ds sizes
-        src_key_0 = list(self.ds)[0]  # first key
-        self.ds_sizes = [self._get_nb_of_patches(ds) for ds in self.ds[src_key_0]]
+        # gdal_ds sizes
+        src_key_0 = list(self.gdal_ds)[0]  # first key
+        self.ds_sizes = [self._get_nb_of_patches(ds) for ds in self.gdal_ds[src_key_0]]
         self.size = sum(self.ds_sizes)
 
         # if use_streaming is False, we store in memory all patches images
         if not self.use_streaming:
-            patches_list = {src_key: [read_as_np_arr(ds) for ds in self.ds[src_key]] for src_key in self.ds}
-            self.patches_buffer = {src_key: np.concatenate(patches_list[src_key], axis=-1) for src_key in self.ds}
+            patches_list = {src_key: [read_as_np_arr(ds) for ds in self.gdal_ds[src_key]] for src_key in self.gdal_ds}
+            self.patches_buffer = {src_key: np.concatenate(patches_list[src_key], axis=0) for src_key in self.gdal_ds}
 
     def _get_ds_and_offset_from_index(self, index):
         offset = index
-        for i, ds_size in enumerate(self.ds_sizes):
+        idx = None
+        for idx, ds_size in enumerate(self.ds_sizes):
             if offset < ds_size:
                 break
             offset -= ds_size
 
-        return i, offset
+        return idx, offset
 
     @staticmethod
-    def _get_nb_of_patches(ds):
-        return int(ds.RasterYSize / ds.RasterXSize)
+    def _get_nb_of_patches(gdal_ds):
+        return int(gdal_ds.RasterYSize / gdal_ds.RasterXSize)
 
     @staticmethod
-    def _read_extract_as_np_arr(ds, offset):
-        assert (ds is not None)
-        psz = ds.RasterXSize
+    def _read_extract_as_np_arr(gdal_ds, offset):
+        assert gdal_ds is not None
+        psz = gdal_ds.RasterXSize
         yoff = int(offset * psz)
-        assert (yoff + psz <= ds.RasterYSize)
-        buffer = ds.ReadAsArray(0, yoff, psz, psz)
+        assert yoff + psz <= gdal_ds.RasterYSize
+        buffer = gdal_ds.ReadAsArray(0, yoff, psz, psz)
         if len(buffer.shape) == 3:
             buffer = np.transpose(buffer, axes=(1, 2, 0))
         return np.float32(buffer)
@@ -248,14 +249,14 @@ class PatchesImagesReader(PatchesReaderBase):
              ...
              "src_key_M": np.array((psz_y_M, psz_x_M, nb_ch_M))}
         """
-        assert (0 <= index)
-        assert (index < self.size)
+        assert index >= 0
+        assert index < self.size
 
         if not self.use_streaming:
-            res = {src_key: self.patches_buffer[src_key][index, :, :, :] for src_key in self.ds}
+            res = {src_key: self.patches_buffer[src_key][index, :, :, :] for src_key in self.gdal_ds}
         else:
             i, offset = self._get_ds_and_offset_from_index(index)
-            res = {src_key: self._read_extract_as_np_arr(self.ds[src_key][i], offset) for src_key in self.ds}
+            res = {src_key: self._read_extract_as_np_arr(self.gdal_ds[src_key][i], offset) for src_key in self.gdal_ds}
 
         return res
 
@@ -278,7 +279,7 @@ class PatchesImagesReader(PatchesReaderBase):
             axis = (0, 1)  # (row, col)
 
             def _filled(value):
-                return {src_key: value * np.ones((self.nb_of_channels[src_key])) for src_key in self.ds}
+                return {src_key: value * np.ones((self.nb_of_channels[src_key])) for src_key in self.gdal_ds}
 
             _maxs = _filled(0.0)
             _mins = _filled(float("inf"))
@@ -298,17 +299,15 @@ class PatchesImagesReader(PatchesReaderBase):
                                "max": _maxs[src_key],
                                "mean": rsize * _sums[src_key],
                                "std": np.sqrt(rsize * _sqsums[src_key] - np.square(rsize * _sums[src_key]))
-                               } for src_key in self.ds}
-        logging.info("Stats: {}".format(stats))
+                               } for src_key in self.gdal_ds}
+        logging.info("Stats: {}", stats)
         return stats
 
     def get_size(self):
         return self.size
 
 
-"""
-------------------------------------------------- IteratorBase class ---------------------------------------------------
-"""
+# ----------------------------------------------- IteratorBase class ---------------------------------------------------
 
 
 class IteratorBase(ABC):
@@ -320,9 +319,7 @@ class IteratorBase(ABC):
         pass
 
 
-"""
------------------------------------------------- RandomIterator class --------------------------------------------------
-"""
+# ---------------------------------------------- RandomIterator class --------------------------------------------------
 
 
 class RandomIterator(IteratorBase):
@@ -352,9 +349,7 @@ class RandomIterator(IteratorBase):
         np.random.shuffle(self.indices)
 
 
-"""
---------------------------------------------------- Dataset class ------------------------------------------------------
-"""
+# ------------------------------------------------- Dataset class ------------------------------------------------------
 
 
 class Dataset:
@@ -389,10 +384,12 @@ class Dataset:
             self.output_shapes[src_key] = np_arr.shape
             self.output_types[src_key] = tf.dtypes.as_dtype(np_arr.dtype)
 
-        logging.info("output_types: {}".format(self.output_types))
-        logging.info("output_shapes: {}".format(self.output_shapes))
+        logging.info("output_types: {}", self.output_types)
+        logging.info("output_shapes: {}", self.output_shapes)
 
         # buffers
+        if self.size <= buffer_length:
+            buffer_length = self.size
         self.miner_buffer = Buffer(buffer_length)
         self.mining_lock = multiprocessing.Lock()
         self.consumer_buffer = Buffer(buffer_length)
@@ -434,12 +431,12 @@ class Dataset:
         This function dumps the miner_buffer into the consumer_buffer, and restart the miner_thread
         """
         # Wait for miner to finish his job
-        t = time.time()
+        date_t = time.time()
         self.miner_thread.join()
-        self.tot_wait += time.time() - t
+        self.tot_wait += time.time() - date_t
 
         # Copy miner_buffer.container --> consumer_buffer.container
-        self.consumer_buffer.container = [elem for elem in self.miner_buffer.container]
+        self.consumer_buffer.container = self.miner_buffer.container.copy()
 
         # Clear miner_buffer.container
         self.miner_buffer.container.clear()
@@ -454,27 +451,24 @@ class Dataset:
         """
         # Fill the miner_container until it's full
         while not self.miner_buffer.is_complete():
-            try:
-                index = next(self.iterator)
-                with self.mining_lock:
-                    new_sample = self.patches_reader.get_sample(index=index)
-                    self.miner_buffer.add(new_sample)
-            except Exception as e:
-                logging.warning("Error during collecting samples: {}".format(e))
+            index = next(self.iterator)
+            with self.mining_lock:
+                new_sample = self.patches_reader.get_sample(index=index)
+                self.miner_buffer.add(new_sample)
 
     def _summon_miner_thread(self):
         """
         Create and starts the thread for the data collect
         """
-        t = threading.Thread(target=self._collect)
-        t.start()
-        return t
+        new_thread = threading.Thread(target=self._collect)
+        new_thread.start()
+        return new_thread
 
     def _generator(self):
         """
         Generator function, used for the tf dataset
         """
-        for elem in range(self.size):
+        for _ in range(self.size):
             yield self.read_one_sample()
 
     def get_tf_dataset(self, batch_size, drop_remainder=True):
@@ -486,7 +480,7 @@ class Dataset:
         """
         if batch_size <= 2 * self.miner_buffer.max_length:
             logging.warning("Batch size is {} but dataset buffer has {} elements. Consider using a larger dataset "
-                            "buffer to avoid I/O bottleneck".format(batch_size, self.miner_buffer.max_length))
+                            "buffer to avoid I/O bottleneck", batch_size, self.miner_buffer.max_length)
         return self.tf_dataset.batch(batch_size, drop_remainder=drop_remainder)
 
     def get_total_wait_in_seconds(self):
@@ -497,9 +491,7 @@ class Dataset:
         return self.tot_wait
 
 
-"""
-------------------------------------------- DatasetFromPatchesImages class ---------------------------------------------
-"""
+# ----------------------------------------- DatasetFromPatchesImages class ---------------------------------------------
 
 
 class DatasetFromPatchesImages(Dataset):
