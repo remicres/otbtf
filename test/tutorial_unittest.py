@@ -7,22 +7,32 @@ from pathlib import Path
 import test_utils
 
 
+def resolve_paths(path):
+    """
+    Resolve a path with the environment variables
+    """
+    return test_utils.resolve_paths(path, var_list=["TMPDIR", "DATADIR"])
+
+
 def run_command(command):
-    tmpdir = os.environ["TMPDIR"]
-    datadir = os.environ["DATADIR"]
-    com = "TMPDIR={} DATADIR={} {}".format(tmpdir, datadir, command)
-    print("Running command {}".format(com))
-    os.system(com)
+    """
+    Run a command
+    :param command: the command to run
+    """
+    full_command = resolve_paths(command)
+    print("Running command {}".format(full_command))
+    os.system(full_command)
 
 
 def run_command_and_test_exist(command, file_list):
     """
     :param command: the command to run (str)
     :param file_list: list of files to check
+    :return True or False
     """
     run_command(command)
     for file in file_list:
-        path = Path(file)
+        path = Path(resolve_paths(file))
         if not path.is_file():
             print("File {} does not exist!".format(file))
             return False
@@ -33,10 +43,13 @@ def run_command_and_compare(command, to_compare_dict, tol=0.01):
     """
     :param command: the command to run (str)
     :param to_compare_dict: a dict of {baseline1: output1, ..., baselineN: outputN}
+    :param tol: tolerance (float)
+    :return True or False
     """
+
     run_command(command)
     for baseline, output in to_compare_dict.items():
-        if not test_utils.compare(baseline, output, tol):
+        if not test_utils.compare(resolve_paths(baseline), resolve_paths(output), tol):
             print("Baseline {} and output {} differ.".format(baseline, output))
             return False
     return True
@@ -85,7 +98,8 @@ class TutorialTest(unittest.TestCase):
                  "$DATADIR/s2_labels_B.tif": "$TMPDIR/s2_labels_B.tif"}))
 
     def test_generate_model1(self):
-        run_command("git clone https://github.com/remicres/otbtf_tutorials_resources.git $TMPDIR/otbtf_tuto_repo")
+        run_command("git clone https://github.com/remicres/otbtf_tutorials_resources.git "
+                    "$TMPDIR/otbtf_tuto_repo")
         self.assertTrue(
             run_command_and_test_exist(
                 "python $TMPDIR/otbtf_tuto_repo/01_patch_based_classification/models/create_model1.py "
