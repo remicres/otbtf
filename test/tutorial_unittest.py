@@ -131,6 +131,7 @@ class TutorialTest(unittest.TestCase):
                         "-training.source2.placeholder y "
                         "-model.dir $TMPDIR/model1 "
                         "-training.targetnodes optimizer "
+                        "-training.epochs 10 "
                         "-validation.mode class "
                         "-validation.source1.il $DATADIR/s2_patches_B.tif "
                         "-validation.source1.name x "
@@ -228,6 +229,7 @@ class TutorialTest(unittest.TestCase):
                         "-training.source2.placeholder y "
                         "-model.dir $TMPDIR/model2 "
                         "-training.targetnodes optimizer "
+                        "-training.epochs 10 "
                         "-validation.mode class "
                         "-validation.source1.il $DATADIR/s2_patches_B.tif "
                         "-validation.source1.name x "
@@ -262,6 +264,8 @@ class TutorialTest(unittest.TestCase):
                         "-source1.placeholder x "
                         "-model.dir $TMPDIR/model2 "
                         "-model.fullyconv on "
+                        "-optim.tilesizex 999999 "
+                        "-optim.tilesizey 128 "
                         "-output.names features "
                         "-vd $TMPDIR/outvec_A.gpkg "
                         "-valid $TMPDIR/outvec_B.gpkg "
@@ -286,7 +290,45 @@ class TutorialTest(unittest.TestCase):
                         "-model $TMPDIR/RF_model_from_deep_features.yaml "
                         "-out \"$TMPDIR/RF_model_from_deep_features_map.tif?&box=4000:4000:1000:1000\" uint8",
                 to_compare_dict={
-                    "$DATADIR/RF_model_from_deep_features_map.tif": "$TMPDIR/RF_model_from_deep_features_map.tif"}))
+                    "$DATADIR/RF_model_from_deep_features_map.tif": "$TMPDIR/RF_model_from_deep_features_map.tif"},
+                tol=INFERENCE_MAE_TOL))
+
+    @pytest.mark.order(14)
+    def test_patch_extraction_20m(self):
+        self.assertTrue(
+            run_command_and_compare(
+                command="OTB_TF_NSOURCES=2 otbcli_PatchesExtraction "
+                        "-source1.il $DATADIR/s2_20m_stack.jp2 "
+                        "-source1.patchsizex 8 "
+                        "-source1.patchsizey 8 "
+                        "-source1.out $TMPDIR/s2_20m_patches_A.tif "
+                        "-source2.il $DATADIR/s2_stack.jp2 "
+                        "-source2.patchsizex 16 "
+                        "-source2.patchsizey 16 "
+                        "-source2.out $TMPDIR/s2_10m_patches_A.tif "
+                        "-vec $TMPDIR/outvec_A.gpkg "
+                        "-field class "
+                        "-outlabels $TMPDIR/s2_10m_labels_A.tif uint8",
+                to_compare_dict={"$DATADIR/s2_10m_labels_A.tif": "$TMPDIR/s2_10m_labels_A.tif",
+                                 "$DATADIR/s2_10m_patches_A.tif": "$TMPDIR/s2_10m_patches_A.tif",
+                                 "$DATADIR/s2_20m_patches_A.tif": "$TMPDIR/s2_20m_patches_A.tif"}))
+        self.assertTrue(
+            run_command_and_compare(
+                command="OTB_TF_NSOURCES=2 otbcli_PatchesExtraction "
+                        "-source1.il $DATADIR/s2_20m_stack.jp2 "
+                        "-source1.patchsizex 8 "
+                        "-source1.patchsizey 8 "
+                        "-source1.out $TMPDIR/s2_20m_patches_B.tif "
+                        "-source2.il $DATADIR/s2_stack.jp2 "
+                        "-source2.patchsizex 16 "
+                        "-source2.patchsizey 16 "
+                        "-source2.out $TMPDIR/s2_10m_patches_B.tif "
+                        "-vec $TMPDIR/outvec_B.gpkg "
+                        "-field class "
+                        "-outlabels $TMPDIR/s2_10m_labels_B.tif uint8",
+                to_compare_dict={"$DATADIR/s2_10m_labels_B.tif": "$TMPDIR/s2_10m_labels_B.tif",
+                                 "$DATADIR/s2_10m_patches_B.tif": "$TMPDIR/s2_10m_patches_B.tif",
+                                 "$DATADIR/s2_20m_patches_B.tif": "$TMPDIR/s2_20m_patches_B.tif"}))
 
 
 if __name__ == '__main__':
