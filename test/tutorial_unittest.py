@@ -77,9 +77,10 @@ class TutorialTest(unittest.TestCase):
                  "$DATADIR/s2_labels_B.tif": "$TMPDIR/s2_labels_B.tif"}))
 
     def test_generate_model1(self):
+        os.system("git clone https://github.com/remicres/otbtf_tutorials_resources.git $TMPDIR/otbtf_tuto_repo")
         self.assertTrue(
             run_command_and_test_exist(
-                "python $DATADIR/tuto_repo/01_patch_based_classification/models/create_model1.py "
+                "python $TMPDIR/otbtf_tuto_repo/01_patch_based_classification/models/create_model1.py "
                 "$TMPDIR/model1",
                 "$TMPDIR/model1/saved_model.pb"))
 
