@@ -70,6 +70,18 @@ ctest:
     expire_in: 1 week
     when: on_failure
 
+crc_book:
+  stage: Test
+  script:
+    - *compile_otbtf
+    - pip3 install pytest pytest-cov
+    - cd $CI_PROJECT_DIR
+    - TMPDIR=$OTB_BUILD/Testing/Temporary DATADIR=$CI_PROJECT_DIR/test/data python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
+  artifacts:
+    when: on_failure
+    paths:
+      - $CI_PROJECT_DIR/report_tutorial.xml
+    expire_in: 1 week
 sr4rs:
   stage: Test
   script:
