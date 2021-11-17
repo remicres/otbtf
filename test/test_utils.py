@@ -1,4 +1,5 @@
 import otbApplication
+import os
 
 
 def get_nb_of_channels(raster):
@@ -39,3 +40,16 @@ def compare(raster1, raster2, tol=0.01):
                   "(Mean average error: {})".format(i, mae))
             return False
     return True
+
+
+def resolve_paths(filename, var_list):
+    """
+    Retrieve environment variables in paths
+    :param filename: file name
+    :params var_list: variable list
+    :return filename with retrieved environment variables
+    """
+    new = filename
+    for var in var_list:
+        new = new.replace(filename, "${}".format(var), os.environ[var])
+    return new
