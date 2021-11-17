@@ -49,7 +49,8 @@ def resolve_paths(filename, var_list):
     :params var_list: variable list
     :return filename with retrieved environment variables
     """
-    new = filename
+    new_filename = filename
     for var in var_list:
-        new = new.replace(filename, "${}".format(var), os.environ[var])
-    return new
+        new_filename = new_filename.replace("${}".format(var), os.environ[var])
+    print("Resolve filename...\n\tfilename: {}, \n\tnew filename: {}".format(filename, new_filename))
+    return new_filename
