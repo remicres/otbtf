@@ -10,7 +10,9 @@ import test_utils
 def run_command(command):
     tmpdir = os.environ["TMPDIR"]
     datadir = os.environ["DATADIR"]
-    os.system("TMPDIR={} DATADIR={} {}".format(tmpdir, datadir, command))
+    com = "TMPDIR={} DATADIR={} {}".format(tmpdir, datadir, command)
+    print("Running command {}".format(com))
+    os.system(com)
 
 
 def run_command_and_test_exist(command, file_list):
