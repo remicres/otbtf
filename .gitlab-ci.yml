@@ -5,6 +5,7 @@ variables:
     OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
     OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
     ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
+    CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
 
 workflow:
   rules:
@@ -22,9 +23,6 @@ stages:
 .compile_otbtf: &compile_otbtf
   - cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
   
-.copy_otb_test_dir: &copy_otb_test_dir
-  - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
-
 before_script:
   - *update_otbtf_src
 
@@ -68,7 +66,7 @@ ctest:
     - sudo rm -rf $OTB_TEST_DIR/*  # Empty testing temporary folder (old files here)
     - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
   after_script:
-    - *copy_otb_test_dir
+    - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
@@ -81,15 +79,16 @@ crc_book:
     - *compile_otbtf
     - pip3 install pytest pytest-cov
     - cd $CI_PROJECT_DIR
-    - TMPDIR=$OTB_TEST_DIR DATADIR=$CI_PROJECT_DIR/test/data sudo python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
+    - mkdir -p /tmp/crc_book_tests/
+    - TMPDIR=$CRC_BOOK_TMP DATADIR=$CI_PROJECT_DIR/test/data python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
   artifacts:
     when: on_failure
     paths:
       - $CI_PROJECT_DIR/report_tutorial.xml
-      - $ARTIFACT_TEST_DIR
+      - $ARTIFACT_TEST_DIR/*.*
     expire_in: 1 week
   after_script:
-    - *copy_otb_test_dir
+    - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
     
     
 sr4rs:
