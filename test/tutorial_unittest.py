@@ -171,6 +171,35 @@ class TutorialTest(unittest.TestCase):
                                     to_compare_dict={"$DATADIR/classif_model1.tif": "$TMPDIR/classif_model1.tif"},
                                     tol=INFERENCE_MAE_TOL))
 
+    @pytest.mark.order(7)
+    def test_rf_sampling(self):
+        self.assertTrue(
+            run_command_and_test_exist(command="otbcli_SampleExtraction "
+                                               "-in $DATADIR/s2_stack.jp2 "
+                                               "-vec $TMPDIR/outvec_A.gpkg "
+                                               "-field class "
+                                               "-out $TMPDIR/pixelvalues_A.gpkg",
+                                       file_list=["$TMPDIR/pixelvalues_A.gpkg"]))
+        self.assertTrue(
+            run_command_and_test_exist(command="otbcli_SampleExtraction "
+                                               "-in $DATADIR/s2_stack.jp2 "
+                                               "-vec $TMPDIR/outvec_B.gpkg "
+                                               "-field class "
+                                               "-out $TMPDIR/pixelvalues_B.gpkg",
+                                       file_list=["$TMPDIR/pixelvalues_B.gpkg"]))
+
+    @pytest.mark.order(8)
+    def test_rf_training(self):
+        self.assertTrue(
+            run_command_and_test_exist(command="otbcli_TrainVectorClassifier "
+                                               "-io.vd $TMPDIR/pixelvalues_A.gpkg "
+                                               "-valid.vd $TMPDIR/pixelvalues_B.gpkg "
+                                               "-feat value_0 value_1 value_2 value_3 "
+                                               "-cfield class "
+                                               "-classifier rf "
+                                               "-io.out $TMPDIR/randomforest_model.yaml ",
+                                       file_list=["$TMPDIR/randomforest_model.yaml"]))
+
 
 if __name__ == '__main__':
     unittest.main()
