@@ -77,7 +77,7 @@ crc_book:
   stage: Test
   script:
     - *compile_otbtf
-    - pip3 install pytest pytest-cov
+    - pip3 install pytest pytest-cov pytest-order
     - cd $CI_PROJECT_DIR
     - mkdir -p /tmp/crc_book_tests/
     - TMPDIR=$CRC_BOOK_TMP DATADIR=$CI_PROJECT_DIR/test/data python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
@@ -88,6 +88,7 @@ crc_book:
       - $ARTIFACT_TEST_DIR/*.*
     expire_in: 1 week
   after_script:
+    - mkdir -p $ARTIFACT_TEST_DIR
     - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
     
     
