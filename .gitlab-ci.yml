@@ -79,7 +79,7 @@ crc_book:
     - *compile_otbtf
     - pip3 install pytest pytest-cov pytest-order
     - cd $CI_PROJECT_DIR
-    - mkdir -p /tmp/crc_book_tests/
+    - mkdir -p $CRC_BOOK_TMP
     - TMPDIR=$CRC_BOOK_TMP DATADIR=$CI_PROJECT_DIR/test/data python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
   artifacts:
     when: on_failure
