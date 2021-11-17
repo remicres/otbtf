@@ -4,8 +4,7 @@
 import unittest
 import os
 from pathlib import Path
-import gdal
-import otbApplication as otb
+import test_utils
 
 
 def command_train_succeed(extra_opts=""):
@@ -54,21 +53,7 @@ class SR4RSv1Test(unittest.TestCase):
         command += "--output '{}?&box=256:256:512:512'".format(out_img)
         os.system(command)
 
-        nbchannels_reconstruct = gdal.Open(out_img).RasterCount
-        nbchannels_baseline = gdal.Open(baseline).RasterCount
-
-        self.assertTrue(nbchannels_reconstruct == nbchannels_baseline)
-
-        for i in range(1, 1 + nbchannels_baseline):
-            comp = otb.Registry.CreateApplication('CompareImages')
-            comp.SetParameterString('ref.in', baseline)
-            comp.SetParameterInt('ref.channel', i)
-            comp.SetParameterString('meas.in', out_img)
-            comp.SetParameterInt('meas.channel', i)
-            comp.Execute()
-            mae = comp.GetParameterFloat('mae')
-
-            self.assertTrue(mae < 0.01)
+        self.assertTrue(test_utils.compare(baseline, out_img))
 
 
 if __name__ == '__main__':
