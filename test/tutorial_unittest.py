@@ -330,6 +330,92 @@ class TutorialTest(unittest.TestCase):
                                  "$DATADIR/s2_10m_patches_B.tif": "$TMPDIR/s2_10m_patches_B.tif",
                                  "$DATADIR/s2_20m_patches_B.tif": "$TMPDIR/s2_20m_patches_B.tif"}))
 
+    @pytest.mark.order(15)
+    def test_generate_model3(self):
+        self.assertTrue(
+            run_command_and_test_exist(
+                command="python $TMPDIR/otbtf_tuto_repo/01_patch_based_classification/models/create_model3.py "
+                        "$TMPDIR/model3",
+                file_list=["$TMPDIR/model3/saved_model.pb"]))
+
+    @pytest.mark.order(16)
+    def test_model2rf_train(self):
+        self.assertTrue(
+            run_command_and_test_exist(
+                command="OTB_TF_NSOURCES=2 otbcli_TensorflowModelTrain "
+                        "-training.source1.il $DATADIR/s2_20m_patches_A.tif "
+                        "-training.source1.patchsizex 8 "
+                        "-training.source1.patchsizey 8 "
+                        "-training.source1.placeholder x1 "
+                        "-training.source2.il $DATADIR/s2_10m_patches_A.tif "
+                        "-training.source2.patchsizex 16 "
+                        "-training.source2.patchsizey 16 "
+                        "-training.source2.placeholder x2 "
+                        "-training.source3.il $DATADIR/s2_10m_labels_A.tif "
+                        "-training.source3.patchsizex 1 "
+                        "-training.source3.patchsizey 1 "
+                        "-training.source3.placeholder y "
+                        "-model.dir $TMPDIR/model3 "
+                        "-training.targetnodes optimizer "
+                        "-validation.mode class "
+                        "-validation.source1.il $DATADIR/s2_20m_patches_B.tif "
+                        "-validation.source1.name x1 "
+                        "-validation.source2.il $DATADIR/s2_10m_patches_B.tif "
+                        "-validation.source2.name x2 "
+                        "-validation.source3.il $DATADIR/s2_10m_labels_B.tif "
+                        "-validation.source3.name prediction "
+                        "-model.saveto $TMPDIR/model3/variables/variables",
+                file_list=["$TMPDIR/model3/variables/variables.index"]))
+
+    @pytest.mark.order(17)
+    def test_model3_inference_pb(self):
+        self.assertTrue(
+            run_command_and_compare(
+                command=
+                "OTB_TF_NSOURCES=2 otbcli_TensorflowModelServe "
+                "-source1.il $DATADIR/s2_20m_stack.jp2 "
+                "-source1.rfieldx 8 "
+                "-source1.rfieldy 8 "
+                "-source1.placeholder x1 "
+                "-source2.il $DATADIR/s2_stack.jp2 "
+                "-source2.rfieldx 16 "
+                "-source2.rfieldy 16 "
+                "-source2.placeholder x2 "
+                "-model.dir $TMPDIR/model3 "
+                "-output.names prediction "
+                "-out \"$TMPDIR/classif_model3_pb.tif?&box=2000:2000:500:500&gdal:co:compress=deflate\"",
+                to_compare_dict={"$DATADIR/classif_model3_pb.tif": "$TMPDIR/classif_model3_pb.tif"},
+                tol=INFERENCE_MAE_TOL))
+
+    @pytest.mark.order(18)
+    def test_model3_inference_fcn(self):
+        self.assertTrue(
+            run_command_and_compare(
+                command=
+                "OTB_TF_NSOURCES=2 otbcli_TensorflowModelServe "
+                "-source1.il $DATADIR/s2_20m_stack.jp2 "
+                "-source1.rfieldx 8 "
+                "-source1.rfieldy 8 "
+                "-source1.placeholder x1 "
+                "-source2.il $DATADIR/s2_stack.jp2 "
+                "-source2.rfieldx 16 "
+                "-source2.rfieldy 16 "
+                "-source2.placeholder x2 "
+                "-model.dir $TMPDIR/model3 "
+                "-model.fullyconv on "
+                "-output.names prediction "
+                "-out \"$TMPDIR/classif_model3_fcn.tif?&box=2000:2000:500:500&gdal:co:compress=deflate\"",
+                to_compare_dict={"$DATADIR/classif_model3_fcn.tif": "$TMPDIR/classif_model3_fcn.tif"},
+                tol=INFERENCE_MAE_TOL))
+
+    @pytest.mark.order(19)
+    def test_generate_model4(self):
+        self.assertTrue(
+            run_command_and_test_exist(
+                command="python $TMPDIR/otbtf_tuto_repo/02_semantic_segmentation/models/create_model4.py "
+                        "$TMPDIR/model4",
+                file_list=["$TMPDIR/model4/saved_model.pb"]))
+
 
 if __name__ == '__main__':
     unittest.main()
