@@ -339,7 +339,7 @@ class TutorialTest(unittest.TestCase):
                 file_list=["$TMPDIR/model3/saved_model.pb"]))
 
     @pytest.mark.order(16)
-    def test_model2rf_train(self):
+    def test_model3_train(self):
         self.assertTrue(
             run_command_and_test_exist(
                 command="OTB_TF_NSOURCES=2 otbcli_TensorflowModelTrain "
