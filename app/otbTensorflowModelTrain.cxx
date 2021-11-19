@@ -1,6 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) Remi Cresson (IRSTEA). All rights reserved.
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -16,9 +17,8 @@
 #include "otbStandardFilterWatcher.h"
 #include "itkFixedArray.h"
 
-// Tensorflow stuff
-#include "tensorflow/core/public/session.h"
-#include "tensorflow/core/platform/env.h"
+// Tensorflow SavedModel
+#include "tensorflow/cc/saved_model/loader.h"
 
 // Tensorflow model train
 #include "otbTensorflowMultisourceModelTrain.h"
@@ -185,6 +185,8 @@ public:
     MandatoryOff                           ("model.restorefrom");
     AddParameter(ParameterType_String,      "model.saveto",       "Save model to path");
     MandatoryOff                           ("model.saveto");
+    AddParameter(ParameterType_StringList,  "model.tagsets",    "Which tags (i.e. v1.MetaGraphDefs) to load from the saved model. Currently, only one tag is supported. Can be retrieved by running `saved_model_cli  show --dir your_model_dir --all`");
+    MandatoryOff                           ("model.tagsets");
 
     // Training parameters group
     AddParameter(ParameterType_Group,       "training",           "Training parameters");
@@ -360,7 +362,7 @@ public:
   //
   // Get user placeholders
   //
-  TrainModelFilterType::DictType GetUserPlaceholders(const std::string key)
+  TrainModelFilterType::DictType GetUserPlaceholders(const std::string & key)
   {
     TrainModelFilterType::DictType dict;
     TrainModelFilterType::StringList expressions = GetParameterStringList(key);
@@ -407,13 +409,15 @@ public:
   {
 
     // Load the Tensorflow bundle
-    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel);
+    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, GetParameterStringList("model.tagsets"));
 
-    // Check if we have to restore variables from somewhere
+    // Check if we have to restore variables from somewhere else
     if (HasValue("model.restorefrom"))
       {
       const std::string path = GetParameterAsString("model.restorefrom");
       otbAppLogINFO("Restoring model from " + path);
+
+      // Load SavedModel variables
       tf::RestoreModel(path, m_SavedModel);
       }
 
@@ -422,8 +426,7 @@ public:
 
     // Setup training filter
     m_TrainModelFilter = TrainModelFilterType::New();
-    m_TrainModelFilter->SetGraph(m_SavedModel.meta_graph_def.graph_def());
-    m_TrainModelFilter->SetSession(m_SavedModel.session.get());
+    m_TrainModelFilter->SetSavedModel(&m_SavedModel);
     m_TrainModelFilter->SetOutputTensors(GetParameterStringList("training.outputtensors"));
     m_TrainModelFilter->SetTargetNodesNames(GetParameterStringList("training.targetnodes"));
     m_TrainModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
@@ -446,8 +449,7 @@ public:
       otbAppLogINFO("Set validation mode to classification validation");
 
       m_ValidateModelFilter = ValidateModelFilterType::New();
-      m_ValidateModelFilter->SetGraph(m_SavedModel.meta_graph_def.graph_def());
-      m_ValidateModelFilter->SetSession(m_SavedModel.session.get());
+      m_ValidateModelFilter->SetSavedModel(&m_SavedModel);
       m_ValidateModelFilter->SetBatchSize(GetParameterInt("training.batchsize"));
       m_ValidateModelFilter->SetUserPlaceholders(GetUserPlaceholders("validation.userplaceholders"));
       m_ValidateModelFilter->SetInputPlaceholders(m_InputPlaceholdersForValidation);

@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -154,7 +154,7 @@ TensorflowSampler<TInputImage, TVectorData>
     m_OutputPatchImages.push_back(newImage);
   }
 
-  itk::ProgressReporter progess(this, 0, nTotal);
+  itk::ProgressReporter progress(this, 0, nTotal);
 
   // Iterate on the vector data
   itVector.GoToBegin();
@@ -218,8 +218,8 @@ TensorflowSampler<TInputImage, TVectorData>
         rejected++;
       }
 
-      // Update progres
-      progess.CompletedPixel();
+      // Update progress
+      progress.CompletedPixel();
 
     }
 

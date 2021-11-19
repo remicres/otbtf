@@ -1,6 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) Remi Cresson (IRSTEA). All rights reserved.
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -16,9 +17,8 @@
 #include "otbStandardFilterWatcher.h"
 #include "itkFixedArray.h"
 
-// Tensorflow stuff
-#include "tensorflow/core/public/session.h"
-#include "tensorflow/core/platform/env.h"
+// Tensorflow SavedModel
+#include "tensorflow/cc/saved_model/loader.h"
 
 // Tensorflow model filter
 #include "otbTensorflowMultisourceModelFilter.h"
@@ -61,10 +61,6 @@ public:
 
   /** Typedefs for images */
   typedef FloatVectorImageType::SizeType SizeType;
-
-  void DoUpdateParameters()
-  {
-  }
 
   //
   // Store stuff related to one source
@@ -120,9 +116,12 @@ public:
     AddParameter(ParameterType_InputImageList, ss_key_in.str(),     ss_desc_in.str() );
     AddParameter(ParameterType_Int,            ss_key_dims_x.str(), ss_desc_dims_x.str());
     SetMinimumParameterIntValue               (ss_key_dims_x.str(), 1);
+    SetDefaultParameterInt                    (ss_key_dims_x.str(), 1);
     AddParameter(ParameterType_Int,            ss_key_dims_y.str(), ss_desc_dims_y.str());
     SetMinimumParameterIntValue               (ss_key_dims_y.str(), 1);
+    SetDefaultParameterInt                    (ss_key_dims_y.str(), 1);
     AddParameter(ParameterType_String,         ss_key_ph.str(),     ss_desc_ph.str());
+    MandatoryOff                              (ss_key_ph.str());
 
     // Add a new bundle
     ProcessObjectsBundle bundle;
@@ -166,7 +165,7 @@ public:
 
     // Input model
     AddParameter(ParameterType_Group,         "model",           "model parameters");
-    AddParameter(ParameterType_Directory,     "model.dir",       "TensorFlow model_save directory");
+    AddParameter(ParameterType_Directory,     "model.dir",       "TensorFlow SavedModel directory");
     MandatoryOn                              ("model.dir");
     SetParameterDescription                  ("model.dir", "The model directory should contains the model Google Protobuf (.pb) and variables");
 
@@ -175,6 +174,8 @@ public:
     SetParameterDescription                  ("model.userplaceholders", "Syntax to use is \"placeholder_1=value_1 ... placeholder_N=value_N\"");
     AddParameter(ParameterType_Bool,          "model.fullyconv", "Fully convolutional");
     MandatoryOff                             ("model.fullyconv");
+    AddParameter(ParameterType_StringList,    "model.tagsets",    "Which tags (i.e. v1.MetaGraphDefs) to load from the saved model. Currently, only one tag is supported. Can be retrieved by running `saved_model_cli  show --dir your_model_dir --all`");
+    MandatoryOff                             ("model.tagsets");
 
     // Output tensors parameters
     AddParameter(ParameterType_Group,         "output",          "Output tensors parameters");
@@ -182,7 +183,7 @@ public:
     SetDefaultParameterFloat                 ("output.spcscale", 1.0);
     SetParameterDescription                  ("output.spcscale", "The output image size/scale and spacing*scale where size and spacing corresponds to the first input");
     AddParameter(ParameterType_StringList,    "output.names",    "Names of the output tensors");
-    MandatoryOn                              ("output.names");
+    MandatoryOff                            ("output.names");
 
     // Output Field of Expression
     AddParameter(ParameterType_Int,           "output.efieldx", "The output expression field (width)");
@@ -246,15 +247,14 @@ public:
   {
 
     // Load the Tensorflow bundle
-    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel);
+    tf::LoadModel(GetParameterAsString("model.dir"), m_SavedModel, GetParameterStringList("model.tagsets"));
 
     // Prepare inputs
     PrepareInputs();
 
     // Setup filter
     m_TFFilter = TFModelFilterType::New();
-    m_TFFilter->SetGraph(m_SavedModel.meta_graph_def.graph_def());
-    m_TFFilter->SetSession(m_SavedModel.session.get());
+    m_TFFilter->SetSavedModel(&m_SavedModel);
     m_TFFilter->SetOutputTensors(GetParameterStringList("output.names"));
     m_TFFilter->SetOutputSpacingScale(GetParameterFloat("output.spcscale"));
     otbAppLogINFO("Output spacing ratio: " << m_TFFilter->GetOutputSpacingScale());
@@ -328,6 +328,11 @@ public:
       SetParameterOutputImage("out", m_TFFilter->GetOutput());
     }
   }
+  
+
+  void DoUpdateParameters()
+  {
+  }
 
 private:
 
@@ -335,7 +340,7 @@ private:
   StreamingFilterType::Pointer m_StreamFilter;
   tensorflow::SavedModelBundle m_SavedModel; // must be alive during all the execution of the application !
 
-  std::vector<ProcessObjectsBundle>           m_Bundles;
+  std::vector<ProcessObjectsBundle> m_Bundles;
 
 }; // end of class
 

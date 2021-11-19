@@ -18,21 +18,23 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
 
 ### Python
 
-This is a work in progress. For now, `tricks.py` provides a set of helpers to build deep nets, and `otbtf.py` provides datasets which can be used in Tensorflow pipelines to train networks from python.
+`otbtf.py` targets python developers that want to train their own model from python with TensorFlow or Keras.
+It provides various classes for datasets and iterators to handle the _patches images_ generated from the `PatchesExtraction` OTB application.
+For instance, the `otbtf.Dataset` class provides a method `get_tf_dataset()` which returns a `tf.dataset` that can be used in your favorite TensorFlow pipelines, or convert your patches into TFRecords.
 
-## Portfolio
+`tricks.py` is here for backward compatibility with codes based on OTBTF 1.x and 2.x.
+
+## Examples
 
 Below are some screen captures of deep learning applications performed at large scale with OTBTF.
- - Image to image translation (Spot-7 image --> Wikimedia Map using CGAN)
-<img src ="doc/images/pix2pix.png" />
-
  - Landcover mapping (Spot-7 images --> Building map using semantic segmentation)
 <img src ="doc/images/landcover.png" />
 
- - Image enhancement (Enhancement of Sentinel-2 images at 1.5m  using SRGAN)
+ - Super resolution (Sentinel-2 images upsampled with the [SR4RS software](https://github.com/remicres/sr4rs), which is based on OTBTF)
 <img src ="doc/images/supresol.png" />
 
-You can read more details about these applications on [this blog](https://mdl4eo.irstea.fr/2019/)
+ - Image to image translation (Spot-7 image --> Wikimedia Map using CGAN. So unnecessary but fun!)
+<img src ="doc/images/pix2pix.png" />
 
 ## How to install
 
@@ -42,8 +44,8 @@ For now you have two options: either use the existing **docker image**, or build
 
 Use the latest image from dockerhub:
 ```
-docker pull mdl4eo/otbtf2.5:cpu
-docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf2.5:cpu otbcli_PatchesExtraction -help
+docker pull mdl4eo/otbtf3.0:cpu
+docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf3.0:cpu otbcli_PatchesExtraction -help
 ```
 
 Read more in the [docker use documentation](doc/DOCKERUSE.md).
@@ -59,10 +61,11 @@ Read more in the [build from sources documentation](doc/HOWTOBUILD.md).
 - in the `python` folder are provided some [ready-to-use deep networks, with documentation and scientific references](doc/EXAMPLES.md).
 - A book: *Cresson, R. (2020). Deep Learning for Remote Sensing Images with Open Source Software. CRC Press.* Use QGIS, OTB and Tensorflow to perform various kind of deep learning sorcery on remote sensing images (patch-based classification for landcover mapping, semantic segmentation of buildings, optical image restoration from joint SAR/Optical time series).
 - Check [our repository](https://github.com/remicres/otbtf_tutorials_resources) containing stuff (data and models) to begin with with!
+- Finally, take a look in the `test` folder. You will find plenty of command lines for applications tests!
 
 ## Contribute
 
-Every one can **contribute** to OTBTF! Don't be shy.
+Every one can **contribute** to OTBTF. Just open a PR :)
 
 ## Cite
 

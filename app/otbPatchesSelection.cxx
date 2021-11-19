@@ -1,6 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) Remi Cresson (IRSTEA). All rights reserved.
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -67,7 +68,7 @@ class PatchesSelection : public Application
 {
 public:
   /** Standard class typedefs. */
-  typedef PatchesSelection          Self;
+  typedef PatchesSelection                    Self;
   typedef Application                         Superclass;
   typedef itk::SmartPointer<Self>             Pointer;
   typedef itk::SmartPointer<const Self>       ConstPointer;
@@ -98,11 +99,6 @@ public:
   typedef tf::Distribution<UInt8ImageType> DistributionType;
 
   typedef itk::MaskImageFilter<UInt8ImageType, UInt8ImageType, UInt8ImageType> MaskImageFilterType;
-
-  void DoUpdateParameters()
-  {
-  }
-
 
   void DoInit()
   {
@@ -166,22 +162,15 @@ public:
   {
   public:
     SampleBundle(){}
-    SampleBundle(unsigned int nClasses){
-      dist = DistributionType(nClasses);
-      id = 0;
+    explicit SampleBundle(unsigned int nClasses): dist(DistributionType(nClasses)), id(0), black(true){
       (void) point;
-      black = true;
       (void) index;
     }
     ~SampleBundle(){}
 
-    SampleBundle(const SampleBundle & other){
-      dist = other.GetDistribution();
-      id = other.GetSampleID();
-      point = other.GetPosition();
-      black = other.GetBlack();
-      index = other.GetIndex();
-    }
+    SampleBundle(const SampleBundle & other): dist(other.GetDistribution()), id(other.GetSampleID()),
+      point(other.GetPosition()), black(other.GetBlack()), index(other.GetIndex())
+    {}
 
     DistributionType GetDistribution() const
     {
@@ -251,6 +240,10 @@ public:
 
     int userOffX = GetParameterInt("grid.offsetx");
     int userOffY = GetParameterInt("grid.offsety");
+
+    // Tell if the patch size is odd or even
+    const bool isEven = GetParameterInt("grid.psize") % 2 == 0;
+    otbAppLogINFO("Patch size is even: " << isEven);
 
     // Explicit streaming over the morphed mask, based on the RAM parameter
     typedef otb::RAMDrivenStrippedStreamingManager<UInt8ImageType> StreamingManagerType;
@@ -327,9 +320,13 @@ public:
             // Compute coordinates
             UInt8ImageType::PointType geo;
             inputImage->TransformIndexToPhysicalPoint(inIt.GetIndex(), geo);
-            DataNodeType::PointType point;
-            point[0] = geo[0];
-            point[1] = geo[1];
+
+            // Update geo if we want the corner or the center
+            if (isEven)
+            {
+              geo[0] -= 0.5 * std::abs(inputImage->GetSpacing()[0]);
+              geo[1] -= 0.5 * std::abs(inputImage->GetSpacing()[1]);
+            }
 
             // Lambda call
             lambda(pos, geo);
@@ -538,7 +535,7 @@ public:
     PopulateVectorData(seed);
   }
 
-  void PopulateVectorData(std::vector<SampleBundle> & samples)
+  void PopulateVectorData(const std::vector<SampleBundle> & samples)
   {
     // Get data tree
     DataTreeType::Pointer treeTrain = m_OutVectorDataTrain->GetDataTree();
@@ -654,6 +651,11 @@ public:
     SetParameterOutputVectorData("outtrain", m_OutVectorDataTrain);
     SetParameterOutputVectorData("outvalid", m_OutVectorDataValid);
 
+  }
+
+
+  void DoUpdateParameters()
+  {
   }
 
 private:

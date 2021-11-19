@@ -1,6 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) Remi Cresson (IRSTEA). All rights reserved.
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -54,8 +55,6 @@ public:
   {
     TFSourceType                       m_ImageSource;   // Image source
     FloatVectorImageType::SizeType     m_PatchSize;          // Patch size
-
-    unsigned int                       m_NumberOfElements;  // Number of output samples
 
     std::string                        m_KeyIn;   // Key of input image list
     std::string                        m_KeyOut;  // Key of output samples image
@@ -135,10 +134,6 @@ public:
       // No data value
       bundle.m_NoDataValue = GetParameterFloat(bundle.m_KeyNoData);
     }
-  }
-
-  void DoUpdateParameters()
-  {
   }
 
   void DoInit()
@@ -238,6 +233,12 @@ public:
     }
 
   }
+  
+  
+  void DoUpdateParameters()
+  {
+  }
+
 private:
   std::vector<SourceBundle> m_Bundles;
 
@@ -246,4 +247,4 @@ private:
 } // end namespace wrapper
 } // end namespace otb
 
-OTB_APPLICATION_EXPORT( otb::Wrapper::PatchesExtraction )
+OTB_APPLICATION_EXPORT(otb::Wrapper::PatchesExtraction)

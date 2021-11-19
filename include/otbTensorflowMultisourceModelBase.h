@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -15,10 +15,12 @@
 #include "itkProcessObject.h"
 #include "itkNumericTraits.h"
 #include "itkSimpleDataObjectDecorator.h"
+#include "itkImageToImageFilter.h"
 
 // Tensorflow
 #include "tensorflow/core/public/session.h"
 #include "tensorflow/core/platform/env.h"
+#include "tensorflow/cc/saved_model/signature_constants.h"
 
 // Tensorflow helpers
 #include "otbTensorflowGraphOperations.h"
@@ -45,8 +47,7 @@ namespace otb
  * be the same. If not, an exception will be thrown during the method
  * GenerateOutputInformation().
  *
- * The TensorFlow graph and session must be set using the SetGraph() and
- * SetSession() methods.
+ * The TensorFlow SavedModel pointer must be set using the SetSavedModel() method.
  *
  * Target nodes names of the TensorFlow graph that must be triggered can be set
  * with the SetTargetNodesNames.
@@ -103,10 +104,11 @@ public:
   typedef std::vector<tensorflow::Tensor>            TensorListType;
 
   /** Set and Get the Tensorflow session and graph */
-  void SetGraph(tensorflow::GraphDef graph)      { m_Graph = graph;     }
-  tensorflow::GraphDef GetGraph()                { return m_Graph ;     }
-  void SetSession(tensorflow::Session * session) { m_Session = session; }
-  tensorflow::Session * GetSession()             { return m_Session;    }
+  void SetSavedModel(tensorflow::SavedModelBundle * saved_model) {m_SavedModel = saved_model;}
+  tensorflow::SavedModelBundle * GetSavedModel() {return m_SavedModel;}
+
+  /** Get the SignatureDef */
+  tensorflow::SignatureDef GetSignatureDef();
 
   /** Model parameters */
   void PushBackInputTensorBundle(std::string name, SizeType receptiveField, ImagePointerType image);
@@ -129,8 +131,8 @@ public:
   itkGetMacro(OutputExpressionFields, SizeListType);
 
   /** User placeholders */
-  void SetUserPlaceholders(DictType dict) { m_UserPlaceholders = dict; }
-  DictType GetUserPlaceholders()          { return m_UserPlaceholders; }
+  void SetUserPlaceholders(const DictType & dict) {m_UserPlaceholders = dict;}
+  DictType GetUserPlaceholders() {return m_UserPlaceholders;}
 
   /** Target nodes names */
   itkSetMacro(TargetNodesNames, StringList);
@@ -157,8 +159,7 @@ private:
   void operator=(const Self&); //purposely not implemented
 
   // Tensorflow graph and session
-  tensorflow::GraphDef       m_Graph;                   // The TensorFlow graph
-  tensorflow::Session *      m_Session;                 // The TensorFlow session
+  tensorflow::SavedModelBundle * m_SavedModel;          // The TensorFlow model
 
   // Model parameters
   StringList                 m_InputPlaceholders;       // Input placeholders names
@@ -173,6 +174,10 @@ private:
   DataTypeListType           m_OutputTensorsDataTypes;  // Output tensors datatype
   TensorShapeProtoList       m_InputTensorsShapes;      // Input tensors shapes
   TensorShapeProtoList       m_OutputTensorsShapes;     // Output tensors shapes
+
+  // Layer names inside the model corresponding to inputs and outputs
+  StringList m_InputLayers;                             // List of input names, as contained in the model
+  StringList m_OutputLayers;                            // List of output names, as contained in the model
 
 }; // end class
 

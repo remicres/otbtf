@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -98,7 +98,7 @@ TensorflowMultisourceModelValidate<TInputImage>
 /**
  * Perform the validation
  * The session is ran over the entire set of batches.
- * Output is then validated agains the references images,
+ * Output is then validated against the references images,
  * and a confusion matrix is built.
  */
 template <class TInputImage>

@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -201,15 +201,19 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   //////////////////////////////////////////////////////////////////////////////////////////
 
   // If the output spacing is not specified, we use the first input image as grid reference
-  m_OutputSpacing = this->GetInput(0)->GetSignedSpacing();
+  // OTBTF assumes that the output image has the following geometric properties:
+  // (1) Image origin is the top-left pixel
+  // (2) Image pixel spacing has positive x-spacing and negative y-spacing
+  m_OutputSpacing = this->GetInput(0)->GetSpacing();  // GetSpacing() returns abs. spacing
+  m_OutputSpacing[1] *= -1.0;  // Force negative y-spacing
   m_OutputSpacing[0] *= m_OutputSpacingScale;
   m_OutputSpacing[1] *= m_OutputSpacingScale;
-  PointType extentInf, extentSup;
-  extentSup.Fill(itk::NumericTraits<double>::max());
-  extentInf.Fill(itk::NumericTraits<double>::NonpositiveMin());
 
   // Compute the extent of each input images and update the extent or the output image.
   // The extent of the output image is the intersection of all input images extents.
+  PointType extentInf, extentSup;
+  extentSup.Fill(itk::NumericTraits<double>::max());
+  extentInf.Fill(itk::NumericTraits<double>::NonpositiveMin());
   for (unsigned int imageIndex = 0 ; imageIndex < this->GetNumberOfInputs() ; imageIndex++)
     {
     ImageType * currentImage = static_cast<ImageType *>(
@@ -267,17 +271,22 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
   unsigned int outputPixelSize = 0;
   for (auto& protoShape: this->GetOutputTensorsShapes())
     {
-    // The number of components per pixel is the last dimension of the tensor
-    int dim_size = protoShape.dim_size();
-    unsigned int nComponents = 1;
-    if (1 < dim_size && dim_size <= 4)
+    // Find the number of components
+    if (protoShape.dim_size() > 4)
       {
-      nComponents = protoShape.dim(dim_size-1).size();
+      itkExceptionMacro("dim_size=" << protoShape.dim_size() << " currently not supported. "
+          "Keep in mind that output tensors must have 1, 2, 3 or 4 dimensions. "
+          "In the case of 1-dimensional tensor, the first dimension is for the batch, "
+          "and we assume that the output tensor has 1 channel. "
+          "In the case of 2-dimensional tensor, the first dimension is for the batch, "
+          "and the second is the number of components. "
+          "In the case of 3-dimensional tensor, the first dimension is for the batch, "
+          "and other dims are for (x, y). "
+          "In the case of 4-dimensional tensor, the first dimension is for the batch, "
+          "and the second and the third are for (x, y). The last is for the number of "
+          "channels. ");
       }
-    else if (dim_size > 4)
-      {
-      itkExceptionMacro("Dim_size=" << dim_size << " currently not supported.");
-      }
+    unsigned int nComponents = tf::GetNumberOfChannelsFromShapeProto(protoShape);
     outputPixelSize += nComponents;
     }
 
@@ -329,7 +338,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     if (!OutputRegionToInputRegion(requestedRegion, inRegion, inputImage) )
       {
       // Image does not overlap requested region: set requested region to null
-      itkDebugMacro( <<  "Image #" << i << " :\n" << inRegion << " is outside the requested region");
+      otbLogMacro(Debug,  << "Image #" << i << " :\n" << inRegion << " is outside the requested region");
       inRegion.GetModifiableIndex().Fill(0);
       inRegion.GetModifiableSize().Fill(0);
       }
@@ -392,6 +401,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
 
   // Create input tensors list
   DictType inputs;
+
 
   // Populate input tensors
   for (unsigned int i = 0 ; i < nInputs ; i++)
@@ -462,6 +472,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     } // next input tensor
 
   // Run session
+  // TODO: see if we print some info about inputs/outputs of the model e.g. m_OutputTensors
   TensorListType outputs;
   this->RunSession(inputs, outputs);
 
@@ -485,7 +496,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>
     catch( itk::ExceptionObject & err )
       {
       std::stringstream debugMsg = this->GenerateDebugReport(inputs);
-      itkExceptionMacro("Error occured during tensor to image conversion.\n"
+      itkExceptionMacro("Error occurred during tensor to image conversion.\n"
           << "Context: " << debugMsg.str()
           << "Error:" << err);
       }

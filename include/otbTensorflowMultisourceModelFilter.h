@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -17,14 +17,12 @@
 // Iterator
 #include "itkImageRegionConstIteratorWithOnlyIndex.h"
 
-// Tensorflow helpers
-#include "otbTensorflowGraphOperations.h"
-#include "otbTensorflowDataTypeBridge.h"
-#include "otbTensorflowCopyUtils.h"
-
 // Tile hint
 #include "itkMetaDataObject.h"
 #include "otbMetaDataKey.h"
+
+// OTB log
+#include "otbMacro.h"
 
 namespace otb
 {

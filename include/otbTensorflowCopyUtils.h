@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -15,18 +15,24 @@
 // ITK exception
 #include "itkMacro.h"
 
+// OTB log
+#include "otbMacro.h"
+
 // ITK image iterators
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionConstIterator.h"
 
 // tensorflow::tensor
 #include "tensorflow/core/framework/tensor.h"
+#include "tensorflow/core/framework/tensor_shape.h"
+#include "tensorflow/core/framework/tensor_shape.pb.h"
 
 // tensorflow::datatype <--> ImageType::InternalPixelType
 #include "otbTensorflowDataTypeBridge.h"
 
 // STD
 #include <string>
+#include <regex>
 
 namespace otb {
 namespace tf {
@@ -63,8 +69,8 @@ void SampleCenteredPatch(const typename TImage::Pointer inputPtr, const typename
 template<class TImage>
 void SampleCenteredPatch(const typename TImage::Pointer inputPtr, const typename TImage::PointType & centerCoord, const typename TImage::SizeType & patchSize, tensorflow::Tensor & tensor, unsigned int elemIdx);
 
-// Return the number of channels that the output tensor will occupy in the output image
-tensorflow::int64 GetNumberOfChannelsForOutputTensor(const tensorflow::Tensor & tensor);
+// Return the number of channels from the TensorflowShapeProto
+tensorflow::int64 GetNumberOfChannelsFromShapeProto(const tensorflow::TensorShapeProto & proto);
 
 // Copy a tensor into the image region
 template<class TImage, class TValueType>
@@ -73,6 +79,9 @@ void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, typename TImage:
 // Copy a tensor into the image region (TValueType-agnostic version)
 template<class TImage>
 void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, const typename TImage::RegionType & bufferRegion, typename TImage::Pointer outputPtr, const typename TImage::RegionType & outputRegion, int & channelOffset);
+
+// Convert a value into a tensor
+tensorflow::Tensor ValueToTensor(std::string value);
 
 // Convert an expression into a dict
 std::pair<std::string, tensorflow::Tensor> ExpressionToTensor(std::string expression);

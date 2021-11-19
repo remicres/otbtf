@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -26,6 +26,9 @@ tensorflow::DataType GetTensorflowDataType();
 // Return true if the tensor data type is correct
 template<class Type>
 bool HasSameDataType(const tensorflow::Tensor & tensor);
+
+// Return datatype as string
+tensorflow::string GetDataTypeAsString(tensorflow::DataType dt);
 
 } // end namespace tf
 } // end namespace otb

@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -27,23 +27,17 @@ public:
   typedef typename TImage::PixelType ValueType;
   typedef vnl_vector<float> CountsType;
 
-  Distribution(unsigned int nClasses){
-    m_NbOfClasses = nClasses;
-    m_Dist = CountsType(nClasses, 0);
-
+  explicit Distribution(unsigned int nClasses): m_NbOfClasses(nClasses), m_Dist(CountsType(nClasses, 0))
+  {
   }
-  Distribution(unsigned int nClasses, float fillValue){
-    m_NbOfClasses = nClasses;
-    m_Dist = CountsType(nClasses, fillValue);
-
+  Distribution(unsigned int nClasses, float fillValue): m_NbOfClasses(nClasses), m_Dist(CountsType(nClasses, fillValue))
+  {
   }
-  Distribution(){
-    m_NbOfClasses = 2;
-    m_Dist = CountsType(m_NbOfClasses, 0);
+  Distribution(): m_NbOfClasses(2), m_Dist(CountsType(m_NbOfClasses, 0))
+  {
   }
-  Distribution(const Distribution & other){
-    m_Dist = other.Get();
-    m_NbOfClasses = m_Dist.size();
+  Distribution(const Distribution & other): m_Dist(other.Get()), m_NbOfClasses(m_Dist.size())
+  {
   }
   ~Distribution(){}
 
