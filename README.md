@@ -22,7 +22,7 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
 It provides various classes for datasets and iterators to handle the _patches images_ generated from the `PatchesExtraction` OTB application.
 For instance, the `otbtf.Dataset` class provides a method `get_tf_dataset()` which returns a `tf.dataset` that can be used in your favorite TensorFlow pipelines, or convert your patches into TFRecords.
 
-`tricks.py` is here for backward compatibility with codes developped for OTBTF 1.x and 2.x.
+`tricks.py` is here for backward compatibility with codes based on OTBTF 1.x and 2.x.
 
 ## Examples
 
