@@ -90,7 +90,10 @@ WORKDIR /src/otb
 
 # SuperBuild OTB
 COPY tools/docker/build-flags-otb.txt ./
-RUN git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
+RUN apt-get update -y \
+ && apt-get install --reinstall ca-certificates -y \
+ && update-ca-certificates \
+ && git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
  && mkdir -p build \
  && cd build \
  # Set GL/Qt build flags
