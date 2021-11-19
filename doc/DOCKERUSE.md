@@ -20,7 +20,9 @@ Here is the list of OTBTF docker images hosted on [dockerhub](https://hub.docker
 | **mdl4eo/otbtf2.5:cpu**           | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, few optimization  | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf2.5:gpu**           | Ubuntu Focal  | r2.5   | 7.4.0 | GPU                    | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf2.5:gpu-dev**       | Ubuntu Focal  | r2.5   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf3.0:cpu-basic**     | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf3.0:cpu-basic-dev** | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf3.0:gpu**           | Ubuntu Focal  | r2.5   | 7.4.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf3.0:gpu-dev**       | Ubuntu Focal  | r2.5   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
 
 - `cpu` tagged docker images are compiled without optimization.
