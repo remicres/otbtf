@@ -239,7 +239,7 @@ class TutorialTest(unittest.TestCase):
                 file_list=["$TMPDIR/model2/variables/variables.index"]))
 
     @pytest.mark.order(11)
-    def test_model1_inference_fcn(self):
+    def test_model2_inference_fcn(self):
         self.assertTrue(
             run_command_and_compare(command="otbcli_TensorflowModelServe "
                                             "-source1.il $DATADIR/s2_stack.jp2 "
@@ -249,7 +249,7 @@ class TutorialTest(unittest.TestCase):
                                             "-model.dir $TMPDIR/model2 "
                                             "-model.fullyconv on "
                                             "-output.names prediction "
-                                            "-out \"$TMPDIR/classif_model2.tif?&box=4000:4000:1000:1000\"",
+                                            "-out \"$TMPDIR/classif_model2.tif?&box=4000:4000:1000:1000\" uint8",
                                     to_compare_dict={"$DATADIR/classif_model2.tif": "$TMPDIR/classif_model2.tif"},
                                     tol=INFERENCE_MAE_TOL))
 
@@ -357,6 +357,7 @@ class TutorialTest(unittest.TestCase):
                         "-training.source3.placeholder y "
                         "-model.dir $TMPDIR/model3 "
                         "-training.targetnodes optimizer "
+                        "-training.epochs 10 "
                         "-validation.mode class "
                         "-validation.source1.il $DATADIR/s2_20m_patches_B.tif "
                         "-validation.source1.name x1 "
@@ -415,6 +416,97 @@ class TutorialTest(unittest.TestCase):
                 command="python $TMPDIR/otbtf_tuto_repo/02_semantic_segmentation/models/create_model4.py "
                         "$TMPDIR/model4",
                 file_list=["$TMPDIR/model4/saved_model.pb"]))
+
+    @pytest.mark.order(20)
+    def test_patches_selection_semseg(self):
+        self.assertTrue(
+            run_command_and_test_exist(
+                command="otbcli_PatchesSelection "
+                        "-in $DATADIR/fake_spot6.jp2 "
+                        "-grid.step 64 "
+                        "-grid.psize 64 "
+                        "-outtrain $TMPDIR/outvec_A_semseg.gpkg "
+                        "-outvalid $TMPDIR/outvec_B_semseg.gpkg",
+                file_list=["$TMPDIR/outvec_A_semseg.gpkg",
+                           "$TMPDIR/outvec_B_semseg.gpkg"]))
+
+    @pytest.mark.order(21)
+    def test_patch_extraction_semseg(self):
+        self.assertTrue(
+            run_command_and_compare(
+                command="OTB_TF_NSOURCES=2 otbcli_PatchesExtraction "
+                        "-source1.il $DATADIR/fake_spot6.jp2 "
+                        "-source1.patchsizex 64 "
+                        "-source1.patchsizey 64 "
+                        "-source1.out \"$TMPDIR/amsterdam_patches_A.tif?&gdal:co:compress=deflate\" "
+                        "-source2.il $TMPDIR/otbtf_tuto_repo/02_semantic_segmentation/"
+                        "amsterdam_dataset/terrain_truth/amsterdam_labelimage.tif "
+                        "-source2.patchsizex 64 "
+                        "-source2.patchsizey 64 "
+                        "-source2.out \"$TMPDIR/amsterdam_labels_A.tif?&gdal:co:compress=deflate\" "
+                        "-vec $TMPDIR/outvec_A_semseg.gpkg "
+                        "-field id ",
+                to_compare_dict={"$DATADIR/amsterdam_labels_A.tif": "$TMPDIR/amsterdam_labels_A.tif",
+                                 "$DATADIR/amsterdam_patches_A.tif": "$TMPDIR/amsterdam_patches_A.tif"}))
+        self.assertTrue(
+            run_command_and_compare(
+                command="OTB_TF_NSOURCES=2 otbcli_PatchesExtraction "
+                        "-source1.il $DATADIR/fake_spot6.jp2 "
+                        "-source1.patchsizex 64 "
+                        "-source1.patchsizey 64 "
+                        "-source1.out \"$TMPDIR/amsterdam_patches_B.tif?&gdal:co:compress=deflate\" "
+                        "-source2.il $TMPDIR/otbtf_tuto_repo/02_semantic_segmentation/"
+                        "amsterdam_dataset/terrain_truth/amsterdam_labelimage.tif "
+                        "-source2.patchsizex 64 "
+                        "-source2.patchsizey 64 "
+                        "-source2.out \"$TMPDIR/amsterdam_labels_B.tif?&gdal:co:compress=deflate\" "
+                        "-vec $TMPDIR/outvec_B_semseg.gpkg "
+                        "-field id ",
+                to_compare_dict={"$DATADIR/amsterdam_labels_B.tif": "$TMPDIR/amsterdam_labels_B.tif",
+                                 "$DATADIR/amsterdam_patches_B.tif": "$TMPDIR/amsterdam_patches_B.tif"}))
+
+    @pytest.mark.order(22)
+    def test_model4_train(self):
+        self.assertTrue(
+            run_command_and_test_exist(
+                command="OTB_TF_NSOURCES=1 otbcli_TensorflowModelTrain "
+                        "-training.source1.il $DATADIR/amsterdam_patches_A.tif "
+                        "-training.source1.patchsizex 64 "
+                        "-training.source1.patchsizey 64 "
+                        "-training.source1.placeholder x "
+                        "-training.source2.il $DATADIR/amsterdam_labels_A.tif "
+                        "-training.source2.patchsizex 64 "
+                        "-training.source2.patchsizey 64 "
+                        "-training.source2.placeholder y "
+                        "-model.dir $TMPDIR/model4 "
+                        "-training.targetnodes optimizer "
+                        "-training.epochs 10 "
+                        "-validation.mode class "
+                        "-validation.source1.il $DATADIR/amsterdam_patches_B.tif "
+                        "-validation.source1.name x "
+                        "-validation.source2.il $DATADIR/amsterdam_labels_B.tif "
+                        "-validation.source2.name prediction "
+                        "-model.saveto $TMPDIR/model4/variables/variables",
+                file_list=["$TMPDIR/model4/variables/variables.index"]))
+
+    @pytest.mark.order(23)
+    def test_model4_inference(self):
+        self.assertTrue(
+            run_command_and_compare(
+                command=
+                "otbcli_TensorflowModelServe "
+                "-source1.il $DATADIR/fake_spot6.jp2 "
+                "-source1.rfieldx 64 "
+                "-source1.rfieldy 64 "
+                "-source1.placeholder x "
+                "-model.dir $TMPDIR/model4 "
+                "-model.fullyconv on "
+                "-output.names prediction_fcn "
+                "-output.efieldx 32 "
+                "-output.efieldy 32 "
+                "-out \"$TMPDIR/classif_model4.tif?&gdal:co:compress=deflate\" uint8",
+                to_compare_dict={"$DATADIR/classif_model4.tif": "$TMPDIR/classif_model4.tif"},
+                tol=INFERENCE_MAE_TOL))
 
 
 if __name__ == '__main__':
