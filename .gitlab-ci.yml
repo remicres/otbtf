@@ -3,6 +3,9 @@ image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
 variables:
     OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
     OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
+    OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
+    ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
+    CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
 
 workflow:
   rules:
@@ -13,13 +16,17 @@ stages:
   - Build
   - Static Analysis
   - Test
+  - Applications Test
 
 .update_otbtf_src: &update_otbtf_src
   - sudo rm -rf $OTBTF_SRC && sudo ln -s $PWD $OTBTF_SRC  # Replace local OTBTF source directory
 
 .compile_otbtf: &compile_otbtf
   - cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
-
+  
+.install_pytest: &install_pytest
+  - pip3 install pytest pytest-cov pytest-order  # Install pytest stuff
+  
 before_script:
   - *update_otbtf_src
 
@@ -60,21 +67,47 @@ ctest:
   stage: Test
   script:
     - *compile_otbtf
-    - sudo rm -rf $OTB_BUILD/Testing/Temporary/*  # Empty testing temporary folder (old files here)
+    - sudo rm -rf $OTB_TEST_DIR/*  # Empty testing temporary folder (old files here)
     - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
   after_script:
-    - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/testing  # Copy artifacts (they must be in $CI_PROJECT_DIR)
+    - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
   artifacts:
     paths:
-      - testing/*.*
+      - $ARTIFACT_TEST_DIR/*.*
     expire_in: 1 week
     when: on_failure
 
-sr4rs:
-  stage: Test
+.applications_test_base:
+  stage: Applications Test
+  rules:
+      # Only for MR targeting 'develop' branch because applications tests are slow
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
+  artifacts:
+    when: on_failure
+    paths:
+      - $CI_PROJECT_DIR/report_*.xml
+      - $ARTIFACT_TEST_DIR/*.*
+    expire_in: 1 week
+          
+crc_book:
+  extends: .applications_test_base
   script:
     - *compile_otbtf
-    - pip3 install pytest pytest-cov
+    - *install_pytest
+    - cd $CI_PROJECT_DIR
+    - mkdir -p $CRC_BOOK_TMP
+    - TMPDIR=$CRC_BOOK_TMP \
+      DATADIR=$CI_PROJECT_DIR/test/data \
+      python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
+  after_script:
+    - mkdir -p $ARTIFACT_TEST_DIR
+    - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
+    
+sr4rs:
+  extends: .applications_test_base
+  script:
+    - *compile_otbtf
+    - *install_pytest
     - cd $CI_PROJECT_DIR
     - wget -O sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
       https://nextcloud.inrae.fr/s/boabW9yCjdpLPGX/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
@@ -85,8 +118,4 @@ sr4rs:
     - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest --junitxml=$CI_PROJECT_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
-  artifacts:
-    when: on_failure
-    paths:
-      - $CI_PROJECT_DIR/report_sr4rs.xml
-    expire_in: 1 week
+
