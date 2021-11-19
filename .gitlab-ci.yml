@@ -96,13 +96,7 @@ crc_book:
     - *install_pytest
     - cd $CI_PROJECT_DIR
     - mkdir -p $CRC_BOOK_TMP
-<<<<<<< HEAD
     - TMPDIR=$CRC_BOOK_TMP DATADIR=$CI_PROJECT_DIR/test/data python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
-=======
-    - TMPDIR=$CRC_BOOK_TMP \
-      DATADIR=$CI_PROJECT_DIR/test/data \
-      python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
->>>>>>> e15fe3ed4b90fed431b356b03eed7a2748a7db62
   after_script:
     - mkdir -p $ARTIFACT_TEST_DIR
     - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
