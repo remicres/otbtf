@@ -170,12 +170,15 @@ private:
   StringList                 m_TargetNodesNames;        // User nodes target
 
   // Internal, read-only
+  DataTypeListType           m_InputConstantsDataTypes; // Input constants datatype
   DataTypeListType           m_InputTensorsDataTypes;   // Input tensors datatype
   DataTypeListType           m_OutputTensorsDataTypes;  // Output tensors datatype
+  TensorShapeProtoList       m_InputConstantsShapes;    // Input constants shapes
   TensorShapeProtoList       m_InputTensorsShapes;      // Input tensors shapes
   TensorShapeProtoList       m_OutputTensorsShapes;     // Output tensors shapes
 
   // Layer names inside the model corresponding to inputs and outputs
+  StringList m_InputConstants;                          // List of constants names, as contained in the model
   StringList m_InputLayers;                             // List of input names, as contained in the model
   StringList m_OutputLayers;                            // List of output names, as contained in the model
 
