@@ -27,27 +27,37 @@
 // OTB log
 #include "otbMacro.h"
 
-namespace otb {
-namespace tf {
+namespace otb
+{
+namespace tf
+{
 
 // Load SavedModel variables
-void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
+void
+RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
 // Save SavedModel variables
-void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
+void
+SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
 // Load SavedModel
-void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::vector<std::string> tagList);
+void
+LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::vector<std::string> tagList);
 
 // Get the following attributes of the specified tensors (by name) of a graph:
 // - shape
 // - datatype
 // Here we assume that the node's output is a tensor
-void GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::TensorInfo> layers, std::vector<std::string> & tensorsNames,
-    std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes);
+void
+GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::TensorInfo> layers,
+                    std::vector<std::string> &                                           tensorsNames,
+                    std::vector<tensorflow::TensorShapeProto> &                          shapes,
+                    std::vector<tensorflow::DataType> &                                  dataTypes,
+                    std::vector<std::string>                                             blackList);
 
 // Print a lot of stuff about the specified nodes of the graph
-void PrintNodeAttributes(const tensorflow::GraphDef & graph, const std::vector<std::string> & nodesNames);
+void
+PrintNodeAttributes(const tensorflow::GraphDef & graph, const std::vector<std::string> & nodesNames);
 
 } // end namespace tf
 } // end namespace otb
