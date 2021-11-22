@@ -87,19 +87,39 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
                     std::vector<std::string> &                                           tensorsNames,
                     std::vector<std::string> &                                           layerNames,
                     std::vector<tensorflow::TensorShapeProto> &                          shapes,
-                    std::vector<tensorflow::DataType> &                                  dataTypes)
+                    std::vector<tensorflow::DataType> &                                  dataTypes,
+                    std::vector<std::string>                                             blackList = {})
 {
-  // Allocation
+  // Clear shapes, datatypes, and layers names
   shapes.clear();
   dataTypes.clear();
   layerNames.clear();
 
   // Debug infos
-  otbLogMacro(Debug, << "Nodes contained in the model: ");
+  otbLogMacro(Debug, << "Nodes contained in the model:");
   for (auto const & layer : layers)
     otbLogMacro(Debug, << "\t" << layer.first);
 
-  // When the user doesn't specify output.names, m_OutputTensors defaults to an empty list that we can not iterate over.
+  // Sort nodes names alphabetically
+  std::size_t                              k = 0;             // Keep track of the indices in the protobuf map
+  std::vector<std::pair<std::string, int>> sortedLayersNames; // vector of (name, index) pairs
+  for (auto const & layer : layers)
+  {
+    // We exclude names, if any in the blacklist. Useful to avoid confusion
+    // between user placeholders (aka constants) and input tensors.
+    // Not used for output tensors.
+    if (std::count(blackList.begin(), blackList.end(), layer.first) == 0)
+    {
+      sortedLayersNames.emplace_back(layer.first, k);
+    }
+    k++;
+  }
+  std::sort(sortedLayersNames.begin(), sortedLayersNames.end());
+  otbLogMacro(Debug, << "Sorted (alphabetically) nodes names:");
+  for (auto const & name : sortedLayersNames)
+    otbLogMacro(Debug, << "\t" << name.first << " (index: " << name.second << ")");
+
+  // When the user doesn't specify output.names, tensorsNames defaults to an empty list that we can not iterate over.
   // We change it to a list containing an empty string [""]
   if (tensorsNames.size() == 0)
   {
@@ -108,8 +128,8 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
   }
 
   // Next, we fill layerNames
-  int k = 0; // counter used for tensorsNames
-  for (auto const & name: tensorsNames)
+  k = 0; // counter used for tensorsNames
+  for (auto const & name : tensorsNames)
   {
     bool                   found = false;
     tensorflow::TensorInfo tensor_info;
@@ -118,12 +138,18 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
     if (name.size() == 0)
     {
       found = true;
-      // select the k-th element of `layers`
-      auto it = layers.begin();
-      std::advance(it, k);
+      // select the k-th element of `layers` names, alphabeticallly sorted
+      const std::string kthName = sortedLayersNames[k].first;
+      auto              it = layers.begin();
+      const int         kthIndex = sortedLayersNames[k].second;
+      std::advance(it, kthIndex);
       layerNames.push_back(it->second.name());
       tensor_info = it->second;
-      otbLogMacro(Debug, << "Name is empty. Input " << k << " corresponds to node \"" << it->first << "\" in the model");
+      if (sortedLayersNames.size() > 1)
+        otbLogMacro(Warning,
+                    << "The provided tensor name is empty, and there are multiple available candidates in the graph. "
+                       "Available tensors names from the graph have been sorted alphabetically, and the tensor #"
+                    << kthIndex << " (aka \"" << it->first << "\") will be used. ");
     }
 
     // Else, if the user specified the placeholdername, find the corresponding layer inside the model
@@ -143,7 +169,7 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
           otbLogMacro(Debug, << "Found: " << layer.second.name() << " in the model");
         }
       } // next layer
-    } // end else
+    }   // end else
 
     k += 1;
 
@@ -178,7 +204,7 @@ PrintNodeAttributes(const tensorflow::GraphDef & graph, const std::vector<std::s
     tensorflow::NodeDef node = graph.node(i);
     std::cout << i << "\t" << node.name() << std::endl;
 
-    for (auto const & name: nodesNames)
+    for (auto const & name : nodesNames)
     {
       if (node.name().compare(name) == 0)
       {
