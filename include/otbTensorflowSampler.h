@@ -52,16 +52,14 @@ namespace otb
  * \ingroup OTBTensorflow
  */
 template <class TInputImage, class TVectorData>
-class ITK_EXPORT TensorflowSampler :
-public itk::ProcessObject
+class ITK_EXPORT TensorflowSampler : public itk::ProcessObject
 {
 public:
-
   /** Standard class typedefs. */
-  typedef TensorflowSampler                       Self;
-  typedef itk::ProcessObject                      Superclass;
-  typedef itk::SmartPointer<Self>                 Pointer;
-  typedef itk::SmartPointer<const Self>           ConstPointer;
+  typedef TensorflowSampler             Self;
+  typedef itk::ProcessObject            Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -70,33 +68,28 @@ public:
   itkTypeMacro(TensorflowSampler, itk::ProcessObject);
 
   /** Images typedefs */
-  typedef TInputImage                             ImageType;
-  typedef typename TInputImage::Pointer           ImagePointerType;
-  typedef typename TInputImage::InternalPixelType InternalPixelType;
-  typedef typename TInputImage::PixelType         PixelType;
-  typedef typename TInputImage::RegionType        RegionType;
-  typedef typename TInputImage::PointType         PointType;
-  typedef typename TInputImage::SizeType          SizeType;
-  typedef typename TInputImage::IndexType         IndexType;
-  typedef typename otb::MultiChannelExtractROI<InternalPixelType,
-      InternalPixelType>                          ExtractROIMultiFilterType;
-  typedef typename ExtractROIMultiFilterType::Pointer
-                                                  ExtractROIMultiFilterPointerType;
-  typedef typename std::vector<ImagePointerType>  ImagePointerListType;
-  typedef typename std::vector<SizeType>          SizeListType;
-  typedef typename itk::ImageRegionConstIterator<ImageType>
-                                                  IteratorType;
+  typedef TInputImage                                                                ImageType;
+  typedef typename TInputImage::Pointer                                              ImagePointerType;
+  typedef typename TInputImage::InternalPixelType                                    InternalPixelType;
+  typedef typename TInputImage::PixelType                                            PixelType;
+  typedef typename TInputImage::RegionType                                           RegionType;
+  typedef typename TInputImage::PointType                                            PointType;
+  typedef typename TInputImage::SizeType                                             SizeType;
+  typedef typename TInputImage::IndexType                                            IndexType;
+  typedef typename otb::MultiChannelExtractROI<InternalPixelType, InternalPixelType> ExtractROIMultiFilterType;
+  typedef typename ExtractROIMultiFilterType::Pointer                                ExtractROIMultiFilterPointerType;
+  typedef typename std::vector<ImagePointerType>                                     ImagePointerListType;
+  typedef typename std::vector<SizeType>                                             SizeListType;
+  typedef typename itk::ImageRegionConstIterator<ImageType>                          IteratorType;
 
   /** Vector data typedefs */
-  typedef TVectorData                             VectorDataType;
-  typedef typename VectorDataType::Pointer        VectorDataPointer;
-  typedef typename VectorDataType::DataTreeType   DataTreeType;
-  typedef typename itk::PreOrderTreeIterator<DataTreeType>
-                                                  TreeIteratorType;
-  typedef typename VectorDataType::DataNodeType   DataNodeType;
-  typedef typename DataNodeType::Pointer          DataNodePointer;
-  typedef typename DataNodeType::PolygonListPointerType
-                                                  PolygonListPointerType;
+  typedef TVectorData                                      VectorDataType;
+  typedef typename VectorDataType::Pointer                 VectorDataPointer;
+  typedef typename VectorDataType::DataTreeType            DataTreeType;
+  typedef typename itk::PreOrderTreeIterator<DataTreeType> TreeIteratorType;
+  typedef typename VectorDataType::DataNodeType            DataNodeType;
+  typedef typename DataNodeType::Pointer                   DataNodePointer;
+  typedef typename DataNodeType::PolygonListPointerType    PolygonListPointerType;
 
   /** Set / get parameters */
   itkSetMacro(Field, std::string);
@@ -107,15 +100,18 @@ public:
   itkGetConstMacro(InputVectorData, VectorDataPointer);
 
   /** Set / get image */
-  virtual void PushBackInputWithPatchSize(const ImageType *input, SizeType & patchSize, InternalPixelType nodataval);
-  const ImageType* GetInput(unsigned int index);
+  virtual void
+  PushBackInputWithPatchSize(const ImageType * input, SizeType & patchSize, InternalPixelType nodataval);
+  const ImageType *
+  GetInput(unsigned int index);
 
   /** Set / get no-data related parameters */
   itkSetMacro(RejectPatchesWithNodata, bool);
   itkGetMacro(RejectPatchesWithNodata, bool);
 
   /** Do the real work */
-  virtual void Update();
+  virtual void
+  Update();
 
   /** Get outputs */
   itkGetMacro(OutputPatchImages, ImagePointerListType);
@@ -125,18 +121,21 @@ public:
 
 protected:
   TensorflowSampler();
-  virtual ~TensorflowSampler() {};
+  virtual ~TensorflowSampler(){};
 
-  virtual void ResizeImage(ImagePointerType & image, SizeType & patchSize, unsigned int nbSamples);
-  virtual void AllocateImage(ImagePointerType & image, SizeType & patchSize, unsigned int nbSamples, unsigned int nbComponents);
+  virtual void
+  ResizeImage(ImagePointerType & image, SizeType & patchSize, unsigned int nbSamples);
+  virtual void
+  AllocateImage(ImagePointerType & image, SizeType & patchSize, unsigned int nbSamples, unsigned int nbComponents);
 
 private:
-  TensorflowSampler(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
+  TensorflowSampler(const Self &); // purposely not implemented
+  void
+  operator=(const Self &); // purposely not implemented
 
-  std::string          m_Field;
-  SizeListType         m_PatchSizes;
-  VectorDataPointer    m_InputVectorData;
+  std::string       m_Field;
+  SizeListType      m_PatchSizes;
+  VectorDataPointer m_InputVectorData;
 
   // Read only
   ImagePointerListType m_OutputPatchImages;
@@ -146,7 +145,7 @@ private:
 
   // No data stuff
   std::vector<InternalPixelType> m_NoDataValues;
-  bool                 m_RejectPatchesWithNodata;
+  bool                           m_RejectPatchesWithNodata;
 
 }; // end class
 

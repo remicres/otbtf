@@ -19,30 +19,28 @@ namespace otb
 {
 
 template <class TInputImage, class TOutputImage>
-TensorflowStreamerFilter<TInputImage, TOutputImage>
-::TensorflowStreamerFilter()
- {
+TensorflowStreamerFilter<TInputImage, TOutputImage>::TensorflowStreamerFilter()
+{
   m_OutputGridSize.Fill(1);
- }
+}
 
 /**
  * Compute the output image
  */
 template <class TInputImage, class TOutputImage>
 void
-TensorflowStreamerFilter<TInputImage, TOutputImage>
-::GenerateData()
- {
+TensorflowStreamerFilter<TInputImage, TOutputImage>::GenerateData()
+{
   // Output pointer and requested region
   OutputImageType * outputPtr = this->GetOutput();
-  const RegionType outputReqRegion = outputPtr->GetRequestedRegion();
+  const RegionType  outputReqRegion = outputPtr->GetRequestedRegion();
   outputPtr->SetBufferedRegion(outputReqRegion);
   outputPtr->Allocate();
 
   // Compute the aligned region
   RegionType region;
-  for(unsigned int dim = 0; dim<OutputImageType::ImageDimension; ++dim)
-    {
+  for (unsigned int dim = 0; dim < OutputImageType::ImageDimension; ++dim)
+  {
     // Get corners
     IndexValueType lower = outputReqRegion.GetIndex(dim);
     IndexValueType upper = lower + outputReqRegion.GetSize(dim);
@@ -54,35 +52,34 @@ TensorflowStreamerFilter<TInputImage, TOutputImage>
     // Move corners to aligned positions
     lower -= deltaLo;
     if (deltaUp > 0)
-      {
+    {
       upper += m_OutputGridSize[dim] - deltaUp;
-      }
+    }
 
     // Update region
     region.SetIndex(dim, lower);
     region.SetSize(dim, upper - lower);
-
-    }
+  }
 
   // Compute the number of subregions to process
   const unsigned int nbTilesX = region.GetSize(0) / m_OutputGridSize[0];
   const unsigned int nbTilesY = region.GetSize(1) / m_OutputGridSize[1];
 
   // Progress
-  itk::ProgressReporter progress(this, 0, nbTilesX*nbTilesY);
+  itk::ProgressReporter progress(this, 0, nbTilesX * nbTilesY);
 
   // For each tile, propagate the input region and recopy the output
-  ImageType * inputImage = static_cast<ImageType * >(  Superclass::ProcessObject::GetInput(0) );
+  ImageType *  inputImage = static_cast<ImageType *>(Superclass::ProcessObject::GetInput(0));
   unsigned int tx, ty;
-  RegionType subRegion;
+  RegionType   subRegion;
   subRegion.SetSize(m_OutputGridSize);
   for (ty = 0; ty < nbTilesY; ty++)
   {
-    subRegion.SetIndex(1, ty*m_OutputGridSize[1] + region.GetIndex(1));
+    subRegion.SetIndex(1, ty * m_OutputGridSize[1] + region.GetIndex(1));
     for (tx = 0; tx < nbTilesX; tx++)
     {
       // Update the input subregion
-      subRegion.SetIndex(0, tx*m_OutputGridSize[0] + region.GetIndex(0));
+      subRegion.SetIndex(0, tx * m_OutputGridSize[0] + region.GetIndex(0));
 
       // The actual region to copy
       RegionType cpyRegion(subRegion);
@@ -94,12 +91,12 @@ TensorflowStreamerFilter<TInputImage, TOutputImage>
       inputImage->UpdateOutputData();
 
       // Copy the subregion to output
-      itk::ImageAlgorithm::Copy( inputImage, outputPtr, cpyRegion, cpyRegion );
+      itk::ImageAlgorithm::Copy(inputImage, outputPtr, cpyRegion, cpyRegion);
 
       progress.CompletedPixel();
     }
   }
- }
+}
 
 
 } // end namespace otb
