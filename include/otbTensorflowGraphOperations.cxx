@@ -123,13 +123,13 @@ GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::Ten
       std::advance(it, k);
       layerNames.push_back(it->second.name());
       tensor_info = it->second;
-      otbLogMacro(Debug, << "Input " << k << " corresponds to " << it->first << " in the model");
+      otbLogMacro(Debug, << "Name is empty. Input " << k << " corresponds to node \"" << it->first << "\" in the model");
     }
 
     // Else, if the user specified the placeholdername, find the corresponding layer inside the model
     else
     {
-      otbLogMacro(Debug, << "Searching for corresponding node of: " << name << "... ");
+      otbLogMacro(Debug, << "Searching for corresponding node of \"" << name << "\"... ");
       for (auto const & layer : layers)
       {
         // layer is a pair (name, tensor_info)
