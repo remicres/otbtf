@@ -172,7 +172,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::GenerateOutputInforma
   // and other infos (shapes, dtypes)
   // For example, for output names specified by the user m_OutputTensors = ['s2t', 's2t_pad'],
   // this will return m_OutputLayers = ['PartitionedCall:0', 'PartitionedCall:1']
-  // In case the user hasn't named the output, e.g.  m_OutputTensors = [''],
+  // In case the user hasn't named the output, i.e.  m_OutputTensors = [''],
   // this will return the first output m_OutputLayers = ['PartitionedCall:0']
   StringList constantsNames;
   std::transform(m_UserPlaceholders.begin(), m_UserPlaceholders.end(), std::back_inserter(constantsNames),
