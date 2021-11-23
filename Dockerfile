@@ -74,6 +74,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
  && ln -s $(find /opt/otbtf -type d -wholename "*/site-packages/tensorflow/include") /opt/otbtf/include/tf \
  # The only missing header in the wheel
  && cp tensorflow/cc/saved_model/tag_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
+ && cp tensorflow/cc/saved_model/signature_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
  # Symlink external libs (required for MKL - libiomp5)
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
  # Compress and save TF binaries
@@ -90,7 +91,10 @@ WORKDIR /src/otb
 
 # SuperBuild OTB
 COPY tools/docker/build-flags-otb.txt ./
-RUN git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
+RUN apt-get update -y \
+ && apt-get install --reinstall ca-certificates -y \
+ && update-ca-certificates \
+ && git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
  && mkdir -p build \
  && cd build \
  # Set GL/Qt build flags

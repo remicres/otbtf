@@ -80,12 +80,10 @@ namespace otb
  * \ingroup OTBTensorflow
  */
 template <class TInputImage, class TOutputImage>
-class ITK_EXPORT TensorflowMultisourceModelFilter :
-public TensorflowMultisourceModelBase<TInputImage, TOutputImage>
+class ITK_EXPORT TensorflowMultisourceModelFilter : public TensorflowMultisourceModelBase<TInputImage, TOutputImage>
 {
 
 public:
-
   /** Standard class typedefs. */
   typedef TensorflowMultisourceModelFilter                          Self;
   typedef TensorflowMultisourceModelBase<TInputImage, TOutputImage> Superclass;
@@ -99,16 +97,16 @@ public:
   itkTypeMacro(TensorflowMultisourceModelFilter, TensorflowMultisourceModelBase);
 
   /** Images typedefs */
-  typedef typename Superclass::ImageType           ImageType;
-  typedef typename Superclass::ImagePointerType    ImagePointerType;
-  typedef typename Superclass::PixelType           PixelType;
-  typedef typename Superclass::IndexType           IndexType;
-  typedef typename IndexType::IndexValueType       IndexValueType;
-  typedef typename Superclass::PointType           PointType;
-  typedef typename Superclass::SizeType            SizeType;
-  typedef typename SizeType::SizeValueType         SizeValueType;
-  typedef typename Superclass::SpacingType         SpacingType;
-  typedef typename Superclass::RegionType          RegionType;
+  typedef typename Superclass::ImageType        ImageType;
+  typedef typename Superclass::ImagePointerType ImagePointerType;
+  typedef typename Superclass::PixelType        PixelType;
+  typedef typename Superclass::IndexType        IndexType;
+  typedef typename IndexType::IndexValueType    IndexValueType;
+  typedef typename Superclass::PointType        PointType;
+  typedef typename Superclass::SizeType         SizeType;
+  typedef typename SizeType::SizeValueType      SizeValueType;
+  typedef typename Superclass::SpacingType      SpacingType;
+  typedef typename Superclass::RegionType       RegionType;
 
   typedef TOutputImage                             OutputImageType;
   typedef typename TOutputImage::PixelType         OutputPixelType;
@@ -119,12 +117,12 @@ public:
   typedef typename itk::ImageRegionConstIterator<TInputImage>              InputConstIteratorType;
 
   /* Typedefs for parameters */
-  typedef typename Superclass::DictElementType     DictElementType;
-  typedef typename Superclass::DictType            DictType;
-  typedef typename Superclass::StringList          StringList;
-  typedef typename Superclass::SizeListType        SizeListType;
-  typedef typename Superclass::TensorListType      TensorListType;
-  typedef std::vector<float>                       ScaleListType;
+  typedef typename Superclass::DictElementType DictElementType;
+  typedef typename Superclass::DictType        DictType;
+  typedef typename Superclass::StringList      StringList;
+  typedef typename Superclass::SizeListType    SizeListType;
+  typedef typename Superclass::TensorListType  TensorListType;
+  typedef std::vector<float>                   ScaleListType;
 
   itkSetMacro(OutputGridSize, SizeType);
   itkGetMacro(OutputGridSize, SizeType);
@@ -137,34 +135,43 @@ public:
 
 protected:
   TensorflowMultisourceModelFilter();
-  virtual ~TensorflowMultisourceModelFilter() {};
+  virtual ~TensorflowMultisourceModelFilter(){};
 
-  virtual void SmartPad(RegionType& region, const SizeType &patchSize);
-  virtual void SmartShrink(RegionType& region, const SizeType &patchSize);
-  virtual void ImageToExtent(ImageType* image, PointType &extentInf, PointType &extentSup, SizeType &patchSize);
-  virtual bool OutputRegionToInputRegion(const RegionType &outputRegion, RegionType &inputRegion, ImageType* &inputImage);
-  virtual void EnlargeToAlignedRegion(RegionType& region);
+  virtual void
+  SmartPad(RegionType & region, const SizeType & patchSize);
+  virtual void
+  SmartShrink(RegionType & region, const SizeType & patchSize);
+  virtual void
+  ImageToExtent(ImageType * image, PointType & extentInf, PointType & extentSup, SizeType & patchSize);
+  virtual bool
+  OutputRegionToInputRegion(const RegionType & outputRegion, RegionType & inputRegion, ImageType *& inputImage);
+  virtual void
+  EnlargeToAlignedRegion(RegionType & region);
 
-  virtual void GenerateOutputInformation(void);
+  virtual void
+  GenerateOutputInformation(void);
 
-  virtual void GenerateInputRequestedRegion(void);
+  virtual void
+  GenerateInputRequestedRegion(void);
 
-  virtual void GenerateData();
+  virtual void
+  GenerateData();
 
 private:
-  TensorflowMultisourceModelFilter(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
+  TensorflowMultisourceModelFilter(const Self &); // purposely not implemented
+  void
+  operator=(const Self &); // purposely not implemented
 
-  SizeType                   m_OutputGridSize;       // Output grid size
-  bool                       m_ForceOutputGridSize;  // Force output grid size
-  bool                       m_FullyConvolutional;   // Convolution mode
-  float                      m_OutputSpacingScale;   // scaling of the output spacings
+  SizeType m_OutputGridSize;      // Output grid size
+  bool     m_ForceOutputGridSize; // Force output grid size
+  bool     m_FullyConvolutional;  // Convolution mode
+  float    m_OutputSpacingScale;  // scaling of the output spacings
 
   // Internal
-  SpacingType                m_OutputSpacing;     // Output image spacing
-  PointType                  m_OutputOrigin;      // Output image origin
-  SizeType                   m_OutputSize;        // Output image size
-  PixelType                  m_NullPixel;         // Pixel filled with zeros
+  SpacingType m_OutputSpacing; // Output image spacing
+  PointType   m_OutputOrigin;  // Output image origin
+  SizeType    m_OutputSize;    // Output image size
+  PixelType   m_NullPixel;     // Pixel filled with zeros
 
 }; // end class
 

@@ -187,7 +187,13 @@ GetNumberOfChannelsFromShapeProto(const tensorflow::TensorShapeProto & proto)
     return 1;
   // any other dimension: we assume that the last dimension represent the
   // number of channels in the output image.
-  return proto.dim(nDims - 1).size();
+  tensorflow::int64 nbChannels = proto.dim(nDims - 1).size();
+  if (nbChannels < 1)
+    itkGenericExceptionMacro("Cannot determine the size of the last dimension of one output tensor. Dimension index is "
+                             << (nDims - 1)
+                             << ". Please rewrite your model with output tensors having a shape where the last "
+                                "dimension is a constant value.");
+  return nbChannels;
 }
 
 //
@@ -218,9 +224,10 @@ CopyTensorToImageRegion(const tensorflow::Tensor &          tensor,
   const tensorflow::int64 nElmI = bufferRegion.GetNumberOfPixels() * outputDimSize_C;
   if (nElmI != nElmT)
   {
-    itkGenericExceptionMacro("Number of elements in the tensor is " << nElmT 
-                             << " but image outputRegion has " << nElmI << " values to fill.\n"
-                             << "Buffer region is: \n" << bufferRegion << "\n"
+    itkGenericExceptionMacro("Number of elements in the tensor is "
+                             << nElmT << " but image outputRegion has " << nElmI << " values to fill.\n"
+                             << "Buffer region is: \n"
+                             << bufferRegion << "\n"
                              << "Number of components in the output image: " << outputDimSize_C << "\n"
                              << "Tensor shape: " << PrintTensorShape(tensor.shape()) << "\n"
                              << "Please check the input(s) field of view (FOV), "
@@ -347,7 +354,7 @@ ValueToTensor(std::string value)
   }
 
   // Create tensor
-  tensorflow::TensorShape shape({values.size()});
+  tensorflow::TensorShape shape({ values.size() });
   tensorflow::Tensor      out(tensorflow::DT_BOOL, shape);
   if (is_digit)
   {
@@ -409,7 +416,7 @@ ValueToTensor(std::string value)
     }
     idx++;
   }
-  otbLogMacro(Debug,  << "Returning tensor: "<< out.DebugString());
+  otbLogMacro(Debug, << "Returning tensor: " << out.DebugString());
 
   return out;
 }
