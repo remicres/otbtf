@@ -80,8 +80,9 @@ ctest:
 .applications_test_base:
   stage: Applications Test
   rules:
-      # Only for MR targeting 'develop' branch because applications tests are slow
+      # Only for MR targeting 'develop' and 'master' branches because applications tests are slow
     - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
   artifacts:
     when: on_failure
     paths:

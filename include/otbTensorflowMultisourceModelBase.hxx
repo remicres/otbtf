@@ -175,10 +175,19 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::GenerateOutputInforma
   // In case the user hasn't named the output, i.e.  m_OutputTensors = [''],
   // this will return the first output m_OutputLayers = ['PartitionedCall:0']
   StringList constantsNames;
-  std::transform(m_UserPlaceholders.begin(), m_UserPlaceholders.end(), std::back_inserter(constantsNames),
-                 [](const DictElementType& p) { return p.first; });
-  tf::GetTensorAttributes(
-    signaturedef.inputs(), constantsNames, m_InputConstants, m_InputConstantsShapes, m_InputConstantsDataTypes);
+  std::transform(m_UserPlaceholders.begin(),
+                 m_UserPlaceholders.end(),
+                 std::back_inserter(constantsNames),
+                 [](const DictElementType & p) { return p.first; });
+  if (m_UserPlaceholders.size() > 0)
+  {
+    // Avoid the unnecessary warning when no placeholder is fed
+    tf::GetTensorAttributes(signaturedef.inputs(),
+                            constantsNames,
+                            m_InputConstants,
+                            m_InputConstantsShapes,
+                            m_InputConstantsDataTypes);
+  }
   tf::GetTensorAttributes(signaturedef.inputs(),
                           m_InputPlaceholders,
                           m_InputLayers,
