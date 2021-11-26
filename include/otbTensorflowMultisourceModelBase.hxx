@@ -179,7 +179,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::GenerateOutputInforma
                  m_UserPlaceholders.end(),
                  std::back_inserter(constantsNames),
                  [](const DictElementType & p) { return p.first; });
-  if (m_UserPlaceholders.size > 0)
+  if (m_UserPlaceholders.size() > 0)
   {
     // Avoid the unnecessary warning when no placeholder is fed
     tf::GetTensorAttributes(signaturedef.inputs(),
