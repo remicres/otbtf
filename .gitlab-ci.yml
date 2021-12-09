@@ -109,9 +109,9 @@ sr4rs:
     - *install_pytest
     - cd $CI_PROJECT_DIR
     - wget -O sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-      https://nextcloud.inrae.fr/s/boabW9yCjdpLPGX/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+      https://nextcloud.inrae.fr/s/337dzXRDjDK8trs/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
     - unzip -o sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-    - wget -O sr4rs_data.zip https://nextcloud.inrae.fr/s/qMLLyKCDieqmgWz/download
+    - wget -O sr4rs_data.zip https://nextcloud.inrae.fr/s/kDms9JrRMQE2Q5z/download
     - unzip -o sr4rs_data.zip
     - rm -rf sr4rs
     - git clone https://github.com/remicres/sr4rs.git
