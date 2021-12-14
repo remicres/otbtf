@@ -1,4 +1,4 @@
-image: gitlab-registry.irstea.fr/remi.cresson/otbtf:2.4-cpu-basic-testing
+image: gitlab-registry.irstea.fr/remi.cresson/otbtf/otbtf3.0:cpu-basic-testing
 
 variables:
     OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
@@ -109,9 +109,9 @@ sr4rs:
     - *install_pytest
     - cd $CI_PROJECT_DIR
     - wget -O sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-      https://nextcloud.inrae.fr/s/boabW9yCjdpLPGX/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+      https://nextcloud.inrae.fr/s/EZL2JN7SZyDK8Cf/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
     - unzip -o sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-    - wget -O sr4rs_data.zip https://nextcloud.inrae.fr/s/qMLLyKCDieqmgWz/download
+    - wget -O sr4rs_data.zip https://nextcloud.inrae.fr/s/kDms9JrRMQE2Q5z/download
     - unzip -o sr4rs_data.zip
     - rm -rf sr4rs
     - git clone https://github.com/remicres/sr4rs.git
