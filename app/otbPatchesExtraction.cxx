@@ -220,9 +220,16 @@ public:
     otbAppLogINFO("Number of samples rejected : " << sampler->GetNumberOfRejectedSamples());
 
     // Save patches image
-    for (unsigned int i = 0 ; i < m_Bundles.size() ; i++)
+    if (sampler->GetNumberOfAcceptedSamples()>0)
     {
-      SetParameterOutputImage(m_Bundles[i].m_KeyOut, sampler->GetOutputPatchImages()[i]);
+      for (unsigned int i = 0 ; i < m_Bundles.size() ; i++)
+      {
+        SetParameterOutputImage(m_Bundles[i].m_KeyOut, sampler->GetOutputPatchImages()[i]);
+      }
+    }
+    else
+    {
+      otbAppLogFATAL("No patch to sample. Please check that your vector data falls inside your images, and no-data values.");
     }
 
 
