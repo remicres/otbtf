@@ -1,4 +1,4 @@
-![OTBTF](doc/images/logo.png)
+![OTBTF](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/logo.png)
 
 # OTBTF: Orfeo ToolBox meets TensorFlow
 
@@ -28,13 +28,13 @@ For instance, the `otbtf.Dataset` class provides a method `get_tf_dataset()` whi
 
 Below are some screen captures of deep learning applications performed at large scale with OTBTF.
  - Landcover mapping (Spot-7 images --> Building map using semantic segmentation)
-<img src ="doc/images/landcover.png" />
+<img src ="https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develhttps://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/landcover.png" />
 
  - Super resolution (Sentinel-2 images upsampled with the [SR4RS software](https://github.com/remicres/sr4rs), which is based on OTBTF)
-<img src ="doc/images/supresol.png" />
+<img src ="https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develhttps://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/supresol.png" />
 
  - Image to image translation (Spot-7 image --> Wikimedia Map using CGAN. So unnecessary but fun!)
-<img src ="doc/images/pix2pix.png" />
+<img src ="https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develhttps://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/pix2pix.png" />
 
 ## How to install
 

@@ -20,7 +20,7 @@ For instance, for *n* samples of size *16 x 16* from a *4* channels _input sourc
 An optional output is an image of size *1 x n* containing the value of one specific field of the input vector data. 
 Typically, the *class* field can be used to generate a dataset suitable for a model that performs pixel wise classification. 
 
-![Schema](doc/images/patches_extraction.png)
+![Schema](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/patches_extraction.png)
 
 ```
 This application extracts patches in multiple input images. Change the OTB_TF_NSOURCES environment variable to set the number of sources.
@@ -57,7 +57,7 @@ When using a model in OTBTF, the important thing is to know the following parame
    - **Expression field**
    - **Scale factor**
 
-![Schema](doc/images/schema.png)
+![Schema](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/schema.png)
 
 The **scale factor** describes the physical change of spacing of the outputs, typically introduced in the model by non unitary strides in pooling or convolution operators.
 For each output, it is expressed relatively to one single input of the model called the _reference input source_.
@@ -82,7 +82,7 @@ Let's take the example of dropout: it's nice for training, but you have to disab
 Hence you will pass a placeholder with "dropout\_rate=0.3" for training and "dropout\_rate=0.0" for validation. 
 Of course, one can train models from handmade python code: to import the patches images, a convenient method consist in reading patches images as numpy arrays using OTB applications (e.g. **ExtractROI**) or GDAL, then do a np.reshape to the dimensions wanted.
 
-![Schema](doc/images/model_training.png)
+![Schema](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/model_training.png)
 
 ```
 Train a multisource deep learning net using Tensorflow. Change the OTB_TF_NSOURCES environment variable to set the number of sources.
@@ -147,7 +147,7 @@ As explained [previously](#buildmodel), the **scale factor** provided for the _o
 The user can ask for multiple _output tensors_, that will be stack along the channel dimension of the output raster.
 However, if the sizes of those _output tensors_ are not consistent (e.g. a different number of (x,y) elements), an exception will be thrown.
 
-![Schema](doc/images/classif_map.png)
+![Schema](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/classif_map.png)
 
 
 ```

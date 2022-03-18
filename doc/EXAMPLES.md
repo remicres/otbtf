@@ -21,7 +21,7 @@ Predicted label is a single pixel, for an input patch of size 16x16 (for an inpu
 The learning rate of the training operator can be adjusted using the *lr* placeholder.
 The following figure summarizes this architecture.
 
-<img src ="../doc/images/savedmodel_simple_cnn.png" />
+<img src ="https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/savedmodel_simple_cnn.png" />
 
 ### Generate the model
 
@@ -103,7 +103,7 @@ otbcli_TensorflowModelServe \
 
 The `create_savedmodel_simple_fcn.py` script enables you to create a fully convolutional model which does not use any stride.
 
-<img src ="../doc/images/savedmodel_simple_fcnn.png" />
+<img src ="https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/savedmodel_simple_fcnn.png" />
 
 Thank to that, once trained this model can be applied on the image to produce a landcover map at the same resolution as the input image, in a fully convolutional (i.e. fast) manner.
 The main difference with the model described in the previous section is the *spcscale* parameter that must be let to default (i.e. unitary).
@@ -146,7 +146,7 @@ Type `python create_savedmodel_ienco-m3_patchbased.py --help` to see the other a
 
 Let's train the M3 model from time series (TS) and Very High Resolution Satellite (VHRS) patches images.
 
-<img src ="../doc/images/model_training.png" />
+<img src ="https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/model_training.png" />
 
 First, tell OTBTF that we want two sources: one for time series + one for VHR image
 
@@ -177,7 +177,7 @@ otbcli_TensorflowModelTrain \
 
 Let's produce a land cover map using the M3 model from time series (TS) and Very High Resolution Satellite image (VHRS)
 
-<img src ="../doc/images/classif_map.png" />
+<img src ="https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/classif_map.png" />
 
 Since we provide time series as the reference source (*source1*), the output classes are estimated at the same resolution.
 This model can be run in patch-based mode only.
@@ -249,7 +249,7 @@ This model inputs separately the two sources (Pan and MS) separately.
 
 See: Gaetano, R., Ienco, D., Ose, K., & Cresson, R. (2018). A two-branch CNN architecture for land cover classification of PAN and MS imagery. Remote Sensing, 10(11), 1746.
 
-<img src ="../doc/images/savedmodel_simple_pxs_fcn.png" />
+<img src ="https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/savedmodel_simple_pxs_fcn.png" />
 
 Use `create_savedmodel_pxs_fcn.py` to generate this model.
 
