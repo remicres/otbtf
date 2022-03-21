@@ -59,10 +59,10 @@ set(PATCHESPOS_01 ${TEMP}/out_train_32.gpkg)
 set(PATCHESPOS_02 ${TEMP}/out_valid_32.gpkg)
 set(PATCHESPOS_11 ${TEMP}/out_train_33.gpkg)
 set(PATCHESPOS_12 ${TEMP}/out_valid_33.gpkg)
-set(PATCHESPOS_SPLIT1 ${TEMP}/out_split_train.geojson)
-set(PATCHESPOS_SPLIT2 ${TEMP}/out_split_valid.geojson)
-set(PATCHESPOS_SPLIT3 ${TEMP}/out_split_test.geojson)
-set(PATCHESPOS_ALL ${TEMP}/vector_all.geojson)
+set(PATCHESPOS_SPLIT1 vector_train.geojson)
+set(PATCHESPOS_SPLIT2 vector_valid.geojson)
+set(PATCHESPOS_SPLIT3 vector_test.geojson)
+set(PATCHESPOS_ALL vector_all.geojson)
 # Even patches
 otb_test_application(NAME PatchesSelectionEven
   APP  PatchesSelection
@@ -89,35 +89,36 @@ otb_test_application(NAME PatchesSelectionOdd
 otb_test_application(NAME PatchesSelectionSplit
   APP  PatchesSelection
   OPTIONS 
-  -in ${IMAGEPXS2}
+  -in ${IMAGEPXS}
   -grid.step 32
   -grid.psize 32
   -nocheck on
-  -outtrain ${PATCHESPOS_SPLIT1}
-  -outvalid ${PATCHESPOS_SPLIT2}
-  -outtest ${PATCHESPOS_SPLIT3}
-  VALID 
-  --compare-ascii ${EPSILON_6}
+  -strategy split
+  -outtrain ${TEMP}/${PATCHESPOS_SPLIT1}
+  -outvalid ${TEMP}/${PATCHESPOS_SPLIT2}
+  -outtest ${TEMP}/${PATCHESPOS_SPLIT3}
+  VALID --compare-ascii ${EPSILON_6}
   ${DATADIR}/${PATCHESPOS_SPLIT1}
   ${TEMP}/${PATCHESPOS_SPLIT1}
-  --compare-ascii ${EPSILON_6}
+  VALID --compare-ascii ${EPSILON_6}
   ${DATADIR}/${PATCHESPOS_SPLIT2}
   ${TEMP}/${PATCHESPOS_SPLIT2}
-  --compare-ascii ${EPSILON_6}
+  VALID --compare-ascii ${EPSILON_6}
   ${DATADIR}/${PATCHESPOS_SPLIT3}
   ${TEMP}/${PATCHESPOS_SPLIT3}
   
   )
 
 # All strategy
-otb_test_application(NAME PatchesSelectionSplit
+otb_test_application(NAME PatchesSelectionAll
   APP  PatchesSelection
   OPTIONS 
-  -in ${IMAGEPXS2}
+  -in ${IMAGEPXS}
   -grid.step 32
   -grid.psize 32
   -nocheck on
-  -outtrain ${PATCHESPOS_ALL}
+  -strategy all
+  -outtrain ${TEMP}/${PATCHESPOS_ALL}
   VALID --compare-ascii ${EPSILON_6}
   ${DATADIR}/${PATCHESPOS_ALL}
   ${TEMP}/${PATCHESPOS_ALL}
