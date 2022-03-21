@@ -158,6 +158,8 @@ public:
     AddParameter(ParameterType_Float, "strategy.split.testprop", "Proportion of test population.");
     SetMinimumParameterFloatValue    ("strategy.split.testprop", 0.0);
     SetDefaultParameterFloat         ("strategy.split.testprop", 25.0);
+    // All
+    AddChoice("strategy.all", "All locations. Only the \"outtrain\" output parameter is used.");
     // Balanced (experimental)
     AddChoice("strategy.balanced", "you can chose the degree of spatial randomness vs class balance");
     AddParameter(ParameterType_Float, "strategy.balanced.sp", "Spatial proportion: between 0 and 1, "
@@ -433,16 +435,13 @@ public:
   /*
    * Samples are split in training/validation/test groups
    */
-  void SampleSplit()
+  void SampleSplit(float trp, float vp, float tp)
   {
 
     std::vector<SampleBundle> bundles = AllocateSamples();
 
     // Populate groups
     unsigned int nbSamples = bundles.size();
-    float trp = GetParameterFloat("strategy.split.trainprop");
-    float vp = GetParameterFloat("strategy.split.validprop");
-    float tp = GetParameterFloat("strategy.split.testprop");
     float tot = (trp + vp + tp);
     std::vector<float> props = {trp, vp, tp};
     std::vector<float> incs, counts;
@@ -758,7 +757,15 @@ public:
     {
       otbAppLogINFO("Sampling with split strategy (Train/Validation/test)");
 
-      SampleSplit();
+      SampleSplit(GetParameterFloat("strategy.split.trainprop"),
+                  GetParameterFloat("strategy.split.validprop"),
+                  GetParameterFloat("strategy.split.testprop"));
+    }
+    else if (GetParameterAsString("strategy") == "all")
+    {
+      otbAppLogINFO("Sampling all locations (only \touttrain\" output parameter will be used");
+
+      SampleSplit(1.0, .0, .0);
     }
 
     otbAppLogINFO( "Writing output samples positions");
