@@ -386,7 +386,7 @@ public:
       const UInt8ImageType::IndexType & pos, const UInt8ImageType::PointType & geo)
   {
     // Black or white
-    int black = (int) ((pos[0] + pos[1]) % 2 == 0);
+    int black = (pos[0] + pos[1]) % 2;
 
     bundle.GetModifiableSampleID() = count;
     bundle.GetModifiablePosition() = geo;
