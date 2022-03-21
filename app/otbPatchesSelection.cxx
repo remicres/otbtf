@@ -746,6 +746,11 @@ public:
       otbAppLogINFO("Sampling at regular interval in space (\"Chessboard\" like)");
 
       SampleChessboard();
+
+      if (HasValue("outtest"))
+      {
+        otbAppLogWARNING("The \"outtest\" parameter is unused with the \"chessboard\" sampling strategy.")
+      }
     }
     else if (GetParameterAsString("strategy") == "balanced")
     {
@@ -766,16 +771,21 @@ public:
       otbAppLogINFO("Sampling all locations (only \touttrain\" output parameter will be used");
 
       SampleSplit(1.0, .0, .0);
+
+      if (HasValue("outtest") || HasValue("outvalid"))
+      {
+        otbAppLogWARNING("The \"outvalid\" and \"outtest\" parameters are unused with the \"all\" sampling strategy.")
+      }
     }
 
     otbAppLogINFO( "Writing output samples positions");
 
     SetParameterOutputVectorData("outtrain", m_OutVectorDataTrain);
-    if (HasValue("outvalid"))
+    if (HasValue("outvalid") && GetParameterAsString("strategy") != "all")
     {
       SetParameterOutputVectorData("outvalid", m_OutVectorDataValid);
     }
-    if (HasValue("outtest"))
+    if (HasValue("outtest") && GetParameterAsString("strategy") == "split")
     {
       SetParameterOutputVectorData("outtest", m_OutVectorDataTest);
     }
