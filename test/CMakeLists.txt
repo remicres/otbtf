@@ -59,6 +59,9 @@ set(PATCHESPOS_01 ${TEMP}/out_train_32.gpkg)
 set(PATCHESPOS_02 ${TEMP}/out_valid_32.gpkg)
 set(PATCHESPOS_11 ${TEMP}/out_train_33.gpkg)
 set(PATCHESPOS_12 ${TEMP}/out_valid_33.gpkg)
+set(PATCHESPOS_SPLIT1 ${TEMP}/out_split_train.geojson)
+set(PATCHESPOS_SPLIT2 ${TEMP}/out_split_valid.geojson)
+set(PATCHESPOS_SPLIT3 ${TEMP}/out_split_test.geojson)
 # Even patches
 otb_test_application(NAME PatchesSelectionEven
   APP  PatchesSelection
@@ -79,6 +82,19 @@ otb_test_application(NAME PatchesSelectionOdd
   -grid.psize 33
   -outtrain ${PATCHESPOS_11}
   -outvalid ${PATCHESPOS_12}
+  )
+
+# Split strategy
+otb_test_application(NAME PatchesSelectionSplit
+  APP  PatchesSelection
+  OPTIONS 
+  -in ${IMAGEPXS2}
+  -grid.step 32
+  -grid.psize 32
+  -nocheck on
+  -outtrain ${PATCHESPOS_SPLIT1}
+  -outvalid ${PATCHESPOS_SPLIT2}
+  -outtest ${PATCHESPOS_SPLIT3}
   )
 
 #----------- Patches extraction ----------------
