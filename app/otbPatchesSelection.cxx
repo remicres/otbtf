@@ -761,10 +761,18 @@ public:
     else if (GetParameterAsString("strategy") == "split")
     {
       otbAppLogINFO("Sampling with split strategy (Train/Validation/test)");
+      float vp = .0;
+      float tp = .0;
+      if (HasValue("outvalid"))
+      {
+        vp = GetParameterFloat("strategy.split.validprop");
+      }
+      if (HasValue("outtest"))
+      {
+        tp = GetParameterFloat("strategy.split.testprop");
+      }
 
-      SampleSplit(GetParameterFloat("strategy.split.trainprop"),
-                  GetParameterFloat("strategy.split.validprop"),
-                  GetParameterFloat("strategy.split.testprop"));
+      SampleSplit(GetParameterFloat("strategy.split.trainprop"), vp, tp);
     }
     else if (GetParameterAsString("strategy") == "all")
     {
