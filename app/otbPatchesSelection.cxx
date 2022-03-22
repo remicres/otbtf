@@ -779,7 +779,7 @@ public:
     }
     else if (GetParameterAsString("strategy") == "all")
     {
-      otbAppLogINFO("Sampling all locations (only \touttrain\" output parameter will be used");
+      otbAppLogINFO("Sampling all locations (only \"outtrain\" output parameter will be used");
 
       SampleSplit(1.0, .0, .0);
 
