@@ -151,7 +151,7 @@ public:
     MandatoryOff                     ("strategy.split.random");
     AddParameter(ParameterType_Float, "strategy.split.trainprop", "Proportion of training population.");
     SetMinimumParameterFloatValue    ("strategy.split.trainprop", 0.0);
-    SetDefaultParameterFloat         ("strategy.split.trainprop", 75.0);
+    SetDefaultParameterFloat         ("strategy.split.trainprop", 50.0);
     AddParameter(ParameterType_Float, "strategy.split.validprop", "Proportion of validation population.");
     SetMinimumParameterFloatValue    ("strategy.split.validprop", 0.0);
     SetDefaultParameterFloat         ("strategy.split.validprop", 25.0);
