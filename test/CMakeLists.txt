@@ -92,7 +92,6 @@ otb_test_application(NAME PatchesSelectionSplit
   -in ${IMAGEPXS}
   -grid.step 32
   -grid.psize 32
-  -nocheck on
   -strategy split
   -outtrain ${TEMP}/${PATCHESPOS_SPLIT1}
   -outvalid ${TEMP}/${PATCHESPOS_SPLIT2}
@@ -116,7 +115,6 @@ otb_test_application(NAME PatchesSelectionAll
   -in ${IMAGEPXS}
   -grid.step 32
   -grid.psize 32
-  -nocheck on
   -strategy all
   -outtrain ${TEMP}/${PATCHESPOS_ALL}
   VALID --compare-ascii ${EPSILON_6}

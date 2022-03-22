@@ -26,13 +26,14 @@
 #include "itkNearestNeighborInterpolateImageFunction.h"
 #include "itkMaskImageFilter.h"
 
-// image utils
+// Image utils
 #include "otbTensorflowCommon.h"
 #include "otbTensorflowSamplingUtils.h"
 #include "itkImageRegionConstIteratorWithOnlyIndex.h"
 
-// Random
+// Math
 #include <random>
+#include <limits>
 
 // Functor to retrieve nodata
 template<class TPixel, class OutputPixel>
@@ -122,10 +123,7 @@ public:
 
     // Input no-data value
     AddParameter(ParameterType_Float, "nodata", "nodata value");
-    MandatoryOn                      ("nodata");
-    SetDefaultParameterFloat         ("nodata", 0);
-    AddParameter(ParameterType_Bool,  "nocheck", "If on, no check on the validity of patches is performed");
-    MandatoryOff                     ("nocheck");
+    MandatoryOff                     ("nodata");
 
     // Grid
     AddParameter(ParameterType_Group, "grid", "grid settings");
@@ -278,9 +276,9 @@ public:
 
     UInt8ImageType::Pointer inputImage;
     bool readInput = true;
-    if (GetParameterInt("nocheck")==1)
+    if (!HasValue("nodata"))
       {
-      otbAppLogINFO("\"nocheck\" mode is enabled. Input image pixels no-data values will not be checked.");
+      otbAppLogINFO("No value specified for no-data. Input image pixels no-data values will not be checked.");
       if (HasValue("mask"))
         {
         otbAppLogINFO("Using the provided \"mask\" parameter.");
@@ -686,7 +684,12 @@ public:
 
     // Compute no-data mask
     m_NoDataFilter = IsNoDataFilterType::New();
-    m_NoDataFilter->GetFunctor().SetNoDataValue(GetParameterFloat("nodata"));
+    float nodataValue = std::numeric_limits<float>::quiet_NaN();
+    if (HasValue("nodata"))
+    {
+      nodataValue = GetParameterFloat("nodata");
+    }
+    m_NoDataFilter->GetFunctor().SetNoDataValue(nodataValue);
     m_NoDataFilter->SetInput(GetParameterFloatVectorImage("in"));
     m_NoDataFilter->UpdateOutputInformation();
     UInt8ImageType::Pointer src = m_NoDataFilter->GetOutput();
