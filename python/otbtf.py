@@ -385,7 +385,7 @@ class Dataset:
     :see Buffer
     """
 
-    def __init__(self, patches_reader: PatchesReaderBase, buffer_length: int = 128,
+    def __init__(self, patches_reader: PatchesReaderBase = None, buffer_length: int = 128,
                  Iterator=RandomIterator, max_nb_of_samples=None):
         """
         :param patches_reader: The patches reader instance
@@ -393,8 +393,19 @@ class Dataset:
         :param Iterator: The iterator class used to generate the sequence of patches indices.
         :param max_nb_of_samples: Optional, max number of samples to consider
         """
-
         # patches reader
+        if patches_reader:
+            self.feed(patches_reader, buffer_length, Iterator, max_nb_of_samples)
+
+
+    def feed(self, patches_reader: PatchesReaderBase = None, buffer_length: int = 128,
+                 Iterator=RandomIterator, max_nb_of_samples=None):
+        """
+        :param patches_reader: The patches reader instance
+        :param buffer_length: The number of samples that are stored in the buffer
+        :param Iterator: The iterator class used to generate the sequence of patches indices.
+        :param max_nb_of_samples: Optional, max number of samples to consider
+        """
         self.patches_reader = patches_reader
         self.size = min(self.patches_reader.get_size(),
                         max_nb_of_samples) if max_nb_of_samples else self.patches_reader.get_size()
