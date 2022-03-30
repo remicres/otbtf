@@ -102,6 +102,8 @@ public:
   /** Set / get image */
   virtual void
   PushBackInputWithPatchSize(const ImageType * input, SizeType & patchSize, InternalPixelType nodataval);
+  virtual void
+  PushBackInputWithPatchSize(const ImageType * input, SizeType & patchSize);
   const ImageType *
   GetInput(unsigned int index);
 
