@@ -110,7 +110,10 @@ public:
     bundle.m_KeyOut  = ss_key_out.str();
     bundle.m_KeyPszX = ss_key_dims_x.str();
     bundle.m_KeyPszY = ss_key_dims_y.str();
-    bundle.m_KeyNoData = ss_key_nodata.str();
+    if (!HasValue(ss_key_nodata))
+      bundle.m_KeyNoData = ss_key_nodata.str();
+    else
+      bundle.m_KeyNoData = ""
 
     m_Bundles.push_back(bundle);
 
@@ -132,7 +135,8 @@ public:
       bundle.m_PatchSize[1] = GetParameterInt(bundle.m_KeyPszY);
 
       // No data value
-      bundle.m_NoDataValue = GetParameterFloat(bundle.m_KeyNoData);
+      if (bundle.m_KeyNoData.size() > 0)
+        bundle.m_NoDataValue = GetParameterFloat(bundle.m_KeyNoData);
     }
   }
 
@@ -197,21 +201,18 @@ public:
     SamplerType::Pointer sampler = SamplerType::New();
     sampler->SetInputVectorData(GetParameterVectorData("vec"));
     sampler->SetField(GetParameterAsString("field"));
-    for (int i = 0; i < tf::GetNumberOfSources() ; i++)
-    {
-        std::stringstream ss_group_key, ss_key_nodata;
-        ss_group_key   << "source"                    << i+1;
-        ss_key_nodata  << ss_group_key.str()          << ".nodata";
-        if (HasValue(ss_key_nodata.str()))
-          {
-          otbAppLogINFO("Rejecting samples that have at least one no-data value");
-          sampler->SetRejectPatchesWithNodata(true);
-          break;
-          }
-    }
+
     for (auto& bundle: m_Bundles)
     {
-      sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize, bundle.m_NoDataValue);
+      if (bundle.m_KeyNoData.size() > 0)
+        {
+        otbAppLogINFO("Rejecting samples that have at least one no-data value");
+        sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize, bundle.m_NoDataValue);
+        }
+      else
+        {
+        sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize)
+        }
     }
 
     // Run the filter

@@ -22,7 +22,6 @@ TensorflowSampler<TInputImage, TVectorData>::TensorflowSampler()
 {
   m_NumberOfAcceptedSamples = 0;
   m_NumberOfRejectedSamples = 0;
-  m_RejectPatchesWithNodata = false;
 }
 
 template <class TInputImage, class TVectorData>
@@ -33,7 +32,17 @@ TensorflowSampler<TInputImage, TVectorData>::PushBackInputWithPatchSize(const Im
 {
   this->ProcessObject::PushBackInput(const_cast<ImageType *>(input));
   m_PatchSizes.push_back(patchSize);
-  m_NoDataValues.push_back(nodataval);
+  unsigned int index = m_PatchSizes.size();  // TODO: peut être trouver mieux
+  m_NoDataValues[index] = nodataval;
+}
+
+template <class TInputImage, class TVectorData>
+void
+TensorflowSampler<TInputImage, TVectorData>::PushBackInputWithPatchSize(const ImageType * input,
+                                                                        SizeType &        patchSize)
+{
+  this->ProcessObject::PushBackInput(const_cast<ImageType *>(input));
+  m_PatchSizes.push_back(patchSize);
 }
 
 template <class TInputImage, class TVectorData>
@@ -187,8 +196,8 @@ TensorflowSampler<TInputImage, TVectorData>::Update()
           // If not, reject this sample
           hasBeenSampled = false;
         }
-        // Check if the sampled patch contains a no-data value
-        if (m_RejectPatchesWithNodata && hasBeenSampled)
+        // If NoData is provided, check if the sampled patch contains a no-data value
+        if (m_NoDataValues.count(i) > 0 && hasBeenSampled)
         {
           IndexType outIndex;
           outIndex[0] = 0;
