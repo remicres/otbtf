@@ -197,15 +197,18 @@ public:
     SamplerType::Pointer sampler = SamplerType::New();
     sampler->SetInputVectorData(GetParameterVectorData("vec"));
     sampler->SetField(GetParameterAsString("field"));
-    for (int i = 0; i < tf::GetNumberOfSources() ; i++):
+    for (int i = 0; i < tf::GetNumberOfSources() ; i++)
+    {
+        std::stringstream ss_group_key, ss_key_nodata;
         ss_group_key   << "source"                    << i+1;
         ss_key_nodata  << ss_group_key.str()          << ".nodata";
-        if HasValue(ss_key_nodata)
+        if (HasValue(ss_key_nodata))
           {
           otbAppLogINFO("Rejecting samples that have at least one no-data value");
           sampler->SetRejectPatchesWithNodata(true);
           break;
           }
+    }
     for (auto& bundle: m_Bundles)
     {
       sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize, bundle.m_NoDataValue);
