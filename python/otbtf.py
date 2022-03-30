@@ -407,8 +407,14 @@ class Dataset:
         :param max_nb_of_samples: Optional, max number of samples to consider
         """
         self.patches_reader = patches_reader
-        self.size = min(self.patches_reader.get_size(),
-                        max_nb_of_samples) if max_nb_of_samples else self.patches_reader.get_size()
+
+        # If necessary, limit the nb of samples
+        logging.info('There are %s samples available', self.patches_reader.get_size())
+        if max_nb_of_samples and self.patches_reader.get_size() > max_nb_of_samples:
+            logging.info('Reducing number of samples to %s', max_nb_of_samples)
+            self.size = max_nb_of_samples
+        else:
+            self.size = self.patches_reader.get_size()
 
         # iterator
         self.iterator = Iterator(patches_reader=self.patches_reader)
