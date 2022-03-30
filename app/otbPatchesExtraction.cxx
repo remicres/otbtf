@@ -211,7 +211,7 @@ public:
         }
       else
         {
-        sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize)
+        sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize);
         }
     }
 
