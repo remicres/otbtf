@@ -202,7 +202,7 @@ public:
         std::stringstream ss_group_key, ss_key_nodata;
         ss_group_key   << "source"                    << i+1;
         ss_key_nodata  << ss_group_key.str()          << ".nodata";
-        if (HasValue(ss_key_nodata))
+        if (HasValue(ss_key_nodata.str()))
           {
           otbAppLogINFO("Rejecting samples that have at least one no-data value");
           sampler->SetRejectPatchesWithNodata(true);
