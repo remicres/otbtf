@@ -110,7 +110,7 @@ public:
     bundle.m_KeyOut  = ss_key_out.str();
     bundle.m_KeyPszX = ss_key_dims_x.str();
     bundle.m_KeyPszY = ss_key_dims_y.str();
-    if (HasValue(ss_key_nodata.str())
+    if (HasValue(ss_key_nodata.str()))
       bundle.m_KeyNoData = ss_key_nodata.str();
     else
       bundle.m_KeyNoData = "";
