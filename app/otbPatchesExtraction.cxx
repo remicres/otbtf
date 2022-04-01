@@ -110,10 +110,7 @@ public:
     bundle.m_KeyOut  = ss_key_out.str();
     bundle.m_KeyPszX = ss_key_dims_x.str();
     bundle.m_KeyPszY = ss_key_dims_y.str();
-    if (HasValue(ss_key_nodata.str()))
-      bundle.m_KeyNoData = ss_key_nodata.str();
-    else
-      bundle.m_KeyNoData = "";
+    bundle.m_KeyNoData = ss_key_nodata.str();
 
     m_Bundles.push_back(bundle);
 
@@ -126,17 +123,27 @@ public:
   {
     for (auto& bundle: m_Bundles)
     {
+      std::cout << bundle.m_KeyIn << std::endl;
       // Create a stack of input images
       FloatVectorImageListType::Pointer list = GetParameterImageList(bundle.m_KeyIn);
+      std::cout << "1" << std::endl;
       bundle.m_ImageSource.Set(list);
+      std::cout << "2" << std::endl;
 
       // Patch size
       bundle.m_PatchSize[0] = GetParameterInt(bundle.m_KeyPszX);
+      std::cout << "3" << std::endl;
       bundle.m_PatchSize[1] = GetParameterInt(bundle.m_KeyPszY);
 
       // No data value
-      if (bundle.m_KeyNoData.size() > 0)
+      std::cout << "DEBUG" << std::endl;
+      if (HasValue(bundle.m_KeyNoData))
+	{
+        std::cout << "HasValue(bundle.m_KeyNoData.str()" << std::endl;
         bundle.m_NoDataValue = GetParameterFloat(bundle.m_KeyNoData);
+        }
+    m_Bundles.push_back(bundle);
+
     }
   }
 
@@ -204,13 +211,14 @@ public:
 
     for (auto& bundle: m_Bundles)
     {
-      if (bundle.m_KeyNoData.size() > 0)
+      if (HasValue(bundle.m_KeyNoData)) 
         {
         otbAppLogINFO("Rejecting samples that have at least one no-data value");
         sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize, bundle.m_NoDataValue);
         }
       else
         {
+        std::cout << "NOT REJECTING" << std::endl;
         sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize);
         }
     }
