@@ -142,7 +142,6 @@ public:
         std::cout << "HasValue(bundle.m_KeyNoData.str()" << std::endl;
         bundle.m_NoDataValue = GetParameterFloat(bundle.m_KeyNoData);
         }
-    m_Bundles.push_back(bundle);
 
     }
   }
