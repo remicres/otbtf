@@ -32,7 +32,7 @@ TensorflowSampler<TInputImage, TVectorData>::PushBackInputWithPatchSize(const Im
 {
   this->ProcessObject::PushBackInput(const_cast<ImageType *>(input));
   m_PatchSizes.push_back(patchSize);
-  unsigned int index = m_PatchSizes.size();  // TODO: peut être trouver mieux
+  unsigned int index = m_PatchSizes.size() -1 ;
   m_NoDataValues[index] = nodataval;
 }
 
