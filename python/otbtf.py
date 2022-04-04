@@ -173,19 +173,19 @@ class PatchesImagesReader(PatchesReaderBase):
     :see PatchesReaderBase
     """
 
-    def __init__(self, filenames_dict, scalar_dict=None, use_streaming=False):
+    def __init__(self, filenames_dict, use_streaming=False, scalar_dict=None):
         """
         :param filenames_dict: A dict() structured as follow:
             {src_name1: [src1_patches_image_1.tif, ..., src1_patches_image_N.tif],
              src_name2: [src2_patches_image_1.tif, ..., src2_patches_image_N.tif],
              ...
              src_nameM: [srcM_patches_image_1.tif, ..., srcM_patches_image_N.tif]}
+        :param use_streaming: if True, the patches are read on the fly from the disc, nothing is kept in memory.
         :param scalar_dict: (optional) a dict containing list of scalars (int, float, str) as follow:
             {scalar_name1: ["value_1", ..., "value_N"],
              scalar_name2: [value_1, ..., value_N],
              ...
-             scalar_nameN: [value1, ..., value_N]}
-        :param use_streaming: if True, the patches are read on the fly from the disc, nothing is kept in memory.
+             scalar_nameM: [value1, ..., valueN]}
         """
 
         assert len(filenames_dict.values()) > 0
