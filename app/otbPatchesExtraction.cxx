@@ -91,7 +91,7 @@ public:
     ss_key_dims_y  << ss_group_key.str()          << ".patchsizey";
     ss_desc_dims_y << "Y patch size for image "   << inputNumber;
     ss_key_nodata  << ss_group_key.str()          << ".nodata";
-    ss_desc_nodata << "No-data value for image "   << inputNumber << "(used only if \"usenodata\" is on)";
+    ss_desc_nodata << "No-data value for image "   << inputNumber;
 
     // Populate group
     AddParameter(ParameterType_Group,          ss_group_key.str(),  ss_desc_group.str());
