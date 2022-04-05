@@ -2,6 +2,8 @@ Version 3.0.0 (5 apr 2022)
 ----------------------------------------------------------------
 * Add the "split" strategy in the `PatchesSelection` application. Now the application can select points for 3 independant data splits (train, valid, test).
 * `PatchesExtraction` and `PatchesSelection` don't use the `usenodata` option anymore. Now to use nodata, one simply has to set a parameter value for the nodata (no more default value).
+* New python examples in `python/examples/tensorflow_v2x` to illustrate how deterministic models can be quickly built using TensorFlow 2, exporte as SavedModel, and used with OTBTF.
+* Change "import gdal" --> "from osgeo import gdal" in otbtf.py
 
 Version 3.0.0-beta (20 nov 2021)
 ----------------------------------------------------------------
