@@ -24,7 +24,7 @@ RUN if $GUI; then \
 ### Python3 links and pip packages
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
 # NumPy version is conflicting with system's gdal dep and may require venv
-ARG NUMPY_SPEC="==1.19.*"
+ARG NUMPY_SPEC="==1.22.*"
 RUN pip install --no-cache-dir -U pip wheel mock six future deprecated "numpy$NUMPY_SPEC" \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
@@ -40,14 +40,14 @@ WORKDIR /src/tf
 RUN git config --global advice.detachedHead false
 
 ### TF
-ARG TF=v2.5.0
+ARG TF=v2.8.0
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
  && chmod +x /opt/otbtf/bin/bazelisk \
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
-# "--config=opt" will enable 'march=native' (otherwise read comments about CPU compatibilty and edit CC_OPT_FLAGS in build-env-tf.sh)
+# "--config=opt" will enable 'march=native' (otherwise read comments about CPU compatibility and edit CC_OPT_FLAGS in build-env-tf.sh)
 ARG BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
 # "--compilation_mode opt" is already enabled by default (see tf repo .bazelrc and configure.py)
 ARG BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
@@ -74,23 +74,27 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
  && ln -s $(find /opt/otbtf -type d -wholename "*/site-packages/tensorflow/include") /opt/otbtf/include/tf \
  # The only missing header in the wheel
  && cp tensorflow/cc/saved_model/tag_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
+ && cp tensorflow/cc/saved_model/signature_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
  # Symlink external libs (required for MKL - libiomp5)
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
  # Compress and save TF binaries
- && ( ! $ZIP_TF_BIN || zip -9 -j --symlinks /opt/otbtf/tf-$TF.zip tensorflow/cc/saved_model/tag_constants.h bazel-bin/tensorflow/libtensorflow_cc.so* /tmp/tensorflow_pkg/tensorflow*.whl ) \
+ && ( ! $ZIP_TF_BIN || zip -9 -j --symlinks /opt/otbtf/tf-$TF.zip tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h bazel-bin/tensorflow/libtensorflow_cc.so* /tmp/tensorflow_pkg/tensorflow*.whl ) \
  # Cleaning
  && rm -rf bazel-* /src/tf /root/.cache/ /tmp/*
 
 ### OTB
 ARG GUI=false
-ARG OTB=7.3.0
+ARG OTB=7.4.0
 
 RUN mkdir /src/otb
 WORKDIR /src/otb
 
 # SuperBuild OTB
 COPY tools/docker/build-flags-otb.txt ./
-RUN git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
+RUN apt-get update -y \
+ && apt-get install --reinstall ca-certificates -y \
+ && update-ca-certificates \
+ && git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
  && mkdir -p build \
  && cd build \
  # Set GL/Qt build flags

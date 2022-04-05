@@ -1,6 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) Remi Cresson (IRSTEA). All rights reserved.
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -55,8 +56,6 @@ public:
     TFSourceType                       m_ImageSource;   // Image source
     FloatVectorImageType::SizeType     m_PatchSize;          // Patch size
 
-    unsigned int                       m_NumberOfElements;  // Number of output samples
-
     std::string                        m_KeyIn;   // Key of input image list
     std::string                        m_KeyOut;  // Key of output samples image
     std::string                        m_KeyPszX; // Key for samples sizes X
@@ -92,7 +91,7 @@ public:
     ss_key_dims_y  << ss_group_key.str()          << ".patchsizey";
     ss_desc_dims_y << "Y patch size for image "   << inputNumber;
     ss_key_nodata  << ss_group_key.str()          << ".nodata";
-    ss_desc_nodata << "No-data value for image "   << inputNumber << "(used only if \"usenodata\" is on)";
+    ss_desc_nodata << "No-data value for image "   << inputNumber;
 
     // Populate group
     AddParameter(ParameterType_Group,          ss_group_key.str(),  ss_desc_group.str());
@@ -103,7 +102,7 @@ public:
     AddParameter(ParameterType_Int,            ss_key_dims_y.str(), ss_desc_dims_y.str());
     SetMinimumParameterIntValue               (ss_key_dims_y.str(), 1);
     AddParameter(ParameterType_Float,          ss_key_nodata.str(), ss_desc_nodata.str());
-    SetDefaultParameterFloat                  (ss_key_nodata.str(), 0);
+    MandatoryOff                              (ss_key_nodata.str());
 
     // Add a new bundle
     SourceBundle bundle;
@@ -133,12 +132,12 @@ public:
       bundle.m_PatchSize[1] = GetParameterInt(bundle.m_KeyPszY);
 
       // No data value
-      bundle.m_NoDataValue = GetParameterFloat(bundle.m_KeyNoData);
-    }
-  }
+      if (HasValue(bundle.m_KeyNoData))
+	{
+        bundle.m_NoDataValue = GetParameterFloat(bundle.m_KeyNoData);
+        }
 
-  void DoUpdateParameters()
-  {
+    }
   }
 
   void DoInit()
@@ -174,10 +173,6 @@ public:
     // Input vector data
     AddParameter(ParameterType_InputVectorData, "vec", "Positions of the samples (must be in the same projection as input image)");
 
-    // No data parameters
-    AddParameter(ParameterType_Bool, "usenodata", "Reject samples that have no-data value");
-    MandatoryOff                    ("usenodata");
-
     // Output label
     AddParameter(ParameterType_OutputImage, "outlabels", "output labels");
     SetDefaultOutputPixelType              ("outlabels", ImagePixelType_uint8);
@@ -206,14 +201,18 @@ public:
     SamplerType::Pointer sampler = SamplerType::New();
     sampler->SetInputVectorData(GetParameterVectorData("vec"));
     sampler->SetField(GetParameterAsString("field"));
-    if (GetParameterInt("usenodata")==1)
-      {
-      otbAppLogINFO("Rejecting samples that have at least one no-data value");
-      sampler->SetRejectPatchesWithNodata(true);
-      }
+
     for (auto& bundle: m_Bundles)
     {
-      sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize, bundle.m_NoDataValue);
+      if (HasValue(bundle.m_KeyNoData)) 
+        {
+        otbAppLogINFO("Rejecting samples that have at least one no-data value");
+        sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize, bundle.m_NoDataValue);
+        }
+      else
+        {
+        sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize);
+        }
     }
 
     // Run the filter
@@ -225,9 +224,16 @@ public:
     otbAppLogINFO("Number of samples rejected : " << sampler->GetNumberOfRejectedSamples());
 
     // Save patches image
-    for (unsigned int i = 0 ; i < m_Bundles.size() ; i++)
+    if (sampler->GetNumberOfAcceptedSamples()>0)
     {
-      SetParameterOutputImage(m_Bundles[i].m_KeyOut, sampler->GetOutputPatchImages()[i]);
+      for (unsigned int i = 0 ; i < m_Bundles.size() ; i++)
+      {
+        SetParameterOutputImage(m_Bundles[i].m_KeyOut, sampler->GetOutputPatchImages()[i]);
+      }
+    }
+    else
+    {
+      otbAppLogFATAL("No patch to sample. Please check that your vector data falls inside your images, and no-data values.");
     }
 
 
@@ -238,6 +244,12 @@ public:
     }
 
   }
+  
+  
+  void DoUpdateParameters()
+  {
+  }
+
 private:
   std::vector<SourceBundle> m_Bundles;
 
@@ -246,4 +258,4 @@ private:
 } // end namespace wrapper
 } // end namespace otb
 
-OTB_APPLICATION_EXPORT( otb::Wrapper::PatchesExtraction )
+OTB_APPLICATION_EXPORT(otb::Wrapper::PatchesExtraction)

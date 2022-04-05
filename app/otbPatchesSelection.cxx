@@ -1,6 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) Remi Cresson (IRSTEA). All rights reserved.
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2022 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -25,10 +26,14 @@
 #include "itkNearestNeighborInterpolateImageFunction.h"
 #include "itkMaskImageFilter.h"
 
-// image utils
+// Image utils
 #include "otbTensorflowCommon.h"
 #include "otbTensorflowSamplingUtils.h"
 #include "itkImageRegionConstIteratorWithOnlyIndex.h"
+
+// Math
+#include <random>
+#include <limits>
 
 // Functor to retrieve nodata
 template<class TPixel, class OutputPixel>
@@ -67,7 +72,7 @@ class PatchesSelection : public Application
 {
 public:
   /** Standard class typedefs. */
-  typedef PatchesSelection          Self;
+  typedef PatchesSelection                    Self;
   typedef Application                         Superclass;
   typedef itk::SmartPointer<Self>             Pointer;
   typedef itk::SmartPointer<const Self>       ConstPointer;
@@ -99,11 +104,6 @@ public:
 
   typedef itk::MaskImageFilter<UInt8ImageType, UInt8ImageType, UInt8ImageType> MaskImageFilterType;
 
-  void DoUpdateParameters()
-  {
-  }
-
-
   void DoInit()
   {
 
@@ -123,10 +123,7 @@ public:
 
     // Input no-data value
     AddParameter(ParameterType_Float, "nodata", "nodata value");
-    MandatoryOn                      ("nodata");
-    SetDefaultParameterFloat         ("nodata", 0);
-    AddParameter(ParameterType_Bool,  "nocheck", "If on, no check on the validity of patches is performed");
-    MandatoryOff                     ("nocheck");
+    MandatoryOff                     ("nodata");
 
     // Grid
     AddParameter(ParameterType_Group, "grid", "grid settings");
@@ -141,7 +138,27 @@ public:
 
     // Strategy
     AddParameter(ParameterType_Choice, "strategy", "Selection strategy for validation/training patches");
-    AddChoice("strategy.chessboard", "fifty fifty, like a chess board");
+    // Chess board
+    AddChoice("strategy.chessboard", "Fifty fifty with chess-board-like layout. Only \"outtrain\" and "
+        "\"outvalid\" output parameters are used.");
+    // Split
+    AddChoice("strategy.split", "The traditional training/validation/test split. The \"outtrain\", "
+        "\"outvalid\" and \"outtest\" output parameters are used.");
+    AddParameter(ParameterType_Bool, "strategy.split.random", "If false, samples will always be from "
+        "the same group");
+    MandatoryOff                     ("strategy.split.random");
+    AddParameter(ParameterType_Float, "strategy.split.trainprop", "Proportion of training population.");
+    SetMinimumParameterFloatValue    ("strategy.split.trainprop", 0.0);
+    SetDefaultParameterFloat         ("strategy.split.trainprop", 50.0);
+    AddParameter(ParameterType_Float, "strategy.split.validprop", "Proportion of validation population.");
+    SetMinimumParameterFloatValue    ("strategy.split.validprop", 0.0);
+    SetDefaultParameterFloat         ("strategy.split.validprop", 25.0);
+    AddParameter(ParameterType_Float, "strategy.split.testprop", "Proportion of test population.");
+    SetMinimumParameterFloatValue    ("strategy.split.testprop", 0.0);
+    SetDefaultParameterFloat         ("strategy.split.testprop", 25.0);
+    // All
+    AddChoice("strategy.all", "All locations. Only the \"outtrain\" output parameter is used.");
+    // Balanced (experimental)
     AddChoice("strategy.balanced", "you can chose the degree of spatial randomness vs class balance");
     AddParameter(ParameterType_Float, "strategy.balanced.sp", "Spatial proportion: between 0 and 1, "
         "indicating the amount of randomly sampled data in space");
@@ -157,6 +174,9 @@ public:
     // Output points
     AddParameter(ParameterType_OutputVectorData, "outtrain", "output set of points (training)");
     AddParameter(ParameterType_OutputVectorData, "outvalid", "output set of points (validation)");
+    MandatoryOff("outvalid");
+    AddParameter(ParameterType_OutputVectorData, "outtest", "output set of points (test)");
+    MandatoryOff("outtest");
 
     AddRAMParameter();
 
@@ -166,22 +186,15 @@ public:
   {
   public:
     SampleBundle(){}
-    SampleBundle(unsigned int nClasses){
-      dist = DistributionType(nClasses);
-      id = 0;
+    explicit SampleBundle(unsigned int nClasses): dist(DistributionType(nClasses)), id(0), group(true){
       (void) point;
-      black = true;
       (void) index;
     }
     ~SampleBundle(){}
 
-    SampleBundle(const SampleBundle & other){
-      dist = other.GetDistribution();
-      id = other.GetSampleID();
-      point = other.GetPosition();
-      black = other.GetBlack();
-      index = other.GetIndex();
-    }
+    SampleBundle(const SampleBundle & other): dist(other.GetDistribution()), id(other.GetSampleID()),
+      point(other.GetPosition()), group(other.GetGroup()), index(other.GetIndex())
+    {}
 
     DistributionType GetDistribution() const
     {
@@ -213,14 +226,14 @@ public:
       return point;
     }
 
-    bool& GetModifiableBlack()
+    int& GetModifiableGroup()
     {
-      return black;
+      return group;
     }
 
-    bool GetBlack() const
+    int GetGroup() const
     {
-      return black;
+      return group;
     }
 
     UInt8ImageType::IndexType& GetModifiableIndex()
@@ -238,7 +251,7 @@ public:
     DistributionType dist;
     unsigned int id;
     DataNodePointType point;
-    bool black;
+    int group;
     UInt8ImageType::IndexType index;
   };
 
@@ -252,6 +265,10 @@ public:
     int userOffX = GetParameterInt("grid.offsetx");
     int userOffY = GetParameterInt("grid.offsety");
 
+    // Tell if the patch size is odd or even
+    const bool isEven = GetParameterInt("grid.psize") % 2 == 0;
+    otbAppLogINFO("Patch size is even: " << isEven);
+
     // Explicit streaming over the morphed mask, based on the RAM parameter
     typedef otb::RAMDrivenStrippedStreamingManager<UInt8ImageType> StreamingManagerType;
     StreamingManagerType::Pointer m_StreamingManager = StreamingManagerType::New();
@@ -259,9 +276,9 @@ public:
 
     UInt8ImageType::Pointer inputImage;
     bool readInput = true;
-    if (GetParameterInt("nocheck")==1)
+    if (!HasValue("nodata"))
       {
-      otbAppLogINFO("\"nocheck\" mode is enabled. Input image pixels no-data values will not be checked.");
+      otbAppLogINFO("No value specified for no-data. Input image pixels no-data values will not be checked.");
       if (HasValue("mask"))
         {
         otbAppLogINFO("Using the provided \"mask\" parameter.");
@@ -327,9 +344,13 @@ public:
             // Compute coordinates
             UInt8ImageType::PointType geo;
             inputImage->TransformIndexToPhysicalPoint(inIt.GetIndex(), geo);
-            DataNodeType::PointType point;
-            point[0] = geo[0];
-            point[1] = geo[1];
+
+            // Update geo if we want the corner or the center
+            if (isEven)
+            {
+              geo[0] -= 0.5 * std::abs(inputImage->GetSpacing()[0]);
+              geo[1] -= 0.5 * std::abs(inputImage->GetSpacing()[1]);
+            }
 
             // Lambda call
             lambda(pos, geo);
@@ -365,18 +386,19 @@ public:
       const UInt8ImageType::IndexType & pos, const UInt8ImageType::PointType & geo)
   {
     // Black or white
-    bool black = ((pos[0] + pos[1]) % 2 == 0);
+    int black = (pos[0] + pos[1]) % 2;
 
     bundle.GetModifiableSampleID() = count;
     bundle.GetModifiablePosition() = geo;
-    bundle.GetModifiableBlack() = black;
+    bundle.GetModifiableGroup() = black;
     bundle.GetModifiableIndex() = pos;
     count++;
 
   }
 
   /*
-   * Samples are placed at regular intervals
+   * Samples are placed at regular intervals with the same layout as a chessboard,
+   * in two groups (A: black, B: white)
    */
   void SampleChessboard()
   {
@@ -387,6 +409,75 @@ public:
     auto lambda = [this, &count, &bundles]
                    (const UInt8ImageType::IndexType & pos, const UInt8ImageType::PointType & geo) {
       SetBlackOrWhiteBundle(bundles[count], count, pos, geo);
+    };
+
+    Apply(lambda);
+    bundles.resize(count);
+
+    // Export training/validation samples
+    PopulateVectorData(bundles);
+  }
+
+  void SetSplitBundle(SampleBundle & bundle, unsigned int & count,
+      const UInt8ImageType::IndexType & pos, const UInt8ImageType::PointType & geo,
+      const std::vector<int> & groups)
+  {
+
+    bundle.GetModifiableGroup() = groups[count];
+    bundle.GetModifiableSampleID() = count;
+    bundle.GetModifiablePosition() = geo;
+    bundle.GetModifiableIndex() = pos;
+    count++;
+  }
+
+  /*
+   * Samples are split in training/validation/test groups
+   */
+  void SampleSplit(float trp, float vp, float tp)
+  {
+
+    std::vector<SampleBundle> bundles = AllocateSamples();
+
+    // Populate groups
+    unsigned int nbSamples = bundles.size();
+    float tot = (trp + vp + tp);
+    std::vector<float> props = {trp, vp, tp};
+    std::vector<float> incs, counts;
+    for (auto& prop: props)
+    {
+      if (prop > 0)
+      {
+        incs.push_back(tot / prop);
+        counts.push_back(.0);
+      }
+      else
+        {
+        incs.push_back(.0);
+        counts.push_back((float) nbSamples);
+        }
+    }
+    std::vector<int> groups;
+    for (unsigned int i = 0; i < nbSamples; i++)
+    {
+      // Find the group with the less samples
+      auto it = std::min_element(std::begin(counts), std::end(counts));
+      auto idx = std::distance(std::begin(counts), it);
+      assert (idx > 0);
+      // Assign the group number, and update counts
+      groups.push_back(idx);
+      counts[idx] += incs[idx];
+    }
+    if (GetParameterInt("strategy.split.random") > 0)
+    {
+      // Shuffle groups
+      auto rng = std::default_random_engine {};
+      std::shuffle(std::begin(groups), std::end(groups), rng);
+    }
+
+    unsigned int count = 0;
+    auto lambda = [this, &count, &bundles, &groups]
+                   (const UInt8ImageType::IndexType & pos, const UInt8ImageType::PointType & geo) {
+      SetSplitBundle(bundles[count], count, pos, geo, groups);
     };
 
     Apply(lambda);
@@ -538,19 +629,24 @@ public:
     PopulateVectorData(seed);
   }
 
-  void PopulateVectorData(std::vector<SampleBundle> & samples)
+  void PopulateVectorData(const std::vector<SampleBundle> & samples)
   {
     // Get data tree
     DataTreeType::Pointer treeTrain = m_OutVectorDataTrain->GetDataTree();
     DataTreeType::Pointer treeValid = m_OutVectorDataValid->GetDataTree();
+    DataTreeType::Pointer treeTest = m_OutVectorDataTest->GetDataTree();
     DataNodePointer rootTrain = treeTrain->GetRoot()->Get();
     DataNodePointer rootValid = treeValid->GetRoot()->Get();
+    DataNodePointer rootTest = treeTest->GetRoot()->Get();
     DataNodePointer documentTrain = DataNodeType::New();
     DataNodePointer documentValid = DataNodeType::New();
+    DataNodePointer documentTest = DataNodeType::New();
     documentTrain->SetNodeType(DOCUMENT);
     documentValid->SetNodeType(DOCUMENT);
+    documentTest->SetNodeType(DOCUMENT);
     treeTrain->Add(documentTrain, rootTrain);
     treeValid->Add(documentValid, rootValid);
+    treeTest->Add(documentTest, rootTest);
 
     unsigned int id = 0;
     for (const auto& sample: samples)
@@ -562,15 +658,20 @@ public:
       id++;
 
       // select this sample
-      if (sample.GetBlack())
+      if (sample.GetGroup() == 0)
       {
         // Train
         treeTrain->Add(newDataNode, documentTrain);
       }
-      else
+      else if (sample.GetGroup() == 1)
       {
         // Valid
         treeValid->Add(newDataNode, documentValid);
+      }
+      else if (sample.GetGroup() == 2)
+      {
+        // Test
+        treeTest->Add(newDataNode, documentTest);
       }
 
     }
@@ -583,7 +684,12 @@ public:
 
     // Compute no-data mask
     m_NoDataFilter = IsNoDataFilterType::New();
-    m_NoDataFilter->GetFunctor().SetNoDataValue(GetParameterFloat("nodata"));
+    float nodataValue = std::numeric_limits<float>::quiet_NaN();
+    if (HasValue("nodata"))
+    {
+      nodataValue = GetParameterFloat("nodata");
+    }
+    m_NoDataFilter->GetFunctor().SetNoDataValue(nodataValue);
     m_NoDataFilter->SetInput(GetParameterFloatVectorImage("in"));
     m_NoDataFilter->UpdateOutputInformation();
     UInt8ImageType::Pointer src = m_NoDataFilter->GetOutput();
@@ -633,14 +739,21 @@ public:
     // Prepare output vector data
     m_OutVectorDataTrain = VectorDataType::New();
     m_OutVectorDataValid = VectorDataType::New();
+    m_OutVectorDataTest = VectorDataType::New();
     m_OutVectorDataTrain->SetProjectionRef(m_MorphoFilter->GetOutput()->GetProjectionRef());
     m_OutVectorDataValid->SetProjectionRef(m_MorphoFilter->GetOutput()->GetProjectionRef());
+    m_OutVectorDataTest->SetProjectionRef(m_MorphoFilter->GetOutput()->GetProjectionRef());
 
     if (GetParameterAsString("strategy") == "chessboard")
     {
       otbAppLogINFO("Sampling at regular interval in space (\"Chessboard\" like)");
 
       SampleChessboard();
+
+      if (HasValue("outtest"))
+      {
+        otbAppLogWARNING("The \"outtest\" parameter is unused with the \"chessboard\" sampling strategy.")
+      }
     }
     else if (GetParameterAsString("strategy") == "balanced")
     {
@@ -648,12 +761,51 @@ public:
 
       SampleBalanced();
     }
+    else if (GetParameterAsString("strategy") == "split")
+    {
+      otbAppLogINFO("Sampling with split strategy (Train/Validation/test)");
+      float vp = .0;
+      float tp = .0;
+      if (HasValue("outvalid"))
+      {
+        vp = GetParameterFloat("strategy.split.validprop");
+      }
+      if (HasValue("outtest"))
+      {
+        tp = GetParameterFloat("strategy.split.testprop");
+      }
+
+      SampleSplit(GetParameterFloat("strategy.split.trainprop"), vp, tp);
+    }
+    else if (GetParameterAsString("strategy") == "all")
+    {
+      otbAppLogINFO("Sampling all locations (only \"outtrain\" output parameter will be used");
+
+      SampleSplit(1.0, .0, .0);
+
+      if (HasValue("outtest") || HasValue("outvalid"))
+      {
+        otbAppLogWARNING("The \"outvalid\" and \"outtest\" parameters are unused with the \"all\" sampling strategy.")
+      }
+    }
 
     otbAppLogINFO( "Writing output samples positions");
 
     SetParameterOutputVectorData("outtrain", m_OutVectorDataTrain);
-    SetParameterOutputVectorData("outvalid", m_OutVectorDataValid);
+    if (HasValue("outvalid") && GetParameterAsString("strategy") != "all")
+    {
+      SetParameterOutputVectorData("outvalid", m_OutVectorDataValid);
+    }
+    if (HasValue("outtest") && GetParameterAsString("strategy") == "split")
+    {
+      SetParameterOutputVectorData("outtest", m_OutVectorDataTest);
+    }
 
+  }
+
+
+  void DoUpdateParameters()
+  {
   }
 
 private:
@@ -663,6 +815,7 @@ private:
   MorphoFilterType::Pointer    m_MorphoFilter;
   VectorDataType::Pointer      m_OutVectorDataTrain;
   VectorDataType::Pointer      m_OutVectorDataValid;
+  VectorDataType::Pointer      m_OutVectorDataTest;
   MaskImageFilterType::Pointer m_MaskImageFilter;
 }; // end of class
 

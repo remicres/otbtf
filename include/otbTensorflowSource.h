@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -25,49 +25,47 @@ namespace otb
 {
 
 /*
- * This is a simple helper to create images concatenation.
+ * This is a helper for images concatenation.
  * Images must have the same size.
- * This is basically the common input type used in every OTB-TF applications.
+ * This is the common input type used in every OTB-TF applications.
  */
-template<class TImage>
+template <class TImage>
 class TensorflowSource
 {
 public:
   /** Typedefs for images */
-  typedef TImage                                            FloatVectorImageType;
-  typedef typename FloatVectorImageType::Pointer            FloatVectorImagePointerType;
-  typedef typename FloatVectorImageType::InternalPixelType  InternalPixelType;
-  typedef otb::Image<InternalPixelType>                     FloatImageType;
-  typedef typename FloatImageType::SizeType                 SizeType;
+  typedef TImage                                           FloatVectorImageType;
+  typedef typename FloatVectorImageType::Pointer           FloatVectorImagePointerType;
+  typedef typename FloatVectorImageType::InternalPixelType InternalPixelType;
+  typedef otb::Image<InternalPixelType>                    FloatImageType;
+  typedef typename FloatImageType::SizeType                SizeType;
 
   /** Typedefs for image concatenation */
-  typedef otb::ImageList<FloatImageType>                    ImageListType;
-  typedef typename ImageListType::Pointer                   ImageListPointer;
-  typedef ImageListToVectorImageFilter<ImageListType,
-      FloatVectorImageType>                                 ListConcatenerFilterType;
-  typedef typename ListConcatenerFilterType::Pointer        ListConcatenerFilterPointer;
-  typedef MultiToMonoChannelExtractROI<InternalPixelType,
-      InternalPixelType>                                    MultiToMonoChannelFilterType;
-  typedef ObjectList<MultiToMonoChannelFilterType>          ExtractROIFilterListType;
-  typedef typename ExtractROIFilterListType::Pointer        ExtractROIFilterListPointer;
-  typedef otb::MultiChannelExtractROI<InternalPixelType,
-      InternalPixelType>                                    ExtractFilterType;
-  typedef otb::ObjectList<FloatVectorImageType>             FloatVectorImageListType;
+  typedef otb::ImageList<FloatImageType>                                     ImageListType;
+  typedef typename ImageListType::Pointer                                    ImageListPointer;
+  typedef ImageListToVectorImageFilter<ImageListType, FloatVectorImageType>  ListConcatenerFilterType;
+  typedef typename ListConcatenerFilterType::Pointer                         ListConcatenerFilterPointer;
+  typedef MultiToMonoChannelExtractROI<InternalPixelType, InternalPixelType> MultiToMonoChannelFilterType;
+  typedef ObjectList<MultiToMonoChannelFilterType>                           ExtractROIFilterListType;
+  typedef typename ExtractROIFilterListType::Pointer                         ExtractROIFilterListPointer;
+  typedef otb::MultiChannelExtractROI<InternalPixelType, InternalPixelType>  ExtractFilterType;
+  typedef otb::ObjectList<FloatVectorImageType>                              FloatVectorImageListType;
 
   // Initialize the source
-  void Set(FloatVectorImageListType * inputList);
+  void
+  Set(FloatVectorImageListType * inputList);
 
   // Get the source output
-  FloatVectorImagePointerType Get();
+  FloatVectorImagePointerType
+  Get();
 
-  TensorflowSource(){};
-  virtual ~TensorflowSource (){};
+  TensorflowSource();
+  virtual ~TensorflowSource(){};
 
 private:
   ListConcatenerFilterPointer m_Concatener;    // Mono-images stacker
   ImageListPointer            m_List;          // List of mono-images
   ExtractROIFilterListPointer m_ExtractorList; // Mono-images extractors
-
 };
 
 } // end namespace otb

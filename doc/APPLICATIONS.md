@@ -20,7 +20,7 @@ For instance, for *n* samples of size *16 x 16* from a *4* channels _input sourc
 An optional output is an image of size *1 x n* containing the value of one specific field of the input vector data. 
 Typically, the *class* field can be used to generate a dataset suitable for a model that performs pixel wise classification. 
 
-![Schema](doc/images/patches_extraction.png)
+![Schema](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/patches_extraction.png)
 
 ```
 This application extracts patches in multiple input images. Change the OTB_TF_NSOURCES environment variable to set the number of sources.
@@ -30,9 +30,8 @@ MISSING -source1.il         <string list>    Input image(s) 1  (mandatory)
 MISSING -source1.out        <string> [pixel] Output patches for image 1  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is float) (mandatory)
 MISSING -source1.patchsizex <int32>          X patch size for image 1  (mandatory)
 MISSING -source1.patchsizey <int32>          Y patch size for image 1  (mandatory)
-        -source1.nodata     <float>          No-data value for image 1(used only if "usenodata" is on)  (mandatory, default value is 0)
+        -source1.nodata     <float>          No-data value for image 1
 MISSING -vec                <string>         Positions of the samples (must be in the same projection as input image)  (mandatory)
-        -usenodata          <boolean>        Reject samples that have no-data value  (optional, off by default, default value is false)
         -outlabels          <string> [pixel] output labels  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is uint8) (optional, off by default)
 MISSING -field              <string>         field of class in the vector data  (mandatory)
         -progress           <boolean>        Report progress 
@@ -57,9 +56,9 @@ When using a model in OTBTF, the important thing is to know the following parame
    - **Expression field**
    - **Scale factor**
 
-![Schema](doc/images/schema.png)
+![Schema](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/schema.png)
 
-The **scale factor** descibes the physical change of spacing of the outputs, typically introduced in the model by non unitary strides in pooling or convolution operators.
+The **scale factor** describes the physical change of spacing of the outputs, typically introduced in the model by non unitary strides in pooling or convolution operators.
 For each output, it is expressed relatively to one single input of the model called the _reference input source_.
 Additionally, the names of the _target nodes_ must be known (e.g. "optimizer").
 Also, the names of _user placeholders_, typically scalars placeholders that are used to control some parameters of the model, must be know (e.g. "dropout_rate").
@@ -82,7 +81,7 @@ Let's take the example of dropout: it's nice for training, but you have to disab
 Hence you will pass a placeholder with "dropout\_rate=0.3" for training and "dropout\_rate=0.0" for validation. 
 Of course, one can train models from handmade python code: to import the patches images, a convenient method consist in reading patches images as numpy arrays using OTB applications (e.g. **ExtractROI**) or GDAL, then do a np.reshape to the dimensions wanted.
 
-![Schema](doc/images/model_training.png)
+![Schema](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/model_training.png)
 
 ```
 Train a multisource deep learning net using Tensorflow. Change the OTB_TF_NSOURCES environment variable to set the number of sources.
@@ -147,7 +146,7 @@ As explained [previously](#buildmodel), the **scale factor** provided for the _o
 The user can ask for multiple _output tensors_, that will be stack along the channel dimension of the output raster.
 However, if the sizes of those _output tensors_ are not consistent (e.g. a different number of (x,y) elements), an exception will be thrown.
 
-![Schema](doc/images/classif_map.png)
+![Schema](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/classif_map.png)
 
 
 ```
@@ -356,7 +355,7 @@ But here, we will just perform some fine tuning of our model.
 The **SavedModel** is located in the `outmodel` directory.
 Our model is quite basic: it has two input placeholders, **x1** and **y1** respectively for input patches (with size 16x16) and input reference labels (with size 1x1).
 We named **prediction** the tensor that predict the labels and the optimizer that perform the stochastic gradient descent is an operator named **optimizer**.
-We perform the fine tuning and we export the new model variables directly in the _outmodel/variables_ folder, overwritting the existing variables of the model.
+We perform the fine tuning and we export the new model variables directly in the _outmodel/variables_ folder, overwriting the existing variables of the model.
 We use the **TensorflowModelTrain** application to perform the training of this existing model.
 ```
 otbcli_TensorflowModelTrain -model.dir /path/to/oursavedmodel -training.targetnodesnames optimizer -training.source1.il samp_patches.tif -training.source1.patchsizex 16 -training.source1.patchsizey 16 -training.source1.placeholder x1 -training.source2.il samp_labels.tif -training.source2.patchsizex 1 -training.source2.patchsizey 1 -training.source2.placeholder y1 -model.saveto /path/to/oursavedmodel/variables/variables

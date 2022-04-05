@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -15,67 +15,113 @@
 // ITK exception
 #include "itkMacro.h"
 
+// OTB log
+#include "otbMacro.h"
+
 // ITK image iterators
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionConstIterator.h"
 
 // tensorflow::tensor
 #include "tensorflow/core/framework/tensor.h"
+#include "tensorflow/core/framework/tensor_shape.h"
+#include "tensorflow/core/framework/tensor_shape.pb.h"
 
 // tensorflow::datatype <--> ImageType::InternalPixelType
 #include "otbTensorflowDataTypeBridge.h"
 
 // STD
 #include <string>
+#include <regex>
 
-namespace otb {
-namespace tf {
+namespace otb
+{
+namespace tf
+{
 
 // Generate a string with TensorShape infos
-std::string PrintTensorShape(const tensorflow::TensorShape & shp);
+std::string
+PrintTensorShape(const tensorflow::TensorShape & shp);
 
 // Generate a string with tensor infos
-std::string PrintTensorInfos(const tensorflow::Tensor & tensor);
+std::string
+PrintTensorInfos(const tensorflow::Tensor & tensor);
 
 // Create a tensor with the good datatype
-template<class TImage>
-tensorflow::Tensor CreateTensor(tensorflow::TensorShape & shape);
+template <class TImage>
+tensorflow::Tensor
+CreateTensor(tensorflow::TensorShape & shape);
 
 // Populate a tensor with the buffered region of a vector image
-template<class TImage>
-void PopulateTensorFromBufferedVectorImage(const typename TImage::Pointer bufferedimagePtr, tensorflow::Tensor & out_tensor);
+template <class TImage>
+void
+PopulateTensorFromBufferedVectorImage(const typename TImage::Pointer bufferedimagePtr, tensorflow::Tensor & out_tensor);
 
 // Populate the buffered region of a vector image with a given tensor's values
-template<class TImage>
-void TensorToImageBuffer(const tensorflow::Tensor & tensor, typename TImage::Pointer & image);
+template <class TImage>
+void
+TensorToImageBuffer(const tensorflow::Tensor & tensor, typename TImage::Pointer & image);
 
 // Recopy an VectorImage region into a 4D-shaped tensorflow::Tensor ({-1, sz_y, sz_x, sz_bands})
-template<class TImage, class TValueType=typename TImage::InternalPixelType>
-void RecopyImageRegionToTensor(const typename TImage::Pointer inputPtr,  const typename TImage::RegionType & region, tensorflow::Tensor & tensor, unsigned int elemIdx);
+template <class TImage, class TValueType = typename TImage::InternalPixelType>
+void
+RecopyImageRegionToTensor(const typename TImage::Pointer      inputPtr,
+                          const typename TImage::RegionType & region,
+                          tensorflow::Tensor &                tensor,
+                          unsigned int                        elemIdx);
 
 // Recopy an VectorImage region into a 4D-shaped tensorflow::Tensor (TValueType-agnostic function)
-template<class TImage>
-void RecopyImageRegionToTensorWithCast(const typename TImage::Pointer inputPtr,  const typename TImage::RegionType & region, tensorflow::Tensor & tensor, unsigned int elemIdx);
+template <class TImage>
+void
+RecopyImageRegionToTensorWithCast(const typename TImage::Pointer      inputPtr,
+                                  const typename TImage::RegionType & region,
+                                  tensorflow::Tensor &                tensor,
+                                  unsigned int                        elemIdx);
 
 // Sample a centered patch
-template<class TImage>
-void SampleCenteredPatch(const typename TImage::Pointer inputPtr, const typename TImage::IndexType & centerIndex, const typename TImage::SizeType & patchSize, tensorflow::Tensor & tensor, unsigned int elemIdx);
-template<class TImage>
-void SampleCenteredPatch(const typename TImage::Pointer inputPtr, const typename TImage::PointType & centerCoord, const typename TImage::SizeType & patchSize, tensorflow::Tensor & tensor, unsigned int elemIdx);
+template <class TImage>
+void
+SampleCenteredPatch(const typename TImage::Pointer     inputPtr,
+                    const typename TImage::IndexType & centerIndex,
+                    const typename TImage::SizeType &  patchSize,
+                    tensorflow::Tensor &               tensor,
+                    unsigned int                       elemIdx);
+template <class TImage>
+void
+SampleCenteredPatch(const typename TImage::Pointer     inputPtr,
+                    const typename TImage::PointType & centerCoord,
+                    const typename TImage::SizeType &  patchSize,
+                    tensorflow::Tensor &               tensor,
+                    unsigned int                       elemIdx);
 
-// Return the number of channels that the output tensor will occupy in the output image
-tensorflow::int64 GetNumberOfChannelsForOutputTensor(const tensorflow::Tensor & tensor);
+// Return the number of channels from the TensorflowShapeProto
+tensorflow::int64
+GetNumberOfChannelsFromShapeProto(const tensorflow::TensorShapeProto & proto);
 
 // Copy a tensor into the image region
-template<class TImage, class TValueType>
-void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, typename TImage::Pointer outputPtr, const typename TImage::RegionType & region, int & channelOffset);
+template <class TImage, class TValueType>
+void
+CopyTensorToImageRegion(const tensorflow::Tensor &          tensor,
+                        typename TImage::Pointer            outputPtr,
+                        const typename TImage::RegionType & region,
+                        int &                               channelOffset);
 
 // Copy a tensor into the image region (TValueType-agnostic version)
-template<class TImage>
-void CopyTensorToImageRegion(const tensorflow::Tensor & tensor, const typename TImage::RegionType & bufferRegion, typename TImage::Pointer outputPtr, const typename TImage::RegionType & outputRegion, int & channelOffset);
+template <class TImage>
+void
+CopyTensorToImageRegion(const tensorflow::Tensor &          tensor,
+                        const typename TImage::RegionType & bufferRegion,
+                        typename TImage::Pointer            outputPtr,
+                        const typename TImage::RegionType & outputRegion,
+                        int &                               channelOffset);
+
+// Convert a value into a tensor
+tensorflow::Tensor
+ValueToTensor(std::string value);
 
 // Convert an expression into a dict
-std::pair<std::string, tensorflow::Tensor> ExpressionToTensor(std::string expression);
+std::pair<std::string, tensorflow::Tensor>
+ExpressionToTensor(std::string expression);
 
 } // end namespace tf
 } // end namespace otb

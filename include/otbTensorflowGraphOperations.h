@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -24,30 +24,40 @@
 // ITK exception
 #include "itkMacro.h"
 
-namespace otb {
-namespace tf {
+// OTB log
+#include "otbMacro.h"
 
-// Restore a model from a path
-void RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
+namespace otb
+{
+namespace tf
+{
 
-// Restore a model from a path
-void SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
+// Load SavedModel variables
+void
+RestoreModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
-// Load a session and a graph from a folder
-void LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
+// Save SavedModel variables
+void
+SaveModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle);
 
-// Load a graph from a .meta file
-tensorflow::GraphDef LoadGraph(std::string filename);
+// Load SavedModel
+void
+LoadModel(const tensorflow::tstring path, tensorflow::SavedModelBundle & bundle, std::vector<std::string> tagList);
 
 // Get the following attributes of the specified tensors (by name) of a graph:
 // - shape
 // - datatype
 // Here we assume that the node's output is a tensor
-void GetTensorAttributes(const tensorflow::GraphDef & graph, std::vector<std::string> & tensorsNames,
-    std::vector<tensorflow::TensorShapeProto> & shapes, std::vector<tensorflow::DataType> & dataTypes);
+void
+GetTensorAttributes(const tensorflow::protobuf::Map<std::string, tensorflow::TensorInfo> layers,
+                    std::vector<std::string> &                                           tensorsNames,
+                    std::vector<tensorflow::TensorShapeProto> &                          shapes,
+                    std::vector<tensorflow::DataType> &                                  dataTypes,
+                    std::vector<std::string>                                             blackList);
 
 // Print a lot of stuff about the specified nodes of the graph
-void PrintNodeAttributes(const tensorflow::GraphDef & graph, std::vector<std::string> & nodesNames);
+void
+PrintNodeAttributes(const tensorflow::GraphDef & graph, const std::vector<std::string> & nodesNames);
 
 } // end namespace tf
 } // end namespace otb

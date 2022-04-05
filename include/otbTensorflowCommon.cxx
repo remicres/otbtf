@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Copyright (c) 2018-2019 Remi Cresson (IRSTEA)
-  Copyright (c) 2020-2021 Remi Cresson (INRAE)
+     Copyright (c) 2018-2019 IRSTEA
+     Copyright (c) 2020-2021 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -11,8 +11,10 @@
 =========================================================================*/
 #include "otbTensorflowCommon.h"
 
-namespace otb {
-namespace tf {
+namespace otb
+{
+namespace tf
+{
 
 //
 // Environment variable for the number of sources in "Multisource" applications
@@ -22,21 +24,21 @@ const std::string ENV_VAR_NAME_NSOURCES = "OTB_TF_NSOURCES";
 //
 // Get the environment variable as int
 //
-int GetEnvironmentVariableAsInt(const std::string & variableName)
+int
+GetEnvironmentVariableAsInt(const std::string & variableName)
 {
-  int ret = -1;
-  char const* tmp = getenv( variableName.c_str() );
-  if ( tmp != NULL )
+  int          ret = -1;
+  char const * tmp = getenv(variableName.c_str());
+  if (tmp != NULL)
   {
-    std::string s( tmp );
+    std::string s(tmp);
     try
     {
       ret = std::stoi(s);
     }
-    catch(...)
+    catch (...)
     {
-      itkGenericExceptionMacro("Error parsing variable "
-          << variableName << " as integer. Value is " << s);
+      itkGenericExceptionMacro("Error parsing variable " << variableName << " as integer. Value is " << s);
     }
   }
 
@@ -47,7 +49,8 @@ int GetEnvironmentVariableAsInt(const std::string & variableName)
 // This function returns the numeric content of the ENV_VAR_NAME_NSOURCES
 // environment variable
 //
-int GetNumberOfSources()
+int
+GetNumberOfSources()
 {
   int ret = GetEnvironmentVariableAsInt(ENV_VAR_NAME_NSOURCES);
   if (ret != -1)
@@ -60,15 +63,18 @@ int GetNumberOfSources()
 //
 // This function copy a patch from an input image to an output image
 //
-template<class TImage>
-void CopyPatch(typename TImage::Pointer inputImg, typename TImage::IndexType & inputPatchIndex,
-    typename TImage::Pointer outputImg, typename TImage::IndexType & outputPatchIndex,
-    typename TImage::SizeType patchSize)
+template <class TImage>
+void
+CopyPatch(typename TImage::Pointer     inputImg,
+          typename TImage::IndexType & inputPatchIndex,
+          typename TImage::Pointer     outputImg,
+          typename TImage::IndexType & outputPatchIndex,
+          typename TImage::SizeType    patchSize)
 {
-  typename TImage::RegionType inputPatchRegion(inputPatchIndex, patchSize);
-  typename TImage::RegionType outputPatchRegion(outputPatchIndex, patchSize);
-  typename itk::ImageRegionConstIterator<TImage> inIt (inputImg, inputPatchRegion);
-  typename itk::ImageRegionIterator<TImage> outIt (outputImg, outputPatchRegion);
+  typename TImage::RegionType                    inputPatchRegion(inputPatchIndex, patchSize);
+  typename TImage::RegionType                    outputPatchRegion(outputPatchIndex, patchSize);
+  typename itk::ImageRegionConstIterator<TImage> inIt(inputImg, inputPatchRegion);
+  typename itk::ImageRegionIterator<TImage>      outIt(outputImg, outputPatchRegion);
   for (inIt.GoToBegin(), outIt.GoToBegin(); !inIt.IsAtEnd(); ++inIt, ++outIt)
   {
     outIt.Set(inIt.Get());
@@ -78,9 +84,9 @@ void CopyPatch(typename TImage::Pointer inputImg, typename TImage::IndexType & i
 //
 // Get image infos
 //
-template<class TImage>
-void GetImageInfo(typename TImage::Pointer image,
-    unsigned int & sizex, unsigned int & sizey, unsigned int & nBands)
+template <class TImage>
+void
+GetImageInfo(typename TImage::Pointer image, unsigned int & sizex, unsigned int & sizey, unsigned int & nBands)
 {
   nBands = image->GetNumberOfComponentsPerPixel();
   sizex = image->GetLargestPossibleRegion().GetSize(0);
@@ -90,8 +96,9 @@ void GetImageInfo(typename TImage::Pointer image,
 //
 // Propagate the requested region in the image
 //
-template<class TImage>
-void PropagateRequestedRegion(typename TImage::Pointer image, typename TImage::RegionType & region)
+template <class TImage>
+void
+PropagateRequestedRegion(typename TImage::Pointer image, typename TImage::RegionType & region)
 {
   image->SetRequestedRegion(region);
   image->PropagateRequestedRegion();
@@ -101,13 +108,16 @@ void PropagateRequestedRegion(typename TImage::Pointer image, typename TImage::R
 //
 // Sample an input image at the specified location
 //
-template<class TImage>
-bool SampleImage(const typename TImage::Pointer inPtr, typename TImage::Pointer outPtr,
-    typename TImage::PointType point, unsigned int elemIdx,
-    typename TImage::SizeType patchSize)
+template <class TImage>
+bool
+SampleImage(const typename TImage::Pointer inPtr,
+            typename TImage::Pointer       outPtr,
+            typename TImage::PointType     point,
+            unsigned int                   elemIdx,
+            typename TImage::SizeType      patchSize)
 {
   typename TImage::IndexType index, outIndex;
-  bool canTransform = inPtr->TransformPhysicalPointToIndex(point, index);
+  bool                       canTransform = inPtr->TransformPhysicalPointToIndex(point, index);
   if (canTransform)
   {
     outIndex[0] = 0;
@@ -128,7 +138,6 @@ bool SampleImage(const typename TImage::Pointer inPtr, typename TImage::Pointer 
     }
   }
   return false;
-
 }
 
 } // end namespace tf

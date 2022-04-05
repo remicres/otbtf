@@ -1,0 +1,106 @@
+Version 3.1 (5 apr 2022)
+----------------------------------------------------------------
+* Add the "split" strategy in the `PatchesSelection` application. Now the application can select points for 3 independent data splits (train, valid, test).
+* `PatchesExtraction` and `PatchesSelection` don't use the `usenodata` option anymore. Now to use nodata, one simply has to set a parameter value for the nodata (no more default value).
+* New python examples in `python/examples/tensorflow_v2x` to illustrate how deterministic models can be quickly built using TensorFlow 2, exporte as SavedModel, and used with OTBTF.
+* Change "import gdal" --> "from osgeo import gdal" in otbtf.py
+
+Version 3.0.0-beta (20 nov 2021)
+----------------------------------------------------------------
+* Use Tensorflow 2 API everywhere. Everything is backward compatible (old models can still be used).
+* Support models with no-named inputs and outputs. OTBTF now can resolve the names! :) Just in the same order as they are defined in the computational graph.
+* Support user placeholders of type vector (int, float or bool)
+* More unit tests, spell check, better static analysis of C++ and python code
+* Improve the handling of 3-dimensional output tensors, + more explanation in error messages about output tensors dimensions.
+* Improve `PatchesSelection` to locate patches centers with corners or pixels centers depending if the patch size is odd or even.
+
+Version 2.5 (20 oct 2021)
+----------------------------------------------------------------
+* Fix a bug in otbtf.py. The `PatchesImagesReader` wasn't working properly when the streaming was disabled.
+* Improve the documentation on docker build and docker use (Thanks to Vincent@LaTelescop and Doctor-Who).
+
+Version 2.4 (11 apr 2021)
+----------------------------------------------------------------
+* Fix a bug: The output image origin was sometimes shifted from a fraction of pixel. This issue happened only with multi-inputs models that have inputs of different spacing.
+* Improvement: The output image largest possible region is now computed on the maximum possible area within the expression field. Before that, the largest possible region was too much cropped when an expression field > 1 was used. Now output images are a bit larger when a non unitary expression field is used.
+
+Version 2.3 (30 mar 2021)
+----------------------------------------------------------------
+* More supported numeric types for tensors:
+  * `tensorflow::DT_FLOAT`
+  * `tensorflow::DT_DOUBLE`
+  * `tensorflow::DT_UINT64`
+  * `tensorflow::DT_INT64`
+  * `tensorflow::DT_UINT32`
+  * `tensorflow::DT_INT32`
+  * `tensorflow::DT_UINT16`
+  * `tensorflow::DT_INT16`
+  * `tensorflow::DT_UINT8`
+* Update instructions to use docker
+
+Version 2.2 (29 jan 2021)
+----------------------------------------------------------------
+* Huge enhancement of the docker image build (from Vincent@LaTeleScop)
+
+Version 2.1 (17 nov 2020)
+----------------------------------------------------------------
+* New OTBTF python classes to train the models:
+  * `PatchesReaderBase`: base abstract class for patches readers. Users/developers can implement their own from it!
+  * `PatchesImagesReader`: a class implementing `PatchesReaderBase` to access the patches images, as they are produced by the OTBTF PatchesExtraction application.
+  * `IteratorBase`: base class to iterate on `PatchesReaderBase`-derived readers.
+  * `RandomIterator`: an iterator implementing `IteratorBase` designed to randomly access elements.
+  * `Dataset`: generic class to build datasets, consisting essentially of the assembly of a `PatchesReaderBase`-derived reader, and a `IteratorBase`-derived iterator. The `Dataset` handles the gathering of the data using a thread. It can be used as a `tf.dataset` to feed computational graphs.
+  * `DatasetFromPatchesImages`: a `Dataset` that uses a `PatchesImagesReader` to allow users/developers to stream their patches generated using the OTBTF PatchesExtraction through a `tf.dataset` which implements a streaming mechanism, enabling low memory footprint and high performance I/O thank to a threaded reading mechanism.
+* Fix in dockerfile (from Pratyush Das) to work with WSL2  
+
+Version 2.0 (29 may 2020)
+----------------------------------------------------------------
+* Now using TensorFlow 2.0! Some minor migration of python models, because we stick with `tf.compat.v1`.
+* Python functions to read patches now use GDAL
+* Lighter docker images (thanks to Vincent@LaTeleScop)
+
+Version 1.8.0 (14 jan 2020)
+----------------------------------------------------------------
+* PatchesExtraction supports no-data (a different value for each source can be set)
+* New sampling strategy available in PatchesSelection (balanced strategy)
+
+Version 1.7.0 (15 oct 2019)
+----------------------------------------------------------------
+* Add a new application for patches selection (experimental)
+* New docker images that are GPU-enabled using NVIDIA runtime
+
+Version 1.6.0 (18 jul 2019)
+----------------------------------------------------------------
+* Fix a bug related to coordinates tolerance (TensorflowModelTrain can now use patches that do not occupy physically the same space)
+* Fix dockerfile (add important environment variables, add a non-root user, add an example how to run the docker image)
+* Document the provided Gaetano et al. two-branch CNN
+
+Version 1.5.1 (18 jun 2019)
+----------------------------------------------------------------
+* Ubuntu bionic dockerfile + instructions
+* Doc tags for QGIS3 integration
+* Add cmake tests (3 models are tested in various configuration on Pan/XS images)
+* PatchesExtraction writes patches images with physical spacing
+
+Version 1.3.0 (18 nov 2018)
+----------------------------------------------------------------
+* Add 3 models that can be directly trained with TensorflowModelTrain (one CNN net, one FCN net, one 2-branch CNN net performing separately on PAN and XS images)
+* Fix a bug occurring when using a scale factor <> 1 with a non-unit expression field
+* Fix incorrect batch size in learning filters when batch size was not a multiple of number of batches
+* Add some documentation
+
+Version 1.2.0 (29 sep 2018)
+----------------------------------------------------------------
+* Fix typos in documentation
+* Add a new application for dense polygon classes statistics
+* Fix a bug in validation step
+* Add streaming option of training/validation
+* Document filters classes
+* Change applications parameters names and roles
+* Add a python application that converts a graph into a savedmodel
+* Adjust tiling to expression field
+* Update license
+
+Version 1.0.0 (16 may 2018)
+----------------------------------------------------------------
+* First release of OTBTF!
