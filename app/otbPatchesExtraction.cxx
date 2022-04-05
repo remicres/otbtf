@@ -102,7 +102,7 @@ public:
     AddParameter(ParameterType_Int,            ss_key_dims_y.str(), ss_desc_dims_y.str());
     SetMinimumParameterIntValue               (ss_key_dims_y.str(), 1);
     AddParameter(ParameterType_Float,          ss_key_nodata.str(), ss_desc_nodata.str());
-    SetDefaultParameterFloat                  (ss_key_nodata.str(), 0);
+    MandatoryOff                              (ss_key_nodata.str());
 
     // Add a new bundle
     SourceBundle bundle;
@@ -132,7 +132,11 @@ public:
       bundle.m_PatchSize[1] = GetParameterInt(bundle.m_KeyPszY);
 
       // No data value
-      bundle.m_NoDataValue = GetParameterFloat(bundle.m_KeyNoData);
+      if (HasValue(bundle.m_KeyNoData))
+	{
+        bundle.m_NoDataValue = GetParameterFloat(bundle.m_KeyNoData);
+        }
+
     }
   }
 
@@ -169,10 +173,6 @@ public:
     // Input vector data
     AddParameter(ParameterType_InputVectorData, "vec", "Positions of the samples (must be in the same projection as input image)");
 
-    // No data parameters
-    AddParameter(ParameterType_Bool, "usenodata", "Reject samples that have no-data value");
-    MandatoryOff                    ("usenodata");
-
     // Output label
     AddParameter(ParameterType_OutputImage, "outlabels", "output labels");
     SetDefaultOutputPixelType              ("outlabels", ImagePixelType_uint8);
@@ -201,14 +201,18 @@ public:
     SamplerType::Pointer sampler = SamplerType::New();
     sampler->SetInputVectorData(GetParameterVectorData("vec"));
     sampler->SetField(GetParameterAsString("field"));
-    if (GetParameterInt("usenodata")==1)
-      {
-      otbAppLogINFO("Rejecting samples that have at least one no-data value");
-      sampler->SetRejectPatchesWithNodata(true);
-      }
+
     for (auto& bundle: m_Bundles)
     {
-      sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize, bundle.m_NoDataValue);
+      if (HasValue(bundle.m_KeyNoData)) 
+        {
+        otbAppLogINFO("Rejecting samples that have at least one no-data value");
+        sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize, bundle.m_NoDataValue);
+        }
+      else
+        {
+        sampler->PushBackInputWithPatchSize(bundle.m_ImageSource.Get(), bundle.m_PatchSize);
+        }
     }
 
     // Run the filter
