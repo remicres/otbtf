@@ -102,12 +102,10 @@ public:
   /** Set / get image */
   virtual void
   PushBackInputWithPatchSize(const ImageType * input, SizeType & patchSize, InternalPixelType nodataval);
+  virtual void
+  PushBackInputWithPatchSize(const ImageType * input, SizeType & patchSize);
   const ImageType *
   GetInput(unsigned int index);
-
-  /** Set / get no-data related parameters */
-  itkSetMacro(RejectPatchesWithNodata, bool);
-  itkGetMacro(RejectPatchesWithNodata, bool);
 
   /** Do the real work */
   virtual void
@@ -144,8 +142,7 @@ private:
   unsigned long        m_NumberOfRejectedSamples;
 
   // No data stuff
-  std::vector<InternalPixelType> m_NoDataValues;
-  bool                           m_RejectPatchesWithNodata;
+  std::map<unsigned int, InternalPixelType> m_NoDataValues;
 
 }; // end class
 

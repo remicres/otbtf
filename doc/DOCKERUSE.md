@@ -24,8 +24,14 @@ Here is the list of OTBTF docker images hosted on [dockerhub](https://hub.docker
 | **mdl4eo/otbtf3.0:cpu-basic-dev** | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf3.0:gpu**           | Ubuntu Focal  | r2.5   | 7.4.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf3.0:gpu-dev**       | Ubuntu Focal  | r2.5   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf3.1:cpu-basic**     | Ubuntu Focal  | r2.8   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf3.1:cpu-basic-dev** | Ubuntu Focal  | r2.8   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf3.1:gpu-basic**     | Ubuntu Focal  | r2.8   | 7.4.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf3.1:gpu**           | Ubuntu Focal  | r2.8   | 7.4.0 | GPU, no optimization   | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf3.1:gpu-dev**       | Ubuntu Focal  | r2.8   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
 
-- `cpu` tagged docker images are compiled without optimization.
+- `cpu` tagged docker images are compiled for CPU usage only.
+- `xxx-basic` tagged docker images are compiled without CPU optimization flags. Other images are compiled with AVX, SSE, FMA.
 - `gpu` tagged docker images are suited for **NVIDIA GPUs**. They use CUDA/CUDNN support. 
 - `cpu-mkl` tagged docker image is experimental, it is optimized for Intel CPUs with AVX512 flags.
 
@@ -49,7 +55,7 @@ For instance, suppose you have some data in `/mnt/my_device/` that you want to u
 The following command shows you how to access the folder from the docker image.
 
 ```bash
-docker run -v /mnt/my_device/:/data/ -ti mdl4eo/otbtf2.5:cpu bash -c "ls /data"
+docker run -v /mnt/my_device/:/data/ -ti mdl4eo/otbtf3.1:cpu-basic bash -c "ls /data"
 ```
 Beware of ownership issues! see the last section of this doc.
 
@@ -62,13 +68,13 @@ You can then use the OTBTF `gpu` tagged docker images with the **NVIDIA runtime*
 With Docker version earlier than 19.03 :
 
 ```bash
-docker run --runtime=nvidia -ti mdl4eo/otbtf2.5:gpu bash
+docker run --runtime=nvidia -ti mdl4eo/otbtf3.1:gpu bash
 ```
 
 With Docker version including and after 19.03 :
 
 ```bash
-docker run --gpus all -ti mdl4eo/otbtf2.5:gpu bash
+docker run --gpus all -ti mdl4eo/otbtf3.1:gpu bash
 ```
 
 You can find some details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/). 
@@ -81,7 +87,7 @@ Be careful though, these infos might be a bit outdated...
 1. Install [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#manual-installation-steps) (Windows Subsystem for Linux)
 2. Install [docker desktop](https://www.docker.com/products/docker-desktop)
 3. Start **docker desktop** and **enable WSL2** from *Settings* > *General* then tick the box *Use the WSL2 based engine*
-3. Open a **cmd.exe** or **PowerShell** terminal, and type `docker create --name otbtf-cpu --interactive --tty mdl4eo/otbtf2.5:cpu`
+3. Open a **cmd.exe** or **PowerShell** terminal, and type `docker create --name otbtf-cpu --interactive --tty mdl4eo/otbtf3.1:cpu`
 4. Open **docker desktop**, and check that the docker is running in the **Container/Apps** menu
 ![Docker desktop, after the docker image is downloaded and ready to use](images/docker_desktop_1.jpeg)
 5. From **docker desktop**, click on the icon highlighted as shown below, and use the bash terminal that should pop up!
@@ -130,12 +136,12 @@ sudo systemctl {status,enable,disable,start,stop} docker
 Run a simple command in a one-shot container:
 
 ```bash
-docker run mdl4eo/otbtf2.5:cpu otbcli_PatchesExtraction
+docker run mdl4eo/otbtf3.1:cpu otbcli_PatchesExtraction
 ```
 
 You can also use the image in interactive mode with bash:
 ```bash
-docker run -ti mdl4eo/otbtf2.5:cpu bash
+docker run -ti mdl4eo/otbtf3.1:cpu bash
 ```
 
 ### Persistent container
@@ -145,7 +151,7 @@ Beware of ownership issues, see the last section of this doc.
 
 ```bash
 docker create --interactive --tty --volume /home/$USER:/home/otbuser/ \
-    --name otbtf mdl4eo/otbtf2.5:cpu /bin/bash
+    --name otbtf mdl4eo/otbtf3.1:cpu /bin/bash
 ```
 
 ### Interactive session
@@ -209,7 +215,7 @@ Create a named container (here with your HOME as volume), Docker will automatica
 
 ```bash
 docker create --interactive --tty --volume /home/$USER:/home/otbuser \
-    --name otbtf mdl4eo/otbtf2.5:cpu /bin/bash
+    --name otbtf mdl4eo/otbtf3.1:cpu /bin/bash
 ```
 
 Start a background container process:
