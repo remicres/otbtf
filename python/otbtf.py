@@ -258,6 +258,9 @@ class PatchesImagesReader(PatchesReaderBase):
         buffer = gdal_ds.ReadAsArray(0, yoff, psz, psz)
         if len(buffer.shape) == 3:
             buffer = np.transpose(buffer, axes=(1, 2, 0))
+        else:  # single-band raster
+            buffer = np.expand_dims(buffer, axis=2)
+
         return np.float32(buffer)
 
     def get_sample(self, index):
