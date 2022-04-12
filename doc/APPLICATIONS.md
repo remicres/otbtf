@@ -30,9 +30,8 @@ MISSING -source1.il         <string list>    Input image(s) 1  (mandatory)
 MISSING -source1.out        <string> [pixel] Output patches for image 1  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is float) (mandatory)
 MISSING -source1.patchsizex <int32>          X patch size for image 1  (mandatory)
 MISSING -source1.patchsizey <int32>          Y patch size for image 1  (mandatory)
-        -source1.nodata     <float>          No-data value for image 1(used only if "usenodata" is on)  (mandatory, default value is 0)
+        -source1.nodata     <float>          No-data value for image 1
 MISSING -vec                <string>         Positions of the samples (must be in the same projection as input image)  (mandatory)
-        -usenodata          <boolean>        Reject samples that have no-data value  (optional, off by default, default value is false)
         -outlabels          <string> [pixel] output labels  [pixel=uint8/uint16/int16/uint32/int32/float/double/cint16/cint32/cfloat/cdouble] (default value is uint8) (optional, off by default)
 MISSING -field              <string>         field of class in the vector data  (mandatory)
         -progress           <boolean>        Report progress 

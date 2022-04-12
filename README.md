@@ -47,8 +47,7 @@ For now you have two options: either use the existing **docker image**, or build
 
 Use the latest image from dockerhub:
 ```
-docker pull mdl4eo/otbtf3.0:cpu
-docker run -u otbuser -v $(pwd):/home/otbuser mdl4eo/otbtf3.0:cpu otbcli_PatchesExtraction -help
+docker run mdl4eo/otbtf3.1:cpu-basic otbcli_PatchesExtraction -help
 ```
 
 Read more in the [docker use documentation](doc/DOCKERUSE.md).

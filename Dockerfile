@@ -24,7 +24,7 @@ RUN if $GUI; then \
 ### Python3 links and pip packages
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
 # NumPy version is conflicting with system's gdal dep and may require venv
-ARG NUMPY_SPEC="==1.19.*"
+ARG NUMPY_SPEC="==1.22.*"
 RUN pip install --no-cache-dir -U pip wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
@@ -40,7 +40,7 @@ WORKDIR /src/tf
 RUN git config --global advice.detachedHead false
 
 ### TF
-ARG TF=v2.5.0
+ARG TF=v2.8.0
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
  && chmod +x /opt/otbtf/bin/bazelisk \
