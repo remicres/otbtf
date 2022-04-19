@@ -425,7 +425,6 @@ class Dataset:
         self.output_types = dict()
         self.output_shapes = dict()
         one_sample = self.patches_reader.get_sample(index=0)
-        print(one_sample)  # DEBUG
         for src_key, np_arr in one_sample.items():
             self.output_shapes[src_key] = np_arr.shape
             self.output_types[src_key] = tf.dtypes.as_dtype(np_arr.dtype)
@@ -704,7 +703,6 @@ class TFRecords:
         target_parsed = {key: value for (key, value) in example_parsed.items() if key in target_keys}
 
         if target_cropping:
-            print({key: value for key, value in target_parsed.items()})
             target_parsed = {key: value[target_cropping:-target_cropping, target_cropping:-target_cropping, :] for key, value in target_parsed.items()}
 
         return input_parsed, target_parsed
