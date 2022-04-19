@@ -685,12 +685,13 @@ class TFRecords:
         self.save(output_shapes, self.output_shape_file)
 
     @staticmethod
-    def parse_tfrecord(example, features_types, target_keys):
+    def parse_tfrecord(example, features_types, target_keys, target_cropping=None):
         """
         Parse example object to sample dict.
         :param example: Example object to parse
         :param features_types: List of types for each feature
         :param target_keys: list of keys of the targets
+        :param target_cropping: Optional. Number of pixels to be removed on each side of the target tensor.
         """
         read_features = {key: tf.io.FixedLenFeature([], dtype=tf.string) for key in features_types}
         example_parsed = tf.io.parse_single_example(example, read_features)
@@ -702,27 +703,33 @@ class TFRecords:
         input_parsed = {key: value for (key, value) in example_parsed.items() if key not in target_keys}
         target_parsed = {key: value for (key, value) in example_parsed.items() if key in target_keys}
 
+        if target_cropping:
+            print({key: value for key, value in target_parsed.items()})
+            target_parsed = {key: value[target_cropping:-target_cropping, target_cropping:-target_cropping, :] for key, value in target_parsed.items()}
+
         return input_parsed, target_parsed
 
 
-    def read(self, batch_size, target_keys, n_workers=1, drop_remainder=True, shuffle_buffer_size=None):
+    def read(self, batch_size, target_keys, target_cropping=None, n_workers=1, drop_remainder=True, shuffle_buffer_size=None):
         """
         Read all tfrecord files matching with pattern and convert data to tensorflow dataset.
         :param batch_size: Size of tensorflow batch
-        :param target_key: Key of the target, e.g. 's2_out'
+        :param target_keys: Keys of the target, e.g. ['s2_out']
+        :param target_cropping: Number of pixels to be removed on each side of the target. Must be used with a network
+                               architecture coherent with this, i.e. that has a Cropping2D layer in the end
         :param n_workers: number of workers, e.g. 4 if using 4 GPUs
                                              e.g. 12 if using 3 nodes of 4 GPUs
         :param drop_remainder: whether the last batch should be dropped in the case it has fewer than
                                `batch_size` elements. True is advisable when training on multiworkers.
                                False is advisable when evaluating metrics so that all samples are used
-        :param shuffle_buffer_size: is None, shuffle is not used. Else, blocks of shuffle_buffer_size
+        :param shuffle_buffer_size: if None, shuffle is not used. Else, blocks of shuffle_buffer_size
                                     elements are shuffled using uniform random.
         """
         options = tf.data.Options()
         if shuffle_buffer_size:
             options.experimental_deterministic = False  # disable order, increase speed
         options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.AUTO  # for multiworker
-        parse = partial(self.parse_tfrecord, features_types=self.output_types, target_keys=target_keys)
+        parse = partial(self.parse_tfrecord, features_types=self.output_types, target_keys=target_keys, target_cropping=target_cropping)
 
         # TODO: to be investigated :
         # 1/ num_parallel_reads useful ? I/O bottleneck of not ?
