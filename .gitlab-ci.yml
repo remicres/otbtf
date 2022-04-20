@@ -25,14 +25,6 @@ Build the CI docker image:
   image: docker/compose:1.29.2
   services:
     - name: docker:dind
-      entrypoint: ["env", "-u", "DOCKER_HOST"]
-      command: ["dockerd-entrypoint.sh"]
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-    # See https://github.com/docker-library/docker/pull/166
-    DOCKER_TLS_CERTDIR: ""
-
   before_script:
     # docker login asks for the password to be passed through stdin for security
     # we use $CI_REGISTRY_PASSWORD here which is a special variable provided by GitLab
