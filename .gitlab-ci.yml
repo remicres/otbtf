@@ -22,9 +22,8 @@ Build the CI docker image:
   stage: Build
   allow_failure: false
   tags: [godzilla]
-  image: docker/compose:1.29.2
   services:
-    - name: docker:dind
+    - name: docker:17.06.0-ce-dind
   before_script:
     # docker login asks for the password to be passed through stdin for security
     # we use $CI_REGISTRY_PASSWORD here which is a special variable provided by GitLab
