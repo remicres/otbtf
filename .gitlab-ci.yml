@@ -35,6 +35,7 @@ Build the CI docker image:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
     - docker info
+    - ls $PWD
     - >
       docker build
       --pull
