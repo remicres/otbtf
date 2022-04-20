@@ -4,8 +4,9 @@ ARG BASE_IMG
 
 # ----------------------------------------------------------------------------
 # Init base stage - will be cloned as intermediate build env
-FROM $BASE_IMG AS otbtf-base
+FROM ubuntu:20.04 AS otbtf-base
 WORKDIR /tmp
+RUN echo $BASE_IMG
 
 ### System packages
 COPY tools/docker/build-deps-*.txt ./
