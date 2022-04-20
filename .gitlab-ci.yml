@@ -18,7 +18,7 @@ stages:
   - Test
   - Applications Test
 
-Build the cpu-basic-dev docker image:
+Build the CI docker image:
   stage: Build
   allow_failure: false
   tags: [godzilla]
