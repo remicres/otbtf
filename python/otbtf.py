@@ -29,11 +29,10 @@ import time
 import logging
 from abc import ABC, abstractmethod
 from functools import partial
-from tqdm import tqdm
-
 import numpy as np
 import tensorflow as tf
 from osgeo import gdal
+from tqdm import tqdm
 
 
 # ----------------------------------------------------- Helpers --------------------------------------------------------
@@ -581,9 +580,10 @@ class TFRecords:
         self.output_shape = self.load(self.output_shape_file) if os.path.exists(self.output_shape_file) else None
         self.output_types = self.load(self.output_types_file) if os.path.exists(self.output_types_file) else None
 
+    @staticmethod
     def _bytes_feature(self, value):
         """
-        Used to convert a value to a type compatible with tf.train.Example.
+        Convert a value to a type compatible with tf.train.Example.
         :param value: value
         :return a bytes_list from a string / byte.
         """
