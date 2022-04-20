@@ -37,7 +37,6 @@ Build the CI docker image:
     - docker info
     - ls $PWD
     - docker run ubuntu:20.04 bash -c "echo 'Hello'"
-    - docker build .
     - >
       docker build
       --pull
