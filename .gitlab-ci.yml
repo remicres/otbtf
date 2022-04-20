@@ -37,6 +37,7 @@ Build the CI docker image:
     # docker login asks for the password to be passed through stdin for security
     # we use $CI_REGISTRY_PASSWORD here which is a special variable provided by GitLab
     # https://docs.gitlab.com/ce/ci/variables/predefined_variables.html
+    - docker info
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
     - docker info
