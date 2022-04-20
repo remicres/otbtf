@@ -22,6 +22,7 @@ Build the CI docker image:
   stage: Build
   allow_failure: false
   tags: [godzilla]
+  image: docker/compose:1.29.2
   services:
     - name: docker:17.06.0-ce-dind
   before_script:
