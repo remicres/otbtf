@@ -46,9 +46,7 @@ Build the CI docker image:
       --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-      --build-arg BASE_IMAGE=ubuntu:20.04
-      --build-arg BZL_CONFIGS=
-      --build-arg KEEP_SRC_OTB=true
+      --build-arg "BASE_IMAGE=ubuntu:20.04"
       .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
