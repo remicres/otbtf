@@ -22,17 +22,13 @@ Build the CI docker image:
   stage: Build
   allow_failure: false
   tags: [godzilla]
-  image: docker:17.06.0-ce
+  image: docker/compose:1.29.2
   variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-    # See https://github.com/docker-library/docker/pull/166
     DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
   services:
     - name: docker:dind
-      entrypoint: ["env", "-u", "DOCKER_HOST"]
-      command: ["dockerd-entrypoint.sh"]
-
+      command: [dockerd, '-H', 'tcp://0.0.0.0:2375']
   before_script:
     # docker login asks for the password to be passed through stdin for security
     # we use $CI_REGISTRY_PASSWORD here which is a special variable provided by GitLab
