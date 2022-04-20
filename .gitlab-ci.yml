@@ -36,7 +36,7 @@ Build the CI docker image:
   script:
     - docker info
     - ls $PWD
-    - docker build --build-arg BASE_IMAGE=abbcdef .
+    - docker build --build-arg "BASE_IMAGE=abbcdef" .
     - >
       docker build
       --pull
