@@ -672,11 +672,15 @@ class TFRecords:
 
     @staticmethod
     def parse_tfrecord(example, features_types, target_keys):
+    def parse_tfrecord(example, features_types, target_keys, preprocessing_fn=None, **kwargs):
         """
         Parse example object to sample dict.
         :param example: Example object to parse
         :param features_types: List of types for each feature
         :param target_keys: list of keys of the targets
+        :param preprocessing_fn: Optional. A preprocessing function that takes input, target as args and returns
+                                           a tuple (input_preprocessed, target_preprocessed)
+        :param kwargs: some keywords arguments for preprocessing_fn
         """
         read_features = {key: tf.io.FixedLenFeature([], dtype=tf.string) for key in features_types}
         example_parsed = tf.io.parse_single_example(example, read_features)
@@ -688,9 +692,13 @@ class TFRecords:
         input_parsed = {key: value for (key, value) in example_parsed.items() if key not in target_keys}
         target_parsed = {key: value for (key, value) in example_parsed.items() if key in target_keys}
 
+        if preprocessing_fn:
+            input_parsed, target_parsed = preprocessing_fn(input_parsed, target_parsed, **kwargs)
+
         return input_parsed, target_parsed
 
-    def read(self, batch_size, target_keys, n_workers=1, drop_remainder=True, shuffle_buffer_size=None):
+    def read(self, batch_size, target_keys, n_workers=1, drop_remainder=True, shuffle_buffer_size=None,
+             preprocessing_fn=None, **kwargs):
         """
         Read all tfrecord files matching with pattern and convert data to tensorflow dataset.
         :param batch_size: Size of tensorflow batch
@@ -702,12 +710,16 @@ class TFRecords:
                                False is advisable when evaluating metrics so that all samples are used
         :param shuffle_buffer_size: if None, shuffle is not used. Else, blocks of shuffle_buffer_size
                                     elements are shuffled using uniform random.
+        :param preprocessing_fn: Optional. A preprocessing function that takes input, target as args and returns
+                                   a tuple (input_preprocessed, target_preprocessed)
+        :param kwargs: some keywords arguments for preprocessing_fn
         """
         options = tf.data.Options()
         if shuffle_buffer_size:
             options.experimental_deterministic = False  # disable order, increase speed
         options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.AUTO  # for multiworker
-        parse = partial(self.parse_tfrecord, features_types=self.output_types, target_keys=target_keys)
+        parse = partial(self.parse_tfrecord, features_types=self.output_types, target_keys=target_keys,
+                        preprocessing_fn=preprocessing_fn, **kwargs)
 
         # TODO: to be investigated :
         # 1/ num_parallel_reads useful ? I/O bottleneck of not ?
