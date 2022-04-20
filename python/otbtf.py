@@ -172,7 +172,7 @@ class PatchesImagesReader(PatchesReaderBase):
     :see PatchesReaderBase
     """
 
-    def __init__(self, filenames_dict, use_streaming=False, scalar_dict=None):
+    def __init__(self, filenames_dict, use_streaming=False, scalar_dict={}):
         """
         :param filenames_dict: A dict() structured as follow:
             {src_name1: [src1_patches_image_1.tif, ..., src1_patches_image_N.tif],
@@ -192,17 +192,17 @@ class PatchesImagesReader(PatchesReaderBase):
         # gdal_ds dict
         self.gdal_ds = {key: [gdal_open(src_fn) for src_fn in src_fns] for key, src_fns in filenames_dict.items()}
 
-        # Scalar parameters (e.g. metadatas)
-        self.scalar_dict = scalar_dict
-        if scalar_dict is None:
-            self.scalar_dict = {}
+        # streaming on/off
+        self.use_streaming = use_streaming
+
+        # Scalar dict (e.g. for metadata)
+        # If the scalars are not numpy.ndarray, convert them
+        self.scalar_dict = {key: [i if isinstance(i, np.ndarray) else np.asarray(i) for i in scalars]
+                            for key, scalars in scalar_dict.items()}
 
         # check number of patches in each sources
         if len({len(ds_list) for ds_list in list(self.gdal_ds.values()) + list(self.scalar_dict.values())}) != 1:
             raise Exception("Each source must have the same number of patches images")
-
-        # streaming on/off
-        self.use_streaming = use_streaming
 
         # gdal_ds check
         nb_of_patches = {key: 0 for key in self.gdal_ds}
@@ -226,14 +226,8 @@ class PatchesImagesReader(PatchesReaderBase):
 
         # if use_streaming is False, we store in memory all patches images
         if not self.use_streaming:
-            patches_list = {src_key: [read_as_np_arr(ds) for ds in self.gdal_ds[src_key]] for src_key in self.gdal_ds}
-            self.patches_buffer = {src_key: np.concatenate(patches_list[src_key], axis=0) for src_key in self.gdal_ds}
-            # Create a scalars dict so that one scalar <-> one patch
-            self.scalar_buffer = {}
-            for src_key, scalars in self.scalar_dict.items():
-                self.scalar_buffer[src_key] = []
-                for scalar, ds_size in zip(scalars, self.ds_sizes):
-                    self.scalar_buffer[src_key].extend([scalar] * ds_size)
+            self.patches_buffer = {src_key: np.concatenate([read_as_np_arr(ds) for ds in src_ds[src_key]], axis=0) for
+                                   src_key, src_ds in self.gdal_ds.items()}
 
     def _get_ds_and_offset_from_index(self, index):
         offset = index
@@ -276,20 +270,19 @@ class PatchesImagesReader(PatchesReaderBase):
         assert index >= 0
         assert index < self.size
 
+        i, offset = self._get_ds_and_offset_from_index(index)
+        res = {src_key: scalar[i] for src_key, scalar in self.scalar_dict.items()}
         if not self.use_streaming:
-            res = {src_key: self.patches_buffer[src_key][index, :, :, :] for src_key in self.gdal_ds}
-            res.update({key: np.asarray(scalars[index]) for key, scalars in self.scalar_buffer.items()})
+            res.update({src_key: arr[index, :, :, :] for src_key, arr in self.patches_buffer.items()})
         else:
-            i, offset = self._get_ds_and_offset_from_index(index)
-            res = {src_key: self._read_extract_as_np_arr(self.gdal_ds[src_key][i], offset) for src_key in self.gdal_ds}
-            res.update({key: np.asarray(scalars[i]) for key, scalars in self.scalar_dict.items()})
-
+            res.update({src_key: self._read_extract_as_np_arr(self.gdal_ds[src_key][i], offset)
+                        for src_key in self.gdal_ds})
         return res
 
     def get_stats(self):
         """
         Compute some statistics for each source.
-        Depending if streaming is used, the statistics are computed directly in memory, or chunk-by-chunk.
+        When streaming is used, chunk-by-chunk. Else, the statistics are computed directly in memory.
 
         :return statistics dict
         """
@@ -340,6 +333,7 @@ class IteratorBase(ABC):
     """
     Base class for iterators
     """
+
     @abstractmethod
     def __init__(self, patches_reader: PatchesReaderBase):
         pass
@@ -396,22 +390,10 @@ class Dataset:
         :param max_nb_of_samples: Optional, max number of samples to consider
         """
         # patches reader
-        if patches_reader:
-            self.feed(patches_reader, buffer_length, Iterator, max_nb_of_samples)
-
-
-    def feed(self, patches_reader: PatchesReaderBase = None, buffer_length: int = 128,
-                 Iterator=RandomIterator, max_nb_of_samples=None):
-        """
-        :param patches_reader: The patches reader instance
-        :param buffer_length: The number of samples that are stored in the buffer
-        :param Iterator: The iterator class used to generate the sequence of patches indices.
-        :param max_nb_of_samples: Optional, max number of samples to consider
-        """
         self.patches_reader = patches_reader
 
         # If necessary, limit the nb of samples
-        logging.info('There are %s samples available', self.patches_reader.get_size())
+        logging.info('Number of samples: %s', self.patches_reader.get_size())
         if max_nb_of_samples and self.patches_reader.get_size() > max_nb_of_samples:
             logging.info('Reducing number of samples to %s', max_nb_of_samples)
             self.size = max_nb_of_samples
@@ -451,14 +433,19 @@ class Dataset:
 
     def to_tfrecords(self, output_dir, n_samples_per_shard=100, drop_remainder=True):
         """
+        Save the dataset into TFRecord files
 
+        :param output_dir: output directory
+        :param n_samples_per_shard: number of samples per TFRecord file
+        :param drop_remainder: drop remainder samples
         """
         tfrecord = TFRecords(output_dir)
         tfrecord.ds2tfrecord(self, n_samples_per_shard=n_samples_per_shard, drop_remainder=drop_remainder)
 
-
     def get_stats(self) -> dict:
         """
+        Compute dataset statistics
+
         :return: the dataset statistics, computed by the patches reader
         """
         with self.mining_lock:
@@ -684,13 +671,12 @@ class TFRecords:
         self.save(output_shapes, self.output_shape_file)
 
     @staticmethod
-    def parse_tfrecord(example, features_types, target_keys, target_cropping=None):
+    def parse_tfrecord(example, features_types, target_keys):
         """
         Parse example object to sample dict.
         :param example: Example object to parse
         :param features_types: List of types for each feature
         :param target_keys: list of keys of the targets
-        :param target_cropping: Optional. Number of pixels to be removed on each side of the target tensor.
         """
         read_features = {key: tf.io.FixedLenFeature([], dtype=tf.string) for key in features_types}
         example_parsed = tf.io.parse_single_example(example, read_features)
@@ -702,19 +688,13 @@ class TFRecords:
         input_parsed = {key: value for (key, value) in example_parsed.items() if key not in target_keys}
         target_parsed = {key: value for (key, value) in example_parsed.items() if key in target_keys}
 
-        if target_cropping:
-            target_parsed = {key: value[target_cropping:-target_cropping, target_cropping:-target_cropping, :] for key, value in target_parsed.items()}
-
         return input_parsed, target_parsed
 
-
-    def read(self, batch_size, target_keys, target_cropping=None, n_workers=1, drop_remainder=True, shuffle_buffer_size=None):
+    def read(self, batch_size, target_keys, n_workers=1, drop_remainder=True, shuffle_buffer_size=None):
         """
         Read all tfrecord files matching with pattern and convert data to tensorflow dataset.
         :param batch_size: Size of tensorflow batch
         :param target_keys: Keys of the target, e.g. ['s2_out']
-        :param target_cropping: Number of pixels to be removed on each side of the target. Must be used with a network
-                               architecture coherent with this, i.e. that has a Cropping2D layer in the end
         :param n_workers: number of workers, e.g. 4 if using 4 GPUs
                                              e.g. 12 if using 3 nodes of 4 GPUs
         :param drop_remainder: whether the last batch should be dropped in the case it has fewer than
@@ -727,7 +707,7 @@ class TFRecords:
         if shuffle_buffer_size:
             options.experimental_deterministic = False  # disable order, increase speed
         options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.AUTO  # for multiworker
-        parse = partial(self.parse_tfrecord, features_types=self.output_types, target_keys=target_keys, target_cropping=target_cropping)
+        parse = partial(self.parse_tfrecord, features_types=self.output_types, target_keys=target_keys)
 
         # TODO: to be investigated :
         # 1/ num_parallel_reads useful ? I/O bottleneck of not ?
