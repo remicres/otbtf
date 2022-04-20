@@ -47,8 +47,6 @@ Build the CI docker image:
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
       --build-arg "BASE_IMAGE=gitlab-registry.irstea.fr/remi.cresson/otbtf/otbtf3.0:cpu-basic-dev"
-      --build-arg BZL_CONFIGS=
-      --build-arg KEEP_SRC_OTB=true
       .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
