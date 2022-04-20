@@ -172,7 +172,7 @@ class PatchesImagesReader(PatchesReaderBase):
     :see PatchesReaderBase
     """
 
-    def __init__(self, filenames_dict, use_streaming=False, scalar_dict={}):
+    def __init__(self, filenames_dict, use_streaming=False, scalar_dict=None):
         """
         :param filenames_dict: A dict() structured as follow:
             {src_name1: [src1_patches_image_1.tif, ..., src1_patches_image_N.tif],
@@ -198,7 +198,7 @@ class PatchesImagesReader(PatchesReaderBase):
         # Scalar dict (e.g. for metadata)
         # If the scalars are not numpy.ndarray, convert them
         self.scalar_dict = {key: [i if isinstance(i, np.ndarray) else np.asarray(i) for i in scalars]
-                            for key, scalars in scalar_dict.items()}
+                            for key, scalars in scalar_dict.items()} if scalar_dict else {}
 
         # check number of patches in each sources
         if len({len(ds_list) for ds_list in list(self.gdal_ds.values()) + list(self.scalar_dict.values())}) != 1:
