@@ -1,4 +1,4 @@
-image: gitlab-registry.irstea.fr/remi.cresson/otbtf:3.1-cpu-basic-testing
+image: $CI_REGISTRY_IMAGE:cpu-basic-test
 
 variables:
     OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
@@ -18,8 +18,8 @@ stages:
   - Test
   - Applications Test
 
-Build the docker image:
-  stage: Docker build cpu-basic-dev
+Build the cpu-basic-dev docker image:
+  stage: Build
   allow_failure: false
   tags: [godzilla]
   image: docker/compose:1.29.2
@@ -55,7 +55,6 @@ Build the docker image:
     - docker push $CI_REGISTRY_IMAGE:cpu-basic-test
 
 .static_analysis_base:
-  image: $CI_REGISTRY_IMAGE:cpu-basic-test
   stage: Static Analysis
   allow_failure: true
 
@@ -83,7 +82,6 @@ cppcheck:
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
 .tests_base:
-  image: $CI_REGISTRY_IMAGE:cpu-basic-test
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
