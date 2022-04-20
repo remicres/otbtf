@@ -4,7 +4,6 @@ ARG BASE_IMG
 
 # ----------------------------------------------------------------------------
 # Init base stage - will be cloned as intermediate build env
-RUN echo $BASE_IMG
 FROM $BASE_IMG AS otbtf-base
 WORKDIR /tmp
 
