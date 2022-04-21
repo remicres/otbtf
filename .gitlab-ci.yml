@@ -22,7 +22,7 @@ Build the CI docker image:
   stage: Build
   allow_failure: false
   tags: [godzilla]
-  image: docker/compose:stable
+  image: docker/compose:18.09.06
   services:
     - name: docker:17.06.0-ce-dind
       alias: docker
