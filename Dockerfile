@@ -1,9 +1,9 @@
 ##### Configurable Dockerfile with multi-stage build - Author: Vincent Delbar
+## Mandatory
+ARG BASE_IMG
 
 # ----------------------------------------------------------------------------
 # Init base stage - will be cloned as intermediate build env
-## Mandatory
-ARG BASE_IMG=tototo123
 FROM $BASE_IMG AS otbtf-base
 WORKDIR /tmp
 

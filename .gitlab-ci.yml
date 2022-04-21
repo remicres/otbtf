@@ -35,6 +35,7 @@ cpu-basic-test image:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
     - docker info
+    - docker build --build-arg BASE_IMAGE="ubuntu:20.04" .
     - >
       docker build
       --pull
