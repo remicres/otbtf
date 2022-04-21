@@ -25,7 +25,7 @@ Build the CI docker image:
   image: docker/compose:latest
   services:
     - name: docker:17.06.0-ce-dind
-      alias: docker
+#      alias: docker
 
   before_script:
     # docker login asks for the password to be passed through stdin for security
