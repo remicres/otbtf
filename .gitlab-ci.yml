@@ -26,15 +26,22 @@ cpu-basic-test image:
   services:
     - name: docker:dind
   before_script:
-    # docker login asks for the password to be passed through stdin for security
-    # we use $CI_REGISTRY_PASSWORD here which is a special variable provided by GitLab
-    # https://docs.gitlab.com/ce/ci/variables/predefined_variables.html
-    - docker info
-    - docker version
-    - docker-compose version
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - sh tools/docker/docker_build_cpu-dev-tests.sh
+    - >
+      docker build
+      --pull
+      --cache-from $CI_REGISTRY_IMAGE:latest
+      --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
+      --label "org.opencontainers.image.url=$CI_PROJECT_URL"
+      --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
+      --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
+      --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
+      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+      --build-arg OTBTESTS="true"
+      --build-arg BZL_CONFIGS=""
+      --build-arg BASE_IMG="ubuntu:20.04"
+      .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
     - docker push $CI_REGISTRY_IMAGE:cpu-basic-test

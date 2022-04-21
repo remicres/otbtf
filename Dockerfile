@@ -1,6 +1,7 @@
 ##### Configurable Dockerfile with multi-stage build - Author: Vincent Delbar
 ## Mandatory
-ARG BASE_IMG=tototot123
+ARG BASE_IMG
+
 # ----------------------------------------------------------------------------
 # Init base stage - will be cloned as intermediate build env
 FROM $BASE_IMG AS otbtf-base
@@ -84,7 +85,6 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
 ### OTB
 ARG GUI=false
 ARG OTB=7.4.0
-ARG OTBTESTS=false
 
 RUN mkdir /src/otb
 WORKDIR /src/otb
@@ -102,8 +102,6 @@ RUN apt-get update -y \
       sed -i -r "s/-DOTB_USE_(QT|OPENGL|GL[UFE][WT])=OFF/-DOTB_USE_\1=ON/" ../build-flags-otb.txt; fi \
  # Possible ENH: superbuild-all-dependencies switch, with separated build-deps-minimal.txt and build-deps-otbcli.txt)
  #&& if $OTB_SUPERBUILD_ALL; then sed -i -r "s/-DUSE_SYSTEM_([A-Z0-9]*)=ON/-DUSE_SYSTEM_\1=OFF/ " ../build-flags-otb.txt; fi \
- && if $OTBTESTS; then \
-      echo "-DBUILD_TESTING=ON" >> "../build-flags-otb.txt" \
  && OTB_FLAGS=$(cat "../build-flags-otb.txt") \
  && cmake ../otb/SuperBuild -DCMAKE_INSTALL_PREFIX=/opt/otbtf $OTB_FLAGS \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))")
