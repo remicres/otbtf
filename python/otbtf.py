@@ -671,7 +671,6 @@ class TFRecords:
         self.save(output_shapes, self.output_shape_file)
 
     @staticmethod
-    def parse_tfrecord(example, features_types, target_keys):
     def parse_tfrecord(example, features_types, target_keys, preprocessing_fn=None, **kwargs):
         """
         Parse example object to sample dict.
