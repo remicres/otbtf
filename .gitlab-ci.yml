@@ -23,20 +23,18 @@ cpu-basic-test image:
   allow_failure: false
   tags: [godzilla]
   image: docker/compose:latest
-  services:
-    - name: docker:dind
-#      alias: docker
+#  services:
+#    - name: docker:dind
 
   before_script:
     # docker login asks for the password to be passed through stdin for security
     # we use $CI_REGISTRY_PASSWORD here which is a special variable provided by GitLab
     # https://docs.gitlab.com/ce/ci/variables/predefined_variables.html
     - docker info
-    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-  script:
-    - docker info
     - docker version
     - docker-compose version
+    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
     - docker build --build-arg BASE_IMAGE="ubuntu:20.04" .
     - >
       docker build
