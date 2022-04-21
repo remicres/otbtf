@@ -30,12 +30,14 @@ cpu-basic-test image:
   timeout: 10 hours
   script:
     - wget http://localhost:9090/status
-    - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test
+    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME || :
+    - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test || :
     - >
       docker build
       --pull
       --network="host"
       --cache-from $CI_REGISTRY_IMAGE:cpu-basic-test
+      --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
       --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
       --label "org.opencontainers.image.url=$CI_PROJECT_URL"
       --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
@@ -48,8 +50,8 @@ cpu-basic-test image:
       --build-arg BASE_IMG="ubuntu:20.04"
       .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
-    - docker push $CI_REGISTRY_IMAGE:cpu-basic-test
+#    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
+#    - docker push $CI_REGISTRY_IMAGE:cpu-basic-test
 
 .static_analysis_base:
   stage: Static Analysis
