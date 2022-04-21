@@ -29,7 +29,7 @@ cpu-basic-test image:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
   script:
-    - wget http://docker:9090/status
+    - wget http://localhost:9090/status
     - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test
     - >
       docker build
@@ -46,7 +46,6 @@ cpu-basic-test image:
       --build-arg KEEP_OTB_SRC="true"
       --build-arg BZL_CONFIGS=""
       --build-arg BASE_IMG="ubuntu:20.04"
-      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
       .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
