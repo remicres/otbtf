@@ -33,6 +33,7 @@ cpu-basic-test image:
     - >
       docker build
       --pull
+      --network="host"
       --cache-from $CI_REGISTRY_IMAGE:cpu-basic-test
       --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
       --label "org.opencontainers.image.url=$CI_PROJECT_URL"
