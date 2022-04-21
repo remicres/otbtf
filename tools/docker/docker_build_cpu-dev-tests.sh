@@ -1,5 +1,5 @@
 docker build --help
-docker build \
+docker build . \
 --no-cache \
 --pull \
 --cache-from $CI_REGISTRY_IMAGE:latest \
@@ -11,5 +11,4 @@ docker build \
 --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME \
 --build-arg OTBTESTS=true \
 --build-arg BZL_CONFIGS="" \
---build-arg BASE_IMAGE="ubuntu:20.04" \
-.
+--build-arg BASE_IMAGE="ubuntu:20.04"
