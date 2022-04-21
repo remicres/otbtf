@@ -581,7 +581,7 @@ class TFRecords:
         self.output_types = self.load(self.output_types_file) if os.path.exists(self.output_types_file) else None
 
     @staticmethod
-    def _bytes_feature(self, value):
+    def _bytes_feature(value):
         """
         Convert a value to a type compatible with tf.train.Example.
         :param value: value
