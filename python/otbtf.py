@@ -58,8 +58,11 @@ def read_as_np_arr(gdal_ds, as_patches=True):
         False, the shape is (1, psz_y, psz_x, nb_channels)
     :return: Numpy array of dim 4
     """
-    buffer = gdal_ds.ReadAsArray()
+    gdal_to_np_types = {1: 'uint8', 2: 'uint16', 3: 'int16', 4: 'uint32', 5: 'int32', 6: 'float32', 7: 'float64',
+                        10: 'complex64', 11: 'complex128'}
+    gdal_type = gdal_ds.GetRasterBand(1).DataType
     size_x = gdal_ds.RasterXSize
+    buffer = gdal_ds.ReadAsArray().astype(gdal_to_np_types[gdal_type])
     if len(buffer.shape) == 3:
         buffer = np.transpose(buffer, axes=(1, 2, 0))
     if not as_patches:
@@ -68,7 +71,7 @@ def read_as_np_arr(gdal_ds, as_patches=True):
     else:
         n_elems = int(gdal_ds.RasterYSize / size_x)
         size_y = size_x
-    return np.float32(buffer.reshape((n_elems, size_y, size_x, gdal_ds.RasterCount)))
+    return buffer.reshape((n_elems, size_y, size_x, gdal_ds.RasterCount))
 
 
 # -------------------------------------------------- Buffer class ------------------------------------------------------
@@ -244,8 +247,11 @@ class PatchesImagesReader(PatchesReaderBase):
 
     @staticmethod
     def _read_extract_as_np_arr(gdal_ds, offset):
+        gdal_to_np_types = {1: 'uint8', 2: 'uint16', 3: 'int16', 4: 'uint32', 5: 'int32', 6: 'float32', 7: 'float64',
+                            10: 'complex64', 11: 'complex128'}
         assert gdal_ds is not None
         psz = gdal_ds.RasterXSize
+        gdal_type = gdal_ds.GetRasterBand(1).DataType
         yoff = int(offset * psz)
         assert yoff + psz <= gdal_ds.RasterYSize
         buffer = gdal_ds.ReadAsArray(0, yoff, psz, psz)
@@ -254,7 +260,7 @@ class PatchesImagesReader(PatchesReaderBase):
         else:  # single-band raster
             buffer = np.expand_dims(buffer, axis=2)
 
-        return np.float32(buffer)
+        return buffer.astype(gdal_to_np_types[gdal_type])
 
     def get_sample(self, index):
         """
