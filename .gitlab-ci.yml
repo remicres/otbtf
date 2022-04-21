@@ -37,7 +37,7 @@ cpu-basic-test image:
     - docker-compose version
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
-    - tools/docker/./docker_build_cpu-dev-tests.sh
+    - sh tools/docker/docker_build_cpu-dev-tests.sh
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
     - docker push $CI_REGISTRY_IMAGE:cpu-basic-test
