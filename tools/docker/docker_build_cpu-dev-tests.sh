@@ -1,5 +1,6 @@
 docker build --help
 docker build \
+--no-cache \
 --pull \
 --cache-from $CI_REGISTRY_IMAGE:latest \
 --label "org.opencontainers.image.title=$CI_PROJECT_TITLE" \
