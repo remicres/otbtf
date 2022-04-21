@@ -26,7 +26,7 @@ cpu-basic-test image:
   services:
     - name: docker:dind
   variables:
-    - BASE_IMAGE: "ubuntu:20.04"
+    - BASE_IMAGE: ubuntu:20.04
   before_script:
     # docker login asks for the password to be passed through stdin for security
     # we use $CI_REGISTRY_PASSWORD here which is a special variable provided by GitLab
