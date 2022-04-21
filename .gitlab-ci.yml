@@ -29,6 +29,7 @@ cpu-basic-test image:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
   script:
+    - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test
     - >
       docker build
       --pull
