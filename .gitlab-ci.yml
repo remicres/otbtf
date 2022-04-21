@@ -29,8 +29,8 @@ cpu-basic-test image:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
   script:
+    - wget http://127.0.0.1:9090/status
     - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test
-    - wget http://localhost:9090/status
     - >
       docker build
       --pull
