@@ -1,4 +1,4 @@
-image: $CI_REGISTRY_IMAGE:cpu-basic-test
+image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
 variables:
     OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
@@ -18,7 +18,7 @@ stages:
   - Test
   - Applications Test
 
-cpu-basic-test image:
+test docker image:
   stage: Build
   allow_failure: false
   tags: [godzilla]
