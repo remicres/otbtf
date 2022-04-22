@@ -18,7 +18,7 @@ stages:
   - Applications Test
   - Ship
 
-test docker image:
+docker image:
   stage: Build
   allow_failure: false
   tags: [godzilla]
@@ -31,22 +31,13 @@ test docker image:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
   script:
-    - ls -ll /
-    - ls -ll /bzl_cache/
-    - touch /bzl_cache/toto
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME ||
     - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test || 
     - >
       docker build
-      --pull
       --network="host"
       --cache-from $CI_REGISTRY_IMAGE:cpu-basic-test
       --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-      --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
-      --label "org.opencontainers.image.url=$CI_PROJECT_URL"
-      --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
-      --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
-      --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
       --build-arg OTBTESTS="true"
       --build-arg KEEP_SRC_OTB="true"

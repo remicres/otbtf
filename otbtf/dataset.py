@@ -20,73 +20,18 @@
 """
 Contains stuff to help working with TensorFlow and geospatial data in the OTBTF framework.
 """
-import glob
-import json
-import os
 import threading
 import multiprocessing
 import time
 import logging
 from abc import ABC, abstractmethod
-from functools import partial
 import numpy as np
 import tensorflow as tf
-from osgeo import gdal
-from tqdm import tqdm
-
-# --------------------------------------------- GDAL to numpy types ----------------------------------------------------
-
-
-GDAL_TO_NP_TYPES = {1: 'uint8',
-                    2: 'uint16',
-                    3: 'int16',
-                    4: 'uint32',
-                    5: 'int32',
-                    6: 'float32',
-                    7: 'float64',
-                    10: 'complex64',
-                    11: 'complex128'}
-
-
-# ----------------------------------------------------- Helpers --------------------------------------------------------
-
-
-def gdal_open(filename):
-    """
-    Open a GDAL raster
-    :param filename: raster file
-    :return: a GDAL dataset instance
-    """
-    gdal_ds = gdal.Open(filename)
-    if gdal_ds is None:
-        raise Exception("Unable to open file {}".format(filename))
-    return gdal_ds
-
-
-def read_as_np_arr(gdal_ds, as_patches=True):
-    """
-    Read a GDAL raster as numpy array
-    :param gdal_ds: a GDAL dataset instance
-    :param as_patches: if True, the returned numpy array has the following shape (n, psz_x, psz_x, nb_channels). If
-        False, the shape is (1, psz_y, psz_x, nb_channels)
-    :return: Numpy array of dim 4
-    """
-    gdal_type = gdal_ds.GetRasterBand(1).DataType
-    size_x = gdal_ds.RasterXSize
-    buffer = gdal_ds.ReadAsArray().astype(GDAL_TO_NP_TYPES[gdal_type])
-    if len(buffer.shape) == 3:
-        buffer = np.transpose(buffer, axes=(1, 2, 0))
-    if not as_patches:
-        n_elems = 1
-        size_y = gdal_ds.RasterYSize
-    else:
-        n_elems = int(gdal_ds.RasterYSize / size_x)
-        size_y = size_x
-    return buffer.reshape((n_elems, size_y, size_x, gdal_ds.RasterCount))
+from otbtf.utils import read_as_np_arr, gdal_open
+from otbtf.tfrecords import TFRecords
 
 
 # -------------------------------------------------- Buffer class ------------------------------------------------------
-
 
 class Buffer:
     """
@@ -119,7 +64,6 @@ class Buffer:
 
 
 # ---------------------------------------------- PatchesReaderBase class -----------------------------------------------
-
 
 class PatchesReaderBase(ABC):
     """
@@ -164,7 +108,6 @@ class PatchesReaderBase(ABC):
 
 
 # --------------------------------------------- PatchesImagesReader class ----------------------------------------------
-
 
 class PatchesImagesReader(PatchesReaderBase):
     """
@@ -260,16 +203,13 @@ class PatchesImagesReader(PatchesReaderBase):
     def _read_extract_as_np_arr(gdal_ds, offset):
         assert gdal_ds is not None
         psz = gdal_ds.RasterXSize
-        gdal_type = gdal_ds.GetRasterBand(1).DataType
         yoff = int(offset * psz)
         assert yoff + psz <= gdal_ds.RasterYSize
         buffer = gdal_ds.ReadAsArray(0, yoff, psz, psz)
         if len(buffer.shape) == 3:
-            buffer = np.transpose(buffer, axes=(1, 2, 0))
-        else:  # single-band raster
-            buffer = np.expand_dims(buffer, axis=2)
-
-        return buffer.astype(GDAL_TO_NP_TYPES[gdal_type])
+            # multi-band raster
+            return np.transpose(buffer, axes=(1, 2, 0))
+        return np.expand_dims(buffer, axis=2)
 
     def get_sample(self, index):
         """
@@ -342,7 +282,6 @@ class PatchesImagesReader(PatchesReaderBase):
 
 # ----------------------------------------------- IteratorBase class ---------------------------------------------------
 
-
 class IteratorBase(ABC):
     """
     Base class for iterators
@@ -354,7 +293,6 @@ class IteratorBase(ABC):
 
 
 # ---------------------------------------------- RandomIterator class --------------------------------------------------
-
 
 class RandomIterator(IteratorBase):
     """
@@ -384,7 +322,6 @@ class RandomIterator(IteratorBase):
 
 
 # ------------------------------------------------- Dataset class ------------------------------------------------------
-
 
 class Dataset:
     """
@@ -547,7 +484,6 @@ class Dataset:
 
 # ----------------------------------------- DatasetFromPatchesImages class ---------------------------------------------
 
-
 class DatasetFromPatchesImages(Dataset):
     """
     Handles the "mining" of a set of patches images.
@@ -572,204 +508,3 @@ class DatasetFromPatchesImages(Dataset):
         patches_reader = PatchesImagesReader(filenames_dict=filenames_dict, use_streaming=use_streaming)
 
         super().__init__(patches_reader=patches_reader, buffer_length=buffer_length, Iterator=Iterator)
-
-
-class TFRecords:
-    """
-    This class allows to convert Dataset objects to TFRecords and to load them in dataset tensorflows format.
-    """
-
-    def __init__(self, path):
-        """
-        :param path: Can be a directory where TFRecords must be saved/loaded or a single TFRecord path
-        """
-        if os.path.isdir(path) or not os.path.exists(path):
-            self.dirpath = path
-            os.makedirs(self.dirpath, exist_ok=True)
-            self.tfrecords_pattern_path = os.path.join(self.dirpath, "*.records")
-        else:
-            self.dirpath = os.path.dirname(path)
-            self.tfrecords_pattern_path = path
-        self.output_types_file = os.path.join(self.dirpath, "output_types.json")
-        self.output_shape_file = os.path.join(self.dirpath, "output_shape.json")
-        self.output_shape = self.load(self.output_shape_file) if os.path.exists(self.output_shape_file) else None
-        self.output_types = self.load(self.output_types_file) if os.path.exists(self.output_types_file) else None
-
-    @staticmethod
-    def _bytes_feature(value):
-        """
-        Convert a value to a type compatible with tf.train.Example.
-        :param value: value
-        :return a bytes_list from a string / byte.
-        """
-        if isinstance(value, type(tf.constant(0))):
-            value = value.numpy()  # BytesList won't unpack a string from an EagerTensor.
-        return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
-
-    def ds2tfrecord(self, dataset, n_samples_per_shard=100, drop_remainder=True):
-        """
-        Convert and save samples from dataset object to tfrecord files.
-        :param dataset: Dataset object to convert into a set of tfrecords
-        :param n_samples_per_shard: Number of samples per shard
-        :param drop_remainder: Whether additional samples should be dropped. Advisable if using multiworkers training.
-                               If True, all TFRecords will have `n_samples_per_shard` samples
-        """
-        logging.info("%s samples", dataset.size)
-
-        nb_shards = (dataset.size // n_samples_per_shard)
-        if not drop_remainder and dataset.size % n_samples_per_shard > 0:
-            nb_shards += 1
-
-        self.convert_dataset_output_shapes(dataset)
-
-        def _convert_data(data):
-            """
-            Convert data
-            """
-            data_converted = {}
-
-            for key, value in data.items():
-                data_converted[key] = value.name
-
-            return data_converted
-
-        self.save(_convert_data(dataset.output_types), self.output_types_file)
-
-        for i in tqdm(range(nb_shards)):
-
-            if (i + 1) * n_samples_per_shard <= dataset.size:
-                nb_sample = n_samples_per_shard
-            else:
-                nb_sample = dataset.size - i * n_samples_per_shard
-
-            filepath = os.path.join(self.dirpath, f"{i}.records")
-            with tf.io.TFRecordWriter(filepath) as writer:
-                for _ in range(nb_sample):
-                    sample = dataset.read_one_sample()
-                    serialized_sample = {name: tf.io.serialize_tensor(fea) for name, fea in sample.items()}
-                    features = {name: self._bytes_feature(serialized_tensor) for name, serialized_tensor in
-                                serialized_sample.items()}
-                    tf_features = tf.train.Features(feature=features)
-                    example = tf.train.Example(features=tf_features)
-                    writer.write(example.SerializeToString())
-
-    @staticmethod
-    def save(data, filepath):
-        """
-        Save data to pickle format.
-        :param data: Data to save json format
-        :param filepath: Output file name
-        """
-
-        with open(filepath, 'w') as file:
-            json.dump(data, file, indent=4)
-
-    @staticmethod
-    def load(filepath):
-        """
-        Return data from pickle format.
-        :param filepath: Input file name
-        """
-        with open(filepath, 'r') as file:
-            return json.load(file)
-
-    def convert_dataset_output_shapes(self, dataset):
-        """
-        Convert and save numpy shape to tensorflow shape.
-        :param dataset: Dataset object containing output shapes
-        """
-        output_shapes = {}
-
-        for key, value in dataset.output_shapes.keys():
-            output_shapes[key] = (None,) + value
-
-        self.save(output_shapes, self.output_shape_file)
-
-    @staticmethod
-    def parse_tfrecord(example, features_types, target_keys, preprocessing_fn=None, **kwargs):
-        """
-        Parse example object to sample dict.
-        :param example: Example object to parse
-        :param features_types: List of types for each feature
-        :param target_keys: list of keys of the targets
-        :param preprocessing_fn: Optional. A preprocessing function that takes input, target as args and returns
-                                           a tuple (input_preprocessed, target_preprocessed)
-        :param kwargs: some keywords arguments for preprocessing_fn
-        """
-        read_features = {key: tf.io.FixedLenFeature([], dtype=tf.string) for key in features_types}
-        example_parsed = tf.io.parse_single_example(example, read_features)
-
-        for key in read_features.keys():
-            example_parsed[key] = tf.io.parse_tensor(example_parsed[key], out_type=features_types[key])
-
-        # Differentiating inputs and outputs
-        input_parsed = {key: value for (key, value) in example_parsed.items() if key not in target_keys}
-        target_parsed = {key: value for (key, value) in example_parsed.items() if key in target_keys}
-
-        if preprocessing_fn:
-            input_parsed, target_parsed = preprocessing_fn(input_parsed, target_parsed, **kwargs)
-
-        return input_parsed, target_parsed
-
-    def read(self, batch_size, target_keys, n_workers=1, drop_remainder=True, shuffle_buffer_size=None,
-             preprocessing_fn=None, **kwargs):
-        """
-        Read all tfrecord files matching with pattern and convert data to tensorflow dataset.
-        :param batch_size: Size of tensorflow batch
-        :param target_keys: Keys of the target, e.g. ['s2_out']
-        :param n_workers: number of workers, e.g. 4 if using 4 GPUs
-                                             e.g. 12 if using 3 nodes of 4 GPUs
-        :param drop_remainder: whether the last batch should be dropped in the case it has fewer than
-                               `batch_size` elements. True is advisable when training on multiworkers.
-                               False is advisable when evaluating metrics so that all samples are used
-        :param shuffle_buffer_size: if None, shuffle is not used. Else, blocks of shuffle_buffer_size
-                                    elements are shuffled using uniform random.
-        :param preprocessing_fn: Optional. A preprocessing function that takes input, target as args and returns
-                                   a tuple (input_preprocessed, target_preprocessed)
-        :param kwargs: some keywords arguments for preprocessing_fn
-        """
-        options = tf.data.Options()
-        if shuffle_buffer_size:
-            options.experimental_deterministic = False  # disable order, increase speed
-        options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.AUTO  # for multiworker
-        parse = partial(self.parse_tfrecord, features_types=self.output_types, target_keys=target_keys,
-                        preprocessing_fn=preprocessing_fn, **kwargs)
-
-        # TODO: to be investigated :
-        # 1/ num_parallel_reads useful ? I/O bottleneck of not ?
-        # 2/ num_parallel_calls=tf.data.experimental.AUTOTUNE useful ?
-        # 3/ shuffle or not shuffle ?
-        matching_files = glob.glob(self.tfrecords_pattern_path)
-        logging.info('Searching TFRecords in %s...', self.tfrecords_pattern_path)
-        logging.info('Number of matching TFRecords: %s', len(matching_files))
-        matching_files = matching_files[:n_workers * (len(matching_files) // n_workers)]  # files multiple of workers
-        nb_matching_files = len(matching_files)
-        if nb_matching_files == 0:
-            raise Exception("At least one worker has no TFRecord file in {}. Please ensure that the number of TFRecord "
-                            "files is greater or equal than the number of workers!".format(self.tfrecords_pattern_path))
-        logging.info('Reducing number of records to : %s', nb_matching_files)
-        dataset = tf.data.TFRecordDataset(matching_files)  # , num_parallel_reads=2)  # interleaves reads from xxx files
-        dataset = dataset.with_options(options)  # uses data as soon as it streams in, rather than in its original order
-        dataset = dataset.map(parse, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        if shuffle_buffer_size:
-            dataset = dataset.shuffle(buffer_size=shuffle_buffer_size)
-        dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
-        dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-        # TODO voir si on met le prefetch avant le batch cf https://keras.io/examples/keras_recipes/tfrecord/
-
-        return dataset
-
-    def read_one_sample(self, target_keys):
-        """
-        Read one tfrecord file matching with pattern and convert data to tensorflow dataset.
-        :param target_key: Key of the target, e.g. 's2_out'
-        """
-        matching_files = glob.glob(self.tfrecords_pattern_path)
-        one_file = matching_files[0]
-        parse = partial(self.parse_tfrecord, features_types=self.output_types, target_keys=target_keys)
-        dataset = tf.data.TFRecordDataset(one_file)
-        dataset = dataset.map(parse)
-        dataset = dataset.batch(1)
-
-        sample = iter(dataset).get_next()
-        return sample

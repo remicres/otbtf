@@ -25,7 +25,7 @@ for TF 1.X versions.
 """
 import tensorflow.compat.v1 as tf
 from deprecated import deprecated
-from otbtf import gdal_open, read_as_np_arr as read_as_np_arr_from_gdal_ds
+from otbtf.utils import gdal_open, read_as_np_arr as read_as_np_arr_from_gdal_ds
 tf.disable_v2_behavior()
 
 
