@@ -49,7 +49,7 @@ test docker image:
       --build-arg KEEP_SRC_OTB="true"
       --build-arg BZL_CONFIGS=""
       --build-arg BASE_IMG="ubuntu:20.04"
-      --build-arg BZL_PRE="--output_user_root=/bzl_cache"
+      --build-arg BZL_PRE="--output_user_root=/bzl_cache/cache"
       --build-arg BZL_OPTIONS="--verbose_failures"
       .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
