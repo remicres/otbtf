@@ -37,7 +37,7 @@ from tqdm import tqdm
 # --------------------------------------------- GDAL to numpy types ----------------------------------------------------
 
 
-gdal_to_np_types = {1: 'uint8',
+GDAL_TO_NP_TYPES = {1: 'uint8',
                     2: 'uint16',
                     3: 'int16',
                     4: 'uint32',
@@ -73,7 +73,7 @@ def read_as_np_arr(gdal_ds, as_patches=True):
     """
     gdal_type = gdal_ds.GetRasterBand(1).DataType
     size_x = gdal_ds.RasterXSize
-    buffer = gdal_ds.ReadAsArray().astype(gdal_to_np_types[gdal_type])
+    buffer = gdal_ds.ReadAsArray().astype(GDAL_TO_NP_TYPES[gdal_type])
     if len(buffer.shape) == 3:
         buffer = np.transpose(buffer, axes=(1, 2, 0))
     if not as_patches:
@@ -269,7 +269,7 @@ class PatchesImagesReader(PatchesReaderBase):
         else:  # single-band raster
             buffer = np.expand_dims(buffer, axis=2)
 
-        return buffer.astype(gdal_to_np_types[gdal_type])
+        return buffer.astype(GDAL_TO_NP_TYPES[gdal_type])
 
     def get_sample(self, index):
         """
@@ -628,8 +628,8 @@ class TFRecords:
             """
             data_converted = {}
 
-            for k, d in data.items():
-                data_converted[k] = d.name
+            for key, value in data.items():
+                data_converted[key] = value.name
 
             return data_converted
 
@@ -644,7 +644,7 @@ class TFRecords:
 
             filepath = os.path.join(self.dirpath, f"{i}.records")
             with tf.io.TFRecordWriter(filepath) as writer:
-                for s in range(nb_sample):
+                for _ in range(nb_sample):
                     sample = dataset.read_one_sample()
                     serialized_sample = {name: tf.io.serialize_tensor(fea) for name, fea in sample.items()}
                     features = {name: self._bytes_feature(serialized_tensor) for name, serialized_tensor in
@@ -661,8 +661,8 @@ class TFRecords:
         :param filepath: Output file name
         """
 
-        with open(filepath, 'w') as f:
-            json.dump(data, f, indent=4)
+        with open(filepath, 'w') as file:
+            json.dump(data, file, indent=4)
 
     @staticmethod
     def load(filepath):
