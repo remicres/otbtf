@@ -1,2 +1,3 @@
 # Compiled python source #
 *.pyc
+.idea
