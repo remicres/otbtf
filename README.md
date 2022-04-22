@@ -3,6 +3,7 @@
 # OTBTF: Orfeo ToolBox meets TensorFlow
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![pipeline status](https://gitlab.irstea.fr/remi.cresson/otbtf/badges/develop/pipeline.svg)](https://gitlab.irstea.fr/remi.cresson/otbtf/-/commits/develop)
 
 This remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org) provides a generic, multi purpose deep learning framework, targeting remote sensing images processing.
 It contains a set of new process objects that internally invoke [Tensorflow](https://www.tensorflow.org/), and a bunch of user-oriented applications to perform deep learning with real-world remote sensing images.
