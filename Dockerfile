@@ -148,7 +148,7 @@ COPY --from=builder /src /src
 # System-wide ENV
 ENV PATH="/opt/otbtf/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
-ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/otb/python:/src/otbtf/python"
+ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/otb/python:/src/otbtf/otbtf"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 
 # Default user, directory and command (bash is the entrypoint when using 'docker create')
@@ -169,6 +169,6 @@ USER otbuser
 # User-only ENV
 
 # Test python imports
-RUN python -c "import tensorflow"
-RUN python -c "import otbtf, tricks"
-RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
+#RUN python -c "import tensorflow"
+#RUN python -c "import otbtf, tricks"
+#RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"

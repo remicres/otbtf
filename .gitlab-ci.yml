@@ -35,7 +35,6 @@ docker image:
     - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test || 
     - >
       docker build
-      --pull
       --network="host"
       --cache-from $CI_REGISTRY_IMAGE:cpu-basic-test
       --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
@@ -44,7 +43,6 @@ docker image:
       --build-arg KEEP_SRC_OTB="true"
       --build-arg BZL_CONFIGS=""
       --build-arg BASE_IMG="ubuntu:20.04"
-      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=172.17.0.1:9090"
       .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
