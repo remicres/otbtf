@@ -52,6 +52,7 @@ test docker image:
       --build-arg KEEP_SRC_OTB="true"
       --build-arg BZL_CONFIGS=""
       --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://172.17.0.1:9090"
       .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
