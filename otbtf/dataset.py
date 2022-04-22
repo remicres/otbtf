@@ -27,7 +27,7 @@ import logging
 from abc import ABC, abstractmethod
 import numpy as np
 import tensorflow as tf
-from otbtf.utils import read_as_np_arr, gdal_open, GDAL_TO_NP_TYPES
+from otbtf.utils import read_as_np_arr, gdal_open
 from otbtf.tfrecords import TFRecords
 
 
@@ -203,16 +203,13 @@ class PatchesImagesReader(PatchesReaderBase):
     def _read_extract_as_np_arr(gdal_ds, offset):
         assert gdal_ds is not None
         psz = gdal_ds.RasterXSize
-        gdal_type = gdal_ds.GetRasterBand(1).DataType
         yoff = int(offset * psz)
         assert yoff + psz <= gdal_ds.RasterYSize
         buffer = gdal_ds.ReadAsArray(0, yoff, psz, psz)
         if len(buffer.shape) == 3:
-            buffer = np.transpose(buffer, axes=(1, 2, 0))
-        else:  # single-band raster
-            buffer = np.expand_dims(buffer, axis=2)
-
-        return buffer.astype(GDAL_TO_NP_TYPES[gdal_type])
+            # multi-band raster
+            return np.transpose(buffer, axes=(1, 2, 0))
+        return np.expand_dims(buffer, axis=2)
 
     def get_sample(self, index):
         """

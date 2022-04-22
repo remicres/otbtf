@@ -1,19 +1,6 @@
 from osgeo import gdal
 import numpy as np
 
-# --------------------------------------------- GDAL to numpy types ----------------------------------------------------
-
-
-GDAL_TO_NP_TYPES = {1: 'uint8',
-                    2: 'uint16',
-                    3: 'int16',
-                    4: 'uint32',
-                    5: 'int32',
-                    6: 'float32',
-                    7: 'float64',
-                    10: 'complex64',
-                    11: 'complex128'}
-
 
 # ----------------------------------------------------- Helpers --------------------------------------------------------
 
@@ -41,10 +28,10 @@ def read_as_np_arr(gdal_ds, as_patches=True):
     size_x = gdal_ds.RasterXSize
     if len(buffer.shape) == 3:
         buffer = np.transpose(buffer, axes=(1, 2, 0))
-    if not as_patches:
-        n_elems = 1
-        size_y = gdal_ds.RasterYSize
-    else:
+    if as_patches:
         n_elems = int(gdal_ds.RasterYSize / size_x)
         size_y = size_x
+    else:
+        n_elems = 1
+        size_y = gdal_ds.RasterYSize
     return np.float32(buffer.reshape((n_elems, size_y, size_x, gdal_ds.RasterCount)))
