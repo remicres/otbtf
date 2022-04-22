@@ -51,6 +51,8 @@ ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package
 ARG BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
 # "--compilation_mode opt" is already enabled by default (see tf repo .bazelrc and configure.py)
 ARG BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
+# options between "bazel" and "build" directive
+ARG BZL_PRE=""
 
 # Build
 ARG ZIP_TF_BIN=false
@@ -63,7 +65,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
       source ../build-env-tf.sh \
       && ./configure \
       && export TMP=/tmp/bazel \
-      && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS" \
+      && BZL_CMD="$BZL_PRE build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS" \
       && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" ' \
 # Installation - split here if you want to check files  ^
 #RUN cd tensorflow \
