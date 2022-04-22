@@ -16,6 +16,7 @@ stages:
   - Static Analysis
   - Test
   - Applications Test
+  - deploy
 
 test docker image:
   stage: Build
