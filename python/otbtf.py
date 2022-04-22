@@ -34,6 +34,19 @@ import tensorflow as tf
 from osgeo import gdal
 from tqdm import tqdm
 
+# --------------------------------------------- GDAL to numpy types ----------------------------------------------------
+
+
+gdal_to_np_types = {1: 'uint8',
+                    2: 'uint16',
+                    3: 'int16',
+                    4: 'uint32',
+                    5: 'int32',
+                    6: 'float32',
+                    7: 'float64',
+                    10: 'complex64',
+                    11: 'complex128'}
+
 
 # ----------------------------------------------------- Helpers --------------------------------------------------------
 
@@ -58,8 +71,6 @@ def read_as_np_arr(gdal_ds, as_patches=True):
         False, the shape is (1, psz_y, psz_x, nb_channels)
     :return: Numpy array of dim 4
     """
-    gdal_to_np_types = {1: 'uint8', 2: 'uint16', 3: 'int16', 4: 'uint32', 5: 'int32', 6: 'float32', 7: 'float64',
-                        10: 'complex64', 11: 'complex128'}
     gdal_type = gdal_ds.GetRasterBand(1).DataType
     size_x = gdal_ds.RasterXSize
     buffer = gdal_ds.ReadAsArray().astype(gdal_to_np_types[gdal_type])
@@ -247,8 +258,6 @@ class PatchesImagesReader(PatchesReaderBase):
 
     @staticmethod
     def _read_extract_as_np_arr(gdal_ds, offset):
-        gdal_to_np_types = {1: 'uint8', 2: 'uint16', 3: 'int16', 4: 'uint32', 5: 'int32', 6: 'float32', 7: 'float64',
-                            10: 'complex64', 11: 'complex128'}
         assert gdal_ds is not None
         psz = gdal_ds.RasterXSize
         gdal_type = gdal_ds.GetRasterBand(1).DataType
