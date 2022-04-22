@@ -31,6 +31,9 @@ test docker image:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
   script:
+    - ls /
+    - ls /bzl_cache/
+    - ls /bzl_cache/cache
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME ||
     - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test || 
     - >
