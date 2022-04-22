@@ -670,8 +670,8 @@ class TFRecords:
         Return data from pickle format.
         :param filepath: Input file name
         """
-        with open(filepath, 'r') as f:
-            return json.load(f)
+        with open(filepath, 'r') as file:
+            return json.load(file)
 
     def convert_dataset_output_shapes(self, dataset):
         """
@@ -680,8 +680,8 @@ class TFRecords:
         """
         output_shapes = {}
 
-        for key in dataset.output_shapes.keys():
-            output_shapes[key] = (None,) + dataset.output_shapes[key]
+        for key, value in dataset.output_shapes.keys():
+            output_shapes[key] = (None,) + value
 
         self.save(output_shapes, self.output_shape_file)
 
