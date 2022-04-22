@@ -18,7 +18,7 @@ stages:
   - Applications Test
   - Ship
 
-test docker image:
+docker image:
   stage: Build
   allow_failure: false
   tags: [godzilla]
