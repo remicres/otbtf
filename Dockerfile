@@ -85,6 +85,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
 ### OTB
 ARG GUI=false
 ARG OTB=7.4.0
+ARG OTBTESTS=false
 
 RUN mkdir /src/otb
 WORKDIR /src/otb
@@ -97,6 +98,8 @@ RUN apt-get update -y \
  && git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
  && mkdir -p build \
  && cd build \
+ && if $OTBTESTS; then \
+      echo "-DBUILD_TESTING=ON" >> ../build-flags-otb.txt; fi \
  # Set GL/Qt build flags
  && if $GUI; then \
       sed -i -r "s/-DOTB_USE_(QT|OPENGL|GL[UFE][WT])=OFF/-DOTB_USE_\1=ON/" ../build-flags-otb.txt; fi \

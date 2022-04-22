@@ -1,4 +1,19 @@
 from osgeo import gdal
+import numpy as np
+
+# --------------------------------------------- GDAL to numpy types ----------------------------------------------------
+
+
+GDAL_TO_NP_TYPES = {1: 'uint8',
+                    2: 'uint16',
+                    3: 'int16',
+                    4: 'uint32',
+                    5: 'int32',
+                    6: 'float32',
+                    7: 'float64',
+                    10: 'complex64',
+                    11: 'complex128'}
+
 
 # ----------------------------------------------------- Helpers --------------------------------------------------------
 
@@ -9,7 +24,7 @@ def gdal_open(filename):
     :return: a GDAL dataset instance
     """
     gdal_ds = gdal.Open(filename)
-    if gdal_ds is None:
+    if not gdal_ds:
         raise Exception("Unable to open file {}".format(filename))
     return gdal_ds
 
