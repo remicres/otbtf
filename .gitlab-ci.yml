@@ -16,13 +16,15 @@ stages:
   - Static Analysis
   - Test
   - Applications Test
-  - deploy
+  - Ship
 
 test docker image:
   stage: Build
   allow_failure: false
   tags: [godzilla]
   image: docker/compose:latest
+  except:
+    - master
   services:
     - name: docker:dind
   before_script:
@@ -126,6 +128,7 @@ sr4rs:
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
 
 deploy:
+  stage: Ship
   only:
     - master
   script:
