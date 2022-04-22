@@ -53,20 +53,11 @@ class TFRecords:
         if not drop_remainder and dataset.size % n_samples_per_shard > 0:
             nb_shards += 1
 
-        self.convert_dataset_output_shapes(dataset)
+        output_shapes = {key: (None,) + output_shape for key, output_shape in dataset.output_shapes.items()}
+        self.save(output_shapes, self.output_shape_file)
 
-        def _convert_data(data):
-            """
-            Convert data
-            """
-            data_converted = {}
-
-            for k, d in data.items():
-                data_converted[k] = d.name
-
-            return data_converted
-
-        self.save(_convert_data(dataset.output_types), self.output_types_file)
+        output_types = {key: output_type.name for key, output_type in dataset.output_types.items()}
+        self.save(output_types, self.output_types_file)
 
         for i in tqdm(range(nb_shards)):
 
@@ -105,18 +96,6 @@ class TFRecords:
         """
         with open(filepath, 'r') as f:
             return json.load(f)
-
-    def convert_dataset_output_shapes(self, dataset):
-        """
-        Convert and save numpy shape to tensorflow shape.
-        :param dataset: Dataset object containing output shapes
-        """
-        output_shapes = {}
-
-        for key in dataset.output_shapes.keys():
-            output_shapes[key] = (None,) + dataset.output_shapes[key]
-
-        self.save(output_shapes, self.output_shape_file)
 
     @staticmethod
     def parse_tfrecord(example, features_types, target_keys, preprocessing_fn=None, **kwargs):
