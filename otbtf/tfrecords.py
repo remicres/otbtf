@@ -1,3 +1,25 @@
+# -*- coding: utf-8 -*-
+# ==========================================================================
+#
+#   Copyright 2018-2019 IRSTEA
+#   Copyright 2020-2022 INRAE
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#          http://www.apache.org/licenses/LICENSE-2.0.txt
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ==========================================================================*/
+"""
+The tfrecords module provides an implementation for the TFRecords files read/write
+"""
 import glob
 import json
 import os
@@ -68,7 +90,7 @@ class TFRecords:
 
             filepath = os.path.join(self.dirpath, f"{i}.records")
             with tf.io.TFRecordWriter(filepath) as writer:
-                for s in range(nb_sample):
+                for _ in range(nb_sample):
                     sample = dataset.read_one_sample()
                     serialized_sample = {name: tf.io.serialize_tensor(fea) for name, fea in sample.items()}
                     features = {name: self._bytes_feature(serialized_tensor) for name, serialized_tensor in
