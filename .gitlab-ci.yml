@@ -35,7 +35,7 @@ docker image:
     - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test || 
     - >
       docker build
-      --network="host"
+      --network="gitlab-runner-net"
       --cache-from $CI_REGISTRY_IMAGE:cpu-basic-test
       --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
