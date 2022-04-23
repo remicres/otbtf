@@ -24,7 +24,7 @@ docker image:
   tags: [godzilla]
   image: docker/compose:latest
   except:
-    - master
+    - develop
   services:
     - name: docker:dind
   before_script:
@@ -124,7 +124,7 @@ sr4rs:
 deploy:
   stage: Ship
   only:
-    - master
+    - develop
   script:
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
