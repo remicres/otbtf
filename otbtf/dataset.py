@@ -171,9 +171,9 @@ class PatchesImagesReader(PatchesReaderBase):
                 else:
                     if self.nb_of_channels[src_key] != gdal_ds.RasterCount:
                         raise Exception("All patches images from one source must have the same number of channels!"
-                                        "Error happened for source: {}".format(src_key))
+                                        f"Error happened for source: {src_key}")
         if len(set(nb_of_patches.values())) != 1:
-            raise Exception("Sources must have the same number of patches! Number of patches: {}".format(nb_of_patches))
+            raise Exception(f"Sources must have the same number of patches! Number of patches: {nb_of_patches}")
 
         # gdal_ds sizes
         src_key_0 = list(self.gdal_ds)[0]  # first key
