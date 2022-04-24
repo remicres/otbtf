@@ -20,7 +20,7 @@
 """
 OTBTF python module
 """
-from otbtf.utils import read_as_np_arr, gdal_open  # noqa: 401
+from otbtf.utils import read_as_np_arr, gdal_open
 from otbtf.dataset import Buffer, PatchesReaderBase, PatchesImagesReader, IteratorBase, RandomIterator, Dataset, \
-    DatasetFromPatchesImages  # noqa: 401
-from otbtf.tfrecords import TFRecords  # noqa: 401
+    DatasetFromPatchesImages
+from otbtf.tfrecords import TFRecords

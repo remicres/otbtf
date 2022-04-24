@@ -107,8 +107,8 @@ class TFRecords:
         :param filepath: Output file name
         """
 
-        with open(filepath, 'w') as f:
-            json.dump(data, f, indent=4)
+        with open(filepath, 'w') as file:
+            json.dump(data, file, indent=4)
 
     @staticmethod
     def load(filepath):
@@ -116,8 +116,8 @@ class TFRecords:
         Return data from pickle format.
         :param filepath: Input file name
         """
-        with open(filepath, 'r') as f:
-            return json.load(f)
+        with open(filepath, 'r') as file:
+            return json.load(file)
 
     @staticmethod
     def parse_tfrecord(example, features_types, target_keys, preprocessing_fn=None, **kwargs):
