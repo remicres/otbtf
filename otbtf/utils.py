@@ -34,7 +34,7 @@ def gdal_open(filename):
     """
     gdal_ds = gdal.Open(filename)
     if not gdal_ds:
-        raise Exception("Unable to open file {}".format(filename))
+        raise Exception(f"Unable to open file {filename}")
     return gdal_ds
 
 
