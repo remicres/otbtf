@@ -36,15 +36,10 @@ class TFRecords:
 
     def __init__(self, path):
         """
-        :param path: Can be a directory where TFRecords must be saved/loaded or a single TFRecord path
+        :param path: Can be a directory where TFRecords must be saved/loaded
         """
-        if os.path.isdir(path) or not os.path.exists(path):
-            self.dirpath = path
-            os.makedirs(self.dirpath, exist_ok=True)
-            self.tfrecords_pattern_path = os.path.join(self.dirpath, "*.records")
-        else:
-            self.dirpath = os.path.dirname(path)
-            self.tfrecords_pattern_path = path
+        self.dirpath = path
+        os.makedirs(self.dirpath, exist_ok=True)
         self.output_types_file = os.path.join(self.dirpath, "output_types.json")
         self.output_shape_file = os.path.join(self.dirpath, "output_shape.json")
         self.output_shape = self.load(self.output_shape_file) if os.path.exists(self.output_shape_file) else None
@@ -102,7 +97,7 @@ class TFRecords:
     @staticmethod
     def save(data, filepath):
         """
-        Save data to pickle format.
+        Save data to JSON format.
         :param data: Data to save json format
         :param filepath: Output file name
         """
@@ -113,7 +108,7 @@ class TFRecords:
     @staticmethod
     def load(filepath):
         """
-        Return data from pickle format.
+        Return data from JSON format.
         :param filepath: Input file name
         """
         with open(filepath, 'r') as file:
@@ -172,15 +167,15 @@ class TFRecords:
         # TODO: to be investigated :
         # 1/ num_parallel_reads useful ? I/O bottleneck of not ?
         # 2/ num_parallel_calls=tf.data.experimental.AUTOTUNE useful ?
-        # 3/ shuffle or not shuffle ?
-        matching_files = glob.glob(self.tfrecords_pattern_path)
-        logging.info('Searching TFRecords in %s...', self.tfrecords_pattern_path)
+        tfrecords_pattern_path = os.path.join(self.dirpath, "*.records")
+        matching_files = glob.glob(tfrecords_pattern_path)
+        logging.info('Searching TFRecords in %s...', tfrecords_pattern_path)
         logging.info('Number of matching TFRecords: %s', len(matching_files))
         matching_files = matching_files[:n_workers * (len(matching_files) // n_workers)]  # files multiple of workers
         nb_matching_files = len(matching_files)
         if nb_matching_files == 0:
-            raise Exception("At least one worker has no TFRecord file in {}. Please ensure that the number of TFRecord "
-                            "files is greater or equal than the number of workers!".format(self.tfrecords_pattern_path))
+            raise Exception(f"At least one worker has no TFRecord file in {tfrecords_pattern_path}. Please ensure that "
+                            "the number of TFRecord files is greater or equal than the number of workers!")
         logging.info('Reducing number of records to : %s', nb_matching_files)
         dataset = tf.data.TFRecordDataset(matching_files)  # , num_parallel_reads=2)  # interleaves reads from xxx files
         dataset = dataset.with_options(options)  # uses data as soon as it streams in, rather than in its original order
@@ -189,21 +184,5 @@ class TFRecords:
             dataset = dataset.shuffle(buffer_size=shuffle_buffer_size)
         dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
         dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-        # TODO voir si on met le prefetch avant le batch cf https://keras.io/examples/keras_recipes/tfrecord/
 
         return dataset
-
-    def read_one_sample(self, target_keys):
-        """
-        Read one tfrecord file matching with pattern and convert data to tensorflow dataset.
-        :param target_key: Key of the target, e.g. 's2_out'
-        """
-        matching_files = glob.glob(self.tfrecords_pattern_path)
-        one_file = matching_files[0]
-        parse = partial(self.parse_tfrecord, features_types=self.output_types, target_keys=target_keys)
-        dataset = tf.data.TFRecordDataset(one_file)
-        dataset = dataset.map(parse)
-        dataset = dataset.batch(1)
-
-        sample = iter(dataset).get_next()
-        return sample
