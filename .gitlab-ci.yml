@@ -31,6 +31,12 @@ docker image:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
   script:
+    - docker pull $CI_REGISTRY_IMAGE:otbtf-base-$CI_COMMIT_REF_NAME || 
+    - docker pull $CI_REGISTRY_IMAGE:builder-$CI_COMMIT_REF_NAME || 
+    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME || 
+    - docker pull $CI_REGISTRY_IMAGE:otbtf-base-cpu-basic-test || 
+    - docker pull $CI_REGISTRY_IMAGE:builder-cpu-basic-test || 
+    - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test || 
     - >
       docker build
       --target otbtf-base
