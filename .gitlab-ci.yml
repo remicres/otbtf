@@ -6,7 +6,9 @@ variables:
     OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
     ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
     CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
-
+    DOCKER_BUILDKIT: 1
+    DOCKER_DRIVER: overlay2
+    
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID             # Execute jobs in merge request context
@@ -45,6 +47,7 @@ docker image:
       --cache-from $CI_REGISTRY_IMAGE:otbtf-base-$CI_COMMIT_REF_NAME
       --tag $CI_REGISTRY_IMAGE:otbtf-base-$CI_COMMIT_REF_NAME
       --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BUILDKIT_INLINE_CACHE=1
       .
     - docker push $CI_REGISTRY_IMAGE:otbtf-base-$CI_COMMIT_REF_NAME
     - >
