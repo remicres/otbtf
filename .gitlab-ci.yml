@@ -31,6 +31,8 @@ docker image:
     - develop
   services:
     - name: docker:dind
+  ports:
+    - "9090:9090"
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
@@ -120,10 +122,6 @@ ctest:
 .applications_test_base:
   extends: .tests_base
   stage: Applications Test
-  rules:
-      # Only for MR targeting 'develop' and 'master' branches because applications tests are slow
-    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
-    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
   before_script:
     - pip3 install pytest pytest-cov pytest-order
     - mkdir -p $ARTIFACT_TEST_DIR
