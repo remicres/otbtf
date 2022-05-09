@@ -118,7 +118,7 @@ sr4rs:
     - wget -O sr4rs_data.zip https://nextcloud.inrae.fr/s/kDms9JrRMQE2Q5z/download
     - unzip -o sr4rs_data.zip
     - rm -rf sr4rs
-    - git clone -b 44-cast_float_input https://github.com/remicres/sr4rs.git
+    - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
 
