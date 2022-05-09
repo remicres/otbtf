@@ -31,8 +31,6 @@ docker image:
     - develop
   services:
     - name: docker:dind
-  ports:
-    - "9090:9090"
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
