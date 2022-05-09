@@ -38,12 +38,13 @@ def gdal_open(filename):
     return gdal_ds
 
 
-def read_as_np_arr(gdal_ds, as_patches=True):
+def read_as_np_arr(gdal_ds, as_patches=True, dtype=None):
     """
     Read a GDAL raster as numpy array
     :param gdal_ds: a GDAL dataset instance
     :param as_patches: if True, the returned numpy array has the following shape (n, psz_x, psz_x, nb_channels). If
         False, the shape is (1, psz_y, psz_x, nb_channels)
+    :param dtype: if not None array dtype will be cast to given numpy data type (np.float32, np.uint16...)
     :return: Numpy array of dim 4
     """
     buffer = gdal_ds.ReadAsArray()
@@ -56,4 +57,9 @@ def read_as_np_arr(gdal_ds, as_patches=True):
     else:
         n_elems = 1
         size_y = gdal_ds.RasterYSize
-    return np.float32(buffer.reshape((n_elems, size_y, size_x, gdal_ds.RasterCount)))
+
+    buffer = buffer.reshape((n_elems, size_y, size_x, gdal_ds.RasterCount))
+    if dtype is not None:
+        buffer = buffer.astype(dtype)
+
+    return buffer
