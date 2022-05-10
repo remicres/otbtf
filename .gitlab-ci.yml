@@ -6,7 +6,11 @@ variables:
     OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
     ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
     CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
-
+    DOCKER_BUILDKIT: 1
+    DOCKER_DRIVER: overlay2
+    CACHE_IMAGE_BASE: $CI_REGISTRY_IMAGE:otbtf-base
+    CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
+    
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID             # Execute jobs in merge request context
@@ -31,20 +35,44 @@ docker image:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
   script:
-    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME ||
-    - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test || 
     - >
-      DOCKER_BUILDKIT=1 docker build
+      docker build
+      --target otbtf-base
       --network="host"
-      --cache-from $CI_REGISTRY_IMAGE:cpu-basic-test
+      --cache-from $CACHE_IMAGE_BASE
+      --tag $CACHE_IMAGE_BASE
+      --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      "."
+    - >
+      docker build
+      --target builder
+      --network="host"
+      --cache-from $CACHE_IMAGE_BASE
+      --cache-from $CACHE_IMAGE_BUILDER
+      --tag $CACHE_IMAGE_BUILDER
+      --build-arg OTBTESTS="true"
+      --build-arg KEEP_SRC_OTB="true"
+      --build-arg BZL_CONFIGS=""
+      --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      "."
+    - >
+      docker build
+      --network="host"
+      --cache-from $CACHE_IMAGE_BASE
+      --cache-from $CACHE_IMAGE_BUILDER
       --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
       --build-arg OTBTESTS="true"
       --build-arg KEEP_SRC_OTB="true"
       --build-arg BZL_CONFIGS=""
       --build-arg BASE_IMG="ubuntu:20.04"
-      --build-arg BUILDKIT_INLINE_CACHE=1 
-      .
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      "."
+  after_script:
+    - docker push $CACHE_IMAGE_BASE
+    - docker push $CACHE_IMAGE_BUILDER
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
 .static_analysis_base:
@@ -92,10 +120,6 @@ ctest:
 .applications_test_base:
   extends: .tests_base
   stage: Applications Test
-  rules:
-      # Only for MR targeting 'develop' and 'master' branches because applications tests are slow
-    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
-    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
   before_script:
     - pip3 install pytest pytest-cov pytest-order
     - mkdir -p $ARTIFACT_TEST_DIR
@@ -127,6 +151,7 @@ deploy:
   only:
     - develop
   script:
+    - echo "Shippping!"
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
     - docker push $CI_REGISTRY_IMAGE:cpu-basic-test
