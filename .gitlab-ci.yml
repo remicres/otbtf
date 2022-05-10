@@ -147,10 +147,11 @@ sr4rs:
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
 
-deploy:
+buildall:
   stage: Ship
-  only:
-    - develop
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'master' && $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == 'develop' && $CI_PIPELINE_SOURCE == 'merge_request_event'
   script:
     - echo "Shippping!"
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
