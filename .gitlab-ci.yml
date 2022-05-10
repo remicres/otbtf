@@ -6,7 +6,11 @@ variables:
     OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
     ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
     CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
-
+    DOCKER_BUILDKIT: 1
+    DOCKER_DRIVER: overlay2
+    CACHE_IMAGE_BASE: $CI_REGISTRY_IMAGE:otbtf-base
+    CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
+    
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID             # Execute jobs in merge request context
@@ -18,41 +22,58 @@ stages:
   - Applications Test
   - Ship
 
-test docker image:
+docker image:
   stage: Build
   allow_failure: false
   tags: [godzilla]
   image: docker/compose:latest
   except:
-    - master
+    - develop
   services:
     - name: docker:dind
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
   script:
-    - ls -ll /
-    - ls -ll /bzl_cache/
-    - touch /bzl_cache/toto
-    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME ||
-    - docker pull $CI_REGISTRY_IMAGE:cpu-basic-test || 
     - >
       docker build
-      --pull
+      --target otbtf-base
       --network="host"
-      --cache-from $CI_REGISTRY_IMAGE:cpu-basic-test
+      --cache-from $CACHE_IMAGE_BASE
+      --tag $CACHE_IMAGE_BASE
+      --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      "."
+    - >
+      docker build
+      --target builder
+      --network="host"
+      --cache-from $CACHE_IMAGE_BASE
+      --cache-from $CACHE_IMAGE_BUILDER
+      --tag $CACHE_IMAGE_BUILDER
+      --build-arg OTBTESTS="true"
+      --build-arg KEEP_SRC_OTB="true"
+      --build-arg BZL_CONFIGS=""
+      --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      "."
+    - >
+      docker build
+      --network="host"
+      --cache-from $CACHE_IMAGE_BASE
+      --cache-from $CACHE_IMAGE_BUILDER
       --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-      --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
-      --label "org.opencontainers.image.url=$CI_PROJECT_URL"
-      --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
-      --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
-      --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
+      --cache-from $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
       --build-arg OTBTESTS="true"
       --build-arg KEEP_SRC_OTB="true"
       --build-arg BZL_CONFIGS=""
       --build-arg BASE_IMG="ubuntu:20.04"
-      .
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      "."
+  after_script:
+    - docker push $CACHE_IMAGE_BASE
+    - docker push $CACHE_IMAGE_BUILDER
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
 .static_analysis_base:
@@ -63,13 +84,13 @@ flake8:
   extends: .static_analysis_base
   script:
     - sudo apt update && sudo apt install flake8 -y
-    - python -m flake8 --max-line-length=120 $OTBTF_SRC/python
+    - python -m flake8 --max-line-length=120 --per-file-ignores="__init__.py:F401" $OTBTF_SRC/otbtf
 
 pylint:
   extends: .static_analysis_base
   script:
     - sudo apt update && sudo apt install pylint -y
-    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 --logging-format-style=new $OTBTF_SRC/python
+    - pylint --logging-format-style=old --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 --logging-format-style=new $OTBTF_SRC/otbtf
 
 codespell:
   extends: .static_analysis_base
@@ -100,10 +121,6 @@ ctest:
 .applications_test_base:
   extends: .tests_base
   stage: Applications Test
-  rules:
-      # Only for MR targeting 'develop' and 'master' branches because applications tests are slow
-    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
-    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
   before_script:
     - pip3 install pytest pytest-cov pytest-order
     - mkdir -p $ARTIFACT_TEST_DIR
@@ -133,8 +150,22 @@ sr4rs:
 deploy:
   stage: Ship
   only:
-    - master
+    - develop
   script:
+    - echo "Shippping!"
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
-    - docker push $CI_REGISTRY_IMAGE:cpu-basic-test
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
+    - docker push $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:cpu-basic --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" .  # cpu-basic
+    - docker push $CI_REGISTRY_IMAGE:cpu-basic
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:cpu-basic-dev --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" --build-arg KEEP_SRC_OTB=true .  # cpu-basic-dev
+    - docker push $CI_REGISTRY_IMAGE:cpu-basic-dev
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 .  # gpu
+    - docker push $CI_REGISTRY_IMAGE:gpu
+    - docker build --network='host' --tag mdl4eo/otbtf${VER}:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-dev
+    - docker push $CI_REGISTRY_IMAGE:gpu-dev
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu-basic --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg BZL_CONFIGS="" .  # gpu-basic
+    - docker push $CI_REGISTRY_IMAGE:gpu-basic
+    - docker build --network='host' --tag mdl4eo/otbtf${VER}:gpu-basic-dev --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-basic-dev
+    - docker push $CI_REGISTRY_IMAGE:gpu-basic-dev
+

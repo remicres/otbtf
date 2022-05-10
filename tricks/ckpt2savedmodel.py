@@ -26,7 +26,7 @@ can be more conveniently exported as SavedModel (see how to build a model with
 keras in Tensorflow 2).
 """
 import argparse
-from tricks import ckpt_to_savedmodel
+from tricks.tricks import ckpt_to_savedmodel
 
 
 def main():
