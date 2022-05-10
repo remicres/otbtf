@@ -63,6 +63,7 @@ docker image:
       --cache-from $CACHE_IMAGE_BASE
       --cache-from $CACHE_IMAGE_BUILDER
       --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+      --cache-from $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
       --build-arg OTBTESTS="true"
       --build-arg KEEP_SRC_OTB="true"
@@ -153,5 +154,18 @@ deploy:
   script:
     - echo "Shippping!"
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-test
-    - docker push $CI_REGISTRY_IMAGE:cpu-basic-test
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
+    - docker push $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:cpu-basic --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" .  # cpu-basic
+    - docker push $CI_REGISTRY_IMAGE:cpu-basic
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:cpu-basic-dev --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" --build-arg KEEP_SRC_OTB=true .  # cpu-basic-dev
+    - docker push $CI_REGISTRY_IMAGE:cpu-basic-dev
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 .  # gpu
+    - docker push $CI_REGISTRY_IMAGE:gpu
+    - docker build --network='host' --tag mdl4eo/otbtf${VER}:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-dev
+    - docker push $CI_REGISTRY_IMAGE:gpu-dev
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu-basic --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg BZL_CONFIGS="" .  # gpu-basic
+    - docker push $CI_REGISTRY_IMAGE:gpu-basic
+    - docker build --network='host' --tag mdl4eo/otbtf${VER}:gpu-basic-dev --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-basic-dev
+    - docker push $CI_REGISTRY_IMAGE:gpu-basic-dev
+
