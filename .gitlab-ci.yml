@@ -13,8 +13,8 @@ variables:
     
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_ID             # Execute jobs in merge request context
-
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /develop/ # Execute jobs in merge request context, or commit in develop branch
+    
 stages:
   - Build
   - Static Analysis
@@ -147,11 +147,10 @@ sr4rs:
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
 
-buildall:
+deploy:
   stage: Ship
-  rules:
-    - if: $CI_COMMIT_BRANCH == 'master' && $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_BRANCH == 'develop' && $CI_PIPELINE_SOURCE == 'merge_request_event'
+  only:
+    - develop
   script:
     - echo "Shippping!"
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
