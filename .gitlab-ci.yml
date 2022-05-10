@@ -151,6 +151,13 @@ deploy:
   stage: Ship
   only:
     - develop
+  tags: [godzilla]
+  image: docker/compose:latest
+  services:
+    - name: docker:dind
+  before_script:
+    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  timeout: 10 hours
   script:
     - echo "Shippping!"
     - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
