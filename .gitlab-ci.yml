@@ -13,7 +13,7 @@ variables:
     
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /develop/ # Execute jobs in merge request context, or commit in develop branch
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/ # Execute jobs in merge request context, or commit in master branch
     
 stages:
   - Build
@@ -29,6 +29,7 @@ docker image:
   image: docker/compose:latest
   except:
     - develop
+    - master
   services:
     - name: docker:dind
   before_script:
@@ -150,7 +151,7 @@ sr4rs:
 deploy:
   stage: Ship
   only:
-    - develop
+    - master
   tags: [godzilla]
   image: docker/compose:latest
   services:
@@ -169,10 +170,10 @@ deploy:
     - docker push $CI_REGISTRY_IMAGE:cpu-basic-dev
     - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 .  # gpu
     - docker push $CI_REGISTRY_IMAGE:gpu
-    - docker build --network='host' --tag mdl4eo/otbtf${VER}:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-dev
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-dev
     - docker push $CI_REGISTRY_IMAGE:gpu-dev
     - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu-basic --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg BZL_CONFIGS="" .  # gpu-basic
     - docker push $CI_REGISTRY_IMAGE:gpu-basic
-    - docker build --network='host' --tag mdl4eo/otbtf${VER}:gpu-basic-dev --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-basic-dev
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu-basic-dev --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-basic-dev
     - docker push $CI_REGISTRY_IMAGE:gpu-basic-dev
 
