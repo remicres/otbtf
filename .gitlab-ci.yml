@@ -29,7 +29,6 @@ docker image:
   image: docker/compose:latest
   except:
     - develop
-    - master
   services:
     - name: docker:dind
   before_script:
