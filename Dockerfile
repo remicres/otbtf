@@ -25,7 +25,7 @@ RUN if $GUI; then \
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
 # NumPy version is conflicting with system's gdal dep and may require venv
 ARG NUMPY_SPEC="==1.22.*"
-RUN pip install --no-cache-dir -U pip wheel mock six future deprecated "numpy$NUMPY_SPEC" \
+RUN pip install --no-cache-dir -U pip wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
 # ----------------------------------------------------------------------------
@@ -85,6 +85,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
 ### OTB
 ARG GUI=false
 ARG OTB=7.4.0
+ARG OTBTESTS=false
 
 RUN mkdir /src/otb
 WORKDIR /src/otb
@@ -97,6 +98,8 @@ RUN apt-get update -y \
  && git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
  && mkdir -p build \
  && cd build \
+ && if $OTBTESTS; then \
+      echo "-DBUILD_TESTING=ON" >> ../build-flags-otb.txt; fi \
  # Set GL/Qt build flags
  && if $GUI; then \
       sed -i -r "s/-DOTB_USE_(QT|OPENGL|GL[UFE][WT])=OFF/-DOTB_USE_\1=ON/" ../build-flags-otb.txt; fi \
@@ -145,7 +148,7 @@ COPY --from=builder /src /src
 # System-wide ENV
 ENV PATH="/opt/otbtf/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
-ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/otb/python:/src/otbtf/python"
+ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/otb/python:/src/otbtf"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 
 # Default user, directory and command (bash is the entrypoint when using 'docker create')

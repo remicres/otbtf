@@ -1,4 +1,4 @@
-image: gitlab-registry.irstea.fr/remi.cresson/otbtf:3.1-cpu-basic-testing
+image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
 variables:
     OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
@@ -6,108 +6,138 @@ variables:
     OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
     ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
     CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
-
+    DOCKER_BUILDKIT: 1
+    DOCKER_DRIVER: overlay2
+    CACHE_IMAGE_BASE: $CI_REGISTRY_IMAGE:otbtf-base
+    CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
+    
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_ID             # Execute jobs in merge request context
-    - if: $CI_COMMIT_BRANCH == 'develop'   # Execute jobs when a new commit is pushed to develop branch
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/ # Execute jobs in merge request context, or commit in master branch
     
 stages:
   - Build
   - Static Analysis
   - Test
   - Applications Test
+  - Ship
 
-.update_otbtf_src: &update_otbtf_src
-  - sudo rm -rf $OTBTF_SRC && sudo ln -s $PWD $OTBTF_SRC  # Replace local OTBTF source directory
-
-.compile_otbtf: &compile_otbtf
-  - cd $OTB_BUILD && sudo make install -j$(nproc --all)  # Rebuild OTB with new OTBTF sources
-  
-.install_pytest: &install_pytest
-  - pip3 install pytest pytest-cov pytest-order  # Install pytest stuff
-  
-before_script:
-  - *update_otbtf_src
-
-build:
+docker image:
   stage: Build
   allow_failure: false
+  tags: [godzilla]
+  image: docker/compose:latest
+  except:
+    - develop
+    - master
+  services:
+    - name: docker:dind
+  before_script:
+    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  timeout: 10 hours
   script:
-    - *compile_otbtf
+    - >
+      docker build
+      --target otbtf-base
+      --network="host"
+      --cache-from $CACHE_IMAGE_BASE
+      --tag $CACHE_IMAGE_BASE
+      --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      "."
+    - >
+      docker build
+      --target builder
+      --network="host"
+      --cache-from $CACHE_IMAGE_BASE
+      --cache-from $CACHE_IMAGE_BUILDER
+      --tag $CACHE_IMAGE_BUILDER
+      --build-arg OTBTESTS="true"
+      --build-arg KEEP_SRC_OTB="true"
+      --build-arg BZL_CONFIGS=""
+      --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      "."
+    - >
+      docker build
+      --network="host"
+      --cache-from $CACHE_IMAGE_BASE
+      --cache-from $CACHE_IMAGE_BUILDER
+      --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+      --cache-from $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
+      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+      --build-arg OTBTESTS="true"
+      --build-arg KEEP_SRC_OTB="true"
+      --build-arg BZL_CONFIGS=""
+      --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      "."
+  after_script:
+    - docker push $CACHE_IMAGE_BASE
+    - docker push $CACHE_IMAGE_BUILDER
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+
+.static_analysis_base:
+  stage: Static Analysis
+  allow_failure: true
 
 flake8:
-  stage: Static Analysis
-  allow_failure: true
+  extends: .static_analysis_base
   script:
     - sudo apt update && sudo apt install flake8 -y
-    - python -m flake8 --max-line-length=120 $OTBTF_SRC/python
+    - python -m flake8 --max-line-length=120 --per-file-ignores="__init__.py:F401" $OTBTF_SRC/otbtf
 
 pylint:
-  stage: Static Analysis
-  allow_failure: true
+  extends: .static_analysis_base
   script:
     - sudo apt update && sudo apt install pylint -y
-    - pylint --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 --logging-format-style=new $OTBTF_SRC/python
+    - pylint --logging-format-style=old --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 --logging-format-style=new $OTBTF_SRC/otbtf
 
 codespell:
-  stage: Static Analysis
-  allow_failure: true
+  extends: .static_analysis_base
   script:
     - sudo pip install codespell && codespell
     
 cppcheck:
-  stage: Static Analysis
-  allow_failure: true
+  extends: .static_analysis_base
   script:
     - sudo apt update && sudo apt install cppcheck -y
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
-ctest:
-  stage: Test
-  script:
-    - *compile_otbtf
-    - sudo rm -rf $OTB_TEST_DIR/*  # Empty testing temporary folder (old files here)
-    - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
-  after_script:
-    - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
+.tests_base:
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
     expire_in: 1 week
     when: on_failure
 
+ctest:
+  extends: .tests_base
+  stage: Test
+  script:
+    - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
+  after_script:
+    - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
+
 .applications_test_base:
+  extends: .tests_base
   stage: Applications Test
-  rules:
-      # Only for MR targeting 'develop' and 'master' branches because applications tests are slow
-    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
-    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
-  artifacts:
-    when: on_failure
-    paths:
-      - $CI_PROJECT_DIR/report_*.xml
-      - $ARTIFACT_TEST_DIR/*.*
-    expire_in: 1 week
-          
+  before_script:
+    - pip3 install pytest pytest-cov pytest-order
+    - mkdir -p $ARTIFACT_TEST_DIR
+    - cd $CI_PROJECT_DIR
+
 crc_book:
   extends: .applications_test_base
   script:
-    - *compile_otbtf
-    - *install_pytest
-    - cd $CI_PROJECT_DIR
     - mkdir -p $CRC_BOOK_TMP
     - TMPDIR=$CRC_BOOK_TMP DATADIR=$CI_PROJECT_DIR/test/data python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
   after_script:
-    - mkdir -p $ARTIFACT_TEST_DIR
     - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
     
 sr4rs:
   extends: .applications_test_base
   script:
-    - *compile_otbtf
-    - *install_pytest
-    - cd $CI_PROJECT_DIR
     - wget -O sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
       https://nextcloud.inrae.fr/s/EZL2JN7SZyDK8Cf/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
     - unzip -o sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
@@ -116,5 +146,34 @@ sr4rs:
     - rm -rf sr4rs
     - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
-    - python -m pytest --junitxml=$CI_PROJECT_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
+
+deploy:
+  stage: Ship
+  only:
+    - master
+  tags: [godzilla]
+  image: docker/compose:latest
+  services:
+    - name: docker:dind
+  before_script:
+    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  timeout: 10 hours
+  script:
+    - echo "Shippping!"
+    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
+    - docker push $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:cpu-basic --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" .  # cpu-basic
+    - docker push $CI_REGISTRY_IMAGE:cpu-basic
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:cpu-basic-dev --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" --build-arg KEEP_SRC_OTB=true .  # cpu-basic-dev
+    - docker push $CI_REGISTRY_IMAGE:cpu-basic-dev
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 .  # gpu
+    - docker push $CI_REGISTRY_IMAGE:gpu
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-dev
+    - docker push $CI_REGISTRY_IMAGE:gpu-dev
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu-basic --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg BZL_CONFIGS="" .  # gpu-basic
+    - docker push $CI_REGISTRY_IMAGE:gpu-basic
+    - docker build --network='host' --tag $CI_REGISTRY_IMAGE:gpu-basic-dev --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-basic-dev
+    - docker push $CI_REGISTRY_IMAGE:gpu-basic-dev
 
