@@ -10,6 +10,7 @@ variables:
     DOCKER_DRIVER: overlay2
     CACHE_IMAGE_BASE: $CI_REGISTRY_IMAGE:otbtf-base
     CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
+    BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
     
 workflow:
   rules:
@@ -44,6 +45,7 @@ docker image:
       --build-arg BASE_IMG="ubuntu:20.04"
       --build-arg BUILDKIT_INLINE_CACHE=1
       "."
+    - docker push $CACHE_IMAGE_BASE
     - >
       docker build
       --target builder
@@ -57,24 +59,22 @@ docker image:
       --build-arg BASE_IMG="ubuntu:20.04"
       --build-arg BUILDKIT_INLINE_CACHE=1
       "."
+    - docker push $CACHE_IMAGE_BUILDER
     - >
       docker build
       --network="host"
       --cache-from $CACHE_IMAGE_BASE
       --cache-from $CACHE_IMAGE_BUILDER
-      --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+      --cache-from $BRANCH_IMAGE
       --cache-from $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
-      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+      --tag $BRANCH_IMAGE
       --build-arg OTBTESTS="true"
       --build-arg KEEP_SRC_OTB="true"
       --build-arg BZL_CONFIGS=""
       --build-arg BASE_IMG="ubuntu:20.04"
       --build-arg BUILDKIT_INLINE_CACHE=1
       "."
-  after_script:
-    - docker push $CACHE_IMAGE_BASE
-    - docker push $CACHE_IMAGE_BUILDER
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    - docker push $BRANCH_IMAGE
 
 .static_analysis_base:
   stage: Static Analysis
@@ -160,8 +160,8 @@ deploy:
   timeout: 10 hours
   script:
     - echo "Shippping!"
-    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
+    - docker pull $BRANCH_IMAGE
+    - docker tag $BRANCH_IMAGE $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
     - docker push $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
     - docker build --network='host' --tag $CI_REGISTRY_IMAGE:cpu-basic --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" .  # cpu-basic
     - docker push $CI_REGISTRY_IMAGE:cpu-basic
