@@ -179,7 +179,7 @@ TensorflowSampler<TInputImage, TVectorData>::Update()
     if (!itVector.Get()->IsRoot() && !itVector.Get()->IsDocument() && !itVector.Get()->IsFolder())
     {
       DataNodePointer currentGeometry = itVector.Get();
-      if (!currentGeometry->HasField(m_Field))
+      if (currentGeometry->HasField(m_Field))
       {
         PointType       point = currentGeometry->GetPoint();
 
