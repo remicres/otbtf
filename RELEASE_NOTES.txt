@@ -1,3 +1,10 @@
+Version 3.2.1 (1 jun 2022)
+----------------------------------------------------------------
+* Enhance CI with automatic builds of docker images
+* Fix a bug in dataset.py (output type was always Float32)
+* Fix a bug in `otbTensorflowSampler.hxx` (see https://github.com/remicres/otbtf/issues/81)
+* Change the behavior of `_read_extract_as_np_arr` method: now  returns 3D arrays even for singleband
+
 Version 3.1 (5 apr 2022)
 ----------------------------------------------------------------
 * Add the "split" strategy in the `PatchesSelection` application. Now the application can select points for 3 independent data splits (train, valid, test).
