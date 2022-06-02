@@ -13,7 +13,9 @@ variables:
   CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   DEV_IMAGE: $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
-    
+  CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE/$OTBTF_VERSION
+  DOCKERHUB_IMAGE_BASE: mdl4eo/ptbtf${OTBTF_VERSION}
+  
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/ # Execute jobs in merge request context, or commit in master branch
@@ -23,20 +25,26 @@ stages:
   - Static Analysis
   - Test
   - Applications Test
+  - Update dev image
   - Ship
 
-docker image:
-  stage: Build
+.docker_build_base:
   allow_failure: false
   tags: [godzilla]
   image: docker/compose:latest
-  except:
-    - develop
   services:
     - name: docker:dind
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   timeout: 10 hours
+
+
+docker image:
+  extends: .docker_build_base
+  stage: Build
+  except:
+    - develop
+    - master
   script:
     - >
       docker build
@@ -149,34 +157,70 @@ sr4rs:
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
 
-deploy:
-  stage: Ship
-  only:
+deploy_cpu-dev-testing:
+  stage: Update dev image
+  extends: .docker_build_base
+  except:
     - master
-  tags: [godzilla]
-  image: docker/compose:latest
-  services:
-    - name: docker:dind
-  variables:
-    CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE/$OTBTF_VERSION
-  before_script:
-    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-  timeout: 10 hours
   script:
-    - echo "Shippping!"
     - docker pull $BRANCH_IMAGE
     - docker tag $BRANCH_IMAGE $DEV_IMAGE
     - docker push $DEV_IMAGE
-    - docker build --network='host' --tag $CI_REGISTRY_PUBIMG:cpu-basic --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" .  # cpu-basic
-    - docker push $CI_REGISTRY_PUBIMG:cpu-basic
-    - docker build --network='host' --tag $CI_REGISTRY_PUBIMG:cpu-basic-dev --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" --build-arg KEEP_SRC_OTB=true .  # cpu-basic-dev
-    - docker push $CI_REGISTRY_PUBIMG:cpu-basic-dev
-    - docker build --network='host' --tag $CI_REGISTRY_PUBIMG:gpu --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 .  # gpu
-    - docker push $CI_REGISTRY_PUBIMG:gpu
-    - docker build --network='host' --tag $CI_REGISTRY_PUBIMG:gpu-dev --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-dev
-    - docker push $CI_REGISTRY_PUBIMG:gpu-dev
-    - docker build --network='host' --tag $CI_REGISTRY_PUBIMG:gpu-basic --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg BZL_CONFIGS="" .  # gpu-basic
-    - docker push $CI_REGISTRY_PUBIMG:gpu-basic
-    - docker build --network='host' --tag $CI_REGISTRY_PUBIMG:gpu-basic-dev --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .  # gpu-basic-dev
-    - docker push $CI_REGISTRY_PUBIMG:gpu-basic-dev
+
+.ship base:
+  extends: .docker_build_base
+  stage: Ship
+  only:
+    - master
+
+deploy_cpu:
+  extends: .ship base
+  variables:
+    IMAGE_CPU: $CI_REGISTRY_PUBIMG:cpu
+    IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG:cpu-dev
+    DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE:cpu
+    DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE:cpu-dev
+  script:
+    # cpu
+    - docker build --network='host' --tag $IMAGE_CPU --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" .
+    - docker push $IMAGE_CPU
+    # cpu-dev
+    - docker build --network='host' --tag $IMAGE_CPUDEV --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" --build-arg KEEP_SRC_OTB=true .
+    - docker push $IMAGE_CPUDEV
+    # push images on dockerhub
+    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
+    - docker tag $IMAGE_CPU $DOCKERHUB_CPU
+    - docker push $DOCKERHUB_CPU
+    - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV
+    - docker push $DOCKERHUB_CPUDEV
+
+deploy_gpu:
+  extends: .ship base
+  variables:
+    IMAGE_GPU: $CI_REGISTRY_PUBIMG:gpu
+    IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG:gpu-dev
+    IMAGE_GPUOPT: $CI_REGISTRY_PUBIMG:gpu-opt
+    IMAGE_GPUOPTDEV: $CI_REGISTRY_PUBIMG:gpu-opt-dev
+    DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE:gpu
+    DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE:gpu-dev
+  script:
+    # gpu-opt
+    - docker build --network='host' --tag $IMAGE_GPUOPT --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 .
+    - docker push $IMAGE_GPUOPT
+    # gpu-opt-dev
+    - docker build --network='host' --tag $IMAGE_GPUOPTDEV --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .
+    - docker push $IMAGE_GPUOPTDEV
+    # gpu-basic
+    - docker build --network='host' --tag $IMAGE_GPU --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg BZL_CONFIGS="" .
+    - docker push $IMAGE_GPU
+    # gpu-basic-dev
+    - docker build --network='host' --tag $IMAGE_GPUDEV --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .
+    - docker push $IMAGE_GPUDEV
+    # push gpu-basic* images on dockerhub
+    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
+    - docker tag $IMAGE_GPU $DOCKERHUB_GPU
+    - docker push $DOCKERHUB_GPU
+    - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV
+    - docker push $DOCKERHUB_GPUDEV
+
 
