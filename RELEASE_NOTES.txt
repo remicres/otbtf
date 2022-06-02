@@ -1,5 +1,6 @@
 Version 3.2.1 (1 jun 2022)
 ----------------------------------------------------------------
+* Changing docker images naming convention (cpu/gpu-basic* --> cpu/gpu*, cpu/gpu* --> cpu/gpu-opt*) + only images without optimizations are pushed on dockerhub
 * Enhance CI with automatic builds of docker images
 * Fix a bug in dataset.py (output type was always Float32)
 * Fix a bug in `otbTensorflowSampler.hxx` (see https://github.com/remicres/otbtf/issues/81)
