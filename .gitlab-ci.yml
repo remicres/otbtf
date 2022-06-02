@@ -41,6 +41,7 @@ stages:
 
 docker image:
   extends: .docker_build_base
+  stage: Build
   except:
     - develop
     - master
