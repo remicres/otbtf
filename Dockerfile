@@ -47,7 +47,7 @@ RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/rele
  && chmod +x /opt/otbtf/bin/bazelisk \
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
-ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
+ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package //tensorflow/tools/graph_transforms:transform_graph"
 # "--config=opt" will enable 'march=native' (otherwise read comments about CPU compatibility and edit CC_OPT_FLAGS in build-env-tf.sh)
 ARG BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
 # "--compilation_mode opt" is already enabled by default (see tf repo .bazelrc and configure.py)
@@ -65,13 +65,14 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
       && ./configure \
       && export TMP=/tmp/bazel \
       && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS" \
-      && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" ' \
+      && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" ' 
 # Installation - split here if you want to check files  ^
-#RUN cd tensorflow \
+RUN cd tensorflow \
  && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf /tmp/tensorflow_pkg/tensorflow*.whl \
  && ln -s /opt/otbtf/lib/python3.* /opt/otbtf/lib/python3 \
  && cp -P bazel-bin/tensorflow/libtensorflow_cc.so* /opt/otbtf/lib/ \
+ && cp -r bazel-bin/tensorflow/tools /opt/otbtf/lib/tf_tools \
  && ln -s $(find /opt/otbtf -type d -wholename "*/site-packages/tensorflow/include") /opt/otbtf/include/tf \
  # The only missing header in the wheel
  && cp tensorflow/cc/saved_model/tag_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
