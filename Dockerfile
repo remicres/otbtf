@@ -72,7 +72,7 @@ RUN cd tensorflow \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf /tmp/tensorflow_pkg/tensorflow*.whl \
  && ln -s /opt/otbtf/lib/python3.* /opt/otbtf/lib/python3 \
  && cp -P bazel-bin/tensorflow/libtensorflow_cc.so* /opt/otbtf/lib/ \
- && cp -r bazel-bin/tensorflow/tools /opt/otbtf/lib/tf_tools \
+ && cp -r bazel-bin/tensorflow/tools/graph_transforms /opt/otbtf/bin/graph_transforms \
  && ln -s $(find /opt/otbtf -type d -wholename "*/site-packages/tensorflow/include") /opt/otbtf/include/tf \
  # The only missing header in the wheel
  && cp tensorflow/cc/saved_model/tag_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
@@ -80,7 +80,7 @@ RUN cd tensorflow \
  # Symlink external libs (required for MKL - libiomp5)
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
  # Compress and save TF binaries
- && ( ! $ZIP_TF_BIN || zip -9 -j --symlinks /opt/otbtf/tf-$TF.zip tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h bazel-bin/tensorflow/libtensorflow_cc.so* /tmp/tensorflow_pkg/tensorflow*.whl ) \
+ && ( ! $ZIP_TF_BIN || zip -9 -j --symlinks /opt/otbtf/tf-$TF.zip tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h bazel-bin/tensorflow/libtensorflow_cc.so* /tmp/tensorflow_pkg/tensorflow*.whl ) #\
  # Cleaning
  && rm -rf bazel-* /src/tf /root/.cache/ /tmp/*
 
