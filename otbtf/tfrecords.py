@@ -70,7 +70,7 @@ class TFRecords:
         if not drop_remainder and dataset.size % n_samples_per_shard > 0:
             nb_shards += 1
 
-        output_shapes = {key: (None,) + output_shape for key, output_shape in dataset.output_shapes.items()}
+        output_shapes = {key: output_shape for key, output_shape in dataset.output_shapes.items()}
         self.save(output_shapes, self.output_shape_file)
 
         output_types = {key: output_type.name for key, output_type in dataset.output_types.items()}

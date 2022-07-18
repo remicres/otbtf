@@ -70,7 +70,7 @@ class ModelBase(abc.ABC):
         model_inputs = {}
         for key in self.dataset_input_keys:
             shape = self.dataset_shapes[key]
-            if shape[0] is None or (len(shape) > 3):  # Remove the potential batch dimension, because keras.Input() doesn't want the batch dimension
+            if shape[0] is None or (len(shape) > 3):  # for backward comp (OTBTF<3.2.2), remove the potential batch dim
                 shape = shape[1:]
             # Here we modify the x and y dims of >2D tensors to enable any image size at input
             if len(shape) > 2:
