@@ -1,20 +1,11 @@
+"""
+Implementation of a small U-Net like model
+"""
 from otbtf.model import ModelBase
 import tensorflow as tf
 import tensorflow.keras.layers as layers
-import argparse
 import pathlib
 import os
-import helper
-
-# Application parameters
-parser = argparse.ArgumentParser(description="Train a FCNN model")
-parser.add_argument("-p", "--dataset_dir", required=True, help="Directory of subdirs: train, valid(, test)")
-parser.add_argument("-f", "--dataset_format", default="tfrecords", const="tfrecords", nargs="?",
-                    choices=["tfrecords", "patches_images"], help="Format of the dataset (TFRecords or Patches images")
-parser.add_argument("-b", "--batch_size", type=int, default=8, help="Batch size")
-parser.add_argument("-r", "--learning_rate", type=float, default=0.00001, help="Learning rate")
-parser.add_argument("-e", "--number_epochs", type=int, default=100, help="Number of epochs")
-parser.add_argument("-m", "--model_dir", required=True, help="Path to save model")
 
 
 class FCNNModel(ModelBase):
@@ -80,16 +71,18 @@ def normalize_fn(inputs):
     return {"input_xs": inputs["input_xs"] * 0.0001}
 
 
-if __name__ == "__main__":
-    params = parser.parse_args()
+def train(params, ds_train, ds_valid, ds_test):
+    """
+    Create, train, and save the model.
 
-    # Get datasets
-    ds_train, ds_valid, ds_test = helper.get_datasets(params.dataset_format, params.dataset_dir)
+    :param params: contains batch_size, learning_rate, nb_epochs, and model_dir
+    """
 
     strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
     with strategy.scope():
 
         # Create and compile the model
+        # Note that the normalize_fn will now be a part of the model
         model = FCNNModel(normalize_fn=normalize_fn)
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(),
                       optimizer=tf.keras.optimizers.Adam(learning_rate=params.learning_rate),
@@ -103,11 +96,11 @@ if __name__ == "__main__":
         tf.keras.utils.plot_model(model, os.path.join(params.model_dir, "figure.png"))
 
         # Train
-        model.fit(ds_train, epochs=params.number_epochs, validation_data=ds_valid)
+        model.fit(ds_train, epochs=params.nb_epochs, validation_data=ds_valid)
 
         # Evaluate against test data
         if ds_test is not None:
             model.evaluate(ds_test, batch_size=params.batch_size)
 
-        # Save trained model
+        # Save trained model as SavedModel
         model.save(params.model_dir)

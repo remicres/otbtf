@@ -1,5 +1,10 @@
+"""
+This example shows how to convert patches-images (like the ones generated from the `PatchesExtraction`)
+into TFRecords files.
+"""
 import argparse
 from pathlib import Path
+import helper
 from otbtf import DatasetFromPatchesImages
 
 # Application parameters
@@ -10,19 +15,6 @@ parser.add_argument("--outdir", required=True, help="Output dir for TFRecords fi
 params = parser.parse_args()
 
 
-def check_files_order(patches, labels):
-    """
-    Here we check that the (input_xs, labels) patches are well sorted
-    """
-    assert len(patches) == len(labels)
-
-    def get_basename(n):
-        return "_".join([n.split("_")][:-1])
-
-    for p, l in zip(patches, labels):
-        assert get_basename(p) == get_basename(l)
-
-
 if __name__ == "__main__":
 
     # Sort patches and labels
@@ -30,7 +22,7 @@ if __name__ == "__main__":
     labels = sorted(params.labels)
 
     # Check patches and labels are correctly sorted
-    check_files_order(patches, labels)
+    helper.check_files_order(patches, labels)
 
     # Create output directory
     outdir = Path(params.outdir)
