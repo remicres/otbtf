@@ -5,34 +5,6 @@ import tensorflow as tf
 from tensorflow import keras
 from otbtf.utils import _is_chief
 
-PADS = [16, 32, 64, 96, 128, 256]
-
-def padded_tensor_name(tensor_name, pad):
-    """
-    A name for the padded tensor
-    :param tensor_name: tensor name
-    :param pad: pad value
-    :return: name
-    """
-    return "{}_pad{}".format(tensor_name, pad)
-
-
-def normalize(key, placeholder):
-    """
-    Normalize an input placeholder, knowing its key
-    :param key: placeholder key
-    :param placeholder: placeholder
-    :return: normalized placeholder
-    """
-    if key == 'pan':
-        return placeholder * (1 / 10000)
-    elif key == 'xs':
-        return placeholder * (1 / 10000)
-    elif key == "tt":
-        return placeholder
-    else:
-        return placeholder
-
 
 class ModelBase(abc.ABC):
     """
@@ -40,20 +12,29 @@ class ModelBase(abc.ABC):
     """
 
     @abc.abstractmethod
-    def __init__(self, dataset_input_keys, model_output_keys, dataset_shapes, target_cropping=None):
+    def __init__(self, dataset_input_keys, model_output_keys, dataset_shapes, target_cropping=None,
+                 inference_cropping=[16, 32, 64, 96, 128], normalize_fn=None):
         """
         Model base class
 
         :param dataset_input_keys: list of dataset keys used for the training
         :param model_output_keys: list of the model outputs keys
         :param dataset_shapes: a dict() of shapes
-        :param target_cropping: Optional. Number of pixels to be removed on each side of the target
+        :param target_cropping: Optional. Number of pixels to be removed on each side of the target. This is used when
+                                training the model and can mitigate the effects of convolution
+        :param inference_cropping: list of number of pixels to be removed on each side of the output during inference.
+                                   This list creates some additional outputs in the model, not used during training,
+                                   only during inference. Default [16, 32, 64, 96, 128]
+        :param normalize_fn: a normalization function that can be added inside the Keras model. The function must accept
+                             2 arguments `key` and `tensor`. Optional
         """
         self.dataset_input_keys = dataset_input_keys
         self.model_output_keys = model_output_keys
         self.dataset_shapes = dataset_shapes
         self.model = None
         self.target_cropping = target_cropping
+        self.inference_cropping = inference_cropping
+        self.normalize_fn = normalize_fn
 
     def __getattr__(self, name):
         """This method is called when the default attribute access fails. We choose to try to access the attribute of
@@ -100,18 +81,21 @@ class ModelBase(abc.ABC):
         model_inputs = self.get_inputs()
 
         # Normalize the inputs
-        normalized_inputs = {key: normalize(key, input) for key, input in model_inputs.items()}
+        if self.normalize_fn:
+            normalized_inputs = {key: self.normalize_fn(key, input) for key, input in model_inputs.items()}
+        else:
+            normalized_inputs = model_inputs
 
         # Build the model
         outputs = self.get_outputs(normalized_inputs)
 
-        # Add extra outputs
+        # Add extra outputs for inference
         extra_outputs = {}
         for out_key, out_tensor in outputs.items():
-            for pad in PADS:
-                extra_output_key = padded_tensor_name(out_key, pad)
-                extra_output_name = padded_tensor_name(out_tensor._keras_history.layer.name, pad)
-                extra_output = tf.keras.layers.Cropping2D(cropping=pad, name=extra_output_name)(out_tensor)
+            for crop in self.inference_cropping:
+                extra_output_key = cropped_tensor_name(out_key, crop)
+                extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
+                extra_output = tf.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
                 extra_outputs[extra_output_key] = extra_output
         outputs.update(extra_outputs)
 
@@ -139,3 +123,13 @@ class ModelBase(abc.ABC):
             outputs = self.get_outputs(inputs)  # raw model outputs
             model_simplified = keras.Model(inputs=inputs, outputs=outputs, name=self.__class__.__name__ + '_simplified')
             keras.utils.plot_model(model_simplified, output_path)
+
+
+def cropped_tensor_name(tensor_name, crop):
+    """
+    A name for the padded tensor
+    :param tensor_name: tensor name
+    :param pad: pad value
+    :return: name
+    """
+    return "{}_crop{}".format(tensor_name, crop)

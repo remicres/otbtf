@@ -67,6 +67,26 @@ def preprocessing_fn(inputs, targets):
     """
     return inputs, {"label": tf.one_hot(tf.squeeze(targets["label"], axis=-1), depth=2)}
 
+
+# TODO: bien expliquer la différence entre preprocessing_fn (utilisé pour transformer les targets des TFRecords)
+#  et normalize_fn (utilisé pour pouvoir réaliser l'inférence "directement" sur les images)
+def normalize(key, placeholder):
+    """
+    Normalize an input placeholder, knowing its key
+    :param key: placeholder key
+    :param placeholder: placeholder
+    :return: normalized placeholder
+    """
+    if key == 'pan':
+        return placeholder * (1 / 10000)
+    elif key == 'xs':
+        return placeholder * (1 / 10000)
+    elif key == "tt":
+        return placeholder
+    else:
+        return placeholder
+
+
 if __name__ == "__main__":
     params = parser.parse_args()
 
