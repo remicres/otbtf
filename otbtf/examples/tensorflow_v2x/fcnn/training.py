@@ -3,18 +3,18 @@ import tensorflow as tf
 import tensorflow.keras.layers as layers
 import argparse
 import pathlib
-from otbtf import TFRecords
 import os
+import helper
 
 # Application parameters
 parser = argparse.ArgumentParser(description="Train a FCNN model")
-parser.add_argument("-p", "--patches_dir", required=True, help="Directory of TFRecords dirs: train, valid(, test)")
-parser.add_argument("-m", "--model_dir", required=True, help="Path to save model")
-parser.add_argument("-e", "--number_epochs", type=int, default=100, help="Number of epochs")
+parser.add_argument("-p", "--dataset_dir", required=True, help="Directory of subdirs: train, valid(, test)")
+parser.add_argument("-f", "--dataset_format", default="tfrecords", const="tfrecords", nargs="?",
+                    choices=["tfrecords", "patches_images"], help="Format of the dataset (TFRecords or Patches images")
 parser.add_argument("-b", "--batch_size", type=int, default=8, help="Batch size")
 parser.add_argument("-r", "--learning_rate", type=float, default=0.00001, help="Learning rate")
-parser.add_argument('--dataset_mode', default='tfrecords', const='tfrecords', nargs='?',
-                    choices=['tfrecords', 'patches_images'])
+parser.add_argument("-e", "--number_epochs", type=int, default=100, help="Number of epochs")
+parser.add_argument("-m", "--model_dir", required=True, help="Path to save model")
 
 
 class FCNNModel(ModelBase):
@@ -83,16 +83,8 @@ def normalize_fn(inputs):
 if __name__ == "__main__":
     params = parser.parse_args()
 
-    # Patches directories must contain 'train' and 'valid' dirs, 'test' is not required
-    patches = pathlib.Path(params.patches_dir)
-    ds_test = None
-    for d in patches.iterdir():
-        if "train" in d.name.lower():
-            ds_train = TFRecords(str(d)).read(shuffle_buffer_size=1000)
-        elif "valid" in d.name.lower():
-            ds_valid = TFRecords(str(d)).read()
-        elif "test" in d.name.lower():
-            ds_test = TFRecords(str(d)).read()
+    # Get datasets
+    ds_train, ds_valid, ds_test = helper.get_datasets(params.dataset_format, params.dataset_dir)
 
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():
