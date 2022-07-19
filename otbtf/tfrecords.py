@@ -162,7 +162,7 @@ class TFRecords:
                                  labels values (integer ranging from [0, n_classes]) in one hot encoding (vector of 0
                                  and 1 of length n_classes). The preprocessing_fn should not implement such things as
                                  radiometric transformations from input to input_preprocessed, because those are
-                                 performed inside the model itself (see `model.normalize()`).
+                                 performed inside the model itself (see `otbtf.ModelBase.normalize()`).
         :param kwargs: some keywords arguments for preprocessing_fn
         """
         options = tf.data.Options()

@@ -7,6 +7,7 @@ from otbtf.utils import _is_chief
 
 PADS = [16, 32, 64, 96, 128, 256]
 
+
 def padded_tensor_name(tensor_name, pad):
     """
     A name for the padded tensor
@@ -131,6 +132,8 @@ class ModelBase(abc.ABC):
         //!\\ only works if create_network() has been called beforehand
         Needs pydot and graphviz to work (`pip install pydot` and https://graphviz.gitlab.io/download/)
         """
+        assert self.model, "Plot() only works if create_network() has been called beforehand"
+
         # When multiworker strategy, only plot if the worker is chief
         if not strategy or _is_chief(strategy):
             # Build a simplified model, without normalization nor extra outputs.
