@@ -15,7 +15,7 @@ class ModelBase(abc.ABC):
 
     @abc.abstractmethod
     def __init__(self, dataset_input_keys, model_output_keys, dataset_shapes, target_cropping=None,
-                 inference_cropping=[16, 32, 64, 96, 128], normalize_fn=None):
+                 inference_cropping=None, normalize_fn=None):
         """
         Model base class
 
@@ -27,14 +27,16 @@ class ModelBase(abc.ABC):
         :param inference_cropping: list of number of pixels to be removed on each side of the output during inference.
                                    This list creates some additional outputs in the model, not used during training,
                                    only during inference. Default [16, 32, 64, 96, 128]
-        :param normalize_fn: a normalization function that can be added inside the Keras model. The function must accept
-                             2 arguments `key` and `tensor`. Optional
+        :param normalize_fn: a normalization function that can be added inside the Keras model. This function takes a
+                             dict of inputs and returns a dict of normalized inputs. Optional
         """
         self.dataset_input_keys = dataset_input_keys
         self.model_output_keys = model_output_keys
         self.dataset_shapes = dataset_shapes
         self.model = None
         self.target_cropping = target_cropping
+        if inference_cropping is None:
+            inference_cropping = [16, 32, 64, 96, 128]
         self.inference_cropping = inference_cropping
         self.normalize_fn = normalize_fn
 
@@ -51,7 +53,7 @@ class ModelBase(abc.ABC):
 
     def get_inputs(self):
         """
-        This method returns the dict of inputs
+        This method returns the dict of keras.Input
         """
         # Create Keras inputs
         model_inputs = {}
@@ -69,10 +71,10 @@ class ModelBase(abc.ABC):
         return model_inputs
 
     @abc.abstractmethod
-    def get_outputs(self, normalized_inputs):
+    def get_outputs(self, inputs):
         """
         Implementation of the model
-        :param normalized_inputs: normalized inputs
+        :param inputs: inputs, either keras.Input or normalized_inputs
         :return: a dict of outputs tensors of the model
         """
         pass
@@ -86,8 +88,8 @@ class ModelBase(abc.ABC):
         # Get the model inputs
         model_inputs = self.get_inputs()
 
-        # Normalize the inputs
-        normalized_inputs = {key: self.normalize_fn[key](inp) for key, inp in
+        # Normalize the inputs. If some input keys are not handled by normalized_fn, these inputs are not normalized
+        normalized_inputs = {key: self.normalize_fn(inp)[key] if key in self.normalize_fn(inp) else inp for key, inp in
                              model_inputs.items()} if self.normalize_fn else model_inputs
 
         # Build the model
