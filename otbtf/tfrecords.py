@@ -153,8 +153,16 @@ class TFRecords:
                                False is advisable when evaluating metrics so that all samples are used
         :param shuffle_buffer_size: if None, shuffle is not used. Else, blocks of shuffle_buffer_size
                                     elements are shuffled using uniform random.
-        :param preprocessing_fn: Optional. A preprocessing function that takes input, target as args and returns
-                                   a tuple (input_preprocessed, target_preprocessed)
+        :param preprocessing_fn: Optional. A preprocessing function that takes (input, target) as args and returns
+                                 a tuple (input_preprocessed, target_preprocessed). Typically, target_preprocessed
+                                 must be computed accordingly to (1) what the model outputs and (2) what training loss
+                                 needs. For instance, for a classification problem, the model will likely output the
+                                 softmax, or activation neurons, for each class, and the cross entropy loss requires
+                                 labels in one hot encoding. In this case, the preprocessing_fn has to transform the
+                                 labels values (integer ranging from [0, n_classes]) in one hot encoding (vector of 0
+                                 and 1 of length n_classes). The preprocessing_fn should not implement such things as
+                                 radiometric transformations from input to input_preprocessed, because those are
+                                 performed inside the model itself (see `model.normalize()`).
         :param kwargs: some keywords arguments for preprocessing_fn
         """
         options = tf.data.Options()
