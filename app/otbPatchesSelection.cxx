@@ -35,6 +35,12 @@
 #include <random>
 #include <limits>
 
+namespace otb
+{
+
+namespace Wrapper
+{
+
 // Functor to retrieve nodata
 template<class TPixel, class OutputPixel>
 class IsNoData
@@ -62,11 +68,6 @@ private:
   typename TPixel::ValueType m_NoDataValue;
 };
 
-namespace otb
-{
-
-namespace Wrapper
-{
 
 class PatchesSelection : public Application
 {
