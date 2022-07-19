@@ -86,7 +86,7 @@ if __name__ == "__main__":
     # Get datasets
     ds_train, ds_valid, ds_test = helper.get_datasets(params.dataset_format, params.dataset_dir)
 
-    strategy = tf.distribute.MirroredStrategy()
+    strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
     with strategy.scope():
 
         # Create and compile the model
