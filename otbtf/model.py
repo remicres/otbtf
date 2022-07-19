@@ -87,10 +87,8 @@ class ModelBase(abc.ABC):
         model_inputs = self.get_inputs()
 
         # Normalize the inputs
-        if self.normalize_fn:
-            normalized_inputs = {key: self.normalize_fn(key, input) for key, input in model_inputs.items()}
-        else:
-            normalized_inputs = model_inputs
+        normalized_inputs = {key: self.normalize_fn[key](inp) for key, inp in
+                             model_inputs.items()} if self.normalize_fn else model_inputs
 
         # Build the model
         outputs = self.get_outputs(normalized_inputs)
@@ -121,6 +119,8 @@ class ModelBase(abc.ABC):
         //!\\ only works if create_network() has been called beforehand
         Needs pydot and graphviz to work (`pip install pydot` and https://graphviz.gitlab.io/download/)
         """
+        assert self.model, "Plot() only works if create_network() has been called beforehand"
+
         # When multiworker strategy, only plot if the worker is chief
         if not strategy or _is_chief(strategy):
             # Build a simplified model, without normalization nor extra outputs.
