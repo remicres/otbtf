@@ -16,6 +16,7 @@ parser.add_argument("-r", "--learning_rate", type=float, default=0.00001, help="
 parser.add_argument('--dataset_mode', default='tfrecords', const='tfrecords', nargs='?',
                     choices=['tfrecords', 'patches_images'])
 
+
 class FCNNModel(ModelBase):
     """
     A Simple Fully Convolutional U-Net like model
@@ -53,13 +54,30 @@ class FCNNModel(ModelBase):
 
 def preprocessing_fn(inputs, targets):
     """
-    Preprocessing function for the training dataset
+    Preprocessing function for the training dataset.
+    This function is only used at training time, to put the data in the expected format.
+    DO NOT USE THIS FUNCTION TO NORMALIZE THE INPUTS ! (see `otbtf.ModelBase.normalize_fn` for that)
 
     :param inputs: dict for inputs
     :param targets: dict for targets
-    :return: an output tuple (processed_inputs, processed_targets) ready to feed the model
+    :return: an output tuple (processed_inputs, processed_targets)
     """
     return inputs, {"label": tf.one_hot(tf.squeeze(targets["label"], axis=-1), depth=2)}
+
+
+def normalize_fn(inputs):
+    """
+    The model will use this function internally to normalize its input, before applying the `get_outputs()` function
+    that actually builds the operations graph (convolutions, etc).
+    This function will hence work at training time and inference time.
+
+    In this example, we assume that we have an input 12 bits multispectral image with values ranging from [0, 10 000],
+    that we process using a simple stretch to roughly match the [0, 1] range.
+
+    :param inputs: dict of inputs
+    :return: dict of normalized inputs, ready to be used from the `get_outputs()` function of the model
+    """
+    return {"input_xs": inputs["input_xs"] * 0.0001}
 
 
 if __name__ == "__main__":
@@ -80,7 +98,7 @@ if __name__ == "__main__":
     with strategy.scope():
 
         # Create and compile the model
-        model = FCNNModel()
+        model = FCNNModel(normalize_fn=normalize_fn)
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(),
                       optimizer=tf.keras.optimizers.Adam(learning_rate=params.learning_rate),
                       metrics=[tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
