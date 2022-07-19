@@ -62,7 +62,7 @@ def preprocessing_fn(inputs, targets):
     :param targets: dict for targets
     :return: an output tuple (processed_inputs, processed_targets)
     """
-    return inputs, {"label": tf.one_hot(tf.squeeze(targets["label"], axis=-1), depth=2)}
+    return inputs, {"labels": tf.one_hot(tf.squeeze(targets["labels"], axis=-1), depth=2)}
 
 
 def normalize_fn(inputs):
