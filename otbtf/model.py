@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """ Base class for models"""
 import abc
+import logging
+
 import tensorflow as tf
 from tensorflow import keras
 from otbtf.utils import _is_chief
@@ -40,7 +42,11 @@ class ModelBase(abc.ABC):
         """This method is called when the default attribute access fails. We choose to try to access the attribute of
         self.model. Thus, any method of keras.Model() can be used transparently, e.g. model.summary() or model.fit()"""
         if not self.model:
-            raise Exception("model is None. Call create_network() before using it!")
+            logging.warning("model is None. You should call `create_network()` before using it!")
+            logging.warning("Creating the neural network. Note that training could fail if using keras distribution "
+                            "strategy such as MirroredStrategy. Best practice is to call `create_network()` inside "
+                            "`with strategy.scope():`")
+            self.create_network()
         return getattr(self.model, name)
 
     def get_inputs(self):
