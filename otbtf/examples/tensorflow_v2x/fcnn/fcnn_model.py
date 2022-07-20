@@ -38,10 +38,8 @@ class FCNNModel(ModelBase):
         :return: activation values
         """
 
-        # Model input
         norm_inp = normalized_inputs["input_xs"]
 
-        # Encoder
         def _conv(inp, depth, name):
             return layers.Conv2D(filters=depth, kernel_size=3, activation="relu", name=name)(inp)
 
@@ -95,6 +93,7 @@ def train(params, ds_train, ds_valid, ds_test):
     strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
     with strategy.scope():
         # Model instantiation. Note that the normalize_fn is now part of the model
+        # It is mandatory to instantiate the model inside the strategy scope.
         model = FCNNModel(dataset_element_spec=ds_train.element_spec)
 
         # Compile the model
