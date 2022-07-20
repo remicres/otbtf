@@ -69,9 +69,7 @@ def create_dataset(xs_filenames, labels_filenames):
     # However, this can slow down your process since the patches are read on-the-fly on the filesystem.
     # Good when one batch computation is slower than one batch gathering.
     ds = DatasetFromPatchesImages(filenames_dict={"input_xs": xs_filenames, "labels": labels_filenames})
-    print(ds)
     tf_ds = ds.get_tf_dataset(batch_size=params.batch_size)
-    print(tf_ds)
     return ds, tf_ds
 
 

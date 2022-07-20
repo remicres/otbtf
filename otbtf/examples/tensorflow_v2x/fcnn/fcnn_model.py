@@ -40,7 +40,7 @@ class FCNNModel(ModelBase):
             tconv = layers.Conv2DTranspose(filters=depth, kernel_size=3, activation="relu", name=name)
             net = tconv(net)
 
-        return net
+        return {"estimated": net}
 
 
 def preprocessing_fn(inputs, targets):
@@ -53,7 +53,7 @@ def preprocessing_fn(inputs, targets):
     :param targets: dict for targets
     :return: an output tuple (processed_inputs, processed_targets)
     """
-    return inputs, {"labels": tf.one_hot(tf.squeeze(targets["labels"], axis=-1), depth=2)}
+    return inputs, {"estimated": tf.one_hot(tf.squeeze(targets["labels"], axis=-1), depth=2)}
 
 
 def normalize_fn(inputs):
@@ -91,11 +91,7 @@ def train(params, ds_train, ds_valid, ds_test, output_shape):
                       metrics=[tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
         # Summarize the model (in CLI)
-        model.summary(line_length=120)
-
-        # Summarize the model (in figure.png)
-        pathlib.Path(params.model_dir).mkdir(exist_ok=True)
-        tf.keras.utils.plot_model(model, os.path.join(params.model_dir, "figure.png"))
+        model.summary()
 
         # Train
         model.fit(ds_train, epochs=params.nb_epochs, validation_data=ds_valid)
