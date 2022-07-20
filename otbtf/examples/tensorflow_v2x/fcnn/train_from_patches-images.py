@@ -1,38 +1,5 @@
 """
 This example shows how to use the otbtf python API to train a deep net from patches-images.
-
-We expect that the files are stored in the following way, with M, N and K denoting respectively
-the number of patches-images in the training, validation, and test datasets:
-
-/dataset_dir
-    /train
-        /image_1
-            ..._xs.tif
-            ..._labels.tif
-        /image_2
-            ..._xs.tif
-            ..._labels.tif
-        ...
-        /image_M
-            ..._xs.tif
-            ..._labels.tif
-    /valid
-        /image_1
-            ..._xs.tif
-            ..._labels.tif
-        ...
-        /image_N
-            ..._xs.tif
-            ..._labels.tif
-    /test
-        /image_1
-            ..._xs.tif
-            ..._labels.tif
-        ...
-        /image_K
-            ..._xs.tif
-            ..._labels.tif
-
 """
 import helper
 from otbtf import DatasetFromPatchesImages
