@@ -41,8 +41,8 @@ class TFRecords:
         self.dirpath = path
         os.makedirs(self.dirpath, exist_ok=True)
         self.output_types_file = os.path.join(self.dirpath, "output_types.json")
-        self.output_shape_file = os.path.join(self.dirpath, "output_shape.json")
-        self.output_shape = self.load(self.output_shape_file) if os.path.exists(self.output_shape_file) else None
+        self.output_shapes_file = os.path.join(self.dirpath, "output_shapes.json")
+        self.output_shapes = self.load(self.output_shapes_file) if os.path.exists(self.output_shapes_file) else None
         self.output_types = self.load(self.output_types_file) if os.path.exists(self.output_types_file) else None
 
     @staticmethod
@@ -71,7 +71,7 @@ class TFRecords:
             nb_shards += 1
 
         output_shapes = {key: output_shape for key, output_shape in dataset.output_shapes.items()}
-        self.save(output_shapes, self.output_shape_file)
+        self.save(output_shapes, self.output_shapes_file)
 
         output_types = {key: output_type.name for key, output_type in dataset.output_types.items()}
         self.save(output_types, self.output_types_file)
