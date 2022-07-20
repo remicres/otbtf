@@ -95,15 +95,15 @@ class ModelBase(abc.ABC):
         # Build the model
         outputs = self.get_outputs(normalized_inputs)
 
-        # Add extra outputs for inference
-        extra_outputs = {}
-        for out_key, out_tensor in outputs.items():
-            for crop in self.inference_cropping:
-                extra_output_key = cropped_tensor_name(out_key, crop)
-                extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
-                extra_output = tf.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
-                extra_outputs[extra_output_key] = extra_output
-        outputs.update(extra_outputs)
+        # # Add extra outputs for inference
+        # extra_outputs = {}
+        # for out_key, out_tensor in outputs.items():
+        #     for crop in self.inference_cropping:
+        #         extra_output_key = cropped_tensor_name(out_key, crop)
+        #         extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
+        #         extra_output = tf.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
+        #         extra_outputs[extra_output_key] = extra_output
+        # outputs.update(extra_outputs)
 
         # Return the keras model
         self.model = keras.Model(inputs=model_inputs, outputs=outputs, name=self.__class__.__name__)

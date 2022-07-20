@@ -4,8 +4,6 @@ Implementation of a small U-Net like model
 from otbtf.model import ModelBase
 import tensorflow as tf
 import tensorflow.keras.layers as layers
-import pathlib
-import os
 
 
 class FCNNModel(ModelBase):
@@ -40,7 +38,7 @@ class FCNNModel(ModelBase):
             tconv = layers.Conv2DTranspose(filters=depth, kernel_size=3, activation="relu", name=name)
             net = tconv(net)
 
-        return {"estimated": net}
+        return {"labels": tf.keras.activations.softmax(net)}
 
 
 def preprocessing_fn(inputs, targets):
@@ -53,7 +51,8 @@ def preprocessing_fn(inputs, targets):
     :param targets: dict for targets
     :return: an output tuple (processed_inputs, processed_targets)
     """
-    return inputs, {"estimated": tf.one_hot(tf.squeeze(targets["labels"], axis=-1), depth=2)}
+    return {"input_xs": tf.keras.layers.Cropping2D(cropping=32)(inputs["input_xs"])}, \
+           {"labels": tf.one_hot(tf.squeeze(targets["labels"], axis=-1), depth=2)}
 
 
 def normalize_fn(inputs):
@@ -71,7 +70,7 @@ def normalize_fn(inputs):
     return {"input_xs": inputs["input_xs"] * 0.0001}
 
 
-def train(params, ds_train, ds_valid, ds_test, output_shape):
+def train(params, ds_train, ds_valid, ds_test, output_shapes):
     """
     Create, train, and save the model.
 
@@ -84,9 +83,9 @@ def train(params, ds_train, ds_valid, ds_test, output_shape):
 
         model = FCNNModel(dataset_input_keys=["input_xs"],
                           model_output_keys=["labels"],
-                          dataset_shapes=output_shape,
+                          dataset_shapes=output_shapes,
                           normalize_fn=normalize_fn)  # Note that the normalize_fn is now part of the model
-        model.compile(loss=tf.keras.losses.BinaryCrossentropy(),
+        model.compile(loss=tf.keras.losses.CategoricalCrossentropy(),
                       optimizer=tf.keras.optimizers.Adam(learning_rate=params.learning_rate),
                       metrics=[tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
