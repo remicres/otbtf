@@ -4,7 +4,10 @@ Implementation of a small U-Net like model
 from otbtf.model import ModelBase
 import tensorflow as tf
 import tensorflow.keras.layers as layers
+import logging
 
+
+logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 N_CLASSES = 6
 
 
@@ -75,17 +78,19 @@ def normalize_fn(inputs):
     return {"input_xs": inputs["input_xs"] * 0.0001}
 
 
-def train(params, ds_train, ds_valid, ds_test, output_shapes):
+def train(params, ds_train, ds_valid, ds_test):
     """
     Create, train, and save the model.
 
     :param params: contains batch_size, learning_rate, nb_epochs, and model_dir
+    :param ds_train: training dataset
+    :param ds_valid: validation dataset
+    :param ds_test: testing dataset
     """
 
-    # Model
-    model = FCNNModel(dataset_input_keys=["input_xs"],
-                      dataset_shapes=output_shapes,
-                      normalize_fn=normalize_fn)  # Note that the normalize_fn is now part of the model
+    # Model instantiation
+    # Note that the normalize_fn is now part of the model
+    model = FCNNModel(dataset_element_spec=ds_train.element_spec, normalize_fn=normalize_fn)
 
     # strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
     strategy = tf.distribute.OneDeviceStrategy(device="/cpu:0")

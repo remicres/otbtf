@@ -2,8 +2,6 @@
 """ Base class for models"""
 import abc
 import logging
-
-import tensorflow as tf
 from tensorflow import keras
 from otbtf.utils import _is_chief
 
@@ -13,13 +11,13 @@ class ModelBase(abc.ABC):
     Base class for all models
     """
 
-    def __init__(self, dataset_input_keys, dataset_shapes, target_cropping=None,
+    def __init__(self, dataset_element_spec, target_cropping=None,
                  inference_cropping=None, normalize_fn=None):
         """
         Model base class
 
-        :param dataset_input_keys: list of dataset keys used for the training
-        :param dataset_shapes: a dict() of shapes
+        :param dataset_element_spec: the dataset elements specification (shape, dtype, etc). Can be retrieved from the
+                                     dataset instance simply with `ds.element_spec`
         :param target_cropping: Optional. Number of pixels to be removed on each side of the target. This is used when
                                 training the model and can mitigate the effects of convolution
         :param inference_cropping: list of number of pixels to be removed on each side of the output during inference.
@@ -28,8 +26,12 @@ class ModelBase(abc.ABC):
         :param normalize_fn: a normalization function that can be added inside the Keras model. This function takes a
                              dict of inputs and returns a dict of normalized inputs. Optional
         """
-        self.dataset_input_keys = dataset_input_keys
-        self.dataset_shapes = dataset_shapes
+        dataset_input_element_spec = dataset_element_spec[0]
+        logging.info("Dataset input element spec: %s", dataset_input_element_spec)
+        self.dataset_input_keys = list(dataset_input_element_spec)
+        logging.info("Found dataset input keys: %s", self.dataset_input_keys)
+        self.inputs_shapes = {key: dataset_input_element_spec[key].shape[1:] for key in self.dataset_input_keys}
+        logging.info("Inputs shapes: %s", self.inputs_shapes)
         self.model = None
         self.target_cropping = target_cropping
         if inference_cropping is None:
@@ -55,10 +57,8 @@ class ModelBase(abc.ABC):
         # Create Keras inputs
         model_inputs = {}
         for key in self.dataset_input_keys:
-            shape = self.dataset_shapes[key]
-            new_shape = list(shape)
-            if shape[0] is None or (len(shape) > 3):  # for backward comp (OTBTF<3.2.2), remove the potential batch dim
-                new_shape = shape[1:]
+            new_shape = list(self.inputs_shapes[key])
+            logging.info("Original shape for input %s: %s", key, new_shape)
             # Here we modify the x and y dims of >2D tensors to enable any image size at input
             if len(new_shape) > 2:
                 new_shape[0] = None

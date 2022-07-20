@@ -84,11 +84,11 @@ def create_dataset(xs_filenames, labels_filenames, targets_keys=["predictions"])
 if __name__ == "__main__":
     params = parser.parse_args()
 
-    ds, ds_train = create_dataset(params.train_xs, params.train_labels)
+    _, ds_train = create_dataset(params.train_xs, params.train_labels)
     _, ds_valid = create_dataset(params.valid_xs, params.valid_labels)
     ds_test = None
     if params.test_xs and params.test_labels:
         _, ds_test = create_dataset(params.test_xs, params.test_labels)
 
     # Train the model
-    fcnn_model.train(params, ds_train, ds_valid, ds_test, ds.output_shapes)
+    fcnn_model.train(params, ds_train, ds_valid, ds_test)
