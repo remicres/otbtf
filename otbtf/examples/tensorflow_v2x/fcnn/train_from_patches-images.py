@@ -53,7 +53,7 @@ parser.add_argument("--test_labels", required=False, nargs="+", default=[],
                     help="A list of patches-images for the labels (test dataset)")
 
 
-def create_dataset(xs_filenames, labels_filenames, targets_keys=["labels"]):
+def create_dataset(xs_filenames, labels_filenames, targets_keys=["predictions"]):
     """
     Create an otbtf.DatasetFromPatchesImages
     """
