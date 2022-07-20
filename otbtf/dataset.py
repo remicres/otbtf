@@ -273,7 +273,7 @@ class PatchesImagesReader(PatchesReaderBase):
                                "mean": rsize * _sums[src_key],
                                "std": np.sqrt(rsize * _sqsums[src_key] - np.square(rsize * _sums[src_key]))
                                } for src_key in self.gdal_ds}
-        logging.info("Stats: {}", stats)
+        logging.info("Stats: %s", stats)
         return stats
 
     def get_size(self):
@@ -362,8 +362,8 @@ class Dataset:
             self.output_shapes[src_key] = np_arr.shape
             self.output_types[src_key] = tf.dtypes.as_dtype(np_arr.dtype)
 
-        logging.info("output_types: {}", self.output_types)
-        logging.info("output_shapes: {}", self.output_shapes)
+        logging.info("output_types: %s", self.output_types)
+        logging.info("output_shapes: %s", self.output_shapes)
 
         # buffers
         if self.size <= buffer_length:
