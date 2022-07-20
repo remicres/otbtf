@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     # Training dataset. Must be shuffled!
     assert os.path.isdir(train_dir)
-    ds = TFRecords(train_dir)
+    ds = TFRecords(train_dir, preprocessing_fn=fcnn_model.preprocessing_fn)
     ds_train = ds.read(batch_size=params.batch_size, target_keys=["label"],
                                          shuffle_buffer_size=1000)
 

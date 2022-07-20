@@ -5,6 +5,8 @@ from otbtf.model import ModelBase
 import tensorflow as tf
 import tensorflow.keras.layers as layers
 
+N_CLASSES = 6
+
 
 class FCNNModel(ModelBase):
     """
@@ -19,9 +21,6 @@ class FCNNModel(ModelBase):
         :param normalized_inputs: dict of normalized inputs`
         :return: activation values
         """
-
-        # Model constants
-        N_CLASSES = 6
 
         # Model input
         net = normalized_inputs["input_xs"]
@@ -38,22 +37,27 @@ class FCNNModel(ModelBase):
             tconv = layers.Conv2DTranspose(filters=depth, kernel_size=3, activation="relu", name=name)
             net = tconv(net)
 
-        return {"labels": tf.keras.activations.softmax(net)}
+        # final layers
+        net = tf.keras.activations.softmax(net)
+        net = tf.keras.layers.Cropping2D(cropping=32)(net)
+
+        return {"predictions": net}
 
 
-def preprocessing_fn(inputs, targets):
+def preprocessing_fn(examples):
     """
     Preprocessing function for the training dataset.
     This function is only used at training time, to put the data in the expected format.
-    DO NOT USE THIS FUNCTION TO NORMALIZE THE INPUTS ! (see `otbtf.ModelBase.normalize_fn` for that)
+    DO NOT USE THIS FUNCTION TO NORMALIZE THE INPUTS ! (see `otbtf.ModelBase.normalize_fn` for that).
+    Note that this function is not called here, but in the code that prepares the datasets.
 
-    :param inputs: dict for inputs
-    :param targets: dict for targets
-    :return: an output tuple (processed_inputs, processed_targets)
+    :param examples: dict for examples (i.e. inputs and targets stored in a single dict)
+    :return: preprocessed examples
     """
-    # TODO: delete the cropping, just for testing with my data
-    return {"input_xs": tf.keras.layers.Cropping2D(cropping=32)(inputs["input_xs"])}, \
-           {"labels": tf.one_hot(tf.squeeze(targets["labels"], axis=-1), depth=2)}
+    def _to_categorical(x):
+        return tf.one_hot(tf.squeeze(x, axis=-1), depth=N_CLASSES)
+    return {"input_xs": examples["input_xs"],
+            "predictions": _to_categorical(examples["labels"])}
 
 
 def normalize_fn(inputs):

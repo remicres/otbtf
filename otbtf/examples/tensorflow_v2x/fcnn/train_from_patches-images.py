@@ -53,7 +53,7 @@ parser.add_argument("--test_labels", required=False, nargs="+", default=[],
                     help="A list of patches-images for the labels (test dataset)")
 
 
-def create_dataset(xs_filenames, labels_filenames):
+def create_dataset(xs_filenames, labels_filenames, targets_keys=["labels"]):
     """
     Create an otbtf.DatasetFromPatchesImages
     """
@@ -70,7 +70,15 @@ def create_dataset(xs_filenames, labels_filenames):
     # Good when one batch computation is slower than one batch gathering.
     ds = DatasetFromPatchesImages(filenames_dict={"input_xs": xs_filenames, "labels": labels_filenames})
     tf_ds = ds.get_tf_dataset(batch_size=params.batch_size)
-    return ds, tf_ds
+
+    def _split_inp_target(all_inp):
+        # Differentiating inputs and outputs
+        all_inp_prep = fcnn_model.preprocessing_fn(all_inp)
+        inputs = {key: value for (key, value) in all_inp_prep.items() if key not in targets_keys}
+        targets = {key: value for (key, value) in all_inp_prep.items() if key in targets_keys}
+        return inputs, targets
+
+    return ds, tf_ds.map(_split_inp_target)
 
 
 if __name__ == "__main__":
