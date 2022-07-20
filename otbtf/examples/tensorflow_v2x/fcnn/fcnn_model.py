@@ -71,7 +71,7 @@ def normalize_fn(inputs):
     return {"input_xs": inputs["input_xs"] * 0.0001}
 
 
-def train(params, ds_train, ds_valid, ds_test):
+def train(params, ds_train, ds_valid, ds_test, output_shape):
     """
     Create, train, and save the model.
 
@@ -80,10 +80,12 @@ def train(params, ds_train, ds_valid, ds_test):
 
     strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
     with strategy.scope():
-
         # Create and compile the model
-        # Note that the normalize_fn will now be a part of the model
-        model = FCNNModel(normalize_fn=normalize_fn)
+
+        model = FCNNModel(dataset_input_keys=["input_xs"],
+                          model_output_keys=["labels"],
+                          dataset_shapes=output_shape,
+                          normalize_fn=normalize_fn)  # Note that the normalize_fn is now part of the model
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(),
                       optimizer=tf.keras.optimizers.Adam(learning_rate=params.learning_rate),
                       metrics=[tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])

@@ -13,7 +13,6 @@ class ModelBase(abc.ABC):
     Base class for all models
     """
 
-    @abc.abstractmethod
     def __init__(self, dataset_input_keys, model_output_keys, dataset_shapes, target_cropping=None,
                  inference_cropping=None, normalize_fn=None):
         """
@@ -77,7 +76,7 @@ class ModelBase(abc.ABC):
         :param inputs: inputs, either keras.Input or normalized_inputs
         :return: a dict of outputs tensors of the model
         """
-        pass
+        raise NotImplemented("This method has to be implemented. Here you code the model :)")
 
     def create_network(self):
         """

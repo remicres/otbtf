@@ -53,7 +53,7 @@ parser.add_argument("--test_labels", required=False, nargs="+", default=[],
                     help="A list of patches-images for the labels (test dataset)")
 
 
-def create_dataset(xs_filenames, labels_filenames, batch_size):
+def create_dataset(xs_filenames, labels_filenames):
     """
     Create an otbtf.DatasetFromPatchesImages
     """
@@ -69,16 +69,20 @@ def create_dataset(xs_filenames, labels_filenames, batch_size):
     # However, this can slow down your process since the patches are read on-the-fly on the filesystem.
     # Good when one batch computation is slower than one batch gathering.
     ds = DatasetFromPatchesImages(filenames_dict={"input_xs": xs_filenames, "labels": labels_filenames})
-    return ds, ds.get_tf_dataset(batch_size=batch_size)
+    print(ds)
+    tf_ds = ds.get_tf_dataset(batch_size=params.batch_size)
+    print(tf_ds)
+    return ds, tf_ds
 
 
 if __name__ == "__main__":
     params = parser.parse_args()
 
-    _, ds_train = create_dataset(params.train_xs, params.train_labels, params.batchsize)
-    _, ds_valid = create_dataset(params.valid_xs, params.valid_labels, params.batchsize)
-    _, ds_test = create_dataset(params.valid_xs, params.valid_labels, params.batchsize) \
-        if params.test_xs and params.test_labels else None
+    ds, ds_train = create_dataset(params.train_xs, params.train_labels)
+    _, ds_valid = create_dataset(params.valid_xs, params.valid_labels)
+    ds_test = None
+    if params.test_xs and params.test_labels:
+        _, ds_test = create_dataset(params.test_xs, params.test_labels)
 
     # Train the model
-    fcnn_model.train(params, ds_train, ds_valid, ds_test)
+    fcnn_model.train(params, ds_train, ds_valid, ds_test, ds.output_shapes)

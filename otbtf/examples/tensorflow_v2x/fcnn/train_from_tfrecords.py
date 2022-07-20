@@ -28,7 +28,7 @@ from otbtf import TFRecords
 import fcnn_model
 
 parser = helper.base_parser()
-parser.add_argument("-p", "--tfrecords_dir", required=True,
+parser.add_argument("--tfrecords_dir", required=True,
                     help="Directory of subdirs containing TFRecords files: train, valid(, test)")
 
 if __name__ == "__main__":
@@ -41,7 +41,8 @@ if __name__ == "__main__":
 
     # Training dataset. Must be shuffled!
     assert os.path.isdir(train_dir)
-    ds_train = TFRecords(train_dir).read(batch_size=params.batch_size, target_keys=["label"],
+    ds = TFRecords(train_dir)
+    ds_train = ds.read(batch_size=params.batch_size, target_keys=["label"],
                                          shuffle_buffer_size=1000)
 
     # Validation dataset
@@ -53,4 +54,4 @@ if __name__ == "__main__":
         test_dir) else None
 
     # Train the model
-    fcnn_model.train(params, ds_train, ds_valid, ds_test)
+    fcnn_model.train(params, ds_train, ds_valid, ds_test, ds.output_shapes)
