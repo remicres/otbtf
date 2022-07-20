@@ -73,7 +73,7 @@ def create_dataset(xs_filenames, labels_filenames, targets_keys=["predictions"])
 
     def _split_inp_target(all_inp):
         # Differentiating inputs and outputs
-        all_inp_prep = fcnn_model.preprocessing_fn(all_inp)
+        all_inp_prep = fcnn_model.dataset_preprocessing_fn(all_inp)
         inputs = {key: value for (key, value) in all_inp_prep.items() if key not in targets_keys}
         targets = {key: value for (key, value) in all_inp_prep.items() if key in targets_keys}
         return inputs, targets

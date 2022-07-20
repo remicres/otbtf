@@ -16,6 +16,20 @@ class FCNNModel(ModelBase):
     A Simple Fully Convolutional U-Net like model
     """
 
+    def normalize_input(inputs):
+        """
+        The model will use this function internally to normalize its inputs, before applying the `get_outputs()`
+        function that actually builds the operations graph (convolutions, etc).
+        This function will hence work at training time and inference time.
+
+        In this example, we assume that we have an input 12 bits multispectral image with values ranging from
+        [0, 10000], that we process using a simple stretch to roughly match the [0, 1] range.
+
+        :param inputs: dict of inputs
+        :return: dict of normalized inputs, ready to be used from the `get_outputs()` function of the model
+        """
+        return {"input_xs": inputs["input_xs"] * 0.0001}
+
     def get_outputs(self, normalized_inputs):
         """
         This small model produces an output which has the same physical spacing as the input.
@@ -42,12 +56,12 @@ class FCNNModel(ModelBase):
 
         # final layers
         net = tf.keras.activations.softmax(net)
-        net = tf.keras.layers.Cropping2D(cropping=32)(net)
+        net = tf.keras.layers.Cropping2D(cropping=32, name="predictions_softmax_tensor")(net)
 
         return {"predictions": net}
 
 
-def preprocessing_fn(examples):
+def dataset_preprocessing_fn(examples):
     """
     Preprocessing function for the training dataset.
     This function is only used at training time, to put the data in the expected format.
@@ -63,21 +77,6 @@ def preprocessing_fn(examples):
             "predictions": _to_categorical(examples["labels"])}
 
 
-def normalize_fn(inputs):
-    """
-    The model will use this function internally to normalize its input, before applying the `get_outputs()` function
-    that actually builds the operations graph (convolutions, etc).
-    This function will hence work at training time and inference time.
-
-    In this example, we assume that we have an input 12 bits multispectral image with values ranging from [0, 10 000],
-    that we process using a simple stretch to roughly match the [0, 1] range.
-
-    :param inputs: dict of inputs
-    :return: dict of normalized inputs, ready to be used from the `get_outputs()` function of the model
-    """
-    return {"input_xs": inputs["input_xs"] * 0.0001}
-
-
 def train(params, ds_train, ds_valid, ds_test):
     """
     Create, train, and save the model.
@@ -91,9 +90,8 @@ def train(params, ds_train, ds_valid, ds_test):
     # strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
     strategy = tf.distribute.OneDeviceStrategy(device="/cpu:0")
     with strategy.scope():
-        # Model instantiation
-        # Note that the normalize_fn is now part of the model
-        model = FCNNModel(dataset_element_spec=ds_train.element_spec, normalize_fn=normalize_fn)
+        # Model instantiation. Note that the normalize_fn is now part of the model
+        model = FCNNModel(dataset_element_spec=ds_train.element_spec)
 
         # Compile the model
         model.compile(loss=tf.keras.losses.CategoricalCrossentropy(),

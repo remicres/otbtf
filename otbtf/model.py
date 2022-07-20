@@ -2,7 +2,7 @@
 """ Base class for models"""
 import abc
 import logging
-from tensorflow import keras
+import tensorflow
 from otbtf.utils import _is_chief
 
 
@@ -11,7 +11,7 @@ class ModelBase(abc.ABC):
     Base class for all models
     """
 
-    def __init__(self, dataset_element_spec, inference_cropping=None, normalize_fn=None):
+    def __init__(self, dataset_element_spec, inference_cropping=None):
         """
         Model initializer, must be called **inside** the strategy.scope().
 
@@ -20,8 +20,6 @@ class ModelBase(abc.ABC):
         :param inference_cropping: list of number of pixels to be removed on each side of the output during inference.
                                    This list creates some additional outputs in the model, not used during training,
                                    only during inference. Default [16, 32, 64, 96, 128]
-        :param normalize_fn: a normalization function that can be added inside the Keras model. This function takes a
-                             dict of inputs and returns a dict of normalized inputs. Optional
         """
         # Retrieve dataset inputs shapes
         dataset_input_element_spec = dataset_element_spec[0]
@@ -37,7 +35,6 @@ class ModelBase(abc.ABC):
         if inference_cropping is None:
             inference_cropping = [16, 32, 64, 96, 128]
         self.inference_cropping = inference_cropping
-        self.normalize_fn = normalize_fn
 
         # Create model
         self.model = self.create_network()
@@ -60,7 +57,7 @@ class ModelBase(abc.ABC):
             if len(new_shape) > 2:
                 new_shape[0] = None
                 new_shape[1] = None
-            placeholder = keras.Input(shape=new_shape, name=key)
+            placeholder = tensorflow.keras.Input(shape=new_shape, name=key)
             logging.info("New shape for input %s: %s", key, new_shape)
             model_inputs.update({key: placeholder})
         return model_inputs
@@ -74,9 +71,22 @@ class ModelBase(abc.ABC):
         """
         raise NotImplemented("This method has to be implemented. Here you code the model :)")
 
+    @staticmethod
+    def normalize_inputs(inputs):
+        """
+        A normalization function that can be added inside the Keras model. This function takes the dict of inputs and
+        returns a dict of normalized inputs. Can be reimplemented depending on the needs.
+
+        :param inputs: inputs, either keras.Input or normalized_inputs
+        :return: a dict of outputs tensors of the model
+        """
+        return inputs
+
     def create_network(self):
         """
-        This method returns the Keras model. This needs to be called **inside** the strategy.scope()
+        This method returns the Keras model. This needs to be called **inside** the strategy.scope().
+        Can be reimplemented depending on the needs.
+
         :return: the keras model
         """
 
@@ -84,27 +94,27 @@ class ModelBase(abc.ABC):
         model_inputs = self.get_inputs()
         logging.info(f"Model inputs: {model_inputs}")
 
-        # Normalize the inputs. If some input keys are not handled by normalized_fn, these inputs are not normalized
-        normalized_inputs = model_inputs.copy()
-        normalized_inputs.update(self.normalize_fn(model_inputs))
+        # Normalize the inputs
+        normalized_inputs = self.normalize_inputs(model_inputs)
         logging.info(f"Normalized model inputs: {normalized_inputs}")
 
         # Build the model
         outputs = self.get_outputs(normalized_inputs)
         logging.info(f"Model outputs: {outputs}")
 
-        # # Add extra outputs for inference
-        # extra_outputs = {}
-        # for out_key, out_tensor in outputs.items():
-        #     for crop in self.inference_cropping:
-        #         extra_output_key = cropped_tensor_name(out_key, crop)
-        #         extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
-        #         extra_output = tf.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
-        #         extra_outputs[extra_output_key] = extra_output
-        # outputs.update(extra_outputs)
+        # Add extra outputs for inference
+        extra_outputs = {}
+        for out_key, out_tensor in outputs.items():
+            for crop in self.inference_cropping:
+                extra_output_key = cropped_tensor_name(out_key, crop)
+                extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
+                #extra_output = tensorflow.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
+                extra_output = tensorflow.identity(out_tensor[:, crop:crop, crop:crop, :], name=extra_output_name)
+                extra_outputs[extra_output_key] = extra_output
+        outputs.update(extra_outputs)
 
         # Return the keras model
-        return keras.Model(inputs=model_inputs, outputs=outputs, name=self.__class__.__name__)
+        return tensorflow.keras.Model(inputs=model_inputs, outputs=outputs, name=self.__class__.__name__)
 
     def summary(self, strategy=None):
         """
@@ -116,7 +126,6 @@ class ModelBase(abc.ABC):
     def plot(self, output_path, strategy=None):
         """
         Enables to save a figure representing the architecture of the network.
-        //!\\ only works if create_network() has been called beforehand
         Needs pydot and graphviz to work (`pip install pydot` and https://graphviz.gitlab.io/download/)
         """
         assert self.model, "Plot() only works if create_network() has been called beforehand"

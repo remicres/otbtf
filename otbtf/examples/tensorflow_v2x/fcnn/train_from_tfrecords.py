@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
 
     def _tfrecords(directory):
-        return TFRecords(directory, preprocessing_fn=fcnn_model.preprocessing_fn)
+        return TFRecords(directory, preprocessing_fn=fcnn_model.dataset_preprocessing_fn)
 
 
     # Training dataset. Must be shuffled!
