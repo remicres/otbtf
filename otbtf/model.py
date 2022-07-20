@@ -58,14 +58,15 @@ class ModelBase(abc.ABC):
         model_inputs = {}
         for key in self.dataset_input_keys:
             shape = self.dataset_shapes[key]
+            new_shape = list(shape)
             if shape[0] is None or (len(shape) > 3):  # for backward comp (OTBTF<3.2.2), remove the potential batch dim
-                shape = shape[1:]
+                new_shape = shape[1:]
             # Here we modify the x and y dims of >2D tensors to enable any image size at input
-            if len(shape) > 2:
-                shape[0] = None
-                shape[1] = None
-            placeholder = keras.Input(shape=shape, name=key)
-            print(key, shape)
+            if len(new_shape) > 2:
+                new_shape[0] = None
+                new_shape[1] = None
+            placeholder = keras.Input(shape=new_shape, name=key)
+            logging.info("New shape for input %s: %s", key, new_shape)
             model_inputs.update({key: placeholder})
         return model_inputs
 
@@ -88,8 +89,8 @@ class ModelBase(abc.ABC):
         model_inputs = self.get_inputs()
 
         # Normalize the inputs. If some input keys are not handled by normalized_fn, these inputs are not normalized
-        normalized_inputs = {key: self.normalize_fn(inp)[key] if key in self.normalize_fn(inp) else inp for key, inp in
-                             model_inputs.items()} if self.normalize_fn else model_inputs
+        normalized_inputs = model_inputs.copy()
+        normalized_inputs.update(self.normalize_fn(model_inputs))
 
         # Build the model
         outputs = self.get_outputs(normalized_inputs)
