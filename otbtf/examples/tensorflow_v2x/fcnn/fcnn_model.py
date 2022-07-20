@@ -84,7 +84,6 @@ def train(params, ds_train, ds_valid, ds_test, output_shapes):
 
     # Model
     model = FCNNModel(dataset_input_keys=["input_xs"],
-                      model_output_keys=["labels"],
                       dataset_shapes=output_shapes,
                       normalize_fn=normalize_fn)  # Note that the normalize_fn is now part of the model
 
