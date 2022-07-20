@@ -6,7 +6,6 @@ import tensorflow as tf
 import tensorflow.keras.layers as layers
 import logging
 
-
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 N_CLASSES = 6
 
@@ -16,7 +15,7 @@ class FCNNModel(ModelBase):
     A Simple Fully Convolutional U-Net like model
     """
 
-    def normalize_input(inputs):
+    def normalize_inputs(self, inputs):
         """
         The model will use this function internally to normalize its inputs, before applying the `get_outputs()`
         function that actually builds the operations graph (convolutions, etc).
@@ -40,22 +39,26 @@ class FCNNModel(ModelBase):
         """
 
         # Model input
-        net = normalized_inputs["input_xs"]
+        norm_inp = normalized_inputs["input_xs"]
 
         # Encoder
-        convs_depth = {"conv1": 16, "conv2": 32, "conv3": 64, "conv4": 64}
-        for name, depth in convs_depth.items():
-            conv = layers.Conv2D(filters=depth, kernel_size=3, activation="relu", name=name)
-            net = conv(net)
+        def _conv(inp, depth, name):
+            return layers.Conv2D(filters=depth, kernel_size=3, activation="relu", name=name)(inp)
 
-        # Decoder
-        tconvs_depths = {"tconv1": 64, "tconv2": 32, "tconv3": 16, "tconv4": N_CLASSES}
-        for name, depth in tconvs_depths.items():
-            tconv = layers.Conv2DTranspose(filters=depth, kernel_size=3, activation="relu", name=name)
-            net = tconv(net)
+        def _tconv(inp, depth, name, activation="relu"):
+            return layers.Conv2DTranspose(filters=depth, kernel_size=3, activation=activation, name=name)(inp)
+
+        out_conv1 = _conv(norm_inp, 16, "conv1")
+        out_conv2 = _conv(out_conv1, 32, "conv2")
+        out_conv3 = _conv(out_conv2, 64, "conv3")
+        out_conv4 = _conv(out_conv3, 64, "conv4")
+        out_tconv1 = _tconv(out_conv4, 64, "tconv1") + out_conv3
+        out_tconv2 = _tconv(out_tconv1, 32, "tconv2") + out_conv2
+        out_tconv3 = _tconv(out_tconv2, 16, "tconv3") + out_conv1
+        out_tconv4 = _tconv(out_tconv3, N_CLASSES, "classifier", None)
 
         # final layers
-        net = tf.keras.activations.softmax(net)
+        net = tf.keras.activations.softmax(out_tconv4)
         net = tf.keras.layers.Cropping2D(cropping=32, name="predictions_softmax_tensor")(net)
 
         return {"predictions": net}
@@ -65,14 +68,16 @@ def dataset_preprocessing_fn(examples):
     """
     Preprocessing function for the training dataset.
     This function is only used at training time, to put the data in the expected format.
-    DO NOT USE THIS FUNCTION TO NORMALIZE THE INPUTS ! (see `otbtf.ModelBase.normalize_fn` for that).
+    DO NOT USE THIS FUNCTION TO NORMALIZE THE INPUTS ! (see `otbtf.ModelBase.normalize_inputs` for that).
     Note that this function is not called here, but in the code that prepares the datasets.
 
     :param examples: dict for examples (i.e. inputs and targets stored in a single dict)
     :return: preprocessed examples
     """
+
     def _to_categorical(x):
         return tf.one_hot(tf.squeeze(x, axis=-1), depth=N_CLASSES)
+
     return {"input_xs": examples["input_xs"],
             "predictions": _to_categorical(examples["labels"])}
 
@@ -87,8 +92,7 @@ def train(params, ds_train, ds_valid, ds_test):
     :param ds_test: testing dataset
     """
 
-    # strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
-    strategy = tf.distribute.OneDeviceStrategy(device="/cpu:0")
+    strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
     with strategy.scope():
         # Model instantiation. Note that the normalize_fn is now part of the model
         model = FCNNModel(dataset_element_spec=ds_train.element_spec)

@@ -12,7 +12,7 @@ def base_parser():
     """
     parser = argparse.ArgumentParser(description="Train a FCNN model")
     parser.add_argument("--batch_size", type=int, default=8, help="Batch size")
-    parser.add_argument("--learning_rate", type=float, default=0.00001, help="Learning rate")
+    parser.add_argument("--learning_rate", type=float, default=0.0001, help="Learning rate")
     parser.add_argument("--nb_epochs", type=int, default=100, help="Number of epochs")
     parser.add_argument("--model_dir", required=True, help="Path to save model")
     return parser

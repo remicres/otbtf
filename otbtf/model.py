@@ -71,8 +71,7 @@ class ModelBase(abc.ABC):
         """
         raise NotImplementedError("This method has to be implemented. Here you code the model :)")
 
-    @staticmethod
-    def normalize_inputs(inputs):
+    def normalize_inputs(self, inputs):
         """
         A normalization function that can be added inside the Keras model. This function takes the dict of inputs and
         returns a dict of normalized inputs. Can be reimplemented depending on the needs.
@@ -80,6 +79,8 @@ class ModelBase(abc.ABC):
         :param inputs: inputs, either keras.Input or normalized_inputs
         :return: a dict of outputs tensors of the model
         """
+        logging.warning("normalize_input() undefined. No normalization of the model inputs will be performed. "
+                        "You can implement the function in your model class")
         return inputs
 
     def create_network(self):
@@ -96,11 +97,11 @@ class ModelBase(abc.ABC):
 
         # Normalize the inputs
         normalized_inputs = self.normalize_inputs(model_inputs)
-        logging.info(f"Normalized model inputs: %", normalized_inputs)
+        logging.info("Normalized model inputs: %s", normalized_inputs)
 
         # Build the model
         outputs = self.get_outputs(normalized_inputs)
-        logging.info(f"Model outputs: %s", outputs)
+        logging.info("Model outputs: %s", outputs)
 
         # Add extra outputs for inference
         extra_outputs = {}
