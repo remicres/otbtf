@@ -32,9 +32,8 @@ class ModelBase(abc.ABC):
         logging.info("Inputs shapes: %s", self.inputs_shapes)
 
         # Setup cropping, normalization function
-        if inference_cropping is None:
-            inference_cropping = [16, 32, 64, 96, 128]
-        self.inference_cropping = inference_cropping
+        self.inference_cropping = [16, 32, 64, 96, 128] if not inference_cropping else inference_cropping
+        logging.info("Inference cropping values: %s", self.inference_cropping)
 
         # Create model
         self.model = self.create_network()
@@ -109,9 +108,14 @@ class ModelBase(abc.ABC):
             for crop in self.inference_cropping:
                 extra_output_key = cropped_tensor_name(out_key, crop)
                 extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
+                logging.info("Adding extra output for tensor %s with crop %s (%s)", out_key, crop, extra_output_name)
+                # Does not work anymore when crop > patch size:
                 # extra_output = tensorflow.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
-                extra_output = tensorflow.identity(out_tensor[:, crop:-crop, crop:-crop, :], name=extra_output_name)
-                extra_outputs[extra_output_key] = extra_output
+                # Works when crop > patch size but we lose tensors names:
+                # extra_output = tensorflow.identity(out_tensor[:, crop:-crop, crop:-crop, :], name=extra_output_name)
+                slice = out_tensor[:, crop:-crop, crop:-crop, :]
+                identity = tensorflow.keras.layers.Activation('linear', name=extra_output_name)
+                extra_outputs[extra_output_key] = identity(slice)
         outputs.update(extra_outputs)
 
         # Return the keras model
