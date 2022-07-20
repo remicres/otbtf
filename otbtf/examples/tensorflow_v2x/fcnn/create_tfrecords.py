@@ -18,7 +18,7 @@ params = parser.parse_args()
 if __name__ == "__main__":
 
     # Sort patches and labels
-    patches = sorted(params.patches)
+    patches = sorted(params.xs)
     labels = sorted(params.labels)
 
     # Check patches and labels are correctly sorted
@@ -33,4 +33,4 @@ if __name__ == "__main__":
     dataset = DatasetFromPatchesImages(filenames_dict={"input_xs": patches, "labels": labels})
 
     # Convert the dataset into TFRecords
-    dataset.to_tfrecords(output_dir=params.outdir)
+    dataset.to_tfrecords(output_dir=params.outdir, drop_remainder=False)
