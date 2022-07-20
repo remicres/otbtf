@@ -121,8 +121,7 @@ class TFRecords:
         :param example: Example object to parse
         :param features_types: List of types for each feature
         :param target_keys: list of keys of the targets
-        :param preprocessing_fn: Optional. A preprocessing function that takes input, target as args and returns
-                                           a tuple (input_preprocessed, target_preprocessed)
+        :param preprocessing_fn: Optional. A preprocessing function that process the input example
         :param kwargs: some keywords arguments for preprocessing_fn
         """
         read_features = {key: tf.io.FixedLenFeature([], dtype=tf.string) for key in features_types}
@@ -132,11 +131,9 @@ class TFRecords:
             example_parsed[key] = tf.io.parse_tensor(example_parsed[key], out_type=features_types[key])
 
         # Differentiating inputs and outputs
-        input_parsed = {key: value for (key, value) in example_parsed.items() if key not in target_keys}
-        target_parsed = {key: value for (key, value) in example_parsed.items() if key in target_keys}
-
-        if preprocessing_fn:
-            input_parsed, target_parsed = preprocessing_fn(input_parsed, target_parsed, **kwargs)
+        example_parsed_prep = preprocessing_fn(example_parsed, **kwargs) if preprocessing_fn else example_parsed
+        input_parsed = {key: value for (key, value) in example_parsed_prep.items() if key not in target_keys}
+        target_parsed = {key: value for (key, value) in example_parsed_prep.items() if key in target_keys}
 
         return input_parsed, target_parsed
 
@@ -153,16 +150,17 @@ class TFRecords:
                                False is advisable when evaluating metrics so that all samples are used
         :param shuffle_buffer_size: if None, shuffle is not used. Else, blocks of shuffle_buffer_size
                                     elements are shuffled using uniform random.
-        :param preprocessing_fn: Optional. A preprocessing function that takes (input, target) as args and returns
-                                 a tuple (input_preprocessed, target_preprocessed). Typically, target_preprocessed
-                                 must be computed accordingly to (1) what the model outputs and (2) what training loss
-                                 needs. For instance, for a classification problem, the model will likely output the
-                                 softmax, or activation neurons, for each class, and the cross entropy loss requires
-                                 labels in one hot encoding. In this case, the preprocessing_fn has to transform the
-                                 labels values (integer ranging from [0, n_classes]) in one hot encoding (vector of 0
-                                 and 1 of length n_classes). The preprocessing_fn should not implement such things as
-                                 radiometric transformations from input to input_preprocessed, because those are
-                                 performed inside the model itself (see `otbtf.ModelBase.normalize()`).
+        :param preprocessing_fn: Optional. A preprocessing function that takes input examples as args and returns the
+                                 preprocessed input examples. Typically, examples are composed of model inputs and
+                                 targets. Model inputs and model targets must be computed accordingly to (1) what the
+                                 model outputs and (2) what training loss needs. For instance, for a classification
+                                 problem, the model will likely output the softmax, or activation neurons, for each
+                                 class, and the cross entropy loss requires labels in one hot encoding. In this case,
+                                 the preprocessing_fn has to transform the labels values (integer ranging from
+                                 [0, n_classes]) in one hot encoding (vector of 0 and 1 of length n_classes). The
+                                 preprocessing_fn should not implement such things as radiometric transformations from
+                                 input to input_preprocessed, because those are performed inside the model itself
+                                 (see `otbtf.ModelBase.normalize()`).
         :param kwargs: some keywords arguments for preprocessing_fn
         """
         options = tf.data.Options()
