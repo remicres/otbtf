@@ -82,14 +82,17 @@ def train(params, ds_train, ds_valid, ds_test, output_shapes):
     :param params: contains batch_size, learning_rate, nb_epochs, and model_dir
     """
 
-    strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
+    # Model
+    model = FCNNModel(dataset_input_keys=["input_xs"],
+                      model_output_keys=["labels"],
+                      dataset_shapes=output_shapes,
+                      normalize_fn=normalize_fn)  # Note that the normalize_fn is now part of the model
+
+    # strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
+    strategy = tf.distribute.OneDeviceStrategy(device="/cpu:0")
     with strategy.scope():
         # Create and compile the model
-
-        model = FCNNModel(dataset_input_keys=["input_xs"],
-                          model_output_keys=["labels"],
-                          dataset_shapes=output_shapes,
-                          normalize_fn=normalize_fn)  # Note that the normalize_fn is now part of the model
+        model.create_network()
         model.compile(loss=tf.keras.losses.CategoricalCrossentropy(),
                       optimizer=tf.keras.optimizers.Adam(learning_rate=params.learning_rate),
                       metrics=[tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
