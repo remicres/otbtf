@@ -39,8 +39,10 @@ if __name__ == "__main__":
     valid_dir = os.path.join(params.tfrecords_dir, "valid")
     test_dir = os.path.join(params.tfrecords_dir, "test")
 
+
     def _tfrecords(directory):
         return TFRecords(directory, preprocessing_fn=fcnn_model.preprocessing_fn)
+
 
     # Training dataset. Must be shuffled!
     assert os.path.isdir(train_dir)
@@ -51,9 +53,8 @@ if __name__ == "__main__":
     ds_valid = _tfrecords(valid_dir).read(batch_size=params.batch_size, target_keys=["label"])
 
     # Test dataset (optional)
-    ds_test = None
-    if os.path.isdir(test_dir):
-        ds_test = _tfrecords(test_dir).read(batch_size=params.batch_size, target_keys=["label"]) if os.path.isdir(test_dir)
+    ds_test = _tfrecords(test_dir).read(batch_size=params.batch_size, target_keys=["label"]) if os.path.isdir(
+        test_dir) else None
 
     # Train the model
     fcnn_model.train(params, ds_train, ds_valid, ds_test)

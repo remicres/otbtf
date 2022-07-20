@@ -11,43 +11,40 @@ class ModelBase(abc.ABC):
     Base class for all models
     """
 
-    def __init__(self, dataset_element_spec, target_cropping=None,
-                 inference_cropping=None, normalize_fn=None):
+    def __init__(self, dataset_element_spec, inference_cropping=None, normalize_fn=None):
         """
-        Model base class
+        Model initializer, must be called **inside** the strategy.scope().
 
         :param dataset_element_spec: the dataset elements specification (shape, dtype, etc). Can be retrieved from the
                                      dataset instance simply with `ds.element_spec`
-        :param target_cropping: Optional. Number of pixels to be removed on each side of the target. This is used when
-                                training the model and can mitigate the effects of convolution
         :param inference_cropping: list of number of pixels to be removed on each side of the output during inference.
                                    This list creates some additional outputs in the model, not used during training,
                                    only during inference. Default [16, 32, 64, 96, 128]
         :param normalize_fn: a normalization function that can be added inside the Keras model. This function takes a
                              dict of inputs and returns a dict of normalized inputs. Optional
         """
+        # Retrieve dataset inputs shapes
         dataset_input_element_spec = dataset_element_spec[0]
         logging.info("Dataset input element spec: %s", dataset_input_element_spec)
+
         self.dataset_input_keys = list(dataset_input_element_spec)
         logging.info("Found dataset input keys: %s", self.dataset_input_keys)
+
         self.inputs_shapes = {key: dataset_input_element_spec[key].shape[1:] for key in self.dataset_input_keys}
         logging.info("Inputs shapes: %s", self.inputs_shapes)
-        self.model = None
-        self.target_cropping = target_cropping
+
+        # Setup cropping, normalization function
         if inference_cropping is None:
             inference_cropping = [16, 32, 64, 96, 128]
         self.inference_cropping = inference_cropping
         self.normalize_fn = normalize_fn
 
+        # Create model
+        self.model = self.create_network()
+
     def __getattr__(self, name):
         """This method is called when the default attribute access fails. We choose to try to access the attribute of
         self.model. Thus, any method of keras.Model() can be used transparently, e.g. model.summary() or model.fit()"""
-        if not self.model:
-            logging.warning("model is None. You should call `create_network()` before using it!")
-            logging.warning("Creating the neural network. Note that training could fail if using keras distribution "
-                            "strategy such as MirroredStrategy. Best practice is to call `create_network()` inside "
-                            "`with strategy.scope():`")
-            self.create_network()
         return getattr(self.model, name)
 
     def get_inputs(self):
@@ -107,7 +104,7 @@ class ModelBase(abc.ABC):
         # outputs.update(extra_outputs)
 
         # Return the keras model
-        self.model = keras.Model(inputs=model_inputs, outputs=outputs, name=self.__class__.__name__)
+        return keras.Model(inputs=model_inputs, outputs=outputs, name=self.__class__.__name__)
 
     def summary(self, strategy=None):
         """

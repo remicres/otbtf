@@ -88,15 +88,14 @@ def train(params, ds_train, ds_valid, ds_test):
     :param ds_test: testing dataset
     """
 
-    # Model instantiation
-    # Note that the normalize_fn is now part of the model
-    model = FCNNModel(dataset_element_spec=ds_train.element_spec, normalize_fn=normalize_fn)
-
     # strategy = tf.distribute.MirroredStrategy()  # For single or multi-GPUs
     strategy = tf.distribute.OneDeviceStrategy(device="/cpu:0")
     with strategy.scope():
-        # Create and compile the model
-        model.create_network()
+        # Model instantiation
+        # Note that the normalize_fn is now part of the model
+        model = FCNNModel(dataset_element_spec=ds_train.element_spec, normalize_fn=normalize_fn)
+
+        # Compile the model
         model.compile(loss=tf.keras.losses.CategoricalCrossentropy(),
                       optimizer=tf.keras.optimizers.Adam(learning_rate=params.learning_rate),
                       metrics=[tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
