@@ -13,13 +13,12 @@ class ModelBase(abc.ABC):
     Base class for all models
     """
 
-    def __init__(self, dataset_input_keys, model_output_keys, dataset_shapes, target_cropping=None,
+    def __init__(self, dataset_input_keys, dataset_shapes, target_cropping=None,
                  inference_cropping=None, normalize_fn=None):
         """
         Model base class
 
         :param dataset_input_keys: list of dataset keys used for the training
-        :param model_output_keys: list of the model outputs keys
         :param dataset_shapes: a dict() of shapes
         :param target_cropping: Optional. Number of pixels to be removed on each side of the target. This is used when
                                 training the model and can mitigate the effects of convolution
@@ -30,7 +29,6 @@ class ModelBase(abc.ABC):
                              dict of inputs and returns a dict of normalized inputs. Optional
         """
         self.dataset_input_keys = dataset_input_keys
-        self.model_output_keys = model_output_keys
         self.dataset_shapes = dataset_shapes
         self.model = None
         self.target_cropping = target_cropping
@@ -87,13 +85,16 @@ class ModelBase(abc.ABC):
 
         # Get the model inputs
         model_inputs = self.get_inputs()
+        logging.info(f"Model inputs: {model_inputs}")
 
         # Normalize the inputs. If some input keys are not handled by normalized_fn, these inputs are not normalized
         normalized_inputs = model_inputs.copy()
         normalized_inputs.update(self.normalize_fn(model_inputs))
+        logging.info(f"Normalized model inputs: {normalized_inputs}")
 
         # Build the model
         outputs = self.get_outputs(normalized_inputs)
+        logging.info(f"Model outputs: {outputs}")
 
         # # Add extra outputs for inference
         # extra_outputs = {}
