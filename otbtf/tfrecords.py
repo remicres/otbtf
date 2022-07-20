@@ -124,13 +124,18 @@ class TFRecords:
         read_features = {key: tf.io.FixedLenFeature([], dtype=tf.string) for key in self.output_types}
         example_parsed = tf.io.parse_single_example(example, read_features)
 
+        # Tensor with right data type
         for key, out_type in self.output_types.items():
             example_parsed[key] = tf.io.parse_tensor(example_parsed[key], out_type=out_type)
+
+        # Ensure shape
         for key, shape in self.output_shapes.items():
             example_parsed[key] = tf.ensure_shape(example_parsed[key], shape)
 
-        # Differentiating inputs and outputs
+        # Preprocessing
         example_parsed_prep = preprocessing_fn(example_parsed, **kwargs) if preprocessing_fn else example_parsed
+
+        # Differentiating inputs and targets
         input_parsed = {key: value for (key, value) in example_parsed_prep.items() if key not in target_keys}
         target_parsed = {key: value for (key, value) in example_parsed_prep.items() if key in target_keys}
 
