@@ -51,6 +51,7 @@ def preprocessing_fn(inputs, targets):
     :param targets: dict for targets
     :return: an output tuple (processed_inputs, processed_targets)
     """
+    # TODO: delete the cropping, just for testing with my data
     return {"input_xs": tf.keras.layers.Cropping2D(cropping=32)(inputs["input_xs"])}, \
            {"labels": tf.one_hot(tf.squeeze(targets["labels"], axis=-1), depth=2)}
 
