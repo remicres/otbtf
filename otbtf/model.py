@@ -109,7 +109,7 @@ class ModelBase(abc.ABC):
                 extra_output_key = cropped_tensor_name(out_key, crop)
                 extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
                 #extra_output = tensorflow.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
-                extra_output = tensorflow.identity(out_tensor[:, crop:crop, crop:crop, :], name=extra_output_name)
+                extra_output = tensorflow.identity(out_tensor[:, crop:-crop, crop:-crop, :], name=extra_output_name)
                 extra_outputs[extra_output_key] = extra_output
         outputs.update(extra_outputs)
 
