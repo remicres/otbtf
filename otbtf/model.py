@@ -69,7 +69,7 @@ class ModelBase(abc.ABC):
         :param inputs: inputs, either keras.Input or normalized_inputs
         :return: a dict of outputs tensors of the model
         """
-        raise NotImplemented("This method has to be implemented. Here you code the model :)")
+        raise NotImplementedError("This method has to be implemented. Here you code the model :)")
 
     @staticmethod
     def normalize_inputs(inputs):
@@ -92,15 +92,15 @@ class ModelBase(abc.ABC):
 
         # Get the model inputs
         model_inputs = self.get_inputs()
-        logging.info(f"Model inputs: {model_inputs}")
+        logging.info("Model inputs: %s", model_inputs)
 
         # Normalize the inputs
         normalized_inputs = self.normalize_inputs(model_inputs)
-        logging.info(f"Normalized model inputs: {normalized_inputs}")
+        logging.info(f"Normalized model inputs: %", normalized_inputs)
 
         # Build the model
         outputs = self.get_outputs(normalized_inputs)
-        logging.info(f"Model outputs: {outputs}")
+        logging.info(f"Model outputs: %s", outputs)
 
         # Add extra outputs for inference
         extra_outputs = {}
@@ -108,7 +108,7 @@ class ModelBase(abc.ABC):
             for crop in self.inference_cropping:
                 extra_output_key = cropped_tensor_name(out_key, crop)
                 extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
-                #extra_output = tensorflow.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
+                # extra_output = tensorflow.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
                 extra_output = tensorflow.identity(out_tensor[:, crop:-crop, crop:-crop, :], name=extra_output_name)
                 extra_outputs[extra_output_key] = extra_output
         outputs.update(extra_outputs)
@@ -136,8 +136,9 @@ class ModelBase(abc.ABC):
             # This model is only used for plotting the architecture thanks to `keras.utils.plot_model`
             inputs = self.get_inputs()  # inputs without normalization
             outputs = self.get_outputs(inputs)  # raw model outputs
-            model_simplified = keras.Model(inputs=inputs, outputs=outputs, name=self.__class__.__name__ + '_simplified')
-            keras.utils.plot_model(model_simplified, output_path)
+            model_simplified = tensorflow.keras.Model(inputs=inputs, outputs=outputs,
+                                                      name=self.__class__.__name__ + '_simplified')
+            tensorflow.keras.utils.plot_model(model_simplified, output_path)
 
 
 def cropped_tensor_name(tensor_name, crop):

@@ -85,5 +85,5 @@ def _is_chief(strategy):
     if strategy.cluster_resolver:  # this means MultiWorkerMirroredStrategy
         task_type, task_id = strategy.cluster_resolver.task_type, strategy.cluster_resolver.task_id
         return (task_type == 'chief') or (task_type == 'worker' and task_id == 0) or task_type is None
-    else:  # strategy with only one worker
-        return True
+    # strategy with only one worker
+    return True
