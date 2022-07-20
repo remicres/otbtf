@@ -11,7 +11,7 @@ patches-images
 - `train_from_tfrecords.py` shows how to train the model from TFRecords files
 - `create_tfrecords.py` shows how to convert patch-images into TFRecords files
 - `helper.py` contains a few helping functions 
-- 
+
 # Patches-images vs TFRecords based datasets
 
 TensorFlow datasets are the most practical way to feed a network data during 
@@ -31,9 +31,6 @@ approach provides the best performances, since it generates less I/Os since
 multiple patches are read simultaneously together. It is the recommended approach
 to work on high end gear. It requires an additional step of converting the 
 patches-images into TFRecords files.
-
-
-# A quick overview
 
 ## Patches-images based datasets
 
