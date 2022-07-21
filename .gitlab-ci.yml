@@ -7,6 +7,8 @@ variables:
   OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
   ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
   CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
+  API_TEST_TMP: /tmp/api_tests_tmp
+  DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
   DOCKER_DRIVER: overlay2
   CACHE_IMAGE_BASE: $CI_REGISTRY_IMAGE:otbtf-base
@@ -140,7 +142,7 @@ crc_book:
   extends: .applications_test_base
   script:
     - mkdir -p $CRC_BOOK_TMP
-    - TMPDIR=$CRC_BOOK_TMP DATADIR=$CI_PROJECT_DIR/test/data python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
+    - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
   after_script:
     - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
     
@@ -156,6 +158,14 @@ sr4rs:
     - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
+
+otbtf_api:
+  extends: .applications_test_base
+  script:
+    - mkdir $API_TEST_TMP
+    - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_api.xml $OTBTF_SRC/test/api_unittest.py
+  after_script:
+    - cp $API_TEST_TMP/*.* $ARTIFACT_TEST_DIR/
 
 deploy_cpu-dev-testing:
   stage: Update dev image
