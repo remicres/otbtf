@@ -165,7 +165,7 @@ class TFRecords:
                                  [0, n_classes]) in one hot encoding (vector of 0 and 1 of length n_classes). The
                                  preprocessing_fn should not implement such things as radiometric transformations from
                                  input to input_preprocessed, because those are performed inside the model itself
-                                 (see `otbtf.ModelBase.normalize()`).
+                                 (see `otbtf.ModelBase.normalize_inputs()`).
         :param shard_policy: sharding policy
         :param prefetch_buffer_size: prefetch buffer size
         :param kwargs: some keywords arguments for preprocessing_fn

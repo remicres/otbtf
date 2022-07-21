@@ -3,7 +3,6 @@ Implementation of a small U-Net like model
 """
 from otbtf.model import ModelBase
 import tensorflow as tf
-import tensorflow.keras.layers as layers
 import logging
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
@@ -17,6 +16,8 @@ class FCNNModel(ModelBase):
 
     def normalize_inputs(self, inputs):
         """
+        Inherits from `ModelBase`
+
         The model will use this function internally to normalize its inputs, before applying the `get_outputs()`
         function that actually builds the operations graph (convolutions, etc).
         This function will hence work at training time and inference time.
@@ -31,6 +32,8 @@ class FCNNModel(ModelBase):
 
     def get_outputs(self, normalized_inputs):
         """
+        Inherits from `ModelBase`
+
         This small model produces an output which has the same physical spacing as the input.
         The model generates [1 x 1 x N_CLASSES] output pixel for [32 x 32 x <nb channels>] input pixels.
 
@@ -41,10 +44,10 @@ class FCNNModel(ModelBase):
         norm_inp = normalized_inputs["input_xs"]
 
         def _conv(inp, depth, name):
-            return layers.Conv2D(filters=depth, kernel_size=3, activation="relu", name=name)(inp)
+            return tf.keras.layers.Conv2D(filters=depth, kernel_size=3, activation="relu", name=name)(inp)
 
         def _tconv(inp, depth, name, activation="relu"):
-            return layers.Conv2DTranspose(filters=depth, kernel_size=3, activation=activation, name=name)(inp)
+            return tf.keras.layers.Conv2DTranspose(filters=depth, kernel_size=3, activation=activation, name=name)(inp)
 
         out_conv1 = _conv(norm_inp, 16, "conv1")
         out_conv2 = _conv(out_conv1, 32, "conv2")
@@ -55,17 +58,29 @@ class FCNNModel(ModelBase):
         out_tconv3 = _tconv(out_tconv2, 16, "tconv3") + out_conv1
         out_tconv4 = _tconv(out_tconv3, N_CLASSES, "classifier", None)
 
-        # final layers
-        net = tf.keras.activations.softmax(out_tconv4)
-        net = tf.keras.layers.Cropping2D(cropping=32, name="predictions_softmax_tensor")(net)
+        # Generally it is a good thing to name the final layers of the network (i.e. the layers of which outputs are
+        # returned from the `MyModel.get_output()` method).
+        # Indeed this enables to retrieve them for inference time, using their name.
+        # In case your forgot to name the last layers, it is still possible to look at the model outputs using the
+        # `saved_model_cli show --dir /path/to/your/savedmodel --all` command.
+        #
+        # Do not confuse **the name of the output layers** (i.e. the "name" property of the tf.keras.layer that is used
+        # to generate an output tensor) and **the key of the output tensor**, in the dict returned from the
+        # `MyModel.get_output()` method. They are two identifiers with a different purpose:
+        #  - the output layer name is used only at inference time, to identify the output tensor from which generate
+        #    the output image,
+        #  - the output tensor key identifies the output tensors, mainly to fit the targets to model outputs during
+        #    training process, but it can also be used to access the tensors as tf/keras objects, for instance to
+        #    display previews images in TensorBoard.
+        predictions = tf.keras.layers.Softmax(name="predictions_softmax_tensor")(out_tconv4)
 
-        return {"predictions": net}
+        return {"predictions": predictions}
 
 
 def dataset_preprocessing_fn(examples):
     """
     Preprocessing function for the training dataset.
-    This function is only used at training time, to put the data in the expected format.
+    This function is only used at training time, to put the data in the expected format for the training step.
     DO NOT USE THIS FUNCTION TO NORMALIZE THE INPUTS ! (see `otbtf.ModelBase.normalize_inputs` for that).
     Note that this function is not called here, but in the code that prepares the datasets.
 
@@ -76,7 +91,7 @@ def dataset_preprocessing_fn(examples):
     def _to_categorical(x):
         return tf.one_hot(tf.squeeze(x, axis=-1), depth=N_CLASSES)
 
-    return {"input_xs": examples["input_xs"],
+    return {"input_xs": examples["input_xs"][32:-32, 32:-32, :],
             "predictions": _to_categorical(examples["labels"])}
 
 

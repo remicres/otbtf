@@ -62,25 +62,40 @@ class ModelBase(abc.ABC):
         return model_inputs
 
     @abc.abstractmethod
-    def get_outputs(self, inputs):
+    def get_outputs(self, normalized_inputs):
         """
-        Implementation of the model
-        :param inputs: inputs, either keras.Input or normalized_inputs
-        :return: a dict of outputs tensors of the model
+        Implementation of the model, from the normalized inputs.
+
+        :param normalized_inputs: normalized inputs, as generated from `self.normalize_inputs()`
+        :return: dict of model outputs
         """
         raise NotImplementedError("This method has to be implemented. Here you code the model :)")
 
     def normalize_inputs(self, inputs):
         """
-        A normalization function that can be added inside the Keras model. This function takes the dict of inputs and
-        returns a dict of normalized inputs. Can be reimplemented depending on the needs.
+        Normalize the model inputs.
+        Takes the dict of inputs and returns a dict of normalized inputs.
 
-        :param inputs: inputs, either keras.Input or normalized_inputs
-        :return: a dict of outputs tensors of the model
+        :param inputs: model inputs
+        :return: a dict of normalized model inputs
         """
         logging.warning("normalize_input() undefined. No normalization of the model inputs will be performed. "
-                        "You can implement the function in your model class")
+                        "You can implement the function in your model class if you want.")
         return inputs
+
+    def postprocess_outputs(self, outputs, inputs=None, normalized_inputs=None):
+        """
+        Post-process the model outputs.
+        Takes the dicts of inputs and outputs, and returns a dict of post-processed outputs.
+
+        :param outputs: dict of model outputs
+        :param inputs: dict of model inputs (optional)
+        :param normalized_inputs: dict of normalized model inputs (optional)
+        :return: a dict of post-processed model outputs
+        """
+        logging.warning("postprocess_outputs() undefined. No post-processing of the model inputs will be performed. "
+                        "You can implement the function in your model class if you want.")
+        return outputs
 
     def create_network(self):
         """
@@ -91,35 +106,43 @@ class ModelBase(abc.ABC):
         """
 
         # Get the model inputs
-        model_inputs = self.get_inputs()
-        logging.info("Model inputs: %s", model_inputs)
+        inputs = self.get_inputs()
+        logging.info("Model inputs: %s", inputs)
 
         # Normalize the inputs
-        normalized_inputs = self.normalize_inputs(model_inputs)
+        normalized_inputs = self.normalize_inputs(inputs=inputs)
         logging.info("Normalized model inputs: %s", normalized_inputs)
 
         # Build the model
-        outputs = self.get_outputs(normalized_inputs)
+        outputs = self.get_outputs(normalized_inputs=normalized_inputs)
         logging.info("Model outputs: %s", outputs)
+
+        # Post-processing for inference
+        postprocessed_outputs = self.postprocess_outputs(outputs=outputs, inputs=inputs,
+                                                         normalized_inputs=normalized_inputs)
 
         # Add extra outputs for inference
         extra_outputs = {}
-        for out_key, out_tensor in outputs.items():
+        for out_key, out_tensor in postprocessed_outputs.items():
             for crop in self.inference_cropping:
                 extra_output_key = cropped_tensor_name(out_key, crop)
                 extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
                 logging.info("Adding extra output for tensor %s with crop %s (%s)", out_key, crop, extra_output_name)
                 # Does not work anymore when crop > patch size:
                 # extra_output = tensorflow.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
-                # Works when crop > patch size but we lose tensors names:
+                # Works when crop > patch size, but we lose tensors names:
                 # extra_output = tensorflow.identity(out_tensor[:, crop:-crop, crop:-crop, :], name=extra_output_name)
+                # Works when crop > patch size, but doesnt work when len(self.inference_cropping) > 1!
+                # extra_output = tensorflow.keras.layers.Lambda(x: x[:, crop:-crop, crop:-crop, :],
+                #     name=extra_output_name)(out_tensor)
                 slice = out_tensor[:, crop:-crop, crop:-crop, :]
                 identity = tensorflow.keras.layers.Activation('linear', name=extra_output_name)
                 extra_outputs[extra_output_key] = identity(slice)
-        outputs.update(extra_outputs)
+        postprocessed_outputs.update(extra_outputs)
+        outputs.update(postprocessed_outputs)
 
         # Return the keras model
-        return tensorflow.keras.Model(inputs=model_inputs, outputs=outputs, name=self.__class__.__name__)
+        return tensorflow.keras.Model(inputs=inputs, outputs=outputs, name=self.__class__.__name__)
 
     def summary(self, strategy=None):
         """

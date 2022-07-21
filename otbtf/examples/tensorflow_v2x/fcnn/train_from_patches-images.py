@@ -36,26 +36,20 @@ def create_dataset(xs_filenames, labels_filenames, targets_keys=["predictions"])
     # However, this can slow down your process since the patches are read on-the-fly on the filesystem.
     # Good when one batch computation is slower than one batch gathering.
     ds = DatasetFromPatchesImages(filenames_dict={"input_xs": xs_filenames, "labels": labels_filenames})
-    tf_ds = ds.get_tf_dataset(batch_size=params.batch_size)
+    tf_ds = ds.get_tf_dataset(batch_size=params.batch_size, preprocessing_fn=fcnn_model.dataset_preprocessing_fn,
+                              targets_keys=targets_keys)
 
-    def _split_inp_target(all_inp):
-        # Differentiating inputs and outputs
-        all_inp_prep = fcnn_model.dataset_preprocessing_fn(all_inp)
-        inputs = {key: value for (key, value) in all_inp_prep.items() if key not in targets_keys}
-        targets = {key: value for (key, value) in all_inp_prep.items() if key in targets_keys}
-        return inputs, targets
-
-    return ds, tf_ds.map(_split_inp_target)
+    return tf_ds
 
 
 if __name__ == "__main__":
     params = parser.parse_args()
 
-    _, ds_train = create_dataset(params.train_xs, params.train_labels)
-    _, ds_valid = create_dataset(params.valid_xs, params.valid_labels)
+    ds_train = create_dataset(params.train_xs, params.train_labels)
+    ds_valid = create_dataset(params.valid_xs, params.valid_labels)
     ds_test = None
     if params.test_xs and params.test_labels:
-        _, ds_test = create_dataset(params.test_xs, params.test_labels)
+        ds_test = create_dataset(params.test_xs, params.test_labels)
 
     # Train the model
     fcnn_model.train(params, ds_train, ds_valid, ds_test)
