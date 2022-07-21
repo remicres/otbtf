@@ -29,7 +29,7 @@ import fcnn_model
 
 parser = helper.base_parser()
 parser.add_argument("--tfrecords_dir", required=True,
-                    help="Directory of subdirs containing TFRecords files: train, valid(, test)")
+                    help="Directory containing train, valid(, test) folders of TFRecords files")
 
 if __name__ == "__main__":
     params = parser.parse_args()
@@ -43,7 +43,7 @@ if __name__ == "__main__":
               "target_keys": ["predictions"],
               "preprocessing_fn": fcnn_model.dataset_preprocessing_fn}
 
-    # Training dataset. Must be shuffled!
+    # Training dataset. Must be shuffled
     assert os.path.isdir(train_dir)
     ds_train = TFRecords(train_dir).read(shuffle_buffer_size=1000, **kwargs)
 
