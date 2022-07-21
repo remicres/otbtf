@@ -11,12 +11,14 @@ class ModelBase(abc.ABC):
     Base class for all models
     """
 
-    def __init__(self, dataset_element_spec, inference_cropping=None):
+    def __init__(self, dataset_element_spec, input_keys=None, inference_cropping=None):
         """
         Model initializer, must be called **inside** the strategy.scope().
 
         :param dataset_element_spec: the dataset elements specification (shape, dtype, etc). Can be retrieved from the
                                      dataset instance simply with `ds.element_spec`
+        :param input_keys: Optional. the keys of the inputs used in the model. If not specified, all inputs from the
+                           dataset will be considered.
         :param inference_cropping: list of number of pixels to be removed on each side of the output during inference.
                                    This list creates some additional outputs in the model, not used during training,
                                    only during inference. Default [16, 32, 64, 96, 128]
@@ -25,8 +27,12 @@ class ModelBase(abc.ABC):
         dataset_input_element_spec = dataset_element_spec[0]
         logging.info("Dataset input element spec: %s", dataset_input_element_spec)
 
-        self.dataset_input_keys = list(dataset_input_element_spec)
-        logging.info("Found dataset input keys: %s", self.dataset_input_keys)
+        if input_keys:
+            self.dataset_input_keys = input_keys
+            logging.info("Using input keys: %s", self.dataset_input_keys)
+        else:
+            self.dataset_input_keys = list(dataset_input_element_spec)
+            logging.info("Found dataset input keys: %s", self.dataset_input_keys)
 
         self.inputs_shapes = {key: dataset_input_element_spec[key].shape[1:] for key in self.dataset_input_keys}
         logging.info("Inputs shapes: %s", self.inputs_shapes)
