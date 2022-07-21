@@ -22,28 +22,27 @@ the number of TFRecords files in the training, validation, and test datasets:
         k.records
 
 """
-import helper
 import os
 from otbtf import TFRecords
-import fcnn_model
+from otbtf.examples.tensorflow_v2x.fcnn import helper
+from otbtf.examples.tensorflow_v2x.fcnn import fcnn_model
 
 parser = helper.base_parser()
 parser.add_argument("--tfrecords_dir", required=True,
-                    help="Directory of subdirs containing TFRecords files: train, valid(, test)")
+                    help="Directory containing train, valid(, test) folders of TFRecords files")
 
-if __name__ == "__main__":
-    params = parser.parse_args()
 
+def train(params):
     # Patches directories must contain 'train' and 'valid' dirs ('test' is not required)
     train_dir = os.path.join(params.tfrecords_dir, "train")
     valid_dir = os.path.join(params.tfrecords_dir, "valid")
     test_dir = os.path.join(params.tfrecords_dir, "test")
 
     kwargs = {"batch_size": params.batch_size,
-              "target_keys": ["predictions"],
+              "target_keys": [fcnn_model.TARGET_NAME],
               "preprocessing_fn": fcnn_model.dataset_preprocessing_fn}
 
-    # Training dataset. Must be shuffled!
+    # Training dataset. Must be shuffled
     assert os.path.isdir(train_dir)
     ds_train = TFRecords(train_dir).read(shuffle_buffer_size=1000, **kwargs)
 
@@ -56,3 +55,7 @@ if __name__ == "__main__":
 
     # Train the model
     fcnn_model.train(params, ds_train, ds_valid, ds_test)
+
+
+if __name__ == "__main__":
+    train(parser.parse_args())

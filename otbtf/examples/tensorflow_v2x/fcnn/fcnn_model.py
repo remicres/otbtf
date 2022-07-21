@@ -7,6 +7,9 @@ import logging
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 N_CLASSES = 6
+INPUT_NAME = "input_xs"  # name of the input in the `FCNNModel` instance, also name of the input node in the SavedModel
+TARGET_NAME = "predictions"  # name of the output in the `FCNNModel` instance
+OUTPUT_SOFTMAX_NAME = "predictions_softmax_tensor"  # name (prefix) of the output node in the SavedModel
 
 
 class FCNNModel(ModelBase):
@@ -28,7 +31,7 @@ class FCNNModel(ModelBase):
         :param inputs: dict of inputs
         :return: dict of normalized inputs, ready to be used from the `get_outputs()` function of the model
         """
-        return {"input_xs": inputs["input_xs"] * 0.0001}
+        return {INPUT_NAME: tf.cast(inputs[INPUT_NAME], tf.float32) * 0.0001}
 
     def get_outputs(self, normalized_inputs):
         """
@@ -41,7 +44,7 @@ class FCNNModel(ModelBase):
         :return: activation values
         """
 
-        norm_inp = normalized_inputs["input_xs"]
+        norm_inp = normalized_inputs[INPUT_NAME]
 
         def _conv(inp, depth, name):
             return tf.keras.layers.Conv2D(filters=depth, kernel_size=3, activation="relu", name=name)(inp)
@@ -72,9 +75,9 @@ class FCNNModel(ModelBase):
         #  - the output tensor key identifies the output tensors, mainly to fit the targets to model outputs during
         #    training process, but it can also be used to access the tensors as tf/keras objects, for instance to
         #    display previews images in TensorBoard.
-        predictions = tf.keras.layers.Softmax(name="predictions_softmax_tensor")(out_tconv4)
+        predictions = tf.keras.layers.Softmax(name=OUTPUT_SOFTMAX_NAME)(out_tconv4)
 
-        return {"predictions": predictions}
+        return {TARGET_NAME: predictions}
 
 
 def dataset_preprocessing_fn(examples):
@@ -89,10 +92,10 @@ def dataset_preprocessing_fn(examples):
     """
 
     def _to_categorical(x):
-        return tf.one_hot(tf.squeeze(x, axis=-1), depth=N_CLASSES)
+        return tf.one_hot(tf.squeeze(tf.cast(x, tf.int32), axis=-1), depth=N_CLASSES)
 
-    return {"input_xs": examples["input_xs"][32:-32, 32:-32, :],
-            "predictions": _to_categorical(examples["labels"])}
+    return {INPUT_NAME: examples["input_xs_patches"],
+            TARGET_NAME: _to_categorical(examples["labels_patches"])}
 
 
 def train(params, ds_train, ds_valid, ds_test):

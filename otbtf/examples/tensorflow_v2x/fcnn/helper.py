@@ -6,7 +6,7 @@ import argparse
 
 def base_parser():
     """
-    Create a parser with the base parameters
+    Create a parser with the base parameters for the training applications
 
     :return: argparse.ArgumentParser instance
     """
@@ -26,6 +26,8 @@ def check_files_order(files1, files2):
     :param files1: list of filenames (str)
     :param files2: list of filenames (str)
     """
+    assert files1
+    assert files2
     assert len(files1) == len(files2)
 
     def get_basename(n):
