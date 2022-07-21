@@ -138,7 +138,7 @@ class ModelBase(abc.ABC):
                 # extra_output = tensorflow.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
                 # Works when crop > patch size, but we lose tensors names:
                 # extra_output = tensorflow.identity(out_tensor[:, crop:-crop, crop:-crop, :], name=extra_output_name)
-                # Works when crop > patch size, but doesnt work when len(self.inference_cropping) > 1!
+                # Works when crop > patch size, but doesn't work when len(self.inference_cropping) > 1!
                 # extra_output = tensorflow.keras.layers.Lambda(x: x[:, crop:-crop, crop:-crop, :],
                 #     name=extra_output_name)(out_tensor)
                 slice = out_tensor[:, crop:-crop, crop:-crop, :]
