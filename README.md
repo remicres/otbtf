@@ -19,9 +19,12 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
 
 ### Python
 
-`otbtf.py` targets python developers that want to train their own model from python with TensorFlow or Keras.
+The `otbtf` module targets python developers that want to train their own model from python with TensorFlow or Keras.
 It provides various classes for datasets and iterators to handle the _patches images_ generated from the `PatchesExtraction` OTB application.
-For instance, the `otbtf.Dataset` class provides a method `get_tf_dataset()` which returns a `tf.dataset` that can be used in your favorite TensorFlow pipelines, or convert your patches into TFRecords.
+For instance, the `otbtf.DatasetFromPatchesImages` can be instantiated from a set of _patches images_
+and delivering samples as `tf.dataset` that can be used in your favorite TensorFlow pipelines, or convert your patches into TFRecords.
+The `otbtf.TFRecords` enables you train networks from TFRecords files, which is quite suited for 
+distributed training. Read more in the [tutorial for keras](otbtf/examples/tensorflow_v2x/fcnn/README.md).
 
 `tricks.py` is here for backward compatibility with codes based on OTBTF 1.x and 2.x.
 
