@@ -1,3 +1,11 @@
+Version 3.3.0 (27 jul 2022)
+----------------------------------------------------------------
+* Improves the `dataset` classes (`DatasetFromPatchesImages`, `TFRecords`) to use them easily in keras
+* Document the python API (`otbtf.dataset` and `otbtf.tfrecords`)
+* Test the python API in the CI, using the (XS, labels) patches of the Amsterdam dataset (from CRC book)
+* Upgrade OTB to version 8.0.1
+* Upgrade GDAL to version
+
 Version 3.2.1 (1 jun 2022)
 ----------------------------------------------------------------
 * Changing docker images naming convention (cpu/gpu-basic* --> cpu/gpu*, cpu/gpu* --> cpu/gpu-opt*) + only images without optimizations are pushed on dockerhub
