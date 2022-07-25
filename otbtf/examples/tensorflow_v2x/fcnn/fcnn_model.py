@@ -6,7 +6,7 @@ import tensorflow as tf
 import logging
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
-N_CLASSES = 6
+N_CLASSES = 2
 INPUT_NAME = "input_xs"  # name of the input in the `FCNNModel` instance, also name of the input node in the SavedModel
 TARGET_NAME = "predictions"  # name of the output in the `FCNNModel` instance
 OUTPUT_SOFTMAX_NAME = "predictions_softmax_tensor"  # name (prefix) of the output node in the SavedModel
