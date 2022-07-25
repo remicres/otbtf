@@ -1,7 +1,7 @@
 image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
 variables:
-  OTBTF_VERSION: 3.2.1
+  OTBTF_VERSION: 3.3.0
   OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
   OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
   OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
@@ -15,8 +15,8 @@ variables:
   CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   DEV_IMAGE: $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
-  CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE/$OTBTF_VERSION
-  DOCKERHUB_IMAGE_BASE: mdl4eo/otbtf${OTBTF_VERSION}
+  CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
+  DOCKERHUB_IMAGE_BASE: mdl4eo/otbtf:${OTBTF_VERSION}
   
 workflow:
   rules:
@@ -186,10 +186,10 @@ deploy_cpu-dev-testing:
 deploy_cpu:
   extends: .ship base
   variables:
-    IMAGE_CPU: $CI_REGISTRY_PUBIMG:cpu
-    IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG:cpu-dev
-    DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE:cpu
-    DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE:cpu-dev
+    IMAGE_CPU: $CI_REGISTRY_PUBIMG-cpu
+    IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG-cpu-dev
+    DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE-cpu
+    DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE-cpu-dev
   script:
     # cpu
     - docker build --network='host' --tag $IMAGE_CPU --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" .
@@ -207,12 +207,12 @@ deploy_cpu:
 deploy_gpu:
   extends: .ship base
   variables:
-    IMAGE_GPU: $CI_REGISTRY_PUBIMG:gpu
-    IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG:gpu-dev
-    IMAGE_GPUOPT: $CI_REGISTRY_PUBIMG:gpu-opt
-    IMAGE_GPUOPTDEV: $CI_REGISTRY_PUBIMG:gpu-opt-dev
-    DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE:gpu
-    DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE:gpu-dev
+    IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
+    IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
+    IMAGE_GPUOPT: $CI_REGISTRY_PUBIMG-gpu-opt
+    IMAGE_GPUOPTDEV: $CI_REGISTRY_PUBIMG-gpu-opt-dev
+    DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE-gpu
+    DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
   script:
     # gpu-opt
     - docker build --network='host' --tag $IMAGE_GPUOPT --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 .
