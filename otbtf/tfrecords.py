@@ -143,7 +143,8 @@ class TFRecords:
 
     def read(self, batch_size, target_keys, n_workers=1, drop_remainder=True, shuffle_buffer_size=None,
              preprocessing_fn=None, shard_policy=tf.data.experimental.AutoShardPolicy.AUTO,
-             prefetch_buffer_size=tf.data.experimental.AUTOTUNE, **kwargs):
+             prefetch_buffer_size=tf.data.experimental.AUTOTUNE,
+             num_parallel_calls=tf.data.experimental.AUTOTUNE, **kwargs):
         """
         Read all tfrecord files matching with pattern and convert data to tensorflow dataset.
         :param batch_size: Size of tensorflow batch
@@ -166,8 +167,9 @@ class TFRecords:
                                  preprocessing_fn should not implement such things as radiometric transformations from
                                  input to input_preprocessed, because those are performed inside the model itself
                                  (see `otbtf.ModelBase.normalize_inputs()`).
-        :param shard_policy: sharding policy
-        :param prefetch_buffer_size: prefetch buffer size
+        :param shard_policy: sharding policy for the TFRecordDataset options
+        :param prefetch_buffer_size: buffer size for the prefetch operation
+        :param num_parallel_calls: number of parallel calls for the parsing + preprocessing step
         :param kwargs: some keywords arguments for preprocessing_fn
         """
         options = tf.data.Options()
@@ -176,7 +178,6 @@ class TFRecords:
         options.experimental_distribute.auto_shard_policy = shard_policy  # for multiworker
         parse = partial(self.parse_tfrecord, target_keys=target_keys, preprocessing_fn=preprocessing_fn, **kwargs)
 
-        # TODO: to be investigated :
         # 1/ num_parallel_reads useful ? I/O bottleneck of not ?
         # 2/ num_parallel_calls=tf.data.experimental.AUTOTUNE useful ?
         tfrecords_pattern_path = os.path.join(self.dirpath, "*.records")
@@ -191,7 +192,7 @@ class TFRecords:
         logging.info('Reducing number of records to : %s', nb_matching_files)
         dataset = tf.data.TFRecordDataset(matching_files)  # , num_parallel_reads=2)  # interleaves reads from xxx files
         dataset = dataset.with_options(options)  # uses data as soon as it streams in, rather than in its original order
-        dataset = dataset.map(parse, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        dataset = dataset.map(parse, num_parallel_calls=num_parallel_calls)
         if shuffle_buffer_size:
             dataset = dataset.shuffle(buffer_size=shuffle_buffer_size)
         dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
