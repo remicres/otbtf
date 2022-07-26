@@ -93,15 +93,26 @@ class ModelBase(abc.ABC):
         """
         Post-process the model outputs.
         Takes the dicts of inputs and outputs, and returns a dict of post-processed outputs.
+        The default implementation provides a set of cropped output tensors
 
         :param outputs: dict of model outputs
         :param inputs: dict of model inputs (optional)
         :param normalized_inputs: dict of normalized model inputs (optional)
         :return: a dict of post-processed model outputs
         """
-        logging.warning("postprocess_outputs() undefined. No post-processing of the model inputs will be performed. "
-                        "You can implement the function in your model class if you want.")
-        return outputs
+
+        # Add extra outputs for inference
+        extra_outputs = {}
+        for out_key, out_tensor in outputs.items():
+            for crop in self.inference_cropping:
+                extra_output_key = cropped_tensor_name(out_key, crop)
+                extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
+                logging.info("Adding extra output for tensor %s with crop %s (%s)", out_key, crop, extra_output_name)
+                cropped = out_tensor[:, crop:-crop, crop:-crop, :]
+                identity = tensorflow.keras.layers.Activation('linear', name=extra_output_name)
+                extra_outputs[extra_output_key] = identity(cropped)
+        
+        return extra_outputs
 
     def create_network(self):
         """
@@ -126,25 +137,6 @@ class ModelBase(abc.ABC):
         # Post-processing for inference
         postprocessed_outputs = self.postprocess_outputs(outputs=outputs, inputs=inputs,
                                                          normalized_inputs=normalized_inputs)
-
-        # Add extra outputs for inference
-        extra_outputs = {}
-        for out_key, out_tensor in postprocessed_outputs.items():
-            for crop in self.inference_cropping:
-                extra_output_key = cropped_tensor_name(out_key, crop)
-                extra_output_name = cropped_tensor_name(out_tensor._keras_history.layer.name, crop)
-                logging.info("Adding extra output for tensor %s with crop %s (%s)", out_key, crop, extra_output_name)
-                # Does not work anymore when crop > patch size:
-                # extra_output = tensorflow.keras.layers.Cropping2D(cropping=crop, name=extra_output_name)(out_tensor)
-                # Works when crop > patch size, but we lose tensors names:
-                # extra_output = tensorflow.identity(out_tensor[:, crop:-crop, crop:-crop, :], name=extra_output_name)
-                # Works when crop > patch size, but doesn't work when len(self.inference_cropping) > 1!
-                # extra_output = tensorflow.keras.layers.Lambda(x: x[:, crop:-crop, crop:-crop, :],
-                #     name=extra_output_name)(out_tensor)
-                slice = out_tensor[:, crop:-crop, crop:-crop, :]
-                identity = tensorflow.keras.layers.Activation('linear', name=extra_output_name)
-                extra_outputs[extra_output_key] = identity(slice)
-        postprocessed_outputs.update(extra_outputs)
         outputs.update(postprocessed_outputs)
 
         # Return the keras model
