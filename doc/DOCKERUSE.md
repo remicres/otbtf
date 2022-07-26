@@ -2,35 +2,11 @@
 
 ### Available images
 
-Here is the list of OTBTF docker images hosted on [dockerhub](https://hub.docker.com/u/mdl4eo).
+Here is the list of the latest OTBTF docker images hosted on [dockerhub](https://hub.docker.com/u/mdl4eo).
 Since OTBTF >= 3.2.1 you can find latest docker images on [gitlab.irstea.fr](https://gitlab.irstea.fr/remi.cresson/otbtf/container_registry).
 
 | Name                                                                               | Os            | TF     | OTB   | Description            | Dev files | Compute capability |
 |------------------------------------------------------------------------------------| ------------- | ------ |-------| ---------------------- | --------- | ------------------ |
-| **mdl4eo/otbtf:1.6-cpu**                                                           | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0        |
-| **mdl4eo/otbtf:1.7-cpu**                                                           | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0        |
-| **mdl4eo/otbtf:1.7-gpu**                                                           | Ubuntu Xenial | r1.14  | 7.0.0 | GPU                    | yes       | 5.2,6.1,7.0        |
-| **mdl4eo/otbtf:2.0-cpu**                                                           | Ubuntu Xenial | r2.1   | 7.1.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0,7.5    |
-| **mdl4eo/otbtf:2.0-gpu**                                                           | Ubuntu Xenial | r2.1   | 7.1.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5    |
-| **mdl4eo/otbtf:2.4-cpu**                                                           | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0,7.5    |
-| **mdl4eo/otbtf:2.4-cpu-opt**                                                       | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, few optimizations | no        | 5.2,6.1,7.0,7.5    |
-| **mdl4eo/otbtf:2.4-cpu-mkl**                                                       | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, Intel MKL, AVX512 | yes       | 5.2,6.1,7.0,7.5    |
-| **mdl4eo/otbtf:2.4-gpu**                                                           | Ubuntu Focal  | r2.4.1 | 7.2.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5    |
-| **mdl4eo/otbtf:2.5-cpu**                                                           | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:2.5:cpu-dev**                                                       | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:2.5-cpu-opt**                                                       | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, few optimization  | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:2.5-gpu-opt**                                                       | Ubuntu Focal  | r2.5   | 7.4.0 | GPU                    | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:2.5-gpu-opt-dev**                                                   | Ubuntu Focal  | r2.5   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.0-cpu**                                                           | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.0-cpu-dev**                                                       | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.0-gpu-opt**                                                       | Ubuntu Focal  | r2.5   | 7.4.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.0-gpu-opt-dev**                                                   | Ubuntu Focal  | r2.5   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.1-cpu**                                                           | Ubuntu Focal  | r2.8   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.1-cpu-dev**                                                       | Ubuntu Focal  | r2.8   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.1-gpu**                                                           | Ubuntu Focal  | r2.8   | 7.4.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.1-gpu-dev**                                                       | Ubuntu Focal  | r2.8   | 7.4.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.1-gpu-opt**                                                       | Ubuntu Focal  | r2.8   | 7.4.0 | GPU                    | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.1-gpu-opt-dev**                                                   | Ubuntu Focal  | r2.8   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.0-cpu**                                                         | Ubuntu Focal  | r2.8   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.0-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.0-gpu**                                                         | Ubuntu Focal  | r2.8   | 7.4.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
@@ -44,7 +20,10 @@ Since OTBTF >= 3.2.1 you can find latest docker images on [gitlab.irstea.fr](htt
 | **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.0-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.0.1 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
 | **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.0-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.0.1 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 
+The list of older releases is available [here](#older-docker-releases).
+
 You can also find more interesting OTBTF flavored images at [LaTelescop gitlab registry](https://gitlab.com/latelescop/docker/otbtf/container_registry/).
+
 
 ### Development ready images
 
@@ -261,3 +240,34 @@ id
 ls -Alh /home/otbuser
 touch /home/otbuser/test.txt
 ```
+
+# Older docker releases
+
+Here you can find the list of older releases of OTBTF:
+
+| Name                                                                               | Os            | TF     | OTB   | Description            | Dev files | Compute capability |
+|------------------------------------------------------------------------------------| ------------- | ------ |-------| ---------------------- | --------- | ------------------ |
+| **mdl4eo/otbtf:1.6-cpu**                                                           | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0        |
+| **mdl4eo/otbtf:1.7-cpu**                                                           | Ubuntu Xenial | r1.14  | 7.0.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0        |
+| **mdl4eo/otbtf:1.7-gpu**                                                           | Ubuntu Xenial | r1.14  | 7.0.0 | GPU                    | yes       | 5.2,6.1,7.0        |
+| **mdl4eo/otbtf:2.0-cpu**                                                           | Ubuntu Xenial | r2.1   | 7.1.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf:2.0-gpu**                                                           | Ubuntu Xenial | r2.1   | 7.1.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf:2.4-cpu**                                                           | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, no optimization   | yes       | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf:2.4-cpu-opt**                                                       | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, few optimizations | no        | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf:2.4-cpu-mkl**                                                       | Ubuntu Focal  | r2.4.1 | 7.2.0 | CPU, Intel MKL, AVX512 | yes       | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf:2.4-gpu**                                                           | Ubuntu Focal  | r2.4.1 | 7.2.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5    |
+| **mdl4eo/otbtf:2.5-cpu**                                                           | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:2.5:cpu-dev**                                                       | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:2.5-cpu-opt**                                                       | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, few optimization  | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:2.5-gpu-opt**                                                       | Ubuntu Focal  | r2.5   | 7.4.0 | GPU                    | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:2.5-gpu-opt-dev**                                                   | Ubuntu Focal  | r2.5   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.0-cpu**                                                           | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.0-cpu-dev**                                                       | Ubuntu Focal  | r2.5   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.0-gpu-opt**                                                       | Ubuntu Focal  | r2.5   | 7.4.0 | GPU                    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.0-gpu-opt-dev**                                                   | Ubuntu Focal  | r2.5   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.1-cpu**                                                           | Ubuntu Focal  | r2.8   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.1-cpu-dev**                                                       | Ubuntu Focal  | r2.8   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.1-gpu**                                                           | Ubuntu Focal  | r2.8   | 7.4.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.1-gpu-dev**                                                       | Ubuntu Focal  | r2.8   | 7.4.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.1-gpu-opt**                                                       | Ubuntu Focal  | r2.8   | 7.4.0 | GPU                    | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.1-gpu-opt-dev**                                                   | Ubuntu Focal  | r2.8   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
