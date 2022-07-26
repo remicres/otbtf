@@ -47,10 +47,11 @@ class FCNNModel(ModelBase):
         norm_inp = normalized_inputs[INPUT_NAME]
 
         def _conv(inp, depth, name):
-            return tf.keras.layers.Conv2D(filters=depth, kernel_size=3, activation="relu", name=name)(inp)
+            return tf.keras.layers.Conv2D(filters=depth, kernel_size=3, strides=2, activation="relu", name=name)(inp)
 
         def _tconv(inp, depth, name, activation="relu"):
-            return tf.keras.layers.Conv2DTranspose(filters=depth, kernel_size=3, activation=activation, name=name)(inp)
+            return tf.keras.layers.Conv2DTranspose(filters=depth, kernel_size=3, strides=2, activation=activation,
+                                                   name=name)(inp)
 
         out_conv1 = _conv(norm_inp, 16, "conv1")
         out_conv2 = _conv(out_conv1, 32, "conv2")
