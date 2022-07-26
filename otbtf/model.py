@@ -111,7 +111,7 @@ class ModelBase(abc.ABC):
                 cropped = out_tensor[:, crop:-crop, crop:-crop, :]
                 identity = tensorflow.keras.layers.Activation('linear', name=extra_output_name)
                 extra_outputs[extra_output_key] = identity(cropped)
-        
+
         return extra_outputs
 
     def create_network(self):
