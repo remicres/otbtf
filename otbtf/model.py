@@ -3,7 +3,7 @@
 import abc
 import logging
 import tensorflow
-from otbtf.utils import _is_chief
+from otbtf.utils import _is_chief, cropped_tensor_name
 
 
 class ModelBase(abc.ABC):
@@ -166,12 +166,3 @@ class ModelBase(abc.ABC):
                                                       name=self.__class__.__name__ + '_simplified')
             tensorflow.keras.utils.plot_model(model_simplified, output_path)
 
-
-def cropped_tensor_name(tensor_name, crop):
-    """
-    A name for the padded tensor
-    :param tensor_name: tensor name
-    :param pad: pad value
-    :return: name
-    """
-    return "{}_crop{}".format(tensor_name, crop)

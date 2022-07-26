@@ -87,3 +87,13 @@ def _is_chief(strategy):
         return (task_type == 'chief') or (task_type == 'worker' and task_id == 0) or task_type is None
     # strategy with only one worker
     return True
+
+
+def cropped_tensor_name(tensor_name, crop):
+    """
+    A name for the padded tensor
+    :param tensor_name: tensor name
+    :param pad: pad value
+    :return: name
+    """
+    return "{}_crop{}".format(tensor_name, crop)
