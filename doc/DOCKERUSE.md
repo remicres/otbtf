@@ -7,12 +7,6 @@ Since OTBTF >= 3.2.1 you can find latest docker images on [gitlab.irstea.fr](htt
 
 | Name                                                                               | Os            | TF     | OTB   | Description            | Dev files | Compute capability |
 |------------------------------------------------------------------------------------| ------------- | ------ |-------| ---------------------- | --------- | ------------------ |
-| **mdl4eo/otbtf:3.3.0-cpu**                                                         | Ubuntu Focal  | r2.8   | 7.4.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.3.0-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 7.4.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.3.0-gpu**                                                         | Ubuntu Focal  | r2.8   | 7.4.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.3.0-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 7.4.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.0-gpu-opt**     | Ubuntu Focal  | r2.8   | 7.4.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.0-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 7.4.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.0-cpu**                                                         | Ubuntu Focal  | r2.8   | 8.0.1 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.0-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.0.1 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.0-gpu**                                                         | Ubuntu Focal  | r2.8   | 8.0.1 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
