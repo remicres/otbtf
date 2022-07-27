@@ -25,8 +25,6 @@ wget
 zip
 
 bison
-gdal-bin
-python3-gdal
 libboost-date-time-dev
 libboost-filesystem-dev
 libboost-graph-dev
@@ -36,8 +34,6 @@ libboost-thread-dev
 libcurl4-gnutls-dev
 libexpat1-dev
 libfftw3-dev
-libgdal-dev
-libgeotiff-dev
 libgsl-dev
 libinsighttoolkit4-dev
 libkml-dev
@@ -45,9 +41,6 @@ libmuparser-dev
 libmuparserx-dev
 libopencv-core-dev
 libopencv-ml-dev
-libopenthreads-dev
-libossim-dev
-libpng-dev
 libsvm-dev
 libtinyxml-dev
 zlib1g-dev

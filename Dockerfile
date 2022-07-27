@@ -148,7 +148,7 @@ COPY --from=builder /src /src
 # System-wide ENV
 ENV PATH="/opt/otbtf/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
-ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/otb/python:/src/otbtf"
+ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/python3/dist-packages:/opt/otbtf/lib/otb/python:/src/otbtf"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 
 # Default user, directory and command (bash is the entrypoint when using 'docker create')
