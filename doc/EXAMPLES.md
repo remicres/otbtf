@@ -312,5 +312,6 @@ otbcli_TensorflowModelServe \
 -source2.il $pan -source2.rfieldx 32 -source2.rfieldy 32 -source2.placeholder "x2" \
 -model.dir $modeldir \
 -model.fullyconv on \
+-output.names "prediction" \
 -out $output_classif
 ```
