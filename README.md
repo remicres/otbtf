@@ -3,7 +3,7 @@
 # OTBTF: Orfeo ToolBox meets TensorFlow
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![pipeline status](https://gitlab.irstea.fr/remi.cresson/otbtf/badges/develop/pipeline.svg)](https://gitlab.irstea.fr/remi.cresson/otbtf/-/commits/develop)
+[![pipeline status](https://gitlab.irstea.fr/remi.cresson/otbtf/badges/master/pipeline.svg)](https://gitlab.irstea.fr/remi.cresson/otbtf/-/commits/develop)
 
 This remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org) provides a generic, multi purpose deep learning framework, targeting remote sensing images processing.
 It contains a set of new process objects that internally invoke [Tensorflow](https://www.tensorflow.org/), and a bunch of user-oriented applications to perform deep learning with real-world remote sensing images.
@@ -19,9 +19,12 @@ Applications can be used to build OTB pipelines from Python or C++ APIs.
 
 ### Python
 
-`otbtf.py` targets python developers that want to train their own model from python with TensorFlow or Keras.
+The `otbtf` module targets python developers that want to train their own model from python with TensorFlow or Keras.
 It provides various classes for datasets and iterators to handle the _patches images_ generated from the `PatchesExtraction` OTB application.
-For instance, the `otbtf.Dataset` class provides a method `get_tf_dataset()` which returns a `tf.dataset` that can be used in your favorite TensorFlow pipelines, or convert your patches into TFRecords.
+For instance, the `otbtf.DatasetFromPatchesImages` can be instantiated from a set of _patches images_
+and delivering samples as `tf.dataset` that can be used in your favorite TensorFlow pipelines, or convert your patches into TFRecords.
+The `otbtf.TFRecords` enables you train networks from TFRecords files, which is quite suited for 
+distributed training. Read more in the [tutorial for keras](otbtf/examples/tensorflow_v2x/fcnn/README.md).
 
 `tricks.py` is here for backward compatibility with codes based on OTBTF 1.x and 2.x.
 
@@ -36,6 +39,10 @@ Below are some screen captures of deep learning applications performed at large 
  
 ![Super resolution](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/supresol.png)
 
+ - Sentinel-2 reconstruction with Sentinel-1 VV/VH with the [Decloud software](https://github.com/CNES/decloud), which is based on OTBTF
+
+![Decloud](https://github.com/CNES/decloud/raw/master/doc/images/cap2.jpg)
+ - 
  - Image to image translation (Spot-7 image --> Wikimedia Map using CGAN. So unnecessary but fun!)
 
 ![Pix2pix](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/pix2pix.png)
@@ -46,9 +53,9 @@ For now you have two options: either use the existing **docker image**, or build
 
 ### Docker
 
-Use the latest image from dockerhub:
+Use the latest CPU or GPU-enabled image from dockerhub:
 ```
-docker run mdl4eo/otbtf3.1:cpu-basic otbcli_PatchesExtraction -help
+docker run mdl4eo/otbtf:3.3.0-cpu otbcli_PatchesExtraction -help
 ```
 
 Read more in the [docker use documentation](doc/DOCKERUSE.md).

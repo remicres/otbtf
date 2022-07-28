@@ -1,5 +1,6 @@
 import otbApplication
 import os
+from pathlib import Path
 
 
 def get_nb_of_channels(raster):
@@ -42,15 +43,59 @@ def compare(raster1, raster2, tol=0.01):
     return True
 
 
-def resolve_paths(filename, var_list):
+def resolve_paths(path):
     """
-    Retrieve environment variables in paths
-    :param filename: file name
-    :params var_list: variable list
-    :return filename with retrieved environment variables
+    Resolve a path with the environment variables
     """
-    new_filename = filename
-    for var in var_list:
-        new_filename = new_filename.replace("${}".format(var), os.environ[var])
-    print("Resolve filename...\n\tfilename: {}, \n\tnew filename: {}".format(filename, new_filename))
-    return new_filename
+    return os.path.expandvars(path)
+
+
+def files_exist(file_list):
+    """
+    Check is all files exist
+    """
+    print("Checking if files exist...")
+    for file in file_list:
+        print("\t{}".format(file))
+        path = Path(resolve_paths(file))
+        if not path.is_file():
+            print("File {} does not exist!".format(file))
+            return False
+        print("\tOk")
+    return True
+
+
+def run_command(command):
+    """
+    Run a command
+    :param command: the command to run
+    """
+    full_command = resolve_paths(command)
+    print("Running command: \n\t {}".format(full_command))
+    os.system(full_command)
+
+
+def run_command_and_test_exist(command, file_list):
+    """
+    :param command: the command to run (str)
+    :param file_list: list of files to check
+    :return True or False
+    """
+    run_command(command)
+    return files_exist(file_list)
+
+
+def run_command_and_compare(command, to_compare_dict, tol=0.01):
+    """
+    :param command: the command to run (str)
+    :param to_compare_dict: a dict of {baseline1: output1, ..., baselineN: outputN}
+    :param tol: tolerance (float)
+    :return True or False
+    """
+
+    run_command(command)
+    for baseline, output in to_compare_dict.items():
+        if not compare(resolve_paths(baseline), resolve_paths(output), tol):
+            print("Baseline {} and output {} differ.".format(baseline, output))
+            return False
+    return True

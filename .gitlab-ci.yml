@@ -1,20 +1,22 @@
 image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
 variables:
-  OTBTF_VERSION: 3.2.1
+  OTBTF_VERSION: 3.3.0
   OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
   OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
   OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
   ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
   CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
+  API_TEST_TMP: /tmp/api_tests_tmp
+  DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
   DOCKER_DRIVER: overlay2
   CACHE_IMAGE_BASE: $CI_REGISTRY_IMAGE:otbtf-base
   CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   DEV_IMAGE: $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
-  CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE/$OTBTF_VERSION
-  DOCKERHUB_IMAGE_BASE: mdl4eo/otbtf${OTBTF_VERSION}
+  CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
+  DOCKERHUB_IMAGE_BASE: mdl4eo/otbtf:${OTBTF_VERSION}
   
 workflow:
   rules:
@@ -140,7 +142,7 @@ crc_book:
   extends: .applications_test_base
   script:
     - mkdir -p $CRC_BOOK_TMP
-    - TMPDIR=$CRC_BOOK_TMP DATADIR=$CI_PROJECT_DIR/test/data python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
+    - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
   after_script:
     - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
     
@@ -156,6 +158,14 @@ sr4rs:
     - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
+
+otbtf_api:
+  extends: .applications_test_base
+  script:
+    - mkdir $API_TEST_TMP
+    - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_api.xml $OTBTF_SRC/test/api_unittest.py
+  after_script:
+    - cp $API_TEST_TMP/*.* $ARTIFACT_TEST_DIR/
 
 deploy_cpu-dev-testing:
   stage: Update dev image
@@ -176,10 +186,10 @@ deploy_cpu-dev-testing:
 deploy_cpu:
   extends: .ship base
   variables:
-    IMAGE_CPU: $CI_REGISTRY_PUBIMG:cpu
-    IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG:cpu-dev
-    DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE:cpu
-    DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE:cpu-dev
+    IMAGE_CPU: $CI_REGISTRY_PUBIMG-cpu
+    IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG-cpu-dev
+    DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE-cpu
+    DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE-cpu-dev
   script:
     # cpu
     - docker build --network='host' --tag $IMAGE_CPU --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" .
@@ -197,12 +207,12 @@ deploy_cpu:
 deploy_gpu:
   extends: .ship base
   variables:
-    IMAGE_GPU: $CI_REGISTRY_PUBIMG:gpu
-    IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG:gpu-dev
-    IMAGE_GPUOPT: $CI_REGISTRY_PUBIMG:gpu-opt
-    IMAGE_GPUOPTDEV: $CI_REGISTRY_PUBIMG:gpu-opt-dev
-    DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE:gpu
-    DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE:gpu-dev
+    IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
+    IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
+    IMAGE_GPUOPT: $CI_REGISTRY_PUBIMG-gpu-opt
+    IMAGE_GPUOPTDEV: $CI_REGISTRY_PUBIMG-gpu-opt-dev
+    DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE-gpu
+    DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
   script:
     # gpu-opt
     - docker build --network='host' --tag $IMAGE_GPUOPT --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 .
