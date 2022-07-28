@@ -46,7 +46,6 @@ docker image:
   stage: Build
   except:
     - develop
-    - master
   script:
     - >
       docker build

@@ -165,4 +165,3 @@ class ModelBase(abc.ABC):
             model_simplified = tensorflow.keras.Model(inputs=inputs, outputs=outputs,
                                                       name=self.__class__.__name__ + '_simplified')
             tensorflow.keras.utils.plot_model(model_simplified, output_path)
-
