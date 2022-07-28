@@ -20,7 +20,9 @@
 """
 OTBTF python module
 """
+
 from otbtf.utils import read_as_np_arr, gdal_open
 from otbtf.dataset import Buffer, PatchesReaderBase, PatchesImagesReader, IteratorBase, RandomIterator, Dataset, \
-    DatasetFromPatchesImages
+     DatasetFromPatchesImages
 from otbtf.tfrecords import TFRecords
+from otbtf.model import ModelBase

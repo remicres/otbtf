@@ -41,8 +41,8 @@ class TFRecords:
         self.dirpath = path
         os.makedirs(self.dirpath, exist_ok=True)
         self.output_types_file = os.path.join(self.dirpath, "output_types.json")
-        self.output_shape_file = os.path.join(self.dirpath, "output_shape.json")
-        self.output_shape = self.load(self.output_shape_file) if os.path.exists(self.output_shape_file) else None
+        self.output_shapes_file = os.path.join(self.dirpath, "output_shapes.json")
+        self.output_shapes = self.load(self.output_shapes_file) if os.path.exists(self.output_shapes_file) else None
         self.output_types = self.load(self.output_types_file) if os.path.exists(self.output_types_file) else None
 
     @staticmethod
@@ -70,8 +70,8 @@ class TFRecords:
         if not drop_remainder and dataset.size % n_samples_per_shard > 0:
             nb_shards += 1
 
-        output_shapes = {key: (None,) + output_shape for key, output_shape in dataset.output_shapes.items()}
-        self.save(output_shapes, self.output_shape_file)
+        output_shapes = {key: output_shape for key, output_shape in dataset.output_shapes.items()}
+        self.save(output_shapes, self.output_shapes_file)
 
         output_types = {key: output_type.name for key, output_type in dataset.output_types.items()}
         self.save(output_types, self.output_types_file)
@@ -101,7 +101,6 @@ class TFRecords:
         :param data: Data to save json format
         :param filepath: Output file name
         """
-
         with open(filepath, 'w') as file:
             json.dump(data, file, indent=4)
 
@@ -114,34 +113,38 @@ class TFRecords:
         with open(filepath, 'r') as file:
             return json.load(file)
 
-    @staticmethod
-    def parse_tfrecord(example, features_types, target_keys, preprocessing_fn=None, **kwargs):
+    def parse_tfrecord(self, example, target_keys, preprocessing_fn=None, **kwargs):
         """
         Parse example object to sample dict.
         :param example: Example object to parse
-        :param features_types: List of types for each feature
         :param target_keys: list of keys of the targets
-        :param preprocessing_fn: Optional. A preprocessing function that takes input, target as args and returns
-                                           a tuple (input_preprocessed, target_preprocessed)
+        :param preprocessing_fn: Optional. A preprocessing function that process the input example
         :param kwargs: some keywords arguments for preprocessing_fn
         """
-        read_features = {key: tf.io.FixedLenFeature([], dtype=tf.string) for key in features_types}
+        read_features = {key: tf.io.FixedLenFeature([], dtype=tf.string) for key in self.output_types}
         example_parsed = tf.io.parse_single_example(example, read_features)
 
-        for key in read_features.keys():
-            example_parsed[key] = tf.io.parse_tensor(example_parsed[key], out_type=features_types[key])
+        # Tensor with right data type
+        for key, out_type in self.output_types.items():
+            example_parsed[key] = tf.io.parse_tensor(example_parsed[key], out_type=out_type)
 
-        # Differentiating inputs and outputs
-        input_parsed = {key: value for (key, value) in example_parsed.items() if key not in target_keys}
-        target_parsed = {key: value for (key, value) in example_parsed.items() if key in target_keys}
+        # Ensure shape
+        for key, shape in self.output_shapes.items():
+            example_parsed[key] = tf.ensure_shape(example_parsed[key], shape)
 
-        if preprocessing_fn:
-            input_parsed, target_parsed = preprocessing_fn(input_parsed, target_parsed, **kwargs)
+        # Preprocessing
+        example_parsed_prep = preprocessing_fn(example_parsed, **kwargs) if preprocessing_fn else example_parsed
+
+        # Differentiating inputs and targets
+        input_parsed = {key: value for (key, value) in example_parsed_prep.items() if key not in target_keys}
+        target_parsed = {key: value for (key, value) in example_parsed_prep.items() if key in target_keys}
 
         return input_parsed, target_parsed
 
     def read(self, batch_size, target_keys, n_workers=1, drop_remainder=True, shuffle_buffer_size=None,
-             preprocessing_fn=None, **kwargs):
+             preprocessing_fn=None, shard_policy=tf.data.experimental.AutoShardPolicy.AUTO,
+             prefetch_buffer_size=tf.data.experimental.AUTOTUNE,
+             num_parallel_calls=tf.data.experimental.AUTOTUNE, **kwargs):
         """
         Read all tfrecord files matching with pattern and convert data to tensorflow dataset.
         :param batch_size: Size of tensorflow batch
@@ -153,18 +156,28 @@ class TFRecords:
                                False is advisable when evaluating metrics so that all samples are used
         :param shuffle_buffer_size: if None, shuffle is not used. Else, blocks of shuffle_buffer_size
                                     elements are shuffled using uniform random.
-        :param preprocessing_fn: Optional. A preprocessing function that takes input, target as args and returns
-                                   a tuple (input_preprocessed, target_preprocessed)
+        :param preprocessing_fn: Optional. A preprocessing function that takes input examples as args and returns the
+                                 preprocessed input examples. Typically, examples are composed of model inputs and
+                                 targets. Model inputs and model targets must be computed accordingly to (1) what the
+                                 model outputs and (2) what training loss needs. For instance, for a classification
+                                 problem, the model will likely output the softmax, or activation neurons, for each
+                                 class, and the cross entropy loss requires labels in one hot encoding. In this case,
+                                 the preprocessing_fn has to transform the labels values (integer ranging from
+                                 [0, n_classes]) in one hot encoding (vector of 0 and 1 of length n_classes). The
+                                 preprocessing_fn should not implement such things as radiometric transformations from
+                                 input to input_preprocessed, because those are performed inside the model itself
+                                 (see `otbtf.ModelBase.normalize_inputs()`).
+        :param shard_policy: sharding policy for the TFRecordDataset options
+        :param prefetch_buffer_size: buffer size for the prefetch operation
+        :param num_parallel_calls: number of parallel calls for the parsing + preprocessing step
         :param kwargs: some keywords arguments for preprocessing_fn
         """
         options = tf.data.Options()
         if shuffle_buffer_size:
             options.experimental_deterministic = False  # disable order, increase speed
-        options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.AUTO  # for multiworker
-        parse = partial(self.parse_tfrecord, features_types=self.output_types, target_keys=target_keys,
-                        preprocessing_fn=preprocessing_fn, **kwargs)
+        options.experimental_distribute.auto_shard_policy = shard_policy  # for multiworker
+        parse = partial(self.parse_tfrecord, target_keys=target_keys, preprocessing_fn=preprocessing_fn, **kwargs)
 
-        # TODO: to be investigated :
         # 1/ num_parallel_reads useful ? I/O bottleneck of not ?
         # 2/ num_parallel_calls=tf.data.experimental.AUTOTUNE useful ?
         tfrecords_pattern_path = os.path.join(self.dirpath, "*.records")
@@ -179,10 +192,10 @@ class TFRecords:
         logging.info('Reducing number of records to : %s', nb_matching_files)
         dataset = tf.data.TFRecordDataset(matching_files)  # , num_parallel_reads=2)  # interleaves reads from xxx files
         dataset = dataset.with_options(options)  # uses data as soon as it streams in, rather than in its original order
-        dataset = dataset.map(parse, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        dataset = dataset.map(parse, num_parallel_calls=num_parallel_calls)
         if shuffle_buffer_size:
             dataset = dataset.shuffle(buffer_size=shuffle_buffer_size)
         dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
-        dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+        dataset = dataset.prefetch(buffer_size=prefetch_buffer_size)
 
         return dataset

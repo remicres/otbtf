@@ -111,7 +111,7 @@ If you see OOM errors during SuperBuild you should decrease CPU_RATIO (e.g. 0.75
 ## Container examples
 ```bash
 # Pull GPU image and create a new container with your home directory as volume (requires apt package nvidia-docker2 and CUDA>=11.0)
-docker create --gpus=all --volume $HOME:/home/otbuser/volume -it --name otbtf-gpu mdl4eo/otbtf2.4:gpu
+docker create --gpus=all --volume $HOME:/home/otbuser/volume -it --name otbtf-gpu mdl4eo/otbtf:3.3.0-gpu
 
 # Run interactive
 docker start -i otbtf-gpu
@@ -123,7 +123,7 @@ docker exec otbtf-gpu python -c 'import tensorflow as tf; print(tf.test.is_gpu_a
 
 ### Rebuild OTB with more modules
 ```bash
-docker create --gpus=all -it --name otbtf-gpu-dev mdl4eo/otbtf2.4:gpu-dev
+docker create --gpus=all -it --name otbtf-gpu-dev mdl4eo/otbtf:3.3.0-gpu-dev
 docker start -i otbtf-gpu-dev
 ```
 ```bash

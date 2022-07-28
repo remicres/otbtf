@@ -2,62 +2,9 @@
 # -*- coding: utf-8 -*-
 import pytest
 import unittest
-import os
-from pathlib import Path
-import test_utils
+from test_utils import run_command, run_command_and_test_exist, run_command_and_compare
 
 INFERENCE_MAE_TOL = 10.0  # Dummy value: we don't really care of the mae value but rather the image size etc
-
-
-def resolve_paths(path):
-    """
-    Resolve a path with the environment variables
-    """
-    return test_utils.resolve_paths(path, var_list=["TMPDIR", "DATADIR"])
-
-
-def run_command(command):
-    """
-    Run a command
-    :param command: the command to run
-    """
-    full_command = resolve_paths(command)
-    print("Running command: \n\t {}".format(full_command))
-    os.system(full_command)
-
-
-def run_command_and_test_exist(command, file_list):
-    """
-    :param command: the command to run (str)
-    :param file_list: list of files to check
-    :return True or False
-    """
-    run_command(command)
-    print("Checking if files exist...")
-    for file in file_list:
-        print("\t{}".format(file))
-        path = Path(resolve_paths(file))
-        if not path.is_file():
-            print("File {} does not exist!".format(file))
-            return False
-        print("\tOk")
-    return True
-
-
-def run_command_and_compare(command, to_compare_dict, tol=0.01):
-    """
-    :param command: the command to run (str)
-    :param to_compare_dict: a dict of {baseline1: output1, ..., baselineN: outputN}
-    :param tol: tolerance (float)
-    :return True or False
-    """
-
-    run_command(command)
-    for baseline, output in to_compare_dict.items():
-        if not test_utils.compare(resolve_paths(baseline), resolve_paths(output), tol):
-            print("Baseline {} and output {} differ.".format(baseline, output))
-            return False
-    return True
 
 
 class TutorialTest(unittest.TestCase):

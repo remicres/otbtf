@@ -273,7 +273,7 @@ class PatchesImagesReader(PatchesReaderBase):
                                "mean": rsize * _sums[src_key],
                                "std": np.sqrt(rsize * _sqsums[src_key] - np.square(rsize * _sums[src_key]))
                                } for src_key in self.gdal_ds}
-        logging.info("Stats: {}", stats)
+        logging.info("Stats: %s", stats)
         return stats
 
     def get_size(self):
@@ -362,8 +362,8 @@ class Dataset:
             self.output_shapes[src_key] = np_arr.shape
             self.output_types[src_key] = tf.dtypes.as_dtype(np_arr.dtype)
 
-        logging.info("output_types: {}", self.output_types)
-        logging.info("output_shapes: {}", self.output_shapes)
+        logging.info("output_types: %s", self.output_types)
+        logging.info("output_shapes: %s", self.output_shapes)
 
         # buffers
         if self.size <= buffer_length:
@@ -462,17 +462,41 @@ class Dataset:
         for _ in range(self.size):
             yield self.read_one_sample()
 
-    def get_tf_dataset(self, batch_size, drop_remainder=True):
+    def get_tf_dataset(self, batch_size, drop_remainder=True, preprocessing_fn=None, targets_keys=None):
         """
         Returns a TF dataset, ready to be used with the provided batch size
         :param batch_size: the batch size
         :param drop_remainder: drop incomplete batches
+        :param preprocessing_fn: Optional. A preprocessing function that takes input examples as args and returns the
+                                 preprocessed input examples. Typically, examples are composed of model inputs and
+                                 targets. Model inputs and model targets must be computed accordingly to (1) what the
+                                 model outputs and (2) what training loss needs. For instance, for a classification
+                                 problem, the model will likely output the softmax, or activation neurons, for each
+                                 class, and the cross entropy loss requires labels in one hot encoding. In this case,
+                                 the preprocessing_fn has to transform the labels values (integer ranging from
+                                 [0, n_classes]) in one hot encoding (vector of 0 and 1 of length n_classes). The
+                                 preprocessing_fn should not implement such things as radiometric transformations from
+                                 input to input_preprocessed, because those are performed inside the model itself
+                                 (see `otbtf.ModelBase.normalize_inputs()`).
+        :param targets_keys: Optional. When provided, the dataset returns a tuple of dicts (inputs_dict, target_dict) so
+                             it can be straightforwardly used with keras models objects.
         :return: The TF dataset
         """
-        if batch_size <= 2 * self.miner_buffer.max_length:
-            logging.warning("Batch size is {} but dataset buffer has {} elements. Consider using a larger dataset "
+        if 2 * batch_size >= self.miner_buffer.max_length:
+            logging.warning("Batch size is %s but dataset buffer has %s elements. Consider using a larger dataset "
                             "buffer to avoid I/O bottleneck", batch_size, self.miner_buffer.max_length)
-        return self.tf_dataset.batch(batch_size, drop_remainder=drop_remainder)
+        tf_ds = self.tf_dataset.map(preprocessing_fn) if preprocessing_fn else self.tf_dataset
+
+        if targets_keys:
+            def _split_input_and_target(example):
+                # Differentiating inputs and outputs for keras
+                inputs = {key: value for (key, value) in example.items() if key not in targets_keys}
+                targets = {key: value for (key, value) in example.items() if key in targets_keys}
+                return inputs, targets
+
+            tf_ds = tf_ds.map(_split_input_and_target)
+
+        return tf_ds.batch(batch_size, drop_remainder=drop_remainder)
 
     def get_total_wait_in_seconds(self):
         """
