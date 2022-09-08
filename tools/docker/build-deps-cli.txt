@@ -44,3 +44,7 @@ libopencv-ml-dev
 libsvm-dev
 libtinyxml-dev
 zlib1g-dev
+libgeos++-dev
+libgeos-3.8.0
+libgeos-c1v5
+libgeos-dev
