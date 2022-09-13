@@ -121,9 +121,6 @@ class TFRecords:
         :param preprocessing_fn: Optional. A preprocessing function that process the input example
         :param kwargs: some keywords arguments for preprocessing_fn
         """
-        for file in [self.output_types_file, self.output_shapes_file]:
-            assert self.output_types, f"The file {file} is missing!"
-
         read_features = {key: tf.io.FixedLenFeature([], dtype=tf.string) for key in self.output_types}
         example_parsed = tf.io.parse_single_example(example, read_features)
 
@@ -175,6 +172,9 @@ class TFRecords:
         :param num_parallel_calls: number of parallel calls for the parsing + preprocessing step
         :param kwargs: some keywords arguments for preprocessing_fn
         """
+        for file in [self.output_types_file, self.output_shapes_file]:
+            assert self.output_types, f"The file {file} is missing!"
+
         options = tf.data.Options()
         if shuffle_buffer_size:
             options.experimental_deterministic = False  # disable order, increase speed
