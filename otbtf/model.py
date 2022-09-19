@@ -158,7 +158,7 @@ class ModelBase(abc.ABC):
 
         :param output_path: output path for the schema
         :param strategy: strategy
-        :param strategy: annotate with shapes values
+        :param show_shapes: annotate with shapes values (True or False)
 
         """
         assert self.model, "Plot() only works if create_network() has been called beforehand"
