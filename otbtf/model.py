@@ -145,23 +145,24 @@ class ModelBase(abc.ABC):
     def summary(self, strategy=None):
         """
         Wraps the summary printing of the model. When multiworker strategy, only prints if the worker is chief
+
+        :param strategy: strategy
         """
         if not strategy or _is_chief(strategy):
             self.model.summary(line_length=150)
 
-    def plot(self, output_path, strategy=None):
+    def plot(self, output_path, strategy=None, show_shapes=False):
         """
         Enables to save a figure representing the architecture of the network.
         Needs pydot and graphviz to work (`pip install pydot` and https://graphviz.gitlab.io/download/)
+
+        :param output_path: output path for the schema
+        :param strategy: strategy
+        :param strategy: annotate with shapes values
+
         """
         assert self.model, "Plot() only works if create_network() has been called beforehand"
 
         # When multiworker strategy, only plot if the worker is chief
         if not strategy or _is_chief(strategy):
-            # Build a simplified model, without normalization nor extra outputs.
-            # This model is only used for plotting the architecture thanks to `keras.utils.plot_model`
-            inputs = self.get_inputs()  # inputs without normalization
-            outputs = self.get_outputs(inputs)  # raw model outputs
-            model_simplified = tensorflow.keras.Model(inputs=inputs, outputs=outputs,
-                                                      name=self.__class__.__name__ + '_simplified')
-            tensorflow.keras.utils.plot_model(model_simplified, output_path)
+            tensorflow.keras.utils.plot_model(self.model, output_path, show_shapes=show_shapes)
