@@ -63,37 +63,3 @@ def read_as_np_arr(gdal_ds, as_patches=True, dtype=None):
         buffer = buffer.astype(dtype)
 
     return buffer
-
-
-def _is_chief(strategy):
-    """
-    Tell if the current worker is the chief.
-
-    :param strategy: strategy
-    :return: True if the current worker is the chief, False else
-    """
-    # Note: there are two possible `TF_CONFIG` configuration.
-    #   1) In addition to `worker` tasks, a `chief` task type is use;
-    #      in this case, this function should be modified to
-    #      `return task_type == 'chief'`.
-    #   2) Only `worker` task type is used; in this case, worker 0 is
-    #      regarded as the chief. The implementation demonstrated here
-    #      is for this case.
-    # For the purpose of this Colab section, the `task_type is None` case
-    # is added because it is effectively run with only a single worker.
-
-    if strategy.cluster_resolver:  # this means MultiWorkerMirroredStrategy
-        task_type, task_id = strategy.cluster_resolver.task_type, strategy.cluster_resolver.task_id
-        return (task_type == 'chief') or (task_type == 'worker' and task_id == 0) or task_type is None
-    # strategy with only one worker
-    return True
-
-
-def cropped_tensor_name(tensor_name, crop):
-    """
-    A name for the padded tensor
-    :param tensor_name: tensor name
-    :param pad: pad value
-    :return: name
-    """
-    return "{}_crop{}".format(tensor_name, crop)
