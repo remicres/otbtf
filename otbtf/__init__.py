@@ -20,9 +20,12 @@
 """
 OTBTF python module
 """
+try:
+    from otbtf.utils import read_as_np_arr, gdal_open
+    from otbtf.dataset import Buffer, PatchesReaderBase, PatchesImagesReader, IteratorBase, RandomIterator, Dataset, \
+        DatasetFromPatchesImages
+except ImportError:
+    print("Warning: otbtf.utils and otbtf.dataset were not imported. Using OTBTF without GDAL.")
 
-from otbtf.utils import read_as_np_arr, gdal_open
-from otbtf.dataset import Buffer, PatchesReaderBase, PatchesImagesReader, IteratorBase, RandomIterator, Dataset, \
-     DatasetFromPatchesImages
 from otbtf.tfrecords import TFRecords
 from otbtf.model import ModelBase
