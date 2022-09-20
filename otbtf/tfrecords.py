@@ -172,7 +172,8 @@ class TFRecords:
         :param num_parallel_calls: number of parallel calls for the parsing + preprocessing step
         :param kwargs: some keywords arguments for preprocessing_fn
         """
-        for dic, file in zip([self.output_types, self.output_shapes], [self.output_types_file, self.output_shapes_file]):
+        for dic, file in zip([self.output_types, self.output_shapes],
+                             [self.output_types_file, self.output_shapes_file]):
             assert dic, f"The file {file} is missing!"
 
         options = tf.data.Options()
