@@ -1,8 +1,8 @@
 # Build with Docker
-Docker build has to be called from the root of the repository (i.e. `docker build .` or `bash tools/docker/multibuild.sh`).  
+Docker build has to be called from the root of the repository (i.e. `docker build .` or `bash tools/docker/multibuild.sh`).
 You can build a custom image using `--build-arg` and several config files :
 - Ubuntu : `BASE_IMG` should accept any version, for additional packages see [build-deps-cli.txt](build-deps-cli.txt) and [build-deps-gui.txt](build-deps-gui.txt).
-- TensorFlow : `TF` arg for the git branch or tag + [build-env-tf.sh](build-env-tf.sh) and BZL_* arguments for the build configuration. `ZIP_TF_BIN` allows you to save compiled binaries if you want to install it elsewhere.    
+- TensorFlow : `TF` arg for the git branch or tag + [build-env-tf.sh](build-env-tf.sh) and BZL_* arguments for the build configuration. `ZIP_TF_BIN` allows you to save compiled binaries if you want to install it elsewhere.
 - OrfeoToolBox : `OTB` arg for the git branch or tag + [build-flags-otb.txt](build-flags-otb.txt) to edit cmake flags. Set `KEEP_SRC_OTB` in order to preserve OTB git directory.
 
 ### Base images
@@ -20,8 +20,8 @@ BASE_IMG                # mandatory
 CPU_RATIO=1
 GUI=false
 NUMPY_SPEC="==1.19.*"
-TF=v2.5.0
-OTB=7.3.0
+TF=v2.8.0
+OTB=8.1.0
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
 BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
 BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
@@ -32,13 +32,14 @@ SUDO=true
 # NumPy version requirement :
 # TF <  2.4 : "numpy<1.19.0,>=1.16.0"
 # TF >= 2.4 : "numpy==1.19.*"
+# TF >= 2.8 : "numpy==1.22.*"
 ```
 
 ### Bazel remote cache daemon
-If you just need to rebuild with different GUI or KEEP_SRC arguments, or may be a different branch of OTB, bazel cache will help you to rebuild everything except TF, even if the docker cache was purged (after `docker [system|builder] prune`).  
-In order to recycle the cache, bazel config and TF git tag should be exactly the same, any change in [build-env-tf.sh](build-env-tf.sh) and `--build-arg` (if related to bazel env, cuda, mkl, xla...) may result in a fresh new build.  
+If you just need to rebuild with different GUI or KEEP_SRC arguments, or may be a different branch of OTB, bazel cache will help you to rebuild everything except TF, even if the docker cache was purged (after `docker [system|builder] prune`).
+In order to recycle the cache, bazel config and TF git tag should be exactly the same, any change in [build-env-tf.sh](build-env-tf.sh) and `--build-arg` (if related to bazel env, cuda, mkl, xla...) may result in a fresh new build.
 
-Start a cache daemon - here with max 20GB but 10GB should be enough to save 2 TF builds (GPU and CPU):  
+Start a cache daemon - here with max 20GB but 10GB should be enough to save 2 TF builds (GPU and CPU):
 ```bash
 mkdir -p $HOME/.cache/bazel-remote
 docker run --detach -u 1000:1000 -v $HOME/.cache/bazel-remote:/data -p 9090:8080 buchgr/bazel-remote-cache --max_size=20
@@ -73,6 +74,9 @@ docker build --network='host' -t otbtf:oldstable-gpu --build-arg BASE_IMG=nvidia
 ```
 
 ### Build for another machine and save TF compiled files 
+
+Example with TF 2.5
+
 ```bash
 # Use same ubuntu and CUDA version than your target machine, beware of CC optimization and CPU compatibility
 # (set env variable CC_OPT_FLAGS and avoid "-march=native" if your Docker's CPU is optimized with AVX2/AVX512 but your target CPU isn't)
@@ -104,14 +108,14 @@ cmake $OTB_GIT \
 ```
 
 ### Debug build
-If you fail to build, you can log into the last layer and check CMake logs. Run `docker images`, find the latest layer ID and run a tmp container (`docker run -it d60496d9612e bash`).  
-You may also need to split some multi-command layers in the Dockerfile.  
-If you see OOM errors during SuperBuild you should decrease CPU_RATIO (e.g. 0.75).  
+If you fail to build, you can log into the last layer and check CMake logs. Run `docker images`, find the latest layer ID and run a tmp container (`docker run -it d60496d9612e bash`).
+You may also need to split some multi-command layers in the Dockerfile.
+If you see OOM errors during SuperBuild you should decrease CPU_RATIO (e.g. 0.75).
 
 ## Container examples
 ```bash
 # Pull GPU image and create a new container with your home directory as volume (requires apt package nvidia-docker2 and CUDA>=11.0)
-docker create --gpus=all --volume $HOME:/home/otbuser/volume -it --name otbtf-gpu mdl4eo/otbtf:3.3.0-gpu
+docker create --gpus=all --volume $HOME:/home/otbuser/volume -it --name otbtf-gpu mdl4eo/otbtf:3.3.2-gpu
 
 # Run interactive
 docker start -i otbtf-gpu
@@ -123,7 +127,7 @@ docker exec otbtf-gpu python -c 'import tensorflow as tf; print(tf.test.is_gpu_a
 
 ### Rebuild OTB with more modules
 ```bash
-docker create --gpus=all -it --name otbtf-gpu-dev mdl4eo/otbtf:3.3.0-gpu-dev
+docker create --gpus=all -it --name otbtf-gpu-dev mdl4eo/otbtf:3.3.2-gpu-dev
 docker start -i otbtf-gpu-dev
 ```
 ```bash
@@ -146,10 +150,10 @@ $ mapla
 ```
 
 ## Common errors
-Build :  
-`Error response from daemon: manifest for nvidia/cuda:11.0-cudnn8-devel-ubuntu20.04 not found: manifest unknown: manifest unknown`  
+Build :
+`Error response from daemon: manifest for nvidia/cuda:11.0-cudnn8-devel-ubuntu20.04 not found: manifest unknown: manifest unknown`
 => Image is missing from dockerhub
 
-Run :  
-`failed call to cuInit: UNKNOWN ERROR (303) / no NVIDIA GPU device is present: /dev/nvidia0 does not exist`  
+Run :
+`failed call to cuInit: UNKNOWN ERROR (303) / no NVIDIA GPU device is present: /dev/nvidia0 does not exist`
 => Nvidia driver is missing or disabled, make sure to add ` --gpus=all` to your docker run or create command
