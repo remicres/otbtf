@@ -55,7 +55,7 @@ For now you have two options: either use the existing **docker image**, or build
 
 Use the latest CPU or GPU-enabled image from dockerhub:
 ```
-docker run mdl4eo/otbtf:3.3.0-cpu otbcli_PatchesExtraction -help
+docker run mdl4eo/otbtf:3.3.2-cpu otbcli_PatchesExtraction -help
 ```
 
 Read more in the [docker use documentation](doc/DOCKERUSE.md).
