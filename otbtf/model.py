@@ -3,7 +3,6 @@
 import abc
 import logging
 import tensorflow
-from otbtf.utils import _is_chief, cropped_tensor_name
 
 
 class ModelBase(abc.ABC):
@@ -145,23 +144,58 @@ class ModelBase(abc.ABC):
     def summary(self, strategy=None):
         """
         Wraps the summary printing of the model. When multiworker strategy, only prints if the worker is chief
+
+        :param strategy: strategy
         """
         if not strategy or _is_chief(strategy):
             self.model.summary(line_length=150)
 
-    def plot(self, output_path, strategy=None):
+    def plot(self, output_path, strategy=None, show_shapes=False):
         """
         Enables to save a figure representing the architecture of the network.
         Needs pydot and graphviz to work (`pip install pydot` and https://graphviz.gitlab.io/download/)
+
+        :param output_path: output path for the schema
+        :param strategy: strategy
+        :param show_shapes: annotate with shapes values (True or False)
+
         """
         assert self.model, "Plot() only works if create_network() has been called beforehand"
 
         # When multiworker strategy, only plot if the worker is chief
         if not strategy or _is_chief(strategy):
-            # Build a simplified model, without normalization nor extra outputs.
-            # This model is only used for plotting the architecture thanks to `keras.utils.plot_model`
-            inputs = self.get_inputs()  # inputs without normalization
-            outputs = self.get_outputs(inputs)  # raw model outputs
-            model_simplified = tensorflow.keras.Model(inputs=inputs, outputs=outputs,
-                                                      name=self.__class__.__name__ + '_simplified')
-            tensorflow.keras.utils.plot_model(model_simplified, output_path)
+            tensorflow.keras.utils.plot_model(self.model, output_path, show_shapes=show_shapes)
+
+
+def _is_chief(strategy):
+    """
+    Tell if the current worker is the chief.
+
+    :param strategy: strategy
+    :return: True if the current worker is the chief, False else
+    """
+    # Note: there are two possible `TF_CONFIG` configuration.
+    #   1) In addition to `worker` tasks, a `chief` task type is use;
+    #      in this case, this function should be modified to
+    #      `return task_type == 'chief'`.
+    #   2) Only `worker` task type is used; in this case, worker 0 is
+    #      regarded as the chief. The implementation demonstrated here
+    #      is for this case.
+    # For the purpose of this Colab section, the `task_type is None` case
+    # is added because it is effectively run with only a single worker.
+
+    if strategy.cluster_resolver:  # this means MultiWorkerMirroredStrategy
+        task_type, task_id = strategy.cluster_resolver.task_type, strategy.cluster_resolver.task_id
+        return (task_type == 'chief') or (task_type == 'worker' and task_id == 0) or task_type is None
+    # strategy with only one worker
+    return True
+
+
+def cropped_tensor_name(tensor_name, crop):
+    """
+    A name for the padded tensor
+    :param tensor_name: tensor name
+    :param pad: pad value
+    :return: name
+    """
+    return "{}_crop{}".format(tensor_name, crop)
