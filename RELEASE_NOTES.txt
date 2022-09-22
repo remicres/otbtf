@@ -1,3 +1,12 @@
+Version 3.3.2 (22 sep 2022)
+----------------------------------------------------------------
+* `otbtf.TFRecords` can be used in environments where only TensorFlow is present, without GDAL or OTB (e.g. HPC centers).
+* Simplify the `plot()` method in the `otbtf.ModelBase` class
+* Upgrade OTB to version 8.1.0
+* Build GDAL with GEOS support
+* Add a warning message in `TFRecords` when output_shape or output_type is missing
+* Upgrade pip in the docker images
+
 Version 3.3.0 (27 jul 2022)
 ----------------------------------------------------------------
 * Improves the `dataset` classes (`DatasetFromPatchesImages`, `TFRecords`) to use them easily in keras
