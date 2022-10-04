@@ -16,7 +16,8 @@ variables:
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   DEV_IMAGE: $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
   CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
-  DOCKERHUB_IMAGE_BASE: mdl4eo/otbtf:${OTBTF_VERSION}
+  DOCKERHUB_BASE: mdl4eo/otbtf
+  DOCKERHUB_IMAGE_BASE: ${DOCKERHUB_BASE}:${OTBTF_VERSION}
   
 workflow:
   rules:
@@ -189,6 +190,7 @@ deploy_cpu:
     IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG-cpu-dev
     DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE-cpu
     DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE-cpu-dev
+    DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
   script:
     # cpu
     - docker build --network='host' --tag $IMAGE_CPU --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" .
@@ -202,6 +204,9 @@ deploy_cpu:
     - docker push $DOCKERHUB_CPU
     - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV
     - docker push $DOCKERHUB_CPUDEV
+    # latest = cpu image
+    - docker tag $IMAGE_CPU $DOCKERHUB_LATEST
+    - docker push $DOCKERHUB_LATEST
 
 deploy_gpu:
   extends: .ship base
