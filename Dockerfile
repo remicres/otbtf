@@ -87,7 +87,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
 
 ### OTB
 ARG GUI=false
-ARG OTB=8.1.0
+ARG OTB=c8cde1f4b35c00613b1cff38ae64bdc02f82542c
 ARG OTBTESTS=false
 
 RUN mkdir /src/otb
