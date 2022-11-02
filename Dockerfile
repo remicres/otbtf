@@ -99,7 +99,7 @@ RUN apt-get update -y \
  && apt-get install --reinstall ca-certificates -y \
  && update-ca-certificates \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
- && cd otb && git checkout $OTB \
+ && cd otb && git checkout $OTB && cd .. \
  && mkdir -p build \
  && cd build \
  && if $OTBTESTS; then \
