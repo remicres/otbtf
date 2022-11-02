@@ -98,7 +98,8 @@ COPY tools/docker/build-flags-otb.txt ./
 RUN apt-get update -y \
  && apt-get install --reinstall ca-certificates -y \
  && update-ca-certificates \
- && git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
+ && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
+ && cd otb && git checkout $OTB \
  && mkdir -p build \
  && cd build \
  && if $OTBTESTS; then \
