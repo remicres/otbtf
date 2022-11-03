@@ -1,3 +1,8 @@
+Version 3.3.3 (3 nov 2022)
+----------------------------------------------------------------
+* Update OTB version to c8cde1f4b35c00613b1cff38ae64bdc02f82542c (version 8.1.0 with extended filename bugfix)
+* CI is able to pick up a sha commit rather than a specific branch for OTB
+
 Version 3.3.2 (22 sep 2022)
 ----------------------------------------------------------------
 * `otbtf.TFRecords` can be used in environments where only TensorFlow is present, without GDAL or OTB (e.g. HPC centers).

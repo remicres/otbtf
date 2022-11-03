@@ -7,12 +7,12 @@ Since OTBTF >= 3.2.1 you can find latest docker images on [gitlab.irstea.fr](htt
 
 | Name                                                                               | Os            | TF     | OTB   | Description            | Dev files | Compute capability |
 |------------------------------------------------------------------------------------| ------------- | ------ |-------| ---------------------- | --------- | ------------------ |
-| **mdl4eo/otbtf:3.3.2-cpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.3.2-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.3.2-gpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.3.2-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.2-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.2-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.3-cpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.3-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.3-gpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.3-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.3-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.3-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 
 The list of older releases is available [here](#older-docker-releases).
 
@@ -37,7 +37,7 @@ For instance, suppose you have some data in `/mnt/my_device/` that you want to u
 The following command shows you how to access the folder from the docker image.
 
 ```bash
-docker run -v /mnt/my_device/:/data/ -ti mdl4eo/otbtf:3.3.2-cpu bash -c "ls /data"
+docker run -v /mnt/my_device/:/data/ -ti mdl4eo/otbtf:3.3.3-cpu bash -c "ls /data"
 ```
 Beware of ownership issues! see the last section of this doc.
 
@@ -50,13 +50,13 @@ You can then use the OTBTF `gpu` tagged docker images with the **NVIDIA runtime*
 With Docker version earlier than 19.03 :
 
 ```bash
-docker run --runtime=nvidia -ti mdl4eo/otbtf:3.3.2-gpu bash
+docker run --runtime=nvidia -ti mdl4eo/otbtf:3.3.3-gpu bash
 ```
 
 With Docker version including and after 19.03 :
 
 ```bash
-docker run --gpus all -ti mdl4eo/otbtf:3.3.2-gpu bash
+docker run --gpus all -ti mdl4eo/otbtf:3.3.3-gpu bash
 ```
 
 You can find some details on the **GPU docker image** and some **docker tips and tricks** on [this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/). 
@@ -69,7 +69,7 @@ Be careful though, these infos might be a bit outdated...
 1. Install [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#manual-installation-steps) (Windows Subsystem for Linux)
 2. Install [docker desktop](https://www.docker.com/products/docker-desktop)
 3. Start **docker desktop** and **enable WSL2** from *Settings* > *General* then tick the box *Use the WSL2 based engine*
-3. Open a **cmd.exe** or **PowerShell** terminal, and type `docker create --name otbtf-cpu --interactive --tty mdl4eo/otbtf:3.3.2-cpu`
+3. Open a **cmd.exe** or **PowerShell** terminal, and type `docker create --name otbtf-cpu --interactive --tty mdl4eo/otbtf:3.3.3-cpu`
 4. Open **docker desktop**, and check that the docker is running in the **Container/Apps** menu
 ![Docker desktop, after the docker image is downloaded and ready to use](images/docker_desktop_1.jpeg)
 5. From **docker desktop**, click on the icon highlighted as shown below, and use the bash terminal that should pop up!
@@ -118,12 +118,12 @@ sudo systemctl {status,enable,disable,start,stop} docker
 Run a simple command in a one-shot container:
 
 ```bash
-docker run mdl4eo/otbtf:3.3.2-cpu otbcli_PatchesExtraction
+docker run mdl4eo/otbtf:3.3.3-cpu otbcli_PatchesExtraction
 ```
 
 You can also use the image in interactive mode with bash:
 ```bash
-docker run -ti mdl4eo/otbtf:3.3.2-cpu bash
+docker run -ti mdl4eo/otbtf:3.3.3-cpu bash
 ```
 
 ### Persistent container
@@ -133,7 +133,7 @@ Beware of ownership issues, see the last section of this doc.
 
 ```bash
 docker create --interactive --tty --volume /home/$USER:/home/otbuser/ \
-    --name otbtf mdl4eo/otbtf:3.3.2-cpu /bin/bash
+    --name otbtf mdl4eo/otbtf:3.3.3-cpu /bin/bash
 ```
 
 ### Interactive session
@@ -197,7 +197,7 @@ Create a named container (here with your HOME as volume), Docker will automatica
 
 ```bash
 docker create --interactive --tty --volume /home/$USER:/home/otbuser \
-    --name otbtf mdl4eo/otbtf:3.3.2-cpu /bin/bash
+    --name otbtf mdl4eo/otbtf:3.3.3-cpu /bin/bash
 ```
 
 Start a background container process:
@@ -265,10 +265,16 @@ Here you can find the list of older releases of OTBTF:
 | **mdl4eo/otbtf:3.1-gpu-dev**                                                       | Ubuntu Focal  | r2.8   | 7.4.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.1-gpu-opt**                                                       | Ubuntu Focal  | r2.8   | 7.4.0 | GPU                    | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.1-gpu-opt-dev**                                                   | Ubuntu Focal  | r2.8   | 7.4.0 | GPU (dev)              | yes       | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.3.0-cpu**                                                         | Ubuntu Focal  | r2.8   | 8.0.1 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.3.0-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.0.1 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.3.0-gpu**                                                         | Ubuntu Focal  | r2.8   | 8.0.1 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:3.3.0-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.0.1 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.0-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.0.1 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.0-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.0.1 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.2-cpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.2-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.2-gpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.2-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.2-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.2-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.0-cpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.0-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.0-gpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:3.3.0-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.0-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.0-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 

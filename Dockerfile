@@ -87,7 +87,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
 
 ### OTB
 ARG GUI=false
-ARG OTB=8.1.0
+ARG OTB=c8cde1f4b35c00613b1cff38ae64bdc02f82542c
 ARG OTBTESTS=false
 
 RUN mkdir /src/otb
@@ -98,7 +98,8 @@ COPY tools/docker/build-flags-otb.txt ./
 RUN apt-get update -y \
  && apt-get install --reinstall ca-certificates -y \
  && update-ca-certificates \
- && git clone --single-branch -b $OTB https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
+ && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
+ && cd otb && git checkout $OTB && cd .. \
  && mkdir -p build \
  && cd build \
  && if $OTBTESTS; then \
