@@ -149,9 +149,6 @@ LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 COPY --from=builder /opt/otbtf /opt/otbtf
 COPY --from=builder /src /src
 
-# Upgrade pip
-RUN python3 -m pip install --upgrade pip
-
 # System-wide ENV
 ENV PATH="/opt/otbtf/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
