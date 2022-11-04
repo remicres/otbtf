@@ -1,7 +1,7 @@
 image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
 variables:
-  OTBTF_VERSION: 3.3.2
+  OTBTF_VERSION: 3.3.3
   OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
   OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
   OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
@@ -166,6 +166,11 @@ otbtf_api:
     - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_api.xml $OTBTF_SRC/test/api_unittest.py
   after_script:
     - cp $API_TEST_TMP/*.* $ARTIFACT_TEST_DIR/
+
+geos_enabled:
+  extends: .applications_test_base
+  script:
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_geos_enabled.xml $OTBTF_SRC/test/geos_test.py
 
 deploy_cpu-dev-testing:
   stage: Update dev image
