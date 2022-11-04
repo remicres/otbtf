@@ -167,6 +167,11 @@ otbtf_api:
   after_script:
     - cp $API_TEST_TMP/*.* $ARTIFACT_TEST_DIR/
 
+geos_enabled:
+  extends: .applications_test_base
+  script:
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_geos_enabled.xml $OTBTF_SRC/test/geos_test.py
+
 deploy_cpu-dev-testing:
   stage: Update dev image
   extends: .docker_build_base
