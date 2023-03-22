@@ -34,7 +34,6 @@ stages:
 .docker_build_base:
   allow_failure: false
   tags: [godzilla]
-#  image: docker/compose:latest
   image: docker:latest
   services:
     - name: docker:dind
