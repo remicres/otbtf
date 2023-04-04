@@ -1,7 +1,9 @@
 ### TF - bazel build env variables
 
-# As in official TF wheels, you'll need to remove "-march=native" to ensure portability (avoid AVX2 / AVX512 compatibility issues)
-# You could also add CPUs instructions one by one, in this example to avoid only AVX512 but enable commons optimizations like FMA, SSE4.2 and AVX2
+# As in official TF wheels, you'll need to remove "-march=native" to ensure
+# portability (avoid AVX2 / AVX512 compatibility issues)
+# You could also add CPUs instructions one by one, in this example to avoid
+# only AVX512 but enable commons optimizations like FMA, SSE4.2 and AVX2
 #export CC_OPT_FLAGS="-Wno-sign-compare --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2"
 export CC_OPT_FLAGS="-march=native -Wno-sign-compare"
 export GCC_HOST_COMPILER_PATH=$(which gcc)
