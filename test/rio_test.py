@@ -27,5 +27,18 @@ class NumpyTest(unittest.TestCase):
                 )
                 self.assertTrue(geom)
 
+
+    def test_import_all(self):
+        import otbApplication
+        self.assertTrue(otbApplication.Registry_GetAvailableApplications())
+        import tensorflow
+        self.assertTrue(tensorflow.__version__)
+        from osgeo import gdal
+        self.assertTrue(gdal.__version__)
+        import numpy
+        self.assertTrue(numpy.__version__)
+        self.test_rio_read_md()
+
+
 if __name__ == '__main__':
     unittest.main()
