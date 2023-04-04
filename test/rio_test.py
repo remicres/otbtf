@@ -38,6 +38,8 @@ class NumpyTest(unittest.TestCase):
         import numpy
         self.assertTrue(numpy.__version__)
         self.test_rio_read_md()
+        import otbtf
+        self.assertTrue(otbtf.__version__)
 
 
 if __name__ == '__main__':
