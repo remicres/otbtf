@@ -50,7 +50,7 @@ set of _patches images_ and delivering samples as `tf.dataset` that can be
 used in your favorite TensorFlow pipelines, or convert your patches into 
 TFRecords. The `otbtf.TFRecords` enables you train networks from TFRecords 
 files, which is quite suited for distributed training. Read more in the 
-[tutorial for keras](#api_tutorial.html).
+[tutorial for keras](api_tutorial.html).
 
 ## Examples
 
