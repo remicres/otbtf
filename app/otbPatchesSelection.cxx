@@ -110,9 +110,10 @@ public:
     // Documentation
     SetName("PatchesSelection");
     SetDescription("This application generate points sampled at regular interval over "
-        "the input image region. The grid size and spacing can be configured.");
+        "the input image region. The selection strategy, grid size and step, "
+        " can be configured.");
     SetDocLongDescription("This application produces a vector data containing "
-        "a set of points centered on the patches lying in the valid regions of the input image. ");
+        "a set of points centered on the selected patches.");
 
     SetDocAuthors("Remi Cresson");
 

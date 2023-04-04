@@ -28,7 +28,7 @@ RUN pip install --no-cache-dir pip --upgrade
 # NumPy version is conflicting with system's gdal dep and may require venv
 ARG NUMPY_SPEC="==1.22.*"
 ARG PROTO_SPEC="==3.20.*"
-RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" "protobuf$PROTO_SPEC" \
+RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" "protobuf$PROTO_SPEC" packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
 # ----------------------------------------------------------------------------
@@ -37,29 +37,36 @@ FROM otbtf-base AS builder
 # A smaller value may be required to avoid OOM errors when building OTB GUI
 ARG CPU_RATIO=1
 
-RUN mkdir -p /src/tf /opt/otbtf/bin /opt/otbtf/include /opt/otbtf/lib
+RUN mkdir -p /src/tf /opt/otbtf/bin /opt/otbtf/include /opt/otbtf/lib/python3
 WORKDIR /src/tf
 
 RUN git config --global advice.detachedHead false
 
 ### TF
-ARG TF=v2.8.0
+
+ARG TF=v2.12.0
+
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
  && chmod +x /opt/otbtf/bin/bazelisk \
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
-# "--config=opt" will enable 'march=native' (otherwise read comments about CPU compatibility and edit CC_OPT_FLAGS in build-env-tf.sh)
+
+# "--config=opt" will enable 'march=native'
+# (otherwise read comments about CPU compatibility and edit CC_OPT_FLAGS in
+# build-env-tf.sh)
 ARG BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
-# "--compilation_mode opt" is already enabled by default (see tf repo .bazelrc and configure.py)
+
+# "--compilation_mode opt" is already enabled by default (see tf repo .bazelrc
+# and configure.py)
 ARG BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
 
 # Build
 ARG ZIP_TF_BIN=false
 COPY tools/docker/build-env-tf.sh ./
-RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git \
- && cd tensorflow \
+RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git
+RUN cd tensorflow \
  && export PATH=$PATH:/opt/otbtf/bin \
  && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/otbtf/lib \
  && bash -c '\
@@ -67,14 +74,15 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
       && ./configure \
       && export TMP=/tmp/bazel \
       && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS" \
-      && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" ' \
-# Installation - split here if you want to check files  ^
-#RUN cd tensorflow \
+      && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" '
+
+# Installation
+RUN cd tensorflow \
  && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf /tmp/tensorflow_pkg/tensorflow*.whl \
- && ln -s /opt/otbtf/lib/python3.* /opt/otbtf/lib/python3 \
- && cp -P bazel-bin/tensorflow/libtensorflow_cc.so* /opt/otbtf/lib/ \
- && ln -s $(find /opt/otbtf -type d -wholename "*/site-packages/tensorflow/include") /opt/otbtf/include/tf \
+ && ln -s /opt/otbtf/local/lib/python3.*/* /opt/otbtf/lib/python3 \
+ && ln -s /opt/otbtf/local/bin/* /opt/otbtf/bin \
+ && ln -s $(find /opt/otbtf -type d -wholename "*/dist-packages/tensorflow/include") /opt/otbtf/include/tf \
  # The only missing header in the wheel
  && cp tensorflow/cc/saved_model/tag_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
  && cp tensorflow/cc/saved_model/signature_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
@@ -86,6 +94,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
  && rm -rf bazel-* /src/tf /root/.cache/ /tmp/*
 
 ### OTB
+
 ARG GUI=false
 ARG OTB=5086d7601d80f2427f4d4d7f2398ec46e7efa300
 ARG OTBTESTS=false
@@ -99,7 +108,20 @@ RUN apt-get update -y \
  && apt-get install --reinstall ca-certificates -y \
  && update-ca-certificates \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
- && cd otb && git checkout $OTB && cd .. \
+ && cd otb && git checkout $OTB \
+# <---------------------------------------- Begin dirty hack
+# This is a dirty hack for release 4.0.0alpha
+# We have to wait that OTB moves from C++14 to C++17
+# See https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb/-/issues/2338
+ && sed -i 's/CMAKE_CXX_STANDARD 14/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
+ && echo "" > Modules/Filtering/ImageManipulation/test/CMakeLists.txt \
+ && echo "" > Modules/Segmentation/Conversion/test/CMakeLists.txt \
+ && echo "" > Modules/Radiometry/Indices/test/CMakeLists.txt \
+ && echo "" > Modules/Learning/DempsterShafer/test/CMakeLists.txt \
+ && echo "" > Modules/Feature/Edge/test/CMakeLists.txt \
+ && echo "" > Modules/Core/ImageBase/test/CMakeLists.txt \
+# <---------------------------------------- End dirty hack
+ && cd .. \
  && mkdir -p build \
  && cd build \
  && if $OTBTESTS; then \
@@ -129,8 +151,8 @@ RUN cd /src/otb/build/OTB/build \
       -DOTB_USE_TENSORFLOW=ON -DModule_OTBTensorflow=ON \
       -Dtensorflow_include_dir=/opt/otbtf/include/tf \
       # Forcing TF>=2, this Dockerfile hasn't been tested with v1 + missing link for libtensorflow_framework.so in the wheel
-      -DTENSORFLOW_CC_LIB=/opt/otbtf/lib/libtensorflow_cc.so.2 \
-      -DTENSORFLOW_FRAMEWORK_LIB=/opt/otbtf/lib/python3/site-packages/tensorflow/libtensorflow_framework.so.2 \
+      -DTENSORFLOW_CC_LIB=/opt/otbtf/local/lib/python3.10/dist-packages/tensorflow/libtensorflow_cc.so.2 \
+      -DTENSORFLOW_FRAMEWORK_LIB=/opt/otbtf/local/lib/python3.10/dist-packages/tensorflow/libtensorflow_framework.so.2 \
  && make install -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  # Cleaning
  && ( $GUI || rm -rf /opt/otbtf/bin/otbgui* ) \
@@ -152,10 +174,12 @@ COPY --from=builder /src /src
 # System-wide ENV
 ENV PATH="/opt/otbtf/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
-ENV PYTHONPATH="/opt/otbtf/lib/python3/site-packages:/opt/otbtf/lib/python3/dist-packages:/opt/otbtf/lib/otb/python:/src/otbtf"
+ENV PYTHONPATH="/opt/otbtf/lib/python3/dist-packages:/opt/otbtf/lib/otb/python"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
+RUN pip install -e /src/otbtf
 
-# Default user, directory and command (bash is the entrypoint when using 'docker create')
+# Default user, directory and command (bash is the entrypoint when using
+# 'docker create')
 RUN useradd -s /bin/bash -m otbuser
 WORKDIR /home/otbuser
 
@@ -165,14 +189,18 @@ RUN if $SUDO; then \
       usermod -a -G sudo otbuser \
       && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
 
-# Set /src/otbtf ownership to otbuser (but you still need 'sudo -i' in order to rebuild TF or OTB)
+# Set /src/otbtf ownership to otbuser (but you still need 'sudo -i' in order
+# to rebuild TF or OTB)
 RUN chown -R otbuser:otbuser /src/otbtf
 
 # This won't prevent ownership problems with volumes if you're not UID 1000
 USER otbuser
+
 # User-only ENV
+ENV PATH="/home/otbuser/.local/bin:$PATH"
 
 # Test python imports
 RUN python -c "import tensorflow"
 RUN python -c "import otbtf, tricks"
 RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
+RUN python -c "from osgeo import gdal"

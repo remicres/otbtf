@@ -1,8 +1,10 @@
 """
-This example shows how to use the otbtf python API to train a deep net from TFRecords.
+This example shows how to use the otbtf python API to train a deep net from
+TFRecords.
 
-We expect that the files are stored in the following way, with m, n, and k denoting respectively
-the number of TFRecords files in the training, validation, and test datasets:
+We expect that the files are stored in the following way, with m, n, and k
+denoting respectively the number of TFRecords files in the training,
+validation, and test datasets:
 
 /dataset_dir
     /train
@@ -23,24 +25,35 @@ the number of TFRecords files in the training, validation, and test datasets:
 
 """
 import os
+
 from otbtf import TFRecords
-from otbtf.examples.tensorflow_v2x.fcnn import helper
 from otbtf.examples.tensorflow_v2x.fcnn import fcnn_model
+from otbtf.examples.tensorflow_v2x.fcnn import helper
 
 parser = helper.base_parser()
-parser.add_argument("--tfrecords_dir", required=True,
-                    help="Directory containing train, valid(, test) folders of TFRecords files")
+parser.add_argument(
+    "--tfrecords_dir",
+    required=True,
+    help="Directory containing train, valid(, test) folders of TFRecords files"
+)
 
 
 def train(params):
-    # Patches directories must contain 'train' and 'valid' dirs ('test' is not required)
+    """
+    Train from TFRecords.
+
+    """
+    # Patches directories must contain 'train' and 'valid' dirs ('test' is not
+    # required)
     train_dir = os.path.join(params.tfrecords_dir, "train")
     valid_dir = os.path.join(params.tfrecords_dir, "valid")
     test_dir = os.path.join(params.tfrecords_dir, "test")
 
-    kwargs = {"batch_size": params.batch_size,
-              "target_keys": [fcnn_model.TARGET_NAME],
-              "preprocessing_fn": fcnn_model.dataset_preprocessing_fn}
+    kwargs = {
+        "batch_size": params.batch_size,
+        "target_keys": [fcnn_model.TARGET_NAME],
+        "preprocessing_fn": fcnn_model.dataset_preprocessing_fn
+    }
 
     # Training dataset. Must be shuffled
     assert os.path.isdir(train_dir)
@@ -51,7 +64,9 @@ def train(params):
     ds_valid = TFRecords(valid_dir).read(**kwargs)
 
     # Test dataset (optional)
-    ds_test = TFRecords(test_dir).read(**kwargs) if os.path.isdir(test_dir) else None
+    ds_test = TFRecords(test_dir).read(**kwargs) if os.path.isdir(
+        test_dir
+    ) else None
 
     # Train the model
     fcnn_model.train(params, ds_train, ds_valid, ds_test)

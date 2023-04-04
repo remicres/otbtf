@@ -1,0 +1,84 @@
+# mkdocs.yml
+theme:
+  name: "material"
+  logo: images/logo.png
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.instant
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+
+plugins:
+- search
+- gen-files:
+    scripts:
+    - doc/gen_ref_pages.py
+- mkdocstrings:
+    watch:
+    - otbtf/
+- literate-nav:
+    nav_file: SUMMARY.md
+- section-index
+- mermaid2
+
+nav:
+- Home: index.md
+- Installation:
+  - Install from docker: docker_use.md
+  - Build your own docker images: docker_build.md
+  - Docker troubleshooting: docker_troubleshooting.md
+  - Build from source: build_from_sources.md
+- Applications:
+  - Overview: app_overview.md
+  - Sampling: app_sampling.md
+  - Training: app_training.md
+  - Inference: app_inference.md
+- Python API:
+  - Model generalities: api_model_generalities.md
+  - Deterministic models: reference/otbtf/examples/tensorflow_v2x/deterministic/__init__.md
+  - Build and train deep learning models: api_tutorial.md
+  - Distributed training: api_distributed.md
+- Python API references:
+  - dataset: reference/otbtf/dataset.md
+  - tfrecords: reference/otbtf/tfrecords.md
+  - model: reference/otbtf/model.md
+- Tensorflow v1:
+  - Tricks (deprecated): deprecated.md
+  - Models examples: reference/otbtf/examples/tensorflow_v1x/__init__.md
+
+# Customization
+extra:
+  feature:
+    tabs: true
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/remicres/otbtf
+use_directory_urls: false  # this creates some otbtf/core.html pages instead of otbtf/core/index.html
+
+markdown_extensions:
+  - attr_list
+  - admonition
+  - toc:
+      permalink: true
+      title: On this page
+      toc_depth: 1-2
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.details
+  - pymdownx.superfences
+  - mdx_math
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+# Rest of the navigation..
+site_name: "OTBTF"
+repo_url: https://github.com/remicres/otbtf
+repo_name: otbtf
+docs_dir: doc/
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML

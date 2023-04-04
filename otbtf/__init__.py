@@ -20,12 +20,17 @@
 """
 OTBTF python module
 """
+import pkg_resources
 try:
-    from otbtf.utils import read_as_np_arr, gdal_open
-    from otbtf.dataset import Buffer, PatchesReaderBase, PatchesImagesReader, IteratorBase, RandomIterator, Dataset, \
-        DatasetFromPatchesImages
+    from otbtf.utils import read_as_np_arr, gdal_open  # noqa
+    from otbtf.dataset import Buffer, PatchesReaderBase, PatchesImagesReader, \
+        IteratorBase, RandomIterator, Dataset, DatasetFromPatchesImages  # noqa
 except ImportError:
-    print("Warning: otbtf.utils and otbtf.dataset were not imported. Using OTBTF without GDAL.")
+    print(
+        "Warning: otbtf.utils and otbtf.dataset were not imported. "
+        "Using OTBTF without GDAL."
+    )
 
-from otbtf.tfrecords import TFRecords
-from otbtf.model import ModelBase
+from otbtf.tfrecords import TFRecords  # noqa
+from otbtf.model import ModelBase  # noqa
+__version__ = pkg_resources.require("otbtf")[0].version

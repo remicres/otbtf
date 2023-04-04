@@ -1,7 +1,7 @@
 image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
 variables:
-  OTBTF_VERSION: 3.4.0
+  OTBTF_VERSION: 4.0.0
   OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
   OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
   OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
@@ -18,7 +18,9 @@ variables:
   CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
   DOCKERHUB_BASE: mdl4eo/otbtf
   DOCKERHUB_IMAGE_BASE: ${DOCKERHUB_BASE}:${OTBTF_VERSION}
-  
+  CPU_BASE_IMG: ubuntu:22.04
+  GPU_BASE_IMG: nvidia/cuda:12.1.0-devel-ubuntu22.04
+
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/ # Execute jobs in merge request context, or commit in master branch
@@ -26,6 +28,7 @@ workflow:
 stages:
   - Build
   - Static Analysis
+  - Documentation
   - Test
   - Applications Test
   - Update dev image
@@ -51,40 +54,39 @@ docker image:
     - >
       docker build
       --target otbtf-base
-      --network="host"
       --cache-from $CACHE_IMAGE_BASE
       --tag $CACHE_IMAGE_BASE
-      --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
       "."
     - docker push $CACHE_IMAGE_BASE
     - >
       docker build
       --target builder
-      --network="host"
       --cache-from $CACHE_IMAGE_BASE
       --cache-from $CACHE_IMAGE_BUILDER
       --tag $CACHE_IMAGE_BUILDER
-      --build-arg OTBTESTS="true"
       --build-arg KEEP_SRC_OTB="true"
       --build-arg BZL_CONFIGS=""
-      --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
+      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=$BAZELCACHE"
+      --build-arg OTBTESTS="true"
       "."
     - docker push $CACHE_IMAGE_BUILDER
     - >
       docker build
-      --network="host"
       --cache-from $CACHE_IMAGE_BASE
       --cache-from $CACHE_IMAGE_BUILDER
       --cache-from $BRANCH_IMAGE
       --cache-from $DEV_IMAGE
       --tag $BRANCH_IMAGE
-      --build-arg OTBTESTS="true"
       --build-arg KEEP_SRC_OTB="true"
       --build-arg BZL_CONFIGS=""
-      --build-arg BASE_IMG="ubuntu:20.04"
+      --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
+      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=$BAZELCACHE"
+      --build-arg OTBTESTS="true"
       "."
     - docker push $BRANCH_IMAGE
 
@@ -95,25 +97,53 @@ docker image:
 flake8:
   extends: .static_analysis_base
   script:
-    - sudo apt update && sudo apt install flake8 -y
-    - python -m flake8 --max-line-length=120 --per-file-ignores="__init__.py:F401" $OTBTF_SRC/otbtf
+    - sudo pip install flake8
+    - flake8 $OTBTF_SRC/otbtf --exclude=tensorflow_v1x
 
 pylint:
   extends: .static_analysis_base
   script:
-    - sudo apt update && sudo apt install pylint -y
-    - pylint --logging-format-style=old --disable=too-many-nested-blocks,too-many-locals,too-many-statements,too-few-public-methods,too-many-instance-attributes,too-many-arguments --ignored-modules=tensorflow --max-line-length=120 --logging-format-style=new $OTBTF_SRC/otbtf
+    - sudo pip install pylint
+    - pylint $OTBTF_SRC/otbtf --ignore=tensorflow_v1x
 
 codespell:
   extends: .static_analysis_base
   script:
-    - sudo pip install codespell && codespell
-    
+    - sudo pip install codespell
+    - codespell otbtf
+    - codespell doc
+
 cppcheck:
   extends: .static_analysis_base
   script:
     - sudo apt update && sudo apt install cppcheck -y
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
+
+.doc_base:
+  stage: Documentation
+  before_script:
+    - pip install -r doc/doc_requirements.txt
+  artifacts:
+    paths:
+      - public
+      - public_test
+
+pages_test:
+  extends: .doc_base
+  except:
+    - master
+  script:
+    - mkdocs build --site-dir public_test
+
+pages:
+  extends: .doc_base
+  only:
+    - master
+  script:
+    - mkdocs build --site-dir public
+  artifacts:
+    paths:
+      - public
 
 .tests_base:
   artifacts:
@@ -172,6 +202,11 @@ geos_enabled:
   script:
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_geos_enabled.xml $OTBTF_SRC/test/geos_test.py
 
+imports:
+  extends: .applications_test_base
+  script:
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_imports.xml $OTBTF_SRC/test/imports_test.py
+
 deploy_cpu-dev-testing:
   stage: Update dev image
   extends: .docker_build_base
@@ -198,10 +233,10 @@ deploy_cpu:
     DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
   script:
     # cpu
-    - docker build --network='host' --tag $IMAGE_CPU --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" .
+    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_CPU --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg BZL_CONFIGS="" .
     - docker push $IMAGE_CPU
     # cpu-dev
-    - docker build --network='host' --tag $IMAGE_CPUDEV --build-arg BASE_IMG=ubuntu:20.04 --build-arg BZL_CONFIGS="" --build-arg KEEP_SRC_OTB=true .
+    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_CPUDEV --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg BZL_CONFIGS="" --build-arg KEEP_SRC_OTB=true .
     - docker push $IMAGE_CPUDEV
     # push images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
@@ -224,16 +259,16 @@ deploy_gpu:
     DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
   script:
     # gpu-opt
-    - docker build --network='host' --tag $IMAGE_GPUOPT --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 .
+    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUOPT --build-arg BASE_IMG=$GPU_BASE_IMG .
     - docker push $IMAGE_GPUOPT
     # gpu-opt-dev
-    - docker build --network='host' --tag $IMAGE_GPUOPTDEV --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .
+    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUOPTDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
     - docker push $IMAGE_GPUOPTDEV
     # gpu-basic
-    - docker build --network='host' --tag $IMAGE_GPU --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg BZL_CONFIGS="" .
+    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg BZL_CONFIGS="" .
     - docker push $IMAGE_GPU
     # gpu-basic-dev
-    - docker build --network='host' --tag $IMAGE_GPUDEV --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 --build-arg KEEP_SRC_OTB=true .
+    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUDEV --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
     - docker push $IMAGE_GPUDEV
     # push gpu-basic* images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin

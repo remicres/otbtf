@@ -1,0 +1,8 @@
+mkdocstrings
+mkdocstrings[crystal,python]
+mkdocs-material
+mkdocs-gen-files
+mkdocs-section-index
+mkdocs-literate-nav
+mkdocs-mermaid2-plugin
+python-markdown-math
