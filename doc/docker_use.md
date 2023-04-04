@@ -25,12 +25,12 @@ Since OTBTF >= 3.2.1 you can find the latest docker images on
 
 | Name                                                                               | Os            | TF    | OTB   | Description            | Dev files | Compute capability |
 |------------------------------------------------------------------------------------| ------------- |-------|-------| ---------------------- | --------- | ------------------ |
-| **mdl4eo/otbtf:4.0.0-cpu**                                                    | Ubuntu Focal  | r2.12 | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:4.0.0-cpu-dev**                                                     | Ubuntu Focal  | r2.12 | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:4.0.0-gpu**                                                         | Ubuntu Focal  | r2.12 | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:4.0.0-gpu-dev**                                                     | Ubuntu Focal  | r2.12 | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.0.0-gpu-opt**     | Ubuntu Focal  | r2.12 | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.0.0-gpu-opt-dev** | Ubuntu Focal  | r2.12 | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.0.0-cpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.0.0-cpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.0.0-gpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.0.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.0.0-gpu-opt**     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.0.0-gpu-opt-dev** | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 
 The list of older releases is available [here](#older-images).
 
@@ -95,8 +95,10 @@ Troubleshooting:
 
     Some users have reported to use OTBTF with GPU in windows 10 using WSL2. 
     How to install WSL2 with Cuda on windows 10:
-    https://docs.nvidia.com/cuda/wsl-user-guide/index.html
-    https://docs.docker.com/docker-for-windows/wsl/#gpu-support
+
+    - [WSL user guide](https://docs.nvidia.com/cuda/wsl-user-guide/index.html)
+    - [XSL GPU support](https://docs.docker.com/docker-for-windows/wsl/#gpu-support)
+
 
 ## Build your own images
 
