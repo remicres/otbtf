@@ -5,6 +5,7 @@ import unittest
 import rasterio
 import rasterio.features
 import rasterio.warp
+from test_utils import resolve_paths
 
 FILENAME = resolve_paths('$DATADIR/fake_spot6.jp2')
 
