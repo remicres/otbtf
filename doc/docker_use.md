@@ -104,7 +104,7 @@ Troubleshooting:
 
 If you want to use optimization flags, change GPUs compute capability, etc. 
 you can build your own docker image using the provided dockerfile. 
-See the [docker build documentation](#docker_build.html).
+See the [docker build documentation](docker_build.html).
 
 ## Older images
 

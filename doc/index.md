@@ -16,7 +16,7 @@
 
 
 This remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org) 
-provides a generic, multi-purpose deep learning framework, targeting remote 
+provides a generic, multipurpose deep learning framework, targeting remote 
 sensing images processing. It contains a set of new process objects for OTB 
 that internally invoke [Tensorflow](https://www.tensorflow.org/), and new [OTB 
 applications](#otb-applications) to perform deep learning with real-world 

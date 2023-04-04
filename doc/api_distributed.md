@@ -24,7 +24,7 @@ on all GPUs.
 ## Python code
 
 We can start from the codebase of the fully convolutional model example 
-described in the OTBTF [Python API tutorial](#api_tutorial.html).
+described in the OTBTF [Python API tutorial](api_tutorial.html).
 
 ### Dataset
 
