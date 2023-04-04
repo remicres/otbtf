@@ -216,7 +216,7 @@ rio:
   extends: .applications_test_base
   script:
     - sudo pip install rasterio
-    - python -c pytest --junitxml=$ARTIFACT_TEST_DIR/report_rio.xml $OTBTF_SRC/test/rio_test.py
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_rio.xml $OTBTF_SRC/test/rio_test.py
 
 deploy_cpu-dev-testing:
   stage: Update dev image
