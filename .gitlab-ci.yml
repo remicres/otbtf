@@ -207,6 +207,17 @@ imports:
   script:
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_imports.xml $OTBTF_SRC/test/imports_test.py
 
+numpy_gdal_otb:
+  extends: .applications_test_base
+  script:
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_numpy.xml $OTBTF_SRC/test/numpy_test.py
+
+rio:
+  extends: .applications_test_base
+  script:
+    - sudo pip install rasterio
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_rio.xml $OTBTF_SRC/test/rio_test.py
+
 deploy_cpu-dev-testing:
   stage: Update dev image
   extends: .docker_build_base

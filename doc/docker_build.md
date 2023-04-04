@@ -49,7 +49,7 @@ be a different branch of OTB, bazel cache will help you to rebuild everything
 except TF, even if the docker cache was purged (after `docker 
 [system|builder] prune`).
 In order to recycle the cache, bazel config and TF git tag should be exactly 
-the same, any change in [build-env-tf.sh](build-env-tf.sh) and `--build-arg` 
+the same, any change in *tools/docker/build-env-tf.sh* and `--build-arg` 
 (if related to bazel env, cuda, mkl, xla...) may result in a fresh new build.
 
 Start a cache daemon - here with max 20GB but 10GB should be enough to save 2 

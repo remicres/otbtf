@@ -16,7 +16,7 @@
 
 
 This remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org) 
-provides a generic, multi-purpose deep learning framework, targeting remote 
+provides a generic, multipurpose deep learning framework, targeting remote 
 sensing images processing. It contains a set of new process objects for OTB 
 that internally invoke [Tensorflow](https://www.tensorflow.org/), and new [OTB 
 applications](#otb-applications) to perform deep learning with real-world 
@@ -50,7 +50,7 @@ set of _patches images_ and delivering samples as `tf.dataset` that can be
 used in your favorite TensorFlow pipelines, or convert your patches into 
 TFRecords. The `otbtf.TFRecords` enables you train networks from TFRecords 
 files, which is quite suited for distributed training. Read more in the 
-[tutorial for keras](otbtf/examples/tensorflow_v2x/fcnn/README.md).
+[tutorial for keras](api_tutorial.html).
 
 ## Examples
 
