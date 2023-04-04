@@ -1,7 +1,7 @@
 # OTBTF: Orfeo ToolBox meets TensorFlow
 
 <p align="center">
-<img src="https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/logo.png" width="160px">
+<img src="images/logo.png" width="160px">
 <br>
 <a href="https://gitlab.irstea.fr/remi.cresson/otbtf/-/releases">
 <img src="https://gitlab.irstea.fr/remi.cresson/otbtf/-/badges/release.svg">
@@ -26,7 +26,7 @@ remote sensing imagery, easy to train in distributed environments.
 
 ## Documentation
 
-The documentation is available on [otbtf.readthedocs.io](otbtf.readthedocs.io).
+The documentation is available on [otbtf.readthedocs.io](https://otbtf.readthedocs.io).
 
 ## Use
 

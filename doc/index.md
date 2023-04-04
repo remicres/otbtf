@@ -9,6 +9,7 @@
 <a href="https://gitlab.irstea.fr/remi.cresson/otbtf/-/commits/master">
 <img src="https://gitlab.irstea.fr/remi.cresson/otbtf/badges/master/pipeline.svg">
 </a>
+<img src='https://readthedocs.org/projects/otbtf/badge/?version=latest' alt='Documentation Status' />
 <a href="LICENSE">
 <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
 </a>
