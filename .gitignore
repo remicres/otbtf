@@ -1,3 +1,6 @@
 # Compiled python source #
 *.pyc
 .idea
+build
+site
+otbtf.egg-info

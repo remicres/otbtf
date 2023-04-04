@@ -2,7 +2,7 @@
 # ==========================================================================
 #
 #   Copyright 2018-2019 IRSTEA
-#   Copyright 2020-2022 INRAE
+#   Copyright 2020-2023 INRAE
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,19 +18,24 @@
 #
 # ==========================================================================*/
 """
+[Source code :fontawesome-brands-github:](https://github.com/remicres/otbtf/
+tree/master/otbtf/utils.py){ .md-button }
+
 The utils module provides some helpers to read patches using gdal
 """
 from osgeo import gdal
 import numpy as np
 
 
-# ----------------------------------------------------- Helpers --------------------------------------------------------
-
-def gdal_open(filename):
+def gdal_open(filename: str):
     """
     Open a GDAL raster
-    :param filename: raster file
-    :return: a GDAL dataset instance
+
+    Params:
+        filename: raster file
+
+    Returns:
+        one GDAL dataset instance
     """
     gdal_ds = gdal.Open(filename)
     if not gdal_ds:
@@ -38,14 +43,25 @@ def gdal_open(filename):
     return gdal_ds
 
 
-def read_as_np_arr(gdal_ds, as_patches=True, dtype=None):
+def read_as_np_arr(
+        gdal_ds,
+        as_patches: bool = True,
+        dtype: np.dtype = None
+) -> np.ndarray:
     """
     Read a GDAL raster as numpy array
-    :param gdal_ds: a GDAL dataset instance
-    :param as_patches: if True, the returned numpy array has the following shape (n, psz_x, psz_x, nb_channels). If
-        False, the shape is (1, psz_y, psz_x, nb_channels)
-    :param dtype: if not None array dtype will be cast to given numpy data type (np.float32, np.uint16...)
-    :return: Numpy array of dim 4
+
+    Params:
+        gdal_ds: a GDAL dataset instance
+        as_patches: if True, the returned numpy array has the following
+            shape (n, psz_x, psz_x, nb_channels). If False, the shape is (1,
+            psz_y, psz_x, nb_channels)
+        dtype: if not None array dtype will be cast to given numpy data type
+            (np.float32, np.uint16...)
+
+    Returns
+        Numpy array of dim 4
+
     """
     buffer = gdal_ds.ReadAsArray()
     size_x = gdal_ds.RasterXSize

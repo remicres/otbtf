@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="otbtf",
-    version="3.4.0",
+    version="4.0.0",
     author="Remi Cresson",
     author_email="remi.cresson@inrae.fr",
     description="OTBTF: Orfeo ToolBox meets TensorFlow",
@@ -26,5 +26,12 @@ setuptools.setup(
     ],
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
-    keywords="remote sensing, otb, orfeotoolbox, orfeo toolbox, tensorflow, tf, deep learning, machine learning",
+    keywords=["remote sensing",
+              "otb",
+              "orfeotoolbox",
+              "orfeo toolbox",
+              "tensorflow",
+              "deep learning",
+              "machine learning"
+              ],
 )

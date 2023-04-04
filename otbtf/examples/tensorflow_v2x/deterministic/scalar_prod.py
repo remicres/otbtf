@@ -1,17 +1,20 @@
 """
-This code implements a simple model that inputs two multispectral image ("x1" and "x2"),
+This code implements a simple model that inputs two multispectral image ("x1"
+and "x2"),
 and computes the scalar product between each pixels of the two images.
 The model is exported as a SavedModel named "scalar_product_savedmodel"
-
 To run the SavedModel:
 
+```
 OTB_TF_NSOURCES=2 otbcli_TensorflowModelServe \
--source1.il image1.tif                        \
--source2.il image2.tif                        \
--model.dir scalar_product_savedmodel          \
--model.fullyconv on                           \
--out output.tif                               \
--optim.disabletiling on  # Tiling is not helping here, since its a pixel wise op.
+-source1.il image1.tif \
+-source2.il image2.tif \
+-model.dir scalar_product_savedmodel \
+-model.fullyconv on \
+-out output.tif \
+-optim.disabletiling on  # (Tiling is not helping here, it is a pixel wise op)
+```
+
 """
 import tensorflow as tf
 

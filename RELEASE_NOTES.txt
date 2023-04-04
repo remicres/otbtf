@@ -1,3 +1,18 @@
+Version 4.0.0alpha (4 apr 2023)
+----------------------------------------------------------------
+* Big improvement of the documentation:
+  - Re-structure the entire doc, remove deprecated stuff, etc.
+  - Add a nice mkdocs template
+  - Docs are now hosted at otbtf.readthedocs.io
+  - Add a new section on the python API (end-to-end tutorial)
+  - A lot of new sections: distributed training, etc...
+* Refactoring all the python classes to enforce pep8
+* Ubuntu version: 22.04
+* Cuda version: 12.1.0
+* Tensorflow version: 2.12.0
+* Fixed Tensorflow error "Cannot register 2 metrics with the same name" + new test
+* Faster CI build thanks to bazel remote cache
+
 Version 3.4.0 (22 mar 2023)
 ----------------------------------------------------------------
 * Update OTB version to 5086d7601d80f2427f4d4d7f2398ec46e7efa300 (version 8.1.1 with bugfixes on in-memory connection with python bindings)
