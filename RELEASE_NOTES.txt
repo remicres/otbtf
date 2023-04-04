@@ -12,6 +12,7 @@ Version 4.0.0alpha (4 apr 2023)
 * Tensorflow version: 2.12.0
 * Fixed Tensorflow error "Cannot register 2 metrics with the same name" + new test
 * Faster CI build thanks to bazel remote cache
+* /home/otbuser/.local/bin added to user path
 
 Version 3.4.0 (22 mar 2023)
 ----------------------------------------------------------------
