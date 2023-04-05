@@ -470,31 +470,35 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>::GenerateData()
   // Run session
   // TODO: see if we print some info about inputs/outputs of the model e.g. m_OutputTensors
   TensorListType outputs;
-  this->RunSession(inputs, outputs);
+  bool nodata;
+  this->RunSession(inputs, outputs, nodata);
 
   // Fill the output buffer with zero value
   outputPtr->SetBufferedRegion(outputReqRegion);
   outputPtr->Allocate();
   outputPtr->FillBuffer(m_NullPixel);
 
-  // Get output tensors
-  int bandOffset = 0;
-  for (unsigned int i = 0; i < outputs.size(); i++)
+  if (nodata == false)
   {
-    // The offset (i.e. the starting index of the channel for the output tensor) is updated
-    // during this call
-    // TODO: implement a generic strategy enabling expression field copy in patch-based mode (see
-    // tf::CopyTensorToImageRegion)
-    try
+    // Get output tensors
+    int bandOffset = 0;
+    for (unsigned int i = 0; i < outputs.size(); i++)
     {
-      tf::CopyTensorToImageRegion<TOutputImage>(
-        outputs[i], outputAlignedReqRegion, outputPtr, outputReqRegion, bandOffset);
-    }
-    catch (itk::ExceptionObject & err)
-    {
-      std::stringstream debugMsg = this->GenerateDebugReport(inputs);
-      itkExceptionMacro("Error occurred during tensor to image conversion.\n"
-                        << "Context: " << debugMsg.str() << "Error:" << err);
+      // The offset (i.e. the starting index of the channel for the output tensor) is updated
+      // during this call
+      // TODO: implement a generic strategy enabling expression field copy in patch-based mode (see
+      // tf::CopyTensorToImageRegion)
+      try
+      {
+        tf::CopyTensorToImageRegion<TOutputImage>(
+          outputs[i], outputAlignedReqRegion, outputPtr, outputReqRegion, bandOffset);
+      }
+      catch (itk::ExceptionObject & err)
+      {
+        std::stringstream debugMsg = this->GenerateDebugReport(inputs);
+        itkExceptionMacro("Error occurred during tensor to image conversion.\n"
+                          << "Context: " << debugMsg.str() << "Error:" << err);
+      }
     }
   }
 }

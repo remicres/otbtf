@@ -96,6 +96,8 @@ public:
   typedef std::pair<std::string, tensorflow::Tensor> DictElementType;
   typedef std::vector<std::string>                   StringList;
   typedef std::vector<SizeType>                      SizeListType;
+  typedef std::vector<bool>                          BoolListType;
+  typedef std::vector<InternalPixelType>             ValueListType;
   typedef std::vector<DictElementType>               DictType;
   typedef std::vector<tensorflow::DataType>          DataTypeListType;
   typedef std::vector<tensorflow::TensorShapeProto>  TensorShapeProtoList;
@@ -119,7 +121,13 @@ public:
 
   /** Model parameters */
   void
-  PushBackInputTensorBundle(std::string name, SizeType receptiveField, ImagePointerType image);
+  PushBackInputTensorBundle(
+    std::string name, 
+    SizeType 
+    receptiveField, 
+    ImagePointerType image,
+    bool useNodata,
+    InternalPixelType nodataValue);
   void
   PushBackOuputTensorBundle(std::string name, SizeType expressionField);
 
@@ -130,6 +138,14 @@ public:
   /** Receptive field */
   itkSetMacro(InputReceptiveFields, SizeListType);
   itkGetMacro(InputReceptiveFields, SizeListType);
+
+  /** Use no-data */
+  itkSetMacro(InputUseNodata, BoolListType);
+  itkGetMacro(InputUseNodata, BoolListType);
+
+  /** No-data value */
+  itkSetMacro(InputNodataValue, ValueListType);
+  itkGetMacro(InputNodataValue, ValueListType);
 
   /** Output tensors names */
   itkSetMacro(OutputTensors, StringList);
@@ -173,6 +189,7 @@ protected:
 
   virtual void
   RunSession(DictType & inputs, TensorListType & outputs);
+  RunSession(DictType & inputs, TensorListType & outputs, bool & nodata);
 
 private:
   TensorflowMultisourceModelBase(const Self &); // purposely not implemented
@@ -183,12 +200,14 @@ private:
   tensorflow::SavedModelBundle * m_SavedModel; // The TensorFlow model
 
   // Model parameters
-  StringList   m_InputPlaceholders;      // Input placeholders names
-  SizeListType m_InputReceptiveFields;   // Input receptive fields
-  StringList   m_OutputTensors;          // Output tensors names
-  SizeListType m_OutputExpressionFields; // Output expression fields
-  DictType     m_UserPlaceholders;       // User placeholders
-  StringList   m_TargetNodesNames;       // User nodes target
+  StringList    m_InputPlaceholders;      // Input placeholders names
+  SizeListType  m_InputReceptiveFields;   // Input receptive fields
+  ValueListType m_InputNodataValues;      // Input no-data values
+  BoolListType  m_InputUseNodata;         // Input no-data used
+  StringList    m_OutputTensors;          // Output tensors names
+  SizeListType  m_OutputExpressionFields; // Output expression fields
+  DictType      m_UserPlaceholders;       // User placeholders
+  StringList    m_TargetNodesNames;       // User nodes target
 
   // Internal, read-only
   DataTypeListType     m_InputConstantsDataTypes; // Input constants datatype

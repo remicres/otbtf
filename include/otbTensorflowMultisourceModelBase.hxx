@@ -55,13 +55,18 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::GetSignatureDef()
 
 template <class TInputImage, class TOutputImage>
 void
-TensorflowMultisourceModelBase<TInputImage, TOutputImage>::PushBackInputTensorBundle(std::string      placeholder,
-                                                                                     SizeType         receptiveField,
-                                                                                     ImagePointerType image)
+TensorflowMultisourceModelBase<TInputImage, TOutputImage>::PushBackInputTensorBundle(
+  std::string       placeholder,
+  SizeType          receptiveField,
+  ImagePointerType  image,
+  bool              useNodata = false,
+  InternalPixelType nodataValue = 0)
 {
   Superclass::PushBackInput(image);
   m_InputReceptiveFields.push_back(receptiveField);
   m_InputPlaceholders.push_back(placeholder);
+  m_InputUseNodata.push_back(useNoData);
+  m_InputNodataValues.push_back(nodataValue);
 }
 
 template <class TInputImage, class TOutputImage>
@@ -96,10 +101,17 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::GenerateDebugReport(D
   return debugReport;
 }
 
-
 template <class TInputImage, class TOutputImage>
 void
 TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType & inputs, TensorListType & outputs)
+{
+  bool nodata;
+  this->RunSession(inputs, outputs, nodata);
+}
+
+template <class TInputImage, class TOutputImage>
+void
+TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType & inputs, TensorListType & outputs, bool & nodata)
 {
 
   // Run the TF session here
@@ -119,10 +131,28 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType &
   }
 
   // Add input tensors
+  // During this step we also check for nodata values
+  struct IsNodata
+    {
+        const InternalPixelType ndval;
+        IsNodata(InternalPixelType val) : ndval(val) {}
+        bool operator()(InternalPixelType val) const { return val == ndval; }
+    };
+  nodata = False;
   k = 0;
   for (auto & dict : inputs)
   {
-    inputs_new.emplace_back(m_InputLayers[k], dict.second);
+    auto inputTensor = dict.second;
+    inputs_new.emplace_back(m_InputLayers[k], inputTensor);
+    if (m_InputUseNodata[k] == true)
+    {
+      auto array = inputTensor.flat<InternalPixelType>().data();
+      if (std::all_of(array.cbegin(), array.cend(), IsNodata(m_InputNodataValue[k])))
+      {
+        nodata = true;
+        return;
+      }
+    }
     k += 1;
   }
 
@@ -140,7 +170,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType &
                       << "Tensorflow error message:\n"
                       << status.ToString()
                       << "\n"
-                         "OTB Filter debug message:\n"
+                        "OTB Filter debug message:\n"
                       << debugReport.str());
   }
 }
