@@ -126,8 +126,8 @@ public:
     SizeType 
     receptiveField, 
     ImagePointerType image,
-    bool useNodata,
-    InternalPixelType nodataValue);
+    bool useNodata = false,
+    InternalPixelType nodataValue = 0);
   void
   PushBackOuputTensorBundle(std::string name, SizeType expressionField);
 
@@ -144,8 +144,8 @@ public:
   itkGetMacro(InputUseNodata, BoolListType);
 
   /** No-data value */
-  itkSetMacro(InputNodataValue, ValueListType);
-  itkGetMacro(InputNodataValue, ValueListType);
+  itkSetMacro(InputNodataValues, ValueListType);
+  itkGetMacro(InputNodataValues, ValueListType);
 
   /** Output tensors names */
   itkSetMacro(OutputTensors, StringList);
@@ -188,9 +188,11 @@ protected:
   GenerateDebugReport(DictType & inputs);
 
   virtual void
-  RunSession(DictType & inputs, TensorListType & outputs);
   RunSession(DictType & inputs, TensorListType & outputs, bool & nodata);
 
+  virtual void
+  RunSession(DictType & inputs, TensorListType & outputs);
+  
 private:
   TensorflowMultisourceModelBase(const Self &); // purposely not implemented
   void

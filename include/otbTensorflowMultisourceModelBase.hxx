@@ -59,13 +59,13 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::PushBackInputTensorBu
   std::string       placeholder,
   SizeType          receptiveField,
   ImagePointerType  image,
-  bool              useNodata = false,
-  InternalPixelType nodataValue = 0)
+  bool              useNodata,
+  InternalPixelType nodataValue)
 {
   Superclass::PushBackInput(image);
   m_InputReceptiveFields.push_back(receptiveField);
   m_InputPlaceholders.push_back(placeholder);
-  m_InputUseNodata.push_back(useNoData);
+  m_InputUseNodata.push_back(useNodata);
   m_InputNodataValues.push_back(nodataValue);
 }
 
@@ -103,14 +103,6 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::GenerateDebugReport(D
 
 template <class TInputImage, class TOutputImage>
 void
-TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType & inputs, TensorListType & outputs)
-{
-  bool nodata;
-  this->RunSession(inputs, outputs, nodata);
-}
-
-template <class TInputImage, class TOutputImage>
-void
 TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType & inputs, TensorListType & outputs, bool & nodata)
 {
 
@@ -132,13 +124,7 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType &
 
   // Add input tensors
   // During this step we also check for nodata values
-  struct IsNodata
-    {
-        const InternalPixelType ndval;
-        IsNodata(InternalPixelType val) : ndval(val) {}
-        bool operator()(InternalPixelType val) const { return val == ndval; }
-    };
-  nodata = False;
+  nodata = false;
   k = 0;
   for (auto & dict : inputs)
   {
@@ -146,8 +132,13 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType &
     inputs_new.emplace_back(m_InputLayers[k], inputTensor);
     if (m_InputUseNodata[k] == true)
     {
-      auto array = inputTensor.flat<InternalPixelType>().data();
-      if (std::all_of(array.cbegin(), array.cend(), IsNodata(m_InputNodataValue[k])))
+      tensorflow::int64 ndCount = 0;
+      const tensorflow::int64 nElmT = inputTensor.NumElements();
+      auto array = inputTensor.flat<InternalPixelType>();
+      for (tensorflow::int64 i = 0 ; i < nElmT ; i++)
+        if (array(i) == m_InputNodataValues[k])
+          ndCount++;
+      if (ndCount == nElmT)
       {
         nodata = true;
         return;
@@ -173,6 +164,14 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType &
                         "OTB Filter debug message:\n"
                       << debugReport.str());
   }
+}
+
+template <class TInputImage, class TOutputImage>
+void
+TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType & inputs, TensorListType & outputs)
+{
+  bool nodata;
+  this->RunSession(inputs, outputs, nodata);
 }
 
 template <class TInputImage, class TOutputImage>
