@@ -132,11 +132,12 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType &
     inputs_new.emplace_back(m_InputLayers[k], inputTensor);
     if (m_InputUseNodata[k] == true)
     {
-      tensorflow::int64 ndCount = 0;
+      const auto nodataValue = m_InputNodataValues[k];
       const tensorflow::int64 nElmT = inputTensor.NumElements();
+      tensorflow::int64 ndCount = 0;
       auto array = inputTensor.flat<InternalPixelType>();
       for (tensorflow::int64 i = 0 ; i < nElmT ; i++)
-        if (array(i) == m_InputNodataValues[k])
+        if (array(i) == nodataValue)
           ndCount++;
       if (ndCount == nElmT)
       {
