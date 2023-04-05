@@ -1,4 +1,4 @@
-Version 4.0.0alpha (4 apr 2023)
+Version 4.0.0 (5 apr 2023)
 ----------------------------------------------------------------
 * Big improvement of the documentation:
   - Re-structure the entire doc, remove deprecated stuff, etc.
@@ -7,8 +7,7 @@ Version 4.0.0alpha (4 apr 2023)
   - Add a new section on the python API (end-to-end tutorial)
   - A lot of new sections: distributed training, etc...
 * Refactoring all the python classes to enforce pep8
-* Ubuntu version: 22.04
-* Cuda version: 12.1.0
+* Base images: ubuntu:22.04 (cpu), nvidia/cuda:12.0.1-cudnn8-devel-ubuntu22.04 (gpu)
 * Tensorflow version: 2.12.0
 * Fixed Tensorflow error "Cannot register 2 metrics with the same name" + new test
 * Faster CI build thanks to bazel remote cache
