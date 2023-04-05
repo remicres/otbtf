@@ -19,8 +19,7 @@ variables:
   DOCKERHUB_BASE: mdl4eo/otbtf
   DOCKERHUB_IMAGE_BASE: ${DOCKERHUB_BASE}:${OTBTF_VERSION}
   CPU_BASE_IMG: ubuntu:22.04
-  GPU_BASE_IMG: nvidia/cuda:12.1.0-devel-ubuntu22.04
-
+  GPU_BASE_IMG: nvidia/cuda:12.0.1-cudnn8-devel-ubuntu22.04
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/ # Execute jobs in merge request context, or commit in master branch
