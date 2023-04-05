@@ -1,7 +1,7 @@
 # OTBTF: Orfeo ToolBox meets TensorFlow
 
 <p align="center">
-<img src="images/logo.png" width="160px">
+<img src="doc/images/logo.png" width="160px">
 <br>
 <a href="https://gitlab.irstea.fr/remi.cresson/otbtf/-/releases">
 <img src="https://gitlab.irstea.fr/remi.cresson/otbtf/-/badges/release.svg">

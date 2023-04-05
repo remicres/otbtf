@@ -1,11 +1,13 @@
-!!! Warning
+!!! Info
 
 	This section is for educational purposes. No coding skills are required,
 	and it's easy to train an existing model built with the Tensorflow API
-	v1. To have a full control over the model implementation and training 
-	process, the Tensorflow API v2 with Keras is the way to go.
-    If you are interested in more similar examples, please read the 
+	v1. If you are interested in more similar examples, please read the 
     [Tensorflow v1 models examples](reference/otbtf/examples/tensorflow_v1x/__init__.md)
+    However, to have a full control over the model implementation and training 
+	process, the [Tensorflow API v2 with Keras](api_tutorial.html) is the 
+    recommended approach (see also 
+    [distributed training](api_distributed.html)). 
 	
 ## TensorflowModelTrain
 
