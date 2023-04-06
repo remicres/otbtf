@@ -20,7 +20,7 @@ class NodataInferenceTest(unittest.TestCase):
 
         # OTB pipeline
         bmx = otbApplication.Registry.CreateApplication("BandMathX")
-        bmx.SetParameterString("exp", "{idxX>idxY?1:0}")
+        bmx.SetParameterString("exp", "{idxX>idxY?idxX*idxY:0}")
         bmx.SetParameterStringList(
             "il", [resolve_paths("$DATADIR/fake_spot6.jp2")]
         )
@@ -30,12 +30,19 @@ class NodataInferenceTest(unittest.TestCase):
             "TensorflowModelServe"
         )
         infer.SetParameterString("model.dir", sm_dir)
+        infer.SetParameterString("model.fullyconv", "on")
         infer.AddImageToParameterInputImageList(
             "source1.il", bmx.GetParameterOutputImage("out")
         )
+        infer.SetParameterFloat("source1.nodata", 0.0)
+        for param in [
+            "source1.rfieldx", "source1.rfieldy", "output.efieldx", "output.efieldy"
+        ]:
+            infer.SetParameterInt(param, 16)
         infer.SetParameterString("out", resolve_paths("$TMPDIR/nd_out.tif"))
         infer.ExecuteAndWriteOutput()
 
 
 if __name__ == '__main__':
-    unittest.main()
+    NodataInferenceTest().test_infersimple()
+    #unittest.main()
