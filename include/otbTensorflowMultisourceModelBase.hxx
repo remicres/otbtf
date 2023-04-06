@@ -194,12 +194,12 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::GenerateOutputInforma
 
   // Check that no-data values size is consistent with the inputs
   // If no value is specified, set a vector of the same size as the inputs
-  if (m_InputNodataValues.size() == 0 && m_InputHasNodata.size() == 0)
+  if (m_InputNodataValues.size() == 0 && m_InputUseNodata.size() == 0)
   {
-    m_InputHasNodata = BoolListType(nbInputs, false);
+    m_InputUseNodata = BoolListType(nbInputs, false);
     m_InputNodataValues = ValueListType(nbInputs, 0.0);
   }
-  if (nbInputs != m_InputNodataValues.size() || nbInputs != m_InputNodataValues.size())
+  if (nbInputs != m_InputNodataValues.size() || nbInputs != m_InputUseNodata.size())
   {
     itkExceptionMacro("Number of input images is " << nbInputs << " but the number of no-data values is not consistent");
   }
