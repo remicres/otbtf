@@ -246,7 +246,7 @@ public:
       bundle.m_PatchSize[0] = GetParameterInt(bundle.m_KeyPszX);
       bundle.m_PatchSize[1] = GetParameterInt(bundle.m_KeyPszY);
       bundle.m_HasNodata = HasValue(bundle.m_KeyND);
-      bundle.m_NodataValue = GetParameterFloat(bundle.m_KeyND);
+      bundle.m_NodataValue = (bundle.m_HasNodata == true) ? GetParameterFloat(bundle.m_KeyND) : 0;
 
       otbAppLogINFO("Source info :");
       otbAppLogINFO("Receptive field  : " << bundle.m_PatchSize  );
@@ -287,8 +287,7 @@ public:
     // Input sources
     for (auto& bundle: m_Bundles)
     {
-      float nodata = (bundle.m_HasNodata == true) ? bundle.m_NodataValue : 0;
-      m_TFFilter->PushBackInputTensorBundle(bundle.m_Placeholder, bundle.m_PatchSize, bundle.m_ImageSource.Get(), bundle.m_HasNodata, nodata);
+      m_TFFilter->PushBackInputTensorBundle(bundle.m_Placeholder, bundle.m_PatchSize, bundle.m_ImageSource.Get(), bundle.m_HasNodata, bundle.m_NodataValue);
     }
 
     // Fully convolutional mode on/off
