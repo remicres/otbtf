@@ -17,7 +17,7 @@ on all GPUs.
 
 
 <div align="center" width="50%">
-<img src="http://www.idris.fr/media/images/jean-zay-annonce-01.jpg?id=web%3Ajean-zay%3Ajean-zay-presentation" width=50%>
+<img src="https://www.genci.fr/sites/default/files/image%20site.png" width=50%>
 <figcaption>Jean-Zay has several hundreds of computing nodes with 4 or 8 GPUs. Copyright Photothèque CNRS/Cyril Frésillon</figcaption>
 </div>
 
