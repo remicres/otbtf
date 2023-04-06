@@ -1,5 +1,3 @@
-image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-
 variables:
   OTBTF_VERSION: 4.0.0
   OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
@@ -20,6 +18,9 @@ variables:
   DOCKERHUB_IMAGE_BASE: ${DOCKERHUB_BASE}:${OTBTF_VERSION}
   CPU_BASE_IMG: ubuntu:22.04
   GPU_BASE_IMG: nvidia/cuda:12.0.1-cudnn8-devel-ubuntu22.04
+
+image: $BRANCH_IMAGE
+
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/ # Execute jobs in merge request context, or commit in master branch
