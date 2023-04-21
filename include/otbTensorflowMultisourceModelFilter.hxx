@@ -302,7 +302,7 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>::GenerateOutputInfor
 
   // Set null pixel
   m_NullPixel.SetSize(outputPtr->GetNumberOfComponentsPerPixel());
-  m_NullPixel.Fill(0);
+  m_NullPixel.Fill(m_OutputBackgroundValue);
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //                        Set the tiling layout hint in metadata

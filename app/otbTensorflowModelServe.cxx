@@ -192,7 +192,12 @@ public:
     SetDefaultParameterFloat                 ("output.spcscale", 1.0);
     SetParameterDescription                  ("output.spcscale", "The output image size/scale and spacing*scale where size and spacing corresponds to the first input");
     AddParameter(ParameterType_StringList,    "output.names",    "Names of the output tensors");
-    MandatoryOff                            ("output.names");
+    MandatoryOff                             ("output.names");
+
+    // Output background value
+    AddParameter(ParameterType_Float,         "output.bv", "Output background value");
+    SetDefaultParameterFloat                 ("output.bv", 0.0);
+    SetParameterDescription                  ("output.bv", "The value used when one input has only no-data values in its receptive field");
 
     // Output Field of Expression
     AddParameter(ParameterType_Int,           "output.efieldx", "The output expression field (width)");
@@ -296,6 +301,11 @@ public:
       otbAppLogINFO("The TensorFlow model is used in fully convolutional mode");
       m_TFFilter->SetFullyConvolutional(true);
     }
+
+    // Output background value
+    const float outBV = GetParameterFloat("output.bv");
+    otbAppLogINFO("Setting background value to " << outBV);
+    m_TFFilter->SetOutputBackgroundValue(outBV);
 
     // Output field of expression
     FloatVectorImageType::SizeType foe;
