@@ -218,6 +218,11 @@ rio:
     - sudo pip install rasterio
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_rio.xml $OTBTF_SRC/test/rio_test.py
 
+nodata:
+  extends: .applications_test_base
+  script:
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_nodata.xml $OTBTF_SRC/test/nodata_test.py
+
 deploy_cpu-dev-testing:
   stage: Update dev image
   extends: .docker_build_base
