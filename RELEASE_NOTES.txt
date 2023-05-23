@@ -1,9 +1,8 @@
-Version 4.1.0 (17 may 2023)
+Version 4.1.0 (23 may 2023)
 ----------------------------------------------------------------
 * Add no-data values support for inference in TensorflowModelServe application
 * Update base docker image for NVIDIA GPU builds (CUDA 12.1.1)
 * Fix CuDNN version detection in `build-env-tf.sh`
-* Add TensorRT support (tested: CUDA 11.8.0 and TensorRT 8.5)
 
 Version 4.0.0 (5 apr 2023)
 ----------------------------------------------------------------
