@@ -1,7 +1,5 @@
-image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-
 variables:
-  OTBTF_VERSION: 4.0.0
+  OTBTF_VERSION: 4.1.0
   OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
   OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
   OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
@@ -19,7 +17,10 @@ variables:
   DOCKERHUB_BASE: mdl4eo/otbtf
   DOCKERHUB_IMAGE_BASE: ${DOCKERHUB_BASE}:${OTBTF_VERSION}
   CPU_BASE_IMG: ubuntu:22.04
-  GPU_BASE_IMG: nvidia/cuda:12.0.1-cudnn8-devel-ubuntu22.04
+  GPU_BASE_IMG: nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+
+image: $BRANCH_IMAGE
+
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/ # Execute jobs in merge request context, or commit in master branch
@@ -217,6 +218,11 @@ rio:
     - sudo pip install rasterio
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_rio.xml $OTBTF_SRC/test/rio_test.py
 
+nodata:
+  extends: .applications_test_base
+  script:
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_nodata.xml $OTBTF_SRC/test/nodata_test.py
+
 deploy_cpu-dev-testing:
   stage: Update dev image
   extends: .docker_build_base
@@ -265,6 +271,7 @@ deploy_gpu:
     IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
     IMAGE_GPUOPT: $CI_REGISTRY_PUBIMG-gpu-opt
     IMAGE_GPUOPTDEV: $CI_REGISTRY_PUBIMG-gpu-opt-dev
+    IMAGE_GPUOPTDEVTRT: $CI_REGISTRY_PUBIMG-gpu-opt-dev-trt
     DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE-gpu
     DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
   script:
@@ -274,6 +281,9 @@ deploy_gpu:
     # gpu-opt-dev
     - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUOPTDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
     - docker push $IMAGE_GPUOPTDEV
+    # gpu-opt-dev-trt
+    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUOPTDEV --build-arg BASE_IMG="cuda:11.8.0-cudnn8-devel-ubuntu22.04" --build-arg KEEP_SRC_OTB=true --build-arg TENSORRT="8.5.1-1+cuda11.8" .
+    - docker push $IMAGE_GPUOPTDEVTRT
     # gpu-basic
     - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg BZL_CONFIGS="" .
     - docker push $IMAGE_GPU

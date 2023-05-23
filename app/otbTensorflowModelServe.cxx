@@ -70,11 +70,14 @@ public:
     InputImageSource m_ImageSource;
     SizeType         m_PatchSize;
     std::string      m_Placeholder;
+    float            m_NodataValue;
+    bool             m_HasNodata;
 
     // Parameters keys
     std::string m_KeyIn;     // Key of input image list
-    std::string m_KeyPszX;   // Key for samples sizes X
-    std::string m_KeyPszY;   // Key for samples sizes Y
+    std::string m_KeyPszX;   // Key for receptive field size in X
+    std::string m_KeyPszY;   // Key for receptive field size in Y
+    std::string m_KeyND;     // Key for no-data value
     std::string m_KeyPHName; // Key for placeholder name in the tensorflow model
   };
 
@@ -93,7 +96,8 @@ public:
     ss_key_in, ss_desc_in,
     ss_key_dims_x, ss_desc_dims_x,
     ss_key_dims_y, ss_desc_dims_y,
-    ss_key_ph, ss_desc_ph;
+    ss_key_ph, ss_desc_ph,
+    ss_key_nd, ss_desc_nd;
 
     // Parameter group key/description
     ss_key_group  << "source"                  << inputNumber;
@@ -104,12 +108,14 @@ public:
     ss_key_dims_x  << ss_key_group.str() << ".rfieldx";
     ss_key_dims_y  << ss_key_group.str() << ".rfieldy";
     ss_key_ph      << ss_key_group.str() << ".placeholder";
+    ss_key_nd      << ss_key_group.str() << ".nodata";
 
     // Parameter group descriptions
     ss_desc_in     << "Input image (or list to stack) for source #" << inputNumber;
     ss_desc_dims_x << "Input receptive field (width) for source #"  << inputNumber;
     ss_desc_dims_y << "Input receptive field (height) for source #" << inputNumber;
     ss_desc_ph     << "Name of the input placeholder for source #"  << inputNumber;
+    ss_desc_nd     << "No-data value for pixels of source #"        << inputNumber;
 
     // Populate group
     AddParameter(ParameterType_Group,          ss_key_group.str(),  ss_desc_group.str());
@@ -122,6 +128,8 @@ public:
     SetDefaultParameterInt                    (ss_key_dims_y.str(), 1);
     AddParameter(ParameterType_String,         ss_key_ph.str(),     ss_desc_ph.str());
     MandatoryOff                              (ss_key_ph.str());
+    AddParameter(ParameterType_Float,          ss_key_nd.str(), ss_desc_nd.str());
+    MandatoryOff                              (ss_key_nd.str());
 
     // Add a new bundle
     ProcessObjectsBundle bundle;
@@ -129,6 +137,7 @@ public:
     bundle.m_KeyPszX   = ss_key_dims_x.str();
     bundle.m_KeyPszY   = ss_key_dims_y.str();
     bundle.m_KeyPHName = ss_key_ph.str();
+    bundle.m_KeyND     = ss_key_nd.str();
 
     m_Bundles.push_back(bundle);
 
@@ -183,7 +192,12 @@ public:
     SetDefaultParameterFloat                 ("output.spcscale", 1.0);
     SetParameterDescription                  ("output.spcscale", "The output image size/scale and spacing*scale where size and spacing corresponds to the first input");
     AddParameter(ParameterType_StringList,    "output.names",    "Names of the output tensors");
-    MandatoryOff                            ("output.names");
+    MandatoryOff                             ("output.names");
+
+    // Output background value
+    AddParameter(ParameterType_Float,         "output.bv", "Output background value");
+    SetDefaultParameterFloat                 ("output.bv", 0.0);
+    SetParameterDescription                  ("output.bv", "The value used when one input has only no-data values in its receptive field");
 
     // Output Field of Expression
     AddParameter(ParameterType_Int,           "output.efieldx", "The output expression field (width)");
@@ -236,10 +250,14 @@ public:
       bundle.m_Placeholder = GetParameterAsString(bundle.m_KeyPHName);
       bundle.m_PatchSize[0] = GetParameterInt(bundle.m_KeyPszX);
       bundle.m_PatchSize[1] = GetParameterInt(bundle.m_KeyPszY);
+      bundle.m_HasNodata = HasValue(bundle.m_KeyND);
+      bundle.m_NodataValue = (bundle.m_HasNodata == true) ? GetParameterFloat(bundle.m_KeyND) : 0;
 
       otbAppLogINFO("Source info :");
       otbAppLogINFO("Receptive field  : " << bundle.m_PatchSize  );
       otbAppLogINFO("Placeholder name : " << bundle.m_Placeholder);
+      if (bundle.m_HasNodata == true)
+        otbAppLogINFO("No-data value    : " << bundle.m_NodataValue);
     }
   }
 
@@ -274,7 +292,7 @@ public:
     // Input sources
     for (auto& bundle: m_Bundles)
     {
-      m_TFFilter->PushBackInputTensorBundle(bundle.m_Placeholder, bundle.m_PatchSize, bundle.m_ImageSource.Get());
+      m_TFFilter->PushBackInputTensorBundle(bundle.m_Placeholder, bundle.m_PatchSize, bundle.m_ImageSource.Get(), bundle.m_HasNodata, bundle.m_NodataValue);
     }
 
     // Fully convolutional mode on/off
@@ -283,6 +301,11 @@ public:
       otbAppLogINFO("The TensorFlow model is used in fully convolutional mode");
       m_TFFilter->SetFullyConvolutional(true);
     }
+
+    // Output background value
+    const float outBV = GetParameterFloat("output.bv");
+    otbAppLogINFO("Setting background value to " << outBV);
+    m_TFFilter->SetOutputBackgroundValue(outBV);
 
     // Output field of expression
     FloatVectorImageType::SizeType foe;

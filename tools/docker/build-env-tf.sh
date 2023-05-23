@@ -34,6 +34,16 @@ export TF_NEED_ROCM=0
 export TF_NEED_CUDA=0
 export CUDA_TOOLKIT_PATH=$(find /usr/local -maxdepth 1 -type d -name 'cuda-*')
 if  [ ! -z $CUDA_TOOLKIT_PATH ] ; then
+    if [ ! -z $TENSORRT ]; then
+        echo "Building tensorflow with TensorRT support"
+        apt install \
+            libnvinfer8=$TENSORRT \
+            libnvinfer-dev=$TENSORRT \
+            libnvinfer-plugin8=$TENSORRT \
+            libnvinfer-plugin-dev=$TENSORRT
+        export TF_TENSORRT_VERSION=$(cat $(find /usr/ -type f -name NvInferVersion.h) | grep '#define NV_TENSORRT_MAJOR' | cut -f3 -d' ')
+        export TF_NEED_TENSORRT=1
+    fi
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CUDA_TOOLKIT_PATH/lib64:$CUDA_TOOLKIT_PATH/lib64/stubs"
     export TF_CUDA_VERSION=$(echo $CUDA_TOOLKIT_PATH | sed -r 's/.*\/cuda-(.*)/\1/')
     export TF_CUDA_COMPUTE_CAPABILITIES="5.2,6.1,7.0,7.5,8.6"
@@ -41,6 +51,6 @@ if  [ ! -z $CUDA_TOOLKIT_PATH ] ; then
     export TF_CUDA_CLANG=0
     export TF_NEED_TENSORRT=0
     export CUDNN_INSTALL_PATH="/usr/"
-    export TF_CUDNN_VERSION=$(sed -n 's/^#define CUDNN_MAJOR\s*\(.*\).*/\1/p' $CUDNN_INSTALL_PATH/include/cudnn.h)
+    export TF_CUDNN_VERSION=$(sed -n 's/^#define CUDNN_MAJOR\s*\(.*\).*/\1/p' $CUDNN_INSTALL_PATH/include/cudnn_version.h)
     export TF_NCCL_VERSION=2
 fi

@@ -132,6 +132,8 @@ public:
   itkGetMacro(FullyConvolutional, bool);
   itkSetMacro(OutputSpacingScale, float);
   itkGetMacro(OutputSpacingScale, float);
+  itkSetMacro(OutputBackgroundValue, OutputInternalPixelType);
+  itkGetMacro(OutputBackgroundValue, OutputInternalPixelType);
 
 protected:
   TensorflowMultisourceModelFilter();
@@ -162,17 +164,18 @@ private:
   void
   operator=(const Self &); // purposely not implemented
 
-  SizeType m_OutputGridSize;      // Output grid size
-  bool     m_ForceOutputGridSize; // Force output grid size
-  bool     m_FullyConvolutional;  // Convolution mode
-  float    m_OutputSpacingScale;  // scaling of the output spacings
+  SizeType                m_OutputGridSize;         // Output grid size
+  bool                    m_ForceOutputGridSize;    // Force output grid size
+  bool                    m_FullyConvolutional;     // Convolution mode
+  float                   m_OutputSpacingScale;     // scaling of the output spacings
+  OutputInternalPixelType m_OutputBackgroundValue;  // Output background value
 
   // Internal
-  SpacingType m_OutputSpacing; // Output image spacing
-  PointType   m_OutputOrigin;  // Output image origin
-  SizeType    m_OutputSize;    // Output image size
-  PixelType   m_NullPixel;     // Pixel filled with zeros
-
+  SpacingType             m_OutputSpacing;          // Output image spacing
+  PointType               m_OutputOrigin;           // Output image origin
+  SizeType                m_OutputSize;             // Output image size
+  PixelType               m_NullPixel;              // Pixel filled with zeros
+  
 }; // end class
 
 
