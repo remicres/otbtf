@@ -44,6 +44,7 @@ RUN git config --global advice.detachedHead false
 ### TF
 
 ARG TF=v2.12.0
+ARG TENSORRT
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
@@ -203,3 +204,4 @@ RUN python -c "import tensorflow"
 RUN python -c "import otbtf, tricks"
 RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
 RUN python -c "from osgeo import gdal"
+

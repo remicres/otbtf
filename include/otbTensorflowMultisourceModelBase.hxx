@@ -55,13 +55,18 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::GetSignatureDef()
 
 template <class TInputImage, class TOutputImage>
 void
-TensorflowMultisourceModelBase<TInputImage, TOutputImage>::PushBackInputTensorBundle(std::string      placeholder,
-                                                                                     SizeType         receptiveField,
-                                                                                     ImagePointerType image)
+TensorflowMultisourceModelBase<TInputImage, TOutputImage>::PushBackInputTensorBundle(
+  std::string       placeholder,
+  SizeType          receptiveField,
+  ImagePointerType  image,
+  bool              useNodata,
+  InternalPixelType nodataValue)
 {
   Superclass::PushBackInput(image);
   m_InputReceptiveFields.push_back(receptiveField);
   m_InputPlaceholders.push_back(placeholder);
+  m_InputUseNodata.push_back(useNodata);
+  m_InputNodataValues.push_back(nodataValue);
 }
 
 template <class TInputImage, class TOutputImage>
@@ -96,10 +101,9 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::GenerateDebugReport(D
   return debugReport;
 }
 
-
 template <class TInputImage, class TOutputImage>
 void
-TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType & inputs, TensorListType & outputs)
+TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType & inputs, TensorListType & outputs, bool & nodata)
 {
 
   // Run the TF session here
@@ -119,10 +123,28 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType &
   }
 
   // Add input tensors
+  // During this step we also check for nodata values
+  nodata = false;
   k = 0;
   for (auto & dict : inputs)
   {
-    inputs_new.emplace_back(m_InputLayers[k], dict.second);
+    auto inputTensor = dict.second;
+    inputs_new.emplace_back(m_InputLayers[k], inputTensor);
+    if (m_InputUseNodata[k] == true)
+    {
+      const auto nodataValue = m_InputNodataValues[k];
+      const tensorflow::int64 nElmT = inputTensor.NumElements();
+      tensorflow::int64 ndCount = 0;
+      auto array = inputTensor.flat<InternalPixelType>();
+      for (tensorflow::int64 i = 0 ; i < nElmT ; i++)
+        if (array(i) == nodataValue)
+          ndCount++;
+      if (ndCount == nElmT)
+      {
+        nodata = true;
+        return;
+      }
+    }
     k += 1;
   }
 
@@ -140,9 +162,17 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType &
                       << "Tensorflow error message:\n"
                       << status.ToString()
                       << "\n"
-                         "OTB Filter debug message:\n"
+                        "OTB Filter debug message:\n"
                       << debugReport.str());
   }
+}
+
+template <class TInputImage, class TOutputImage>
+void
+TensorflowMultisourceModelBase<TInputImage, TOutputImage>::RunSession(DictType & inputs, TensorListType & outputs)
+{
+  bool nodata;
+  this->RunSession(inputs, outputs, nodata);
 }
 
 template <class TInputImage, class TOutputImage>
@@ -160,6 +190,18 @@ TensorflowMultisourceModelBase<TInputImage, TOutputImage>::GenerateOutputInforma
     itkExceptionMacro("Number of input images is "
                       << nbInputs << " but the number of input patches size is " << m_InputReceptiveFields.size()
                       << " and the number of input tensors names is " << m_InputPlaceholders.size());
+  }
+
+  // Check that no-data values size is consistent with the inputs
+  // If no value is specified, set a vector of the same size as the inputs
+  if (m_InputNodataValues.size() == 0 && m_InputUseNodata.size() == 0)
+  {
+    m_InputUseNodata = BoolListType(nbInputs, false);
+    m_InputNodataValues = ValueListType(nbInputs, 0.0);
+  }
+  if (nbInputs != m_InputNodataValues.size() || nbInputs != m_InputUseNodata.size())
+  {
+    itkExceptionMacro("Number of input images is " << nbInputs << " but the number of no-data values is not consistent");
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////

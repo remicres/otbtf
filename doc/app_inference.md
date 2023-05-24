@@ -23,14 +23,14 @@ known:
 ![Schema](images/schema.png)
 
 The **scale factor** describes the physical change of spacing of the outputs,
-typically introduced in the model by non unitary strides in pooling or
+typically introduced in the model by non-unitary strides in pooling or
 convolution operators.
 For each output, it is expressed relatively to one single input of the model
 called the *reference input source*.
 Additionally, the names of the *target nodes* must be known (e.g. optimizers
 for Tensorflow API v1).
 Also, the names of *user placeholders*, typically scalars inputs that are
-used to control some parameters of the model, must be know.
+used to control some parameters of the model, must be known.
 The **receptive field** corresponds to the input volume that "sees" the deep
 net.
 The **expression field** corresponds to the output volume that the deep net
@@ -58,15 +58,20 @@ computation of one single tile of pixels.
 So, this application takes in input one or multiple _input sources_ (the number
 of _input sources_ can be changed by setting the `OTB_TF_NSOURCES` to the
 desired number) and produce one output of the specified tensors.
-The user is responsible of giving the **receptive field** and **name** of
+The user is responsible for giving the **receptive field** and **name** of
 _input placeholders_, as well as the **expression field**, **scale factor** and
 **name** of _output tensors_.
 The first _input source_ (`source1.il`) corresponds to the _reference input
 source_.
 As explained, the **scale factor** provided for the
 _output tensors_ is related to this _reference input source_.
-The user can ask for multiple _output tensors_, that will be stack along the
+The user can ask for multiple _output tensors_, that will be stacked along the
 channel dimension of the output raster.
+Since OTBTF 4.1, a no-data value can be provided for each input source (e.g. 
+`source1.nodata`). When all elements of an input are equals to the no-data 
+value in the processed chunk of image, the local inference process is skipped, 
+and the output pixel is filled with the value provided by the `output.bv` 
+parameter.
 
 !!! Warning
 
