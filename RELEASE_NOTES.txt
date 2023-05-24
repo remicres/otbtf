@@ -1,7 +1,6 @@
 Version 4.1.0 (23 may 2023)
 ----------------------------------------------------------------
 * Add no-data values support for inference in TensorflowModelServe application
-* Update base docker image for NVIDIA GPU builds (CUDA 12.1.1)
 * Fix CuDNN version detection in `build-env-tf.sh`
 * Dockerfile args to build otbtf with TensorRT (experimental)
 
