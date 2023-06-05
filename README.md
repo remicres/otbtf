@@ -33,8 +33,8 @@ The documentation is available on [otbtf.readthedocs.io](https://otbtf.readthedo
 You can use our latest GPU enabled docker images.
 
 ```bash
-docker run --runtime=nvidia -ti mdl4eo/otbtf:4.0.0-gpu otbcli_PatchesExtraction
-docker run --runtime=nvidia -ti mdl4eo/otbtf:4.0.0-gpu python -c "import otbtf"
+docker run --runtime=nvidia -ti mdl4eo/otbtf:4.1.0-gpu otbcli_PatchesExtraction
+docker run --runtime=nvidia -ti mdl4eo/otbtf:4.1.0-gpu python -c "import otbtf"
 ```
 
 You can also build OTBTF from sources (see the documentation)
