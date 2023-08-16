@@ -19,7 +19,7 @@
 # ==========================================================================*/
 """
 [Source code :fontawesome-brands-github:](https://github.com/remicres/otbtf/
-tree/master/otbtf/ops.py){ .md-button }
+tree/master/otbtf/layers.py){ .md-button }
 
 The utils module provides some useful keras layers to build deep nets.
 """
