@@ -33,4 +33,5 @@ except ImportError:
 
 from otbtf.tfrecords import TFRecords  # noqa
 from otbtf.model import ModelBase  # noqa
+from otbtf import layers, ops  # noqa
 __version__ = pkg_resources.require("otbtf")[0].version
