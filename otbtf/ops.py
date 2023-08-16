@@ -29,7 +29,7 @@ import tensorflow as tf
 
 
 Tensor = Any
-Scalars = List[float] | Tuple[Float]
+Scalars = List[float] | Tuple[float]
 def one_hot(labels: Tensor, nb_classes: int):
     """
     Converts labels values into one-hot vector.
