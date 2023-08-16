@@ -27,7 +27,9 @@ RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/loc
 RUN pip install --no-cache-dir pip --upgrade
 # NumPy version is conflicting with system's gdal dep and may require venv
 ARG NUMPY_SPEC="==1.22.*"
-RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" packaging requests \
+# This is to avoid https://github.com/tensorflow/tensorflow/issues/61551
+ARG PROTO_SPEC="==4.23.*"
+RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" "protobuf$PROTO_SPEC" packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
 # ----------------------------------------------------------------------------
