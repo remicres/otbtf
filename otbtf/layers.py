@@ -136,13 +136,15 @@ class Argmax(tf.keras.layers.Layer):
     Useful to transform a softmax into a "categorical" map for instance.
 
     """
-    def __init__(self, name: str = None):
+    def __init__(self, name: str = None, expand_last_dim: bool = True):
         """
         Params:
             name: layer name
+            expand_last_dim: expand the last dimension when True
 
         """
         super().__init__(name=name)
+        self.expand_last_dim = expand_last_dim
 
     def call(self, inputs):
         """
@@ -157,7 +159,10 @@ class Argmax(tf.keras.layers.Layer):
             (nb_classes - 1).
 
         """
-        return tf.expand_dims(tf.math.argmax(inputs, axis=-1), axis=-1)
+        argmax = tf.math.argmax(inputs, axis=-1)
+        if self.expand_last_dim:
+            return tf.expand_dims(argmax, axis=-1)
+        return argmax
 
 
 class Max(tf.keras.layers.Layer):
