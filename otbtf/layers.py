@@ -55,7 +55,7 @@ class DilatedMask(tf.keras.layers.Layer):
         nodata_mask = tf.cast(tf.math.equal(inp, self.nodata_value), tf.uint8)
 
         se_size = 1 + 2 * self.radius
-        # Create a morphological kernel suitable for binary dilatation, see 
+        # Create a morphological kernel suitable for binary dilatation, see
         # https://stackoverflow.com/q/54686895/13711499
         kernel = tf.zeros((se_size, se_size, 1), dtype=tf.uint8)
         conv2d_out = tf.nn.dilation2d(
@@ -136,13 +136,15 @@ class Argmax(tf.keras.layers.Layer):
     Useful to transform a softmax into a "categorical" map for instance.
 
     """
-    def __init__(self, name: str = None):
+    def __init__(self, name: str = None, expand_last_dim: bool = True):
         """
         Params:
             name: layer name
+            expand_last_dim: expand the last dimension when True
 
         """
         super().__init__(name=name)
+        self.expand_last_dim = expand_last_dim
 
     def call(self, inputs):
         """
@@ -157,7 +159,10 @@ class Argmax(tf.keras.layers.Layer):
             (nb_classes - 1).
 
         """
-        return tf.expand_dims(tf.math.argmax(inputs, axis=-1), axis=-1)
+        argmax = tf.math.argmax(inputs, axis=-1)
+        if self.expand_last_dim:
+            return tf.expand_dims(argmax, axis=-1)
+        return argmax
 
 
 class Max(tf.keras.layers.Layer):
