@@ -55,7 +55,7 @@ class DilatedMask(tf.keras.layers.Layer):
         nodata_mask = tf.cast(tf.math.equal(inp, self.nodata_value), tf.uint8)
 
         se_size = 1 + 2 * self.radius
-        # Create a morphological kernel suitable for binary dilatation, see 
+        # Create a morphological kernel suitable for binary dilatation, see
         # https://stackoverflow.com/q/54686895/13711499
         kernel = tf.zeros((se_size, se_size, 1), dtype=tf.uint8)
         conv2d_out = tf.nn.dilation2d(
