@@ -28,7 +28,8 @@ import abc
 import logging
 import tensorflow as tf
 
-TensorsDict = Dict[str, Any]
+Tensor = Any
+TensorsDict = Dict[str, Tensor]
 
 
 class ModelBase(abc.ABC):
