@@ -258,10 +258,7 @@ and the estimated values.
         out_tconv1 = _tconv(out_conv4, 64, "tconv1") + out_conv3
         out_tconv2 = _tconv(out_tconv1, 32, "tconv2") + out_conv2
         out_tconv3 = _tconv(out_tconv2, 16, "tconv3") + out_conv1
-        out_tconv4 = _tconv(out_tconv3, N_CLASSES, "classifier", None)
-
-        softmax_op = tf.keras.layers.Softmax(name=OUTPUT_SOFTMAX_NAME)
-        predictions = softmax_op(out_tconv4)
+        predictions = _tconv(out_tconv3, N_CLASSES, OUTPUT_SOFTMAX_NAME, "softmax")
 
         return {TARGET_NAME: predictions}
 
@@ -375,36 +372,36 @@ polluted by the convolutional padding.
 For a 2D convolution of stride \(s\) and kernel size \(k\), we can deduce the 
 valid output size \(y\) from input size \(x\) using this expression:
 $$
-y = \left[\frac{x - k + 1}{s}\right]
+y = \left[\frac{x - k }{s}\right] + 1
 $$
 For a 2D transposed convolution of stride \(s\) and kernel size \(k\), we can 
 deduce the valid output size \(y\) from input size \(x\) using this expression:
 $$
-y = (x * s) - k + 1
+y = x * s - k + 2
 $$
 
-Let's consider a chunk of input image of size 128, and check the valid output 
+Let's consider a chunk of input image of size 64, and check the valid output 
 size of our model:
 
 | Conv. name     | Conv. type        | Kernel | Stride | Out. size | Valid out. size |
 |----------------|-------------------|--------|--------|-----------|-----------------|
-| *input*        | /                 | /      | /      | 128       | 128             |
-| *conv1*        | Conv2D            | 3      | 2      | 64        | 63              |
-| *conv2*        | Conv2D            | 3      | 2      | 32        | 30              |
-| *conv3*        | Conv2D            | 3      | 2      | 16        | 14              |
-| *conv4*        | Conv2D            | 3      | 2      | 8         | 6               |
-| *tconv1*       | Transposed Conv2D | 3      | 2      | 16        | 10              |
-| *tconv2*       | Transposed Conv2D | 3      | 2      | 32        | 18              |
-| *tconv3*       | Transposed Conv2D | 3      | 2      | 64        | 34              |
-| *classifier*   | Transposed Conv2D | 3      | 2      | 128       | 66              |
+| *input*        | /                 | /      | /      | 64        | 64              |
+| *conv1*        | Conv2D            | 3      | 2      | 32        | 31              |
+| *conv2*        | Conv2D            | 3      | 2      | 16        | 15              |
+| *conv3*        | Conv2D            | 3      | 2      | 8         | 7               |
+| *conv4*        | Conv2D            | 3      | 2      | 4         | 3               |
+| *tconv1*       | Transposed Conv2D | 3      | 2      | 8         | 5               |
+| *tconv2*       | Transposed Conv2D | 3      | 2      | 16        | 9               |
+| *tconv3*       | Transposed Conv2D | 3      | 2      | 32        | 17              |
+| *classifier*   | Transposed Conv2D | 3      | 2      | 64        | 33              |
 
 This shows that our model can be applied in a fully convolutional fashion 
 without generating blocking artifacts, using the central part of the output of 
-size 66. This is equivalent to remove \((128 - 66)/2 = 31\) pixels from 
+size 33. This is equivalent to remove \((64 - 33)/2 = 15\) pixels from 
 the borders of the output. We keep the upper nearest power of 2 to keep the 
-convolutions consistent between two adjacent image chunks, hence we can remove 32 
-pixels from the borders. We can hence use the output cropped with **32** pixels, 
-named ***predictions_crop32*** in the model outputs.
+convolutions consistent between two adjacent image chunks, hence we can remove 16 
+pixels from the borders. We can hence use the output cropped with **16** pixels, 
+named ***predictions_crop16*** in the model outputs.
 By default, cropped outputs in `otbtf.ModelBase` are generated for the following 
 values: `[16, 32, 64, 96, 128]` but that can be changed setting `inference_cropping` 
 in the model `__init__()` (see the reference API documentation for details).
@@ -434,10 +431,10 @@ In the following subsections, we run `TensorflowModelServe` over the input
 image, with the following parameters:
 
 - the input name is ***input_xs***
-- the output name is ***predictions_crop32*** (cropping margin of 32 pixels)
-- we choose a receptive field of ***128*** and an expression field of 
-***64*** so that they match the cropping margin of 32 pixels (since we remove 
-32 pixels from each side in x and y dimensions, we remove a total of 64 pixels 
+- the output name is ***predictions_crop16*** (cropping margin of 16 pixels)
+- we choose a receptive field of ***64*** and an expression field of 
+***32*** so that they match the cropping margin of 16 pixels (since we remove 
+16 pixels from each side in x and y dimensions, we remove a total of 32 pixels 
 from each borders in x/y dimensions). 
 
 ### Command Line Interface
@@ -447,14 +444,14 @@ Open a terminal and run the following command:
 ```commandline
 otbcli_TensorflowModelServe \
 -source1.il $DATADIR/fake_spot6.jp2 \
--source1.rfieldx 128 \ 
--source1.rfieldy 128 \
+-source1.rfieldx 64 \ 
+-source1.rfieldy 64 \
 -source1.placeholder "input_xs" \
 -model.dir /tmp/my_1st_savedmodel \
 -model.fullyconv on \
--output.names "predictions_crop32" \
--output.efieldx 64 \
--output.efieldy 64 \
+-output.names "predictions_crop16" \
+-output.efieldx 32 \
+-output.efieldy 32 \
 -out softmax.tif
 ```
 
@@ -467,14 +464,14 @@ python wrapper:
 import otbApplication
 app = otbApplication.Registry.CreateApplication("TensorflowModelServe")
 app.SetParameterStringList("source1.il", ["fake_spot6.jp2"])
-app.SetParameterInt("source1.rfieldx", 128)
-app.SetParameterInt("source1.rfieldy", 128)
+app.SetParameterInt("source1.rfieldx", 64)
+app.SetParameterInt("source1.rfieldy", 64)
 app.SetParameterString("source1.placeholder", "input_xs")
 app.SetParameterString("model.dir", "/tmp/my_1st_savedmodel")
 app.EnableParameter("fullyconv")
-app.SetParameterStringList("output.names", ["predictions_crop32"])
-app.SetParameterInt("output.efieldx", 64)
-app.SetParameterInt("output.efieldy", 64)
+app.SetParameterStringList("output.names", ["predictions_crop16"])
+app.SetParameterInt("output.efieldx", 32)
+app.SetParameterInt("output.efieldy", 32)
 app.SetParameterString("out", "softmax.tif")
 app.ExecuteAndWriteOutput()
 ```
@@ -487,14 +484,14 @@ Using PyOTB is nicer:
 import pyotb
 pyotb.TensorflowModelServe({
     "source1.il": "fake_spot6.jp2",
-    "source1.rfieldx": 128,
-    "source1.rfieldy": 128,
+    "source1.rfieldx": 64,
+    "source1.rfieldy": 64,
     "source1.placeholder": "input_xs",
     "model.dir": "/tmp/my_1st_savedmodel",
     "fullyconv": True,
-    "output.names": ["predictions_crop32"],
-    "output.efieldx": 64,
-    "output.efieldy": 64,
+    "output.names": ["predictions_crop16"],
+    "output.efieldx": 32,
+    "output.efieldy": 32,
     "out": "softmax.tif",
 })
 ```
