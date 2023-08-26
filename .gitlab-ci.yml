@@ -164,7 +164,7 @@ ctest:
   extends: .tests_base
   stage: Applications Test
   before_script:
-    - pip3 install pytest pytest-cov pytest-order
+    - pip install pytest pytest-cov pytest-order
     - mkdir -p $ARTIFACT_TEST_DIR
     - cd $CI_PROJECT_DIR
 
@@ -188,6 +188,15 @@ sr4rs:
     - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
+
+decloud:
+  extends: .applications_test_base
+  script:
+    - git clone https://github.com/CNES/decloud.git
+    - pip install -r $PWD/decloud/docker/requirements.txt
+    - wget -P decloud_data --no-verbose --recursive --level=inf --no-parent -R "index.html*" --cut-dirs=3 --no-host-directories http://indexof.montpellier.irstea.priv/projets/geocicd/decloud/
+    - export DECLOUD_DATA_DIR="$PWD/decloud_data"
+    - pytest decloud/tests/train_from_tfrecords_unittest.py
 
 otbtf_api:
   extends: .applications_test_base
