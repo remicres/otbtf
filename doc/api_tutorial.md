@@ -184,6 +184,19 @@ def dataset_preprocessing_fn(examples: dict):
 
 As you can see, we don't modify the input tensor, since we want to use it 
 as it in the model.
+Note that since version 4.2.0 the `otbtf.ops.one_hot` can ease the transform:
+
+```python
+def dataset_preprocessing_fn(examples: dict):
+    return {
+        INPUT_NAME: examples["input_xs_patches"],
+        TARGET_NAME: otbtf.ops.one_hot(
+            labels=examples["labels_patches"],
+            nb_classes=N_CLASSES
+        )
+}
+
+```
 
 ### Model inputs preprocessing
 
