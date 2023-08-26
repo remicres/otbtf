@@ -196,8 +196,9 @@ decloud:
     - pip install -r $PWD/decloud/docker/requirements.txt
     - wget -P decloud_data --no-verbose --recursive --level=inf --no-parent -R "index.html*" --cut-dirs=3 --no-host-directories http://indexof.montpellier.irstea.priv/projets/geocicd/decloud/
     - export DECLOUD_DATA_DIR="$PWD/decloud_data"
-    - pytest decloud/tests/train_from_tfrecords_unittest.py
-    - pytest decloud/tests/create_tfrecords_unittest.py
+    - cd decloud
+    - pytest tests/train_from_tfrecords_unittest.py
+    - pytest tests/create_tfrecords_unittest.py
 
 otbtf_api:
   extends: .applications_test_base
