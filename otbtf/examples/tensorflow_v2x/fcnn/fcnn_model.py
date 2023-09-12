@@ -123,6 +123,18 @@ class FCNNModel(ModelBase):
         softmax_op = tf.keras.layers.Softmax(name=OUTPUT_SOFTMAX_NAME)
         predictions = softmax_op(out_tconv4)
 
+        # note that we could also add additional outputs, for instance the
+        # argmax of the softmax:
+        #
+        # argmax_op = otbtf.layers.Argmax(name="labels")
+        # labels = argmax_op(predictions)
+        # return {TARGET_NAME: predictions, OUTPUT_ARGMAX_NAME: labels}
+        # The default extra outputs (i.e. output tensors with cropping in
+        # physical domain) are append by `otbtf.ModelBase` for all returned
+        # outputs of this function to be used at inference time (e.g.
+        # "labels_crop32", "labels_crop64", ...,
+        # "predictions_softmax_tensor_crop16", ..., etc).
+
         return {TARGET_NAME: predictions}
 
 
@@ -173,12 +185,23 @@ def train(params, ds_train, ds_valid, ds_test):
         model = FCNNModel(dataset_element_spec=ds_train.element_spec)
 
         # Compile the model
+        # It is a good practice to use a `dict` to explicitly name the outputs
+        # over which the losses/metrics are computed.
+        # This ensures a better optimization control, and also avoids lots of
+        # useless outputs (e.g. metrics computed over extra outputs).
         model.compile(
-            loss=tf.keras.losses.CategoricalCrossentropy(),
+            loss={
+                TARGET_NAME: tf.keras.losses.CategoricalCrossentropy()
+            },
             optimizer=tf.keras.optimizers.Adam(
                 learning_rate=params.learning_rate
             ),
-            metrics=[tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
+            metrics={
+                TARGET_NAME: [
+                    tf.keras.metrics.Precision(class_id=1),
+                    tf.keras.metrics.Recall(class_id=1)
+                ]
+            }
         )
 
         # Summarize the model (in CLI)

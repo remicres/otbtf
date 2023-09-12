@@ -5,13 +5,13 @@ We recommend to use OTBTF from official docker images.
 Latest CPU-only docker image:
 
 ```commandline
-docker pull mdl4eo/otbtf:4.0.0-cpu
+docker pull mdl4eo/otbtf:4.2.0-cpu
 ```
 
 Latest GPU-ready docker image:
 
 ```commandline
-docker pull mdl4eo/otbtf:4.0.0-gpu
+docker pull mdl4eo/otbtf:4.2.0-gpu
 ```
 
 Read more in the following sections.
@@ -25,12 +25,12 @@ Since OTBTF >= 3.2.1 you can find the latest docker images on
 
 | Name                                                                               | Os            | TF    | OTB   | Description            | Dev files | Compute capability |
 |------------------------------------------------------------------------------------| ------------- |-------|-------| ---------------------- | --------- | ------------------ |
-| **mdl4eo/otbtf:4.0.0-cpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:4.0.0-cpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:4.0.0-gpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:4.0.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.0.0-gpu-opt**     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.0.0-gpu-opt-dev** | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.2.0-cpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.2.0-cpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.2.0-gpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.2.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.2.0-gpu-opt**     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.2.0-gpu-opt-dev** | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 
 The list of older releases is available [here](#older-images).
 
@@ -51,13 +51,13 @@ You can then use the OTBTF `gpu` tagged docker images with the **NVIDIA runtime*
 With Docker version earlier than 19.03 :
 
 ```bash
-docker run --runtime=nvidia -ti mdl4eo/otbtf:4.0.0-gpu bash
+docker run --runtime=nvidia -ti mdl4eo/otbtf:4.2.0-gpu bash
 ```
 
 With Docker version including and after 19.03 :
 
 ```bash
-docker run --gpus all -ti mdl4eo/otbtf:4.0.0-gpu bash
+docker run --gpus all -ti mdl4eo/otbtf:4.2.0-gpu bash
 ```
 
 You can find some details on the **GPU docker image** and some **docker tips 
@@ -80,7 +80,7 @@ See here how to install docker on Ubuntu
 1. Install [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#manual-installation-steps) (Windows Subsystem for Linux)
 2. Install [docker desktop](https://www.docker.com/products/docker-desktop)
 3. Start **docker desktop** and **enable WSL2** from *Settings* > *General* then tick the box *Use the WSL2 based engine*
-3. Open a **cmd.exe** or **PowerShell** terminal, and type `docker create --name otbtf-cpu --interactive --tty mdl4eo/otbtf:4.0.0-cpu`
+3. Open a **cmd.exe** or **PowerShell** terminal, and type `docker create --name otbtf-cpu --interactive --tty mdl4eo/otbtf:4.2.0-cpu`
 4. Open **docker desktop**, and check that the docker is running in the **Container/Apps** menu
 ![Docker desktop, after the docker image is downloaded and ready to use](images/docker_desktop_1.jpeg)
 5. From **docker desktop**, click on the icon highlighted as shown below, and use the bash terminal that should pop up!
@@ -160,4 +160,16 @@ Here you can find the list of older releases of OTBTF:
 | **mdl4eo/otbtf:3.4.0-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
 | **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.4.0-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
 | **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.4.0-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.0.0-cpu**                                                         | Ubuntu Jammy  | r2.12  | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.0.0-cpu-dev**                                                     | Ubuntu Jammy  | r2.12  | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.0.0-gpu**                                                         | Ubuntu Jammy  | r2.12  | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.0.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.12  | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.0.0-gpu-opt**     | Ubuntu Jammy  | r2.12  | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.0.0-gpu-opt-dev** | Ubuntu Jammy  | r2.12  | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.1.0-cpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.1.0-cpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.1.0-gpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.1.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.1.0-gpu-opt**     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.1.0-gpu-opt-dev** | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 

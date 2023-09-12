@@ -18,20 +18,31 @@
 #
 # ==========================================================================*/
 """
-OTBTF python module
-"""
-import pkg_resources
-try:
-    from otbtf.utils import read_as_np_arr, gdal_open  # noqa
-    from otbtf.dataset import Buffer, PatchesReaderBase, PatchesImagesReader, \
-        IteratorBase, RandomIterator, Dataset, DatasetFromPatchesImages  # noqa
-except ImportError:
-    print(
-        "Warning: otbtf.utils and otbtf.dataset were not imported. "
-        "Using OTBTF without GDAL."
-    )
+[Source code :fontawesome-brands-github:](https://github.com/remicres/otbtf/
+tree/master/otbtf/ops.py){ .md-button }
 
-from otbtf.tfrecords import TFRecords  # noqa
-from otbtf.model import ModelBase  # noqa
-from otbtf import layers, ops  # noqa
-__version__ = pkg_resources.require("otbtf")[0].version
+The utils module provides some useful Tensorflow ad keras operators to build
+and train deep nets.
+"""
+from typing import List, Tuple, Any
+import tensorflow as tf
+
+
+Tensor = Any
+Scalars = List[float] | Tuple[float]
+
+
+def one_hot(labels: Tensor, nb_classes: int):
+    """
+    Converts labels values into one-hot vector.
+
+    Params:
+        labels: tensor of label values (shape [x, y, 1])
+        nb_classes: number of classes
+
+    Returns:
+        one-hot encoded vector (shape [x, y, nb_classes])
+
+    """
+    labels_xy = tf.squeeze(tf.cast(labels, tf.int32), axis=-1)  # shape [x, y]
+    return tf.one_hot(labels_xy, depth=nb_classes)  # shape [x, y, nb_classes]
