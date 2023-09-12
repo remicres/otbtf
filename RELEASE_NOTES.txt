@@ -1,3 +1,11 @@
+Version 4.2.0 (12 sep 2023)
+----------------------------------------------------------------
+* Add new python modules: `otbtf.layers` (with new classes `DilatedMask`, `ApplyMask`, `ScalarsTile`, `ArgMax`, `Max`) and `otbtf.ops` (`one_hot()`)
+* Fix an error in the documentation
+* Update the otbtf-keras tutorial
+* Add decloud testing in CI
+* Fix protobuf version in dockerfile (see https://github.com/tensorflow/tensorflow/issues/61551)
+
 Version 4.1.0 (23 may 2023)
 ----------------------------------------------------------------
 * Add no-data values support for inference in TensorflowModelServe application
