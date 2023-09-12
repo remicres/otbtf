@@ -52,13 +52,13 @@ sudo service docker {status,enable,disable,start,stop,restart}
 Run a simple command in a one-shot container:
 
 ```bash
-docker run mdl4eo/otbtf:3.4.0-cpu otbcli_PatchesExtraction
+docker run mdl4eo/otbtf:4.2.0-cpu otbcli_PatchesExtraction
 ```
 
 You can also use the image in interactive mode with bash:
 
 ```bash
-docker run -ti mdl4eo/otbtf:3.4.0-cpu bash
+docker run -ti mdl4eo/otbtf:4.2.0-cpu bash
 ```
 
 ### Mounting file systems
@@ -70,7 +70,7 @@ to use inside the container:
 The following command shows you how to access the folder from the docker image.
 
 ```bash
-docker run -v /mnt/disk1/:/data/ -ti mdl4eo/otbtf:3.4.0-cpu bash -c "ls /data"
+docker run -v /mnt/disk1/:/data/ -ti mdl4eo/otbtf:4.2.0-cpu bash -c "ls /data"
 ```
 Beware of ownership issues! see the last section of this doc.
 
@@ -81,7 +81,7 @@ any directory.
 
 ```bash
 docker create --interactive --tty --volume /home/$USER:/home/otbuser/ \
-    --name otbtf mdl4eo/otbtf:3.4.0-cpu /bin/bash
+    --name otbtf mdl4eo/otbtf:4.2.0-cpu /bin/bash
 ```
 
 !!! warning
@@ -160,7 +160,7 @@ automatically pull image
 
 ```bash
 docker create --interactive --tty --volume /home/$USER:/home/otbuser \
-    --name otbtf mdl4eo/otbtf:3.4.0-cpu /bin/bash
+    --name otbtf mdl4eo/otbtf:4.2.0-cpu /bin/bash
 ```
 
 Start a background container process:
