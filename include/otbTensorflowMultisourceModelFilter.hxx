@@ -204,6 +204,24 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>::GenerateOutputInfor
   m_OutputSpacing[0] *= m_OutputSpacingScale;
   m_OutputSpacing[1] *= m_OutputSpacingScale;
 
+  // Check that inputs are aligned
+  if (m_FullyConvolutional)
+  {
+    for (unsigned int dim = 0; dim < OutputImageType::ImageDimension; ++dim)
+    {
+      const float ref_spc = this->GetInput(0)->GetSpacing()[dim];
+      const float ref = this->GetInput(0)->GetOrigin()[dim] - 0.5 * ref_spc;
+      for (unsigned int imageIndex = 1; imageIndex < this->GetNumberOfInputs(); imageIndex++)
+      {
+        const float orig = this->GetInput(imageIndex)->GetOrigin()[dim] - 0.5 * this->GetInput(imageIndex)->GetSpacing()[dim];
+        if (ref != orig)
+          otbLogMacro(Warning, << "Input #" << imageIndex << " origin does not match reference (first) input");
+        if (std::fmod(ref - orig, ref_spc) != 0.0)
+          otbLogMacro(Warning, << "Input #" << imageIndex << " pixels are not aligned with reference (first) input");
+      } // next input
+    } // next dim
+  }
+
   // Compute the extent of each input images and update the extent or the output image.
   // The extent of the output image is the intersection of all input images extents.
   PointType extentInf, extentSup;
@@ -226,6 +244,25 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>::GenerateOutputInfor
     }
   }
 
+  if (m_FullyConvolutional)
+  {
+    // Align extent to reference (first) image grid
+    PointType alignedExtentInf, alignedExtentSup;
+    alignedExtentSup.Fill(itk::NumericTraits<double>::max());
+    alignedExtentInf.Fill(itk::NumericTraits<double>::NonpositiveMin());
+    for (unsigned int imageIndex = 0; imageIndex < this->GetNumberOfInputs(); imageIndex++)
+      for (unsigned int dim = 0; dim < OutputImageType::ImageDimension; ++dim)
+      {
+        const double spc = this->GetInput(imageIndex)->GetSpacing()[dim];
+        const double ref = this->GetInput(imageIndex)->GetOrigin()[dim] - 0.5 * spc;
+        const double alignedInf = std::ceil((extentInf[dim] - ref) / spc) * spc + ref;
+        const double alignedSup = std::floor((extentSup[dim] - ref) / spc) * spc + ref;
+        alignedExtentInf[dim] = vnl_math_max(alignedInf, alignedExtentInf[dim]);
+        alignedExtentSup[dim] = vnl_math_min(alignedSup, alignedExtentSup[dim]);
+      }
+    extentInf = alignedExtentInf;
+    extentSup = alignedExtentSup;
+  }
 
   // Set final origin, aligned to the reference image grid.
   // Here we simply get back to the center of the pixel (extents are pixels corners coordinates)
