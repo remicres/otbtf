@@ -282,6 +282,7 @@ deploy_gpu:
     IMAGE_GPUOPTDEV: $CI_REGISTRY_PUBIMG-gpu-opt-dev
     DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE-gpu
     DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
+    DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
   script:
     # gpu-opt
     - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUOPT --build-arg BASE_IMG=$GPU_BASE_IMG .
@@ -301,5 +302,7 @@ deploy_gpu:
     - docker push $DOCKERHUB_GPU
     - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV
     - docker push $DOCKERHUB_GPUDEV
-
+    # latest-gpu = gpu image
+    - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST
+    - docker push $DOCKERHUB_GPULATEST
 
