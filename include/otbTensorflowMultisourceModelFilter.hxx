@@ -246,7 +246,10 @@ TensorflowMultisourceModelFilter<TInputImage, TOutputImage>::GenerateOutputInfor
 
   if (m_FullyConvolutional)
   {
-    // Align extent to reference (first) image grid
+    // Align extent over inputs pixel grid, so that the extent lies on the
+    // common pixel grid of all inputs.
+    // When this can't be done (i.e. shifted origins), a bug is likely to occur.
+    // However the warning issued previously should give a hint about the issue.
     PointType alignedExtentInf, alignedExtentSup;
     alignedExtentSup.Fill(itk::NumericTraits<double>::max());
     alignedExtentInf.Fill(itk::NumericTraits<double>::NonpositiveMin());
