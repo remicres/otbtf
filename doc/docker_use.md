@@ -25,12 +25,12 @@ Since OTBTF >= 3.2.1 you can find the latest docker images on
 
 | Name                                                                               | Os            | TF    | OTB   | Description            | Dev files | Compute capability |
 |------------------------------------------------------------------------------------| ------------- |-------|-------| ---------------------- | --------- | ------------------ |
-| **mdl4eo/otbtf:4.2.1-cpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:4.2.1-cpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:4.2.1-gpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
-| **mdl4eo/otbtf:4.2.1-gpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.2.1-gpu-opt**     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.2.1-gpu-opt-dev** | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.2.1-cpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.2 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.2.1-cpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.2 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.2.1-gpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.2 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.2.1-gpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.2 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.2.1-gpu-opt**     | Ubuntu Jammy  | r2.12 | 8.1.2 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.2.1-gpu-opt-dev** | Ubuntu Jammy  | r2.12 | 8.1.2 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 
 The list of older releases is available [here](#older-images).
 
