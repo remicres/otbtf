@@ -98,7 +98,7 @@ RUN cd tensorflow \
 ### OTB
 
 ARG GUI=false
-ARG OTB=5086d7601d80f2427f4d4d7f2398ec46e7efa300
+ARG OTB=8.1.2
 ARG OTBTESTS=false
 
 RUN mkdir /src/otb
