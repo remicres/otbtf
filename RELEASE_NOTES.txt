@@ -1,3 +1,9 @@
+Version 4.2.1 (5 oct 2023)
+----------------------------------------------------------------
+* Fix a bug occuring when input images origins were not sharing the same pixel grid
+* CI to push "latest-gpu" tag on dockerhub
+* Move to OTB 8.2.1
+
 Version 4.2.0 (12 sep 2023)
 ----------------------------------------------------------------
 * Add new python modules: `otbtf.layers` (with new classes `DilatedMask`, `ApplyMask`, `ScalarsTile`, `ArgMax`, `Max`) and `otbtf.ops` (`one_hot()`)
