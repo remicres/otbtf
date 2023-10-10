@@ -99,6 +99,7 @@ Every one can **contribute** to OTBTF. Just open a PR :)
 
 ## Additional resources
 
+- The [otbtf/keras tutorial](https://github.com/remicres/otbtf_keras_tutorial) shows how to create a dataset, build, train, evaluate, and apply a model to perform semantic segmentation of a remote sensing image,
 - The [*test* folder](https://github.com/remicres/otbtf/tree/master/test/) 
 of this repository contains various use-cases with commands, python codes, and 
 input/baseline data,
