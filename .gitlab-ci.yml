@@ -211,6 +211,11 @@ geos_enabled:
   script:
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_geos_enabled.xml $OTBTF_SRC/test/geos_test.py
 
+planetary_computer:
+  extends: .applications_test_base
+  script:
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_pc_enabled.xml $OTBTF_SRC/test/pc_test.py
+
 imports:
   extends: .applications_test_base
   script:
