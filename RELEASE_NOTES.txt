@@ -1,5 +1,6 @@
 Version 4.2.2 (19 oct 2023)
 ----------------------------------------------------------------
+* Add a test to ensure that planetary computer works in the OTBTF docker image
 * Move to OTB version d74ab47d4308591db4ed5a5ea3b820cef73a39fe since 8.2.1 looks not up-to-date
 
 Version 4.2.1 (5 oct 2023)
