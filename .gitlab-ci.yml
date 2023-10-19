@@ -214,6 +214,7 @@ geos_enabled:
 planetary_computer:
   extends: .applications_test_base
   script:
+    - pip install pystac_client planeatry_computer
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_pc_enabled.xml $OTBTF_SRC/test/pc_test.py
 
 imports:
