@@ -20,6 +20,7 @@ export TF_NEED_OPENCL=0
 export TF_NEED_OPENCL_SYCL=0
 export TF_NEED_VERBS=0
 export TF_SET_ANDROID_WORKSPACE=0
+export TF_NEED_CLANG=0
 # For MKL support BZL_CONFIGS+=" --config=mkl"
 #export TF_DOWNLOAD_MKL=1
 #export TF_NEED_MKL=0

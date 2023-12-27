@@ -26,7 +26,7 @@ RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/loc
 # Upgrade pip
 RUN pip install --no-cache-dir pip --upgrade
 # NumPy version is conflicting with system's gdal dep and may require venv
-ARG NUMPY_SPEC="==1.22.*"
+#ARG NUMPY_SPEC="==1.22.*"
 # This is to avoid https://github.com/tensorflow/tensorflow/issues/61551
 ARG PROTO_SPEC="==4.23.*"
 RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" "protobuf$PROTO_SPEC" packaging requests \
@@ -45,7 +45,7 @@ RUN git config --global advice.detachedHead false
 
 ### TF
 
-ARG TF=v2.12.0
+ARG TF=v2.14.0
 ARG TENSORRT
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
@@ -98,7 +98,7 @@ RUN cd tensorflow \
 ### OTB
 
 ARG GUI=false
-ARG OTB=d74ab47d4308591db4ed5a5ea3b820cef73a39fe
+ARG OTB=release-9.0
 ARG OTBTESTS=false
 
 RUN mkdir /src/otb
@@ -111,18 +111,6 @@ RUN apt-get update -y \
  && update-ca-certificates \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
  && cd otb && git checkout $OTB \
-# <---------------------------------------- Begin dirty hack
-# This is a dirty hack for release 4.0.0alpha
-# We have to wait that OTB moves from C++14 to C++17
-# See https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb/-/issues/2338
- && sed -i 's/CMAKE_CXX_STANDARD 14/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
- && echo "" > Modules/Filtering/ImageManipulation/test/CMakeLists.txt \
- && echo "" > Modules/Segmentation/Conversion/test/CMakeLists.txt \
- && echo "" > Modules/Radiometry/Indices/test/CMakeLists.txt \
- && echo "" > Modules/Learning/DempsterShafer/test/CMakeLists.txt \
- && echo "" > Modules/Feature/Edge/test/CMakeLists.txt \
- && echo "" > Modules/Core/ImageBase/test/CMakeLists.txt \
-# <---------------------------------------- End dirty hack
  && cd .. \
  && mkdir -p build \
  && cd build \
@@ -206,4 +194,3 @@ RUN python -c "import tensorflow"
 RUN python -c "import otbtf, tricks"
 RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
 RUN python -c "from osgeo import gdal"
-
