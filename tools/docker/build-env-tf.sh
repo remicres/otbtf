@@ -20,6 +20,7 @@ export TF_NEED_OPENCL=0
 export TF_NEED_OPENCL_SYCL=0
 export TF_NEED_VERBS=0
 export TF_SET_ANDROID_WORKSPACE=0
+export TF_NEED_CLANG=0
 # For MKL support BZL_CONFIGS+=" --config=mkl"
 #export TF_DOWNLOAD_MKL=1
 #export TF_NEED_MKL=0
@@ -46,7 +47,7 @@ if  [ ! -z $CUDA_TOOLKIT_PATH ] ; then
     fi
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CUDA_TOOLKIT_PATH/lib64:$CUDA_TOOLKIT_PATH/lib64/stubs"
     export TF_CUDA_VERSION=$(echo $CUDA_TOOLKIT_PATH | sed -r 's/.*\/cuda-(.*)/\1/')
-    export TF_CUDA_COMPUTE_CAPABILITIES="5.2,6.1,7.0,7.5,8.6"
+    export TF_CUDA_COMPUTE_CAPABILITIES="5.2,6.1,7.0,7.5,8.0,8.6,9.0"
     export TF_NEED_CUDA=1
     export TF_CUDA_CLANG=0
     export TF_NEED_TENSORRT=0
