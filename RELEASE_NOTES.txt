@@ -1,5 +1,6 @@
 Version 4.3.0 (02 jan 2024)
 ----------------------------------------------------------------
+* Remove OTB GUI dependencies
 * Move OTB to version 9.0.0
 * Move TensorFlow to version 2.14
 
