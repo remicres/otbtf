@@ -10,23 +10,15 @@ WORKDIR /tmp
 ### System packages
 COPY tools/docker/build-deps-*.txt ./
 ARG DEBIAN_FRONTEND=noninteractive
-# CLI
 RUN apt-get update -y && apt-get upgrade -y \
  && cat build-deps-cli.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
-# Optional GUI
-ARG GUI=false
-RUN if $GUI; then \
-      apt-get update -y \
-      && cat build-deps-gui.txt | xargs apt-get install --no-install-recommends -y \
-      && apt-get clean && rm -rf /var/lib/apt/lists/* ; fi
-
 ### Python3 links and pip packages
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
 # Upgrade pip
 RUN pip install --no-cache-dir pip --upgrade
-# NumPy version is conflicting with system's gdal dep and may require venv
-#ARG NUMPY_SPEC="==1.22.*"
+# In case NumPy version is conflicting with system's gdal dep and may require venv
+ARG NUMPY_SPEC=""
 # This is to avoid https://github.com/tensorflow/tensorflow/issues/61551
 ARG PROTO_SPEC="==4.23.*"
 RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" "protobuf$PROTO_SPEC" packaging requests \
@@ -35,7 +27,7 @@ RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$N
 # ----------------------------------------------------------------------------
 # Tmp builder stage - dangling cache should persist until "docker builder prune"
 FROM otbtf-base AS builder
-# A smaller value may be required to avoid OOM errors when building OTB GUI
+# A smaller value may be required to avoid OOM errors when building OTB
 ARG CPU_RATIO=1
 
 RUN mkdir -p /src/tf /opt/otbtf/bin /opt/otbtf/include /opt/otbtf/lib/python3
@@ -79,6 +71,7 @@ RUN cd tensorflow \
       && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" '
 
 # Installation
+RUN apt update && apt install -y patchelf
 RUN cd tensorflow \
  && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf /tmp/tensorflow_pkg/tensorflow*.whl \
@@ -97,7 +90,6 @@ RUN cd tensorflow \
 
 ### OTB
 
-ARG GUI=false
 ARG OTB=release-9.0
 ARG OTBTESTS=false
 
@@ -110,15 +102,26 @@ RUN apt-get update -y \
  && apt-get install --reinstall ca-certificates -y \
  && update-ca-certificates \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
- && cd otb && git checkout $OTB \
+ && cd otb && git checkout $OTB
+
+# <---------------------------------------- Begin dirty hack
+# This is a dirty hack for release 4.0.0alpha
+# We have to wait that OTB moves from C++14 to C++17
+# See https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb/-/issues/2338
+RUN cd /src/otb/otb \
+ && sed -i 's/CMAKE_CXX_STANDARD 14/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
+ && echo "" > Modules/Core/ImageManipulation/test/CMakeLists.txt \
+ && echo "" > Modules/Core/Conversion/test/CMakeLists.txt \
+ && echo "" > Modules/Core/Indices/test/CMakeLists.txt \
+ && echo "" > Modules/Core/Edge/test/CMakeLists.txt \
+ && echo "" > Modules/Core/ImageBase/test/CMakeLists.txt \
+ && echo "" > Modules/Learning/DempsterShafer/test/CMakeLists.txt \
+# <---------------------------------------- End dirty hack
  && cd .. \
  && mkdir -p build \
  && cd build \
  && if $OTBTESTS; then \
       echo "-DBUILD_TESTING=ON" >> ../build-flags-otb.txt; fi \
- # Set GL/Qt build flags
- && if $GUI; then \
-      sed -i -r "s/-DOTB_USE_(QT|OPENGL|GL[UFE][WT])=OFF/-DOTB_USE_\1=ON/" ../build-flags-otb.txt; fi \
  # Possible ENH: superbuild-all-dependencies switch, with separated build-deps-minimal.txt and build-deps-otbcli.txt)
  #&& if $OTB_SUPERBUILD_ALL; then sed -i -r "s/-DUSE_SYSTEM_([A-Z0-9]*)=ON/-DUSE_SYSTEM_\1=OFF/ " ../build-flags-otb.txt; fi \
  && OTB_FLAGS=$(cat "../build-flags-otb.txt") \
@@ -127,7 +130,6 @@ RUN apt-get update -y \
 
 ### OTBTF - copy (without .git/) or clone repository
 COPY . /src/otbtf
-#RUN git clone https://github.com/remicres/otbtf.git /src/otbtf
 RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
 
 # Rebuild OTB with module
@@ -140,12 +142,10 @@ RUN cd /src/otb/build/OTB/build \
       -DOTB_WRAP_PYTHON=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 \
       -DOTB_USE_TENSORFLOW=ON -DModule_OTBTensorflow=ON \
       -Dtensorflow_include_dir=/opt/otbtf/include/tf \
-      # Forcing TF>=2, this Dockerfile hasn't been tested with v1 + missing link for libtensorflow_framework.so in the wheel
       -DTENSORFLOW_CC_LIB=/opt/otbtf/local/lib/python3.10/dist-packages/tensorflow/libtensorflow_cc.so.2 \
       -DTENSORFLOW_FRAMEWORK_LIB=/opt/otbtf/local/lib/python3.10/dist-packages/tensorflow/libtensorflow_framework.so.2 \
  && make install -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  # Cleaning
- && ( $GUI || rm -rf /opt/otbtf/bin/otbgui* ) \
  && ( $KEEP_SRC_OTB || rm -rf /src/otb ) \
  && rm -rf /root/.cache /tmp/*
 
