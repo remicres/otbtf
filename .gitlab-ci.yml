@@ -194,7 +194,7 @@ decloud:
   script:
     - git clone https://github.com/CNES/decloud.git
     - pip install -r $PWD/decloud/docker/requirements.txt
-    - wget -P decloud_data --no-verbose --recursive --level=inf --no-parent -R "index.html*" --cut-dirs=3 --no-host-directories http://indexof.montpellier.irstea.priv/projets/geocicd/decloud/
+    - wget https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download -O file.zip && unzip file.zip
     - export DECLOUD_DATA_DIR="$PWD/decloud_data"
     - pytest decloud/tests/train_from_tfrecords_unittest.py
 
