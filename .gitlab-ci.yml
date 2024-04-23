@@ -1,5 +1,5 @@
 variables:
-  OTBTF_VERSION: 4.3.0
+  OTBTF_VERSION: 4.3.1
   OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
   OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
   OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory

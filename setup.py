@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="otbtf",
-    version="4.3.0",
+    version="4.3.1",
     author="Remi Cresson",
     author_email="remi.cresson@inrae.fr",
     description="OTBTF: Orfeo ToolBox meets TensorFlow",
