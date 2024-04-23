@@ -21,4 +21,5 @@ swig
 unzip
 vim
 wget
+sudo
 zip
