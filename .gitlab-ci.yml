@@ -158,7 +158,7 @@ ctest:
   stage: Test
   script:
     - sudo apt update && sudo apt install -y git-lfs 
-    - cd /src/otb/otb && sudo git lfs fetch --all
+    - cd /src/otb/otb && sudo git lfs fetch --all && sudo git lfs pull
     - cd $OTB_BUILD/
     - sudo ctest -L OTBTensorflow
     - sudo ctest -L OTBPanSharpening
