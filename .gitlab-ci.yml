@@ -1,5 +1,5 @@
 variables:
-  OTBTF_VERSION: 4.3.0
+  OTBTF_VERSION: 4.3.1
   OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
   OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
   OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
@@ -146,6 +146,7 @@ pages:
       - public
 
 .tests_base:
+  tags: [godzilla]
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
@@ -156,7 +157,14 @@ ctest:
   extends: .tests_base
   stage: Test
   script:
-    - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
+    - sudo apt update && sudo apt install -y git-lfs 
+    - cd /src/otb/otb && sudo git lfs fetch --all && sudo git lfs pull
+    - cd $OTB_BUILD/
+    - sudo ctest -L OTBTensorflow
+    - sudo ctest -L OTBPanSharpening
+    - sudo ctest -L OTBProjection
+    - sudo ctest -L OTBTransform
+    - sudo ctest -L OTBIOGDAL
   after_script:
     - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
 
@@ -194,7 +202,7 @@ decloud:
   script:
     - git clone https://github.com/CNES/decloud.git
     - pip install -r $PWD/decloud/docker/requirements.txt
-    - wget -P decloud_data --no-verbose --recursive --level=inf --no-parent -R "index.html*" --cut-dirs=3 --no-host-directories http://indexof.montpellier.irstea.priv/projets/geocicd/decloud/
+    - wget https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download -O file.zip && unzip file.zip
     - export DECLOUD_DATA_DIR="$PWD/decloud_data"
     - pytest decloud/tests/train_from_tfrecords_unittest.py
 

@@ -1,3 +1,8 @@
+Version 4.3.1 (02 jan 2024)
+----------------------------------------------------------------
+* Fix a bug with PROJ due to OTB 9 packaging
+* More tests for OTB
+
 Version 4.3.0 (02 jan 2024)
 ----------------------------------------------------------------
 * Add compute capability 8.0 and 9.0
