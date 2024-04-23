@@ -157,7 +157,14 @@ ctest:
   extends: .tests_base
   stage: Test
   script:
-    - cd $OTB_BUILD/ && sudo ctest -L OTBTensorflow  # Run ctest
+    - sudo apt install git-lfs 
+    - cd /src/otb/otb && git lfs fetch --all
+    - cd $OTB_BUILD/
+    - sudo ctest -L OTBTensorflow
+    - sudo ctest -L OTBPanSharpening
+    - sudo ctest -L OTBProjection
+    - sudo ctest -L OTBTransform
+    - sudo ctest -L OTBIOGDAL
   after_script:
     - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
 
