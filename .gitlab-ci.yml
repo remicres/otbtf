@@ -146,6 +146,7 @@ pages:
       - public
 
 .tests_base:
+  tags: [godzilla]
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
