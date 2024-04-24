@@ -137,9 +137,7 @@ cppcheck:
   rules:
     - changes:
       - doc/**/*
-      - "*.{md,txt}"
-      - mkdocs.yml
-      - .readthedocs.yaml
+
   artifacts:
     paths:
       - public
