@@ -3,11 +3,11 @@
 <p align="center">
 <img src="images/logo.png" width="160px">
 <br>
-<a href="https://gitlab.irstea.fr/remi.cresson/otbtf/-/releases">
-<img src="https://gitlab.irstea.fr/remi.cresson/otbtf/-/badges/release.svg">
+<a href="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/releases">
+<img src="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/badges/release.svg">
 </a>
-<a href="https://gitlab.irstea.fr/remi.cresson/otbtf/-/commits/master">
-<img src="https://gitlab.irstea.fr/remi.cresson/otbtf/badges/master/pipeline.svg">
+<a href="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/commits/master">
+<img src="https://forgemia.inra.fr/orfeo-toolbox/otbtf/badges/master/pipeline.svg">
 </a>
 <img src='https://readthedocs.org/projects/otbtf/badge/?version=latest' alt='Documentation Status' />
 <a href="LICENSE">
@@ -61,12 +61,12 @@ large scale with OTBTF.
  - Landcover mapping (Spot-7 images --> Building map using semantic 
 segmentation)
 
-![Landcover mapping](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/landcover.png)
+![Landcover mapping](https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/raw/develop/doc/images/landcover.png)
 
  - Super resolution (Sentinel-2 images upsampled with the 
 [SR4RS software](https://github.com/remicres/sr4rs), which is based on OTBTF)
  
-![Super resolution](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/supresol.png)
+![Super resolution](https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/raw/develop/doc/images/supresol.png)
 
  - Sentinel-2 reconstruction with Sentinel-1 VV/VH with the 
 [Decloud software](https://github.com/CNES/decloud), which is based on OTBTF
@@ -76,7 +76,7 @@ segmentation)
  - Image to image translation (Spot-7 image --> Wikimedia Map using CGAN. 
 So unnecessary but fun!)
 
-![Pix2pix](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/pix2pix.png)
+![Pix2pix](https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/raw/develop/doc/images/pix2pix.png)
 
 ## Contribute
 

@@ -3,16 +3,17 @@
 <p align="center">
 <img src="doc/images/logo.png" width="160px">
 <br>
-<a href="https://gitlab.irstea.fr/remi.cresson/otbtf/-/releases">
-<img src="https://gitlab.irstea.fr/remi.cresson/otbtf/-/badges/release.svg">
+<a href="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/releases">
+<img src="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/badges/release.svg">
 </a>
-<a href="https://gitlab.irstea.fr/remi.cresson/otbtf/-/commits/master">
-<img src="https://gitlab.irstea.fr/remi.cresson/otbtf/badges/master/pipeline.svg">
+<a href="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/commits/master">
+<img src="https://forgemia.inra.fr/orfeo-toolbox/otbtf/badges/master/pipeline.svg">
 </a>
 <img src='https://readthedocs.org/projects/otbtf/badge/?version=latest' alt='Documentation Status' />
 <a href="LICENSE">
 <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
 </a>
+<img src="https://img.shields.io/badge/dynamic/json?formatter=metric&color=blue&label=Docker%20pull&query=%24.pull_count&url=https://hub.docker.com/v2/repositories/mdl4eo/otbtf">
 </p>
 
 OTBTF is a remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org). 
