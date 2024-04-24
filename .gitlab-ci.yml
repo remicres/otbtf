@@ -130,35 +130,26 @@ cppcheck:
     - sudo apt update && sudo apt install cppcheck -y
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
-.doc_base:
+pages:
   stage: Documentation
-  before_script:
-    - pip install -r doc/doc_requirements.txt
+  variables:
+    PTH: "public_test"
   rules:
     - changes:
       - doc/**/*
-
+      - "*.{md,txt}"
+      - mkdocs.yml
+      - .readthedocs.yaml
+    - if: $CI_COMMIT_REF_NAME == /master/
+      variables:
+        PTH: "public"
+  before_script:
+    - pip install -r doc/doc_requirements.txt
+  script:
+    - mkdocs build --site-dir $PTH
   artifacts:
     paths:
-      - public
-      - public_test
-
-pages_test:
-  extends: .doc_base
-  except:
-    - master
-  script:
-    - mkdocs build --site-dir public_test
-
-pages:
-  extends: .doc_base
-  only:
-    - master
-  script:
-    - mkdocs build --site-dir public
-  artifacts:
-    paths:
-      - public
+      - $PTH
 
 .tests_base:
   tags: [ godzilla ]
