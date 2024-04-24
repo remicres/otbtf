@@ -45,7 +45,7 @@ stages:
   timeout: 10 hours
 
 
-docker image:
+dev docker image build:
   extends: .docker_build_base
   stage: Build
   except:
