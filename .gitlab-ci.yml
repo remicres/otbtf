@@ -24,7 +24,7 @@ image: $BRANCH_IMAGE
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/ # Execute jobs in merge request context, or commit in master branch
-    
+
 stages:
   - Build
   - Static Analysis
@@ -36,7 +36,7 @@ stages:
 
 .docker_build_base:
   allow_failure: false
-  tags: [godzilla]
+  tags: [ godzilla ]
   image: docker:latest
   services:
     - name: docker:dind
@@ -99,7 +99,7 @@ docker image:
   extends: .static_analysis_base
   rules:
     - changes:
-        - otbtf/**/*
+      - otbtf/**/*
 
 flake8:
   extends: .py_static_analysis_base
@@ -124,8 +124,8 @@ cppcheck:
   extends: .static_analysis_base
   rules:
     - changes:
-        - app/**/*
-        - include/**/*
+      - app/**/*
+      - include/**/*
   script:
     - sudo apt update && sudo apt install cppcheck -y
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
@@ -136,10 +136,10 @@ cppcheck:
     - pip install -r doc/doc_requirements.txt
   rules:
     - changes:
-        - doc/**/*
-        - "*.{md,txt}"
-        - mkdocs.yml
-        - .readthedocs.yaml
+      - doc/**/*
+      - "*.{md,txt}"
+      - mkdocs.yml
+      - .readthedocs.yaml
   artifacts:
     paths:
       - public
@@ -163,19 +163,19 @@ pages:
       - public
 
 .tests_base:
-  tags: [godzilla]
+  tags: [ godzilla ]
   rules:
     - changes:
-        - app/**/*
-        - include/**/*
-        - otbtf/**/*
-        - test/**/*
-        - tools/**/*
-        - .gitlab-ci.yml
-        - Dockerfile
-        - otb-module.cmake
-        - CMakeLists.txt
-        - setup.py
+      - app/**/*
+      - include/**/*
+      - otbtf/**/*
+      - test/**/*
+      - tools/**/*
+      - .gitlab-ci.yml
+      - Dockerfile
+      - otb-module.cmake
+      - CMakeLists.txt
+      - setup.py
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
@@ -186,7 +186,7 @@ ctest:
   extends: .tests_base
   stage: Test
   script:
-    - sudo apt update && sudo apt install -y git-lfs 
+    - sudo apt update && sudo apt install -y git-lfs
     - cd /src/otb/otb && sudo git lfs fetch --all && sudo git lfs pull
     - cd $OTB_BUILD/
     - sudo ctest -L OTBTensorflow
@@ -212,7 +212,7 @@ crc_book:
     - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
   after_script:
     - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
-    
+
 sr4rs:
   extends: .applications_test_base
   script:
