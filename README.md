@@ -3,11 +3,11 @@
 <p align="center">
 <img src="doc/images/logo.png" width="160px">
 <br>
-<a href="https://gitlab.irstea.fr/remi.cresson/otbtf/-/releases">
-<img src="https://gitlab.irstea.fr/remi.cresson/otbtf/-/badges/release.svg">
+<a href="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/releases">
+<img src="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/badges/release.svg">
 </a>
-<a href="https://gitlab.irstea.fr/remi.cresson/otbtf/-/commits/master">
-<img src="https://gitlab.irstea.fr/remi.cresson/otbtf/badges/master/pipeline.svg">
+<a href="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/commits/master">
+<img src="https://forgemia.inra.fr/orfeo-toolbox/otbtf/badges/master/pipeline.svg">
 </a>
 <img src='https://readthedocs.org/projects/otbtf/badge/?version=latest' alt='Documentation Status' />
 <a href="LICENSE">
