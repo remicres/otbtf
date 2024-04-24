@@ -13,6 +13,7 @@
 <a href="LICENSE">
 <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
 </a>
+<img src="https://img.shields.io/badge/dynamic/json?formatter=metric&color=blue&label=Docker%20pull&query=%24.pull_count&url=https://hub.docker.com/v2/repositories/mdl4eo/otbtf">
 </p>
 
 OTBTF is a remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org). 
