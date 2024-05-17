@@ -104,20 +104,7 @@ RUN apt-get update -y \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
  && cd otb && git checkout $OTB
 
-# <---------------------------------------- Begin dirty hack
-# This is a dirty hack for release 4.0.0alpha
-# We have to wait that OTB moves from C++14 to C++17
-# See https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb/-/issues/2338
-RUN cd /src/otb/otb \
- && sed -i 's/CMAKE_CXX_STANDARD 14/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
- && echo "" > Modules/Core/ImageManipulation/test/CMakeLists.txt \
- && echo "" > Modules/Core/Conversion/test/CMakeLists.txt \
- && echo "" > Modules/Core/Indices/test/CMakeLists.txt \
- && echo "" > Modules/Core/Edge/test/CMakeLists.txt \
- && echo "" > Modules/Core/ImageBase/test/CMakeLists.txt \
- && echo "" > Modules/Learning/DempsterShafer/test/CMakeLists.txt \
-# <---------------------------------------- End dirty hack
- && cd .. \
+RUN cd /src/otb/ \
  && mkdir -p build \
  && cd build \
  && if $OTBTESTS; then \
