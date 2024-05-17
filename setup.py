@@ -32,4 +32,10 @@ setuptools.setup(
               "deep learning",
               "machine learning"
               ],
+    install_requires=[
+        "deprecated",
+        "tensorflow",
+        "numpy",
+        "tqdm",
+    ]
 )
