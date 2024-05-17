@@ -2,6 +2,7 @@ project(OTBTensorflow)
 
 # Use Tensorflow, or not
 option(OTB_USE_TENSORFLOW "Enable Tensorflow dependent applications" OFF)
+set(CMAKE_CXX_STANDARD 17)
 
 if(OTB_USE_TENSORFLOW)
   message("Tensorflow support enabled")
