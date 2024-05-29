@@ -99,7 +99,8 @@ Every one can **contribute** to OTBTF. Just open a PR :)
 
 ## Additional resources
 
-- The [otbtf/keras tutorial](https://github.com/remicres/otbtf_keras_tutorial) shows how to create a dataset, build, train, evaluate, and apply a model to perform semantic segmentation of a remote sensing image,
+- The big [otbtf/keras tutorial](https://orfeo-toolbox.pages.mia.inra.fr/otbtf-keras-tutorial/) shows how to perform patch-based classification, semantic segmentation, layer freeze, fine tuning, and an introduction to generic image processing tasks with deterministic super-resolution. It involves STAC and [pyotb](https://github.com/orfeotoolbox/pyotb). It is basically an update of the book (see below) but 100% python/keras/pyotb, and free. We also have hosted the data so you don't need to ask for Spot-6/7 images on the Airbus website!
+- The small [otbtf/keras tutorial](https://github.com/remicres/otbtf_keras_tutorial) shows how to create a dataset, build, train, evaluate, and apply a model to perform semantic segmentation of a remote sensing image,
 - The [*test* folder](https://github.com/remicres/otbtf/tree/master/test/) 
 of this repository contains various use-cases with commands, python codes, and 
 input/baseline data,
@@ -108,7 +109,7 @@ learn how to use OTBTF with OTB and QGIS to perform various kind of deep
 learning sorcery on remote sensing images (patch-based classification for 
 landcover mapping, semantic segmentation of buildings, optical image 
 restoration from joint SAR/Optical time series): *Cresson, R. (2020). Deep 
-Learning for Remote Sensing Images with Open Source Software. CRC Press.*
+Learning for Remote Sensing Images with Open Source Software. CRC Press.*.
 - A small [tutorial](https://mdl4eo.irstea.fr/2019/01/04/an-introduction-to-deep-learning-on-remote-sensing-images-tutorial/) on MDL4EO's blog
 - Check [our repository](https://github.com/remicres/otbtf_tutorials_resources) 
 containing stuff (data and models) to begin with!
