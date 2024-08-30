@@ -23,5 +23,3 @@ vim
 wget
 sudo
 zip
-llvm-17
-clang-17
