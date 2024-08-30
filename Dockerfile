@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir pip --upgrade
 # In case NumPy version is conflicting with system's gdal dep and may require venv
 ARG NUMPY_SPEC=""
 # This is to avoid https://github.com/tensorflow/tensorflow/issues/61551
-ARG PROTO_SPEC="==4.23.*"
+ARG PROTO_SPEC=""
 RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" "protobuf$PROTO_SPEC" packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 

@@ -21,7 +21,8 @@ Read more in the following sections.
 Here is the list of the latest OTBTF docker images hosted on 
 [dockerhub](https://hub.docker.com/u/mdl4eo).
 Since OTBTF >= 3.2.1 you can find the latest docker images on 
-[gitlab.irstea.fr](https://gitlab.irstea.fr/remi.cresson/otbtf/container_registry).
+[gitlab.irstea.fr](https://gitlab.irstea.fr/remi.cresson/otbtf/container_registry) for 
+versions <= 4.3.0 and [forgemia.inra.fr](https://forgemia.inra.fr/orfeo-toolbox/otbtf/container_registry/) since version 4.3.1.
 
 | Name                                                                               | Os            | TF    | OTB   | Description            | Dev files | Compute capability |
 |------------------------------------------------------------------------------------| ------------- |-------|-------| ---------------------- | --------- | ------------------ |
@@ -29,8 +30,8 @@ Since OTBTF >= 3.2.1 you can find the latest docker images on
 | **mdl4eo/otbtf:4.3.1-cpu-dev**                                                     | Ubuntu Jammy  | r2.14 | 9.0.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.3.1-gpu**                                                         | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.3.1-gpu-dev**                                                     | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.3.1-gpu-opt**     | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.3.1-gpu-opt-dev** | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **registry.forgemia.inra.fr/orfeo-toolbox/otbtf:4.3.1-gpu-opt**     | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
+| **registry.forgemia.inra.fr/orfeo-toolbox/otbtf:4.3.1-gpu-opt-dev** | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 
 The list of older releases is available [here](#older-images).
 
@@ -57,7 +58,7 @@ docker run --runtime=nvidia -ti mdl4eo/otbtf:latest-gpu bash
 With Docker version including and after 19.03 :
 
 ```bash
-docker run --gpus all -ti mdl4eo/otbtf:latest-gpu bash
+docker run --gpus=all -ti mdl4eo/otbtf:latest-gpu bash
 ```
 
 You can find some details on the **GPU docker image** and some **docker tips 
