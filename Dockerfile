@@ -37,7 +37,7 @@ RUN git config --global advice.detachedHead false
 
 ### TF
 
-ARG TF=v2.16.0
+ARG TF=v2.16.2
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
