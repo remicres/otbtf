@@ -44,7 +44,7 @@ RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/rele
  && chmod +x /opt/otbtf/bin/bazelisk \
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
-ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
+ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
 
 # "--config=opt" will enable 'march=native'
 # (otherwise read comments about CPU compatibility and edit CC_OPT_FLAGS in
