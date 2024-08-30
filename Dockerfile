@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir pip --upgrade
 # In case NumPy version is conflicting with system's gdal dep and may require venv
 ARG NUMPY_SPEC=""
 # This is to avoid https://github.com/tensorflow/tensorflow/issues/61551
-ARG PROTO_SPEC=""
+ARG PROTO_SPEC="==4.23.*"
 RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" "protobuf$PROTO_SPEC" packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
@@ -37,14 +37,15 @@ RUN git config --global advice.detachedHead false
 
 ### TF
 
-ARG TF=v2.16.2
+ARG TF=v2.16.1
+ARG TENSORRT
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
  && chmod +x /opt/otbtf/bin/bazelisk \
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
-ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
+ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
 
 # "--config=opt" will enable 'march=native'
 # (otherwise read comments about CPU compatibility and edit CC_OPT_FLAGS in
