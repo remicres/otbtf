@@ -9,7 +9,6 @@ variables:
   DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
   DOCKER_DRIVER: overlay2
-  FF_NETWORK_PER_BUILD: false
   CACHE_IMAGE_BASE: $CI_REGISTRY_IMAGE:otbtf-base
   CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
@@ -24,7 +23,6 @@ image: docker:latest
 services:
   - name: docker:dind
   - name: buchgr/bazel-remote-cache
-    alias: bazel-cache
 
 workflow:
   rules:
@@ -71,7 +69,7 @@ docker_image:
       --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
       --build-arg OTBTESTS="true"
-      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080"
+      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-remote-cache:8080"
       "."
     - docker push $CACHE_IMAGE_BUILDER
     - >
@@ -85,7 +83,7 @@ docker_image:
       --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
       --build-arg OTBTESTS="true"
-      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080"
+      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-remote-cache:8080"
       "."
     - docker push $BRANCH_IMAGE
 
@@ -274,10 +272,10 @@ deploy_cpu:
     DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
   script:
     # cpu
-    - docker build --tag $IMAGE_CPU --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080" .
+    - docker build --tag $IMAGE_CPU --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-remote-cache:8080" .
     - docker push $IMAGE_CPU
     # cpu-dev
-    - docker build --tag $IMAGE_CPUDEV --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg KEEP_SRC_OTB=true --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080" .
+    - docker build --tag $IMAGE_CPUDEV --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg KEEP_SRC_OTB=true --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-remote-cache:8080" .
     - docker push $IMAGE_CPUDEV
     # push images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
@@ -299,10 +297,10 @@ deploy_gpu:
     DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
   script:
     # gpu
-    - docker build --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080" .
+    - docker build --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-remote-cache:8080" .
     - docker push $IMAGE_GPU
     # gpu-dev
-    - docker build --tag $IMAGE_GPUDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080" .
+    - docker build --tag $IMAGE_GPUDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-remote-cache:8080" .
     - docker push $IMAGE_GPUDEV
     # push gpu-* images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
