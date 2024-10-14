@@ -39,12 +39,11 @@ stages:
   - Ship
 
 .docker_build_base:
+  tags: [ godzilla ]
   allow_failure: false
-  tags: [godzilla]
-
+  timeout: 10 hours
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-  timeout: 10 hours
 
 docker_image:
   stage: Build
@@ -147,7 +146,7 @@ pages:
 
 .tests_base:
   image: $BRANCH_IMAGE
-  tags: [godzilla]
+  tags: [ godzilla ]
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
