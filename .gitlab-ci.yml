@@ -38,11 +38,6 @@ stages:
   - Update dev image
   - Ship
 
-cache:
-  key: bazel_cache
-  paths:
-    - .cache/
-
 .docker_build_base:
   allow_failure: false
   tags: [godzilla]
