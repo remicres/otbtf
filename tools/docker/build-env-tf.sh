@@ -44,7 +44,6 @@ if  [ ! -z $CUDA_TOOLKIT_PATH ] ; then
     export TF_CUDA_VERSION=$(echo $CUDA_TOOLKIT_PATH | sed -r 's/.*\/cuda-(.*)/\1/')
     export TF_CUDA_COMPUTE_CAPABILITIES="5.2,6.1,7.0,7.5,8.0,8.6,8.9,9.0"
     export TF_NEED_CUDA=1
-    export TF_CUDA_CLANG=0
     export TF_NEED_TENSORRT=0
     export CUDNN_INSTALL_PATH="/usr/"
     export TF_CUDNN_VERSION=$(sed -n 's/^#define CUDNN_MAJOR\s*\(.*\).*/\1/p' $CUDNN_INSTALL_PATH/include/cudnn_version.h)
