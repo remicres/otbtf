@@ -34,6 +34,11 @@ stages:
   - Update dev image
   - Ship
 
+cache:
+  key: bazel_cache
+  paths:
+    - .cache/
+
 .docker_build_base:
   allow_failure: false
   tags: [godzilla]
@@ -42,8 +47,8 @@ stages:
     - name: docker:dind
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
   timeout: 10 hours
-
 
 docker image:
   extends: .docker_build_base
