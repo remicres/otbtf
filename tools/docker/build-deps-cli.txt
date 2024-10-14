@@ -3,8 +3,6 @@ ca-certificates
 curl
 cmake
 file
-clang-17
-llvm-17
 git
 libc6-dev
 libtool
