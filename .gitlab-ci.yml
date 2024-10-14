@@ -288,25 +288,17 @@ deploy_gpu:
   variables:
     IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
     IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
-    IMAGE_GPUOPT: $CI_REGISTRY_PUBIMG-gpu-opt
-    IMAGE_GPUOPTDEV: $CI_REGISTRY_PUBIMG-gpu-opt-dev
     DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE-gpu
     DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
     DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
   script:
-    # gpu-opt
-    - docker build --tag $IMAGE_GPUOPT --build-arg BASE_IMG=$GPU_BASE_IMG .
-    - docker push $IMAGE_GPUOPT
-    # gpu-opt-dev
-    - docker build --tag $IMAGE_GPUOPTDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
-    - docker push $IMAGE_GPUOPTDEV
-    # gpu-basic
+    # gpu
     - docker build --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG .
     - docker push $IMAGE_GPU
-    # gpu-basic-dev
+    # gpu-dev
     - docker build --tag $IMAGE_GPUDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
     - docker push $IMAGE_GPUDEV
-    # push gpu-basic* images on dockerhub
+    # push gpu-* images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
     - docker tag $IMAGE_GPU $DOCKERHUB_GPU
     - docker push $DOCKERHUB_GPU
