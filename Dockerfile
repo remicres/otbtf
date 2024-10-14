@@ -36,8 +36,8 @@ WORKDIR /src/tf
 RUN git config --global advice.detachedHead false
 
 ### TF
-
-ARG TF=v2.16.1
+ARG TF=v2.17.0
+# 2.17 will be the last release to support TensorRT
 ARG TENSORRT
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
@@ -89,8 +89,7 @@ RUN cd tensorflow \
  && rm -rf bazel-* /src/tf /root/.cache/ /tmp/*
 
 ### OTB
-
-ARG OTB=release-9.0
+ARG OTB=release-9.1
 ARG OTBTESTS=false
 
 RUN mkdir /src/otb
