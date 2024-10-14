@@ -93,7 +93,6 @@ RUN mkdir /src/otb
 WORKDIR /src/otb
 
 # SuperBuild OTB
-COPY tools/docker/build-flags-otb.txt ./
 RUN apt-get update -y \
  && apt-get install --reinstall ca-certificates -y \
  && update-ca-certificates \
