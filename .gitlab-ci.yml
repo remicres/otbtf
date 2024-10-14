@@ -9,6 +9,7 @@ variables:
   DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
   DOCKER_DRIVER: overlay2
+  FF_NETWORK_PER_BUILD: false
   CACHE_IMAGE_BASE: $CI_REGISTRY_IMAGE:otbtf-base
   CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
@@ -70,6 +71,7 @@ docker_image:
       --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
       --build-arg OTBTESTS="true"
+      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080"
       "."
     - docker push $CACHE_IMAGE_BUILDER
     - >
