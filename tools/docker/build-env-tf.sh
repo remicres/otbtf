@@ -4,7 +4,7 @@ export CXX=$(which clang++-17)
 export BAZEL_COMPILER=$(which clang-17)
 # As in official TF wheels, we avoid "-march=native" to prevent MAVX512 compatibility issues
 # Here we disable only AVX512 but enable commons optimizations like FMA, SSE4.2 and AVX2
-export CC_OPT_FLAGS="-Wno-sign-compare --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2"
+export CC_OPT_FLAGS="--copt=-mfma --copt=-msse4.2 --copt=-mavx --copt=-mavx2"
 # Required variable since TF 2.16
 export TF_PYTHON_VERSION=$(python3 -c 'import sys; print(sys.version[:4])')
 export PYTHON_BIN_PATH=$(which python)
@@ -20,7 +20,7 @@ export TF_NEED_OPENCL=0
 export TF_NEED_OPENCL_SYCL=0
 export TF_NEED_VERBS=0
 export TF_SET_ANDROID_WORKSPACE=0
-export TF_NEED_CLANG=0
+export TF_NEED_CLANG=1
 # For MKL support BZL_CONFIGS+=" --config=mkl"
 #export TF_DOWNLOAD_MKL=1
 #export TF_NEED_MKL=0
