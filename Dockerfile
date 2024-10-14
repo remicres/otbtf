@@ -1,5 +1,5 @@
-##### Configurable Dockerfile with multi-stage build - Author: Vincent Delbar
-## Mandatory
+##### Configurable Dockerfile with multi-stage build
+# Mandatory
 ARG BASE_IMG
 
 # ----------------------------------------------------------------------------
@@ -8,12 +8,13 @@ FROM $BASE_IMG AS otbtf-base
 WORKDIR /tmp
 
 ### System packages
-COPY tools/docker/build-deps-*.txt ./
+COPY tools/docker/build-deps-cli.txt ./
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get upgrade -y \
  && cat build-deps-cli.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
-### Python3 links and pip packages
+
+### Python3 environment
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
 # Upgrade pip
 RUN pip install --no-cache-dir pip --upgrade
@@ -68,7 +69,6 @@ RUN cd tensorflow \
       && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" '
 
 # Installation
-RUN apt update && apt install -y patchelf
 RUN cd tensorflow \
  && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf /tmp/tensorflow_pkg/tensorflow*.whl \
@@ -118,9 +118,6 @@ RUN cd /src/otb/otb \
  && cd build \
  && if $OTBTESTS; then \
       echo "-DBUILD_TESTING=ON" >> ../build-flags-otb.txt; fi \
- # Possible ENH: superbuild-all-dependencies switch, with separated build-deps-minimal.txt and build-deps-otbcli.txt)
- #&& if $OTB_SUPERBUILD_ALL; then sed -i -r "s/-DUSE_SYSTEM_([A-Z0-9]*)=ON/-DUSE_SYSTEM_\1=OFF/ " ../build-flags-otb.txt; fi \
- && OTB_FLAGS=$(cat "../build-flags-otb.txt") \
  && cmake ../otb/SuperBuild \
      -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
      -DOTB_BUILD_FeaturesExtraction=ON \
@@ -173,8 +170,7 @@ ENV PYTHONPATH="/opt/otbtf/lib/python3/dist-packages:/opt/otbtf/lib/otb/python"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 RUN pip install -e /src/otbtf
 
-# Default user, directory and command (bash is the entrypoint when using
-# 'docker create')
+# Default user, directory and command (bash will be the default entrypoint)
 RUN useradd -s /bin/bash -m otbuser
 WORKDIR /home/otbuser
 
@@ -184,10 +180,8 @@ RUN if $SUDO; then \
       usermod -a -G sudo otbuser \
       && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
 
-# Set /src/otbtf ownership to otbuser (but you still need 'sudo -i' in order
-# to rebuild TF or OTB)
+# Set /src/otbtf ownership to otbuser (you'll need root user in order to rebuild OTB)
 RUN chown -R otbuser:otbuser /src/otbtf
-
 # This won't prevent ownership problems with volumes if you're not UID 1000
 USER otbuser
 
