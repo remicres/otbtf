@@ -15,8 +15,7 @@ RUN apt-get update -y && apt-get upgrade -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install clang+llvm
-ARG CLANG=17
-RUN wget -q https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh $CLANG
+RUN wget -q https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 17
 
 ### Python3 environment
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip

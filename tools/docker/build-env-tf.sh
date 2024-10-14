@@ -1,7 +1,7 @@
 #!/usr/bin/bash
-export CC=$(which clang)
-export CXX=$(which clang++)
-export BAZEL_COMPILER=$(which clang)
+export CC=$(which clang-17)
+export CXX=$(which clang++-17)
+export BAZEL_COMPILER=$(which clang-17)
 # As in official TF wheels, we avoid "-march=native" to prevent MAVX512 compatibility issues
 # Here we disable only AVX512 but enable commons optimizations like FMA, SSE4.2 and AVX2
 export CC_OPT_FLAGS="-Wno-sign-compare --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2"
