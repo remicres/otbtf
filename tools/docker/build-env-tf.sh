@@ -3,6 +3,8 @@
 # Here we disable only AVX512 but enable commons optimizations like FMA, SSE4.2 and AVX2
 export CC_OPT_FLAGS="-Wno-sign-compare --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2"
 export GCC_HOST_COMPILER_PATH=$(which gcc)
+# Required variable since TF 2.16
+export TF_PYTHON_VERSION=$(python3 -c 'import sys; print(sys.version[:4])')
 export PYTHON_BIN_PATH=$(which python)
 export PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])')"
 export TF_DOWNLOAD_CLANG=0
@@ -20,11 +22,6 @@ export TF_NEED_CLANG=0
 # For MKL support BZL_CONFIGS+=" --config=mkl"
 #export TF_DOWNLOAD_MKL=1
 #export TF_NEED_MKL=0
-# Needed BZL_CONFIGS=" --config=nogcp --config=noaws --config=nohdfs"
-#export TF_NEED_S3=0
-#export TF_NEED_AWS=0
-#export TF_NEED_GCP=0
-#export TF_NEED_HDFS=0
 
 ## GPU
 export TF_NEED_ROCM=0
