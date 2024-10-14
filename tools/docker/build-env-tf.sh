@@ -1,7 +1,4 @@
 #!/usr/bin/bash
-export CC=$(which clang-17)
-export CXX=$(which clang++-17)
-export BAZEL_COMPILER=$(which clang-17)
 # As in official TF wheels, we avoid "-march=native" to prevent MAVX512 compatibility issues
 # Here we disable only AVX512 but enable commons optimizations like FMA, SSE4.2 and AVX2
 export CC_OPT_FLAGS="--copt=-mfma --copt=-msse4.2 --copt=-mavx --copt=-mavx2"
@@ -21,9 +18,6 @@ export TF_NEED_OPENCL_SYCL=0
 export TF_NEED_VERBS=0
 export TF_SET_ANDROID_WORKSPACE=0
 export TF_NEED_CLANG=1
-# For MKL support BZL_CONFIGS+=" --config=mkl"
-#export TF_DOWNLOAD_MKL=1
-#export TF_NEED_MKL=0
 
 ## GPU
 export TF_NEED_ROCM=0
