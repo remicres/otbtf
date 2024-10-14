@@ -17,7 +17,7 @@ order to preserve OTB git directory.
 
 ```bash
 CPU_IMG=ubuntu:22.04
-GPU_IMG=nvidia/cuda:12.1.0-devel-ubuntu22.04
+GPU_IMG=nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
 ```
 
 ### Default arguments
@@ -25,21 +25,15 @@ GPU_IMG=nvidia/cuda:12.1.0-devel-ubuntu22.04
 ```bash
 BASE_IMG                # mandatory
 CPU_RATIO=1
-GUI=false
-NUMPY_SPEC="==1.19.*"
-TF=v2.12.0
-OTB=8.1.0
-BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
-BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
-BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
+NUMPY_SPEC="<2"
+TF=v2.17.0
+OTB=release-9.1
+BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
+BZL_CONFIGS=""
+BZL_OPTIONS="--verbose_failures"
 ZIP_TF_BIN=false
 KEEP_SRC_OTB=false
 SUDO=true
-
-# NumPy version requirement :
-# TF <  2.4 : "numpy<1.19.0,>=1.16.0"
-# TF >= 2.4 : "numpy==1.19.*"
-# TF >= 2.8 : "numpy==1.22.*"
 ```
 
 ### Bazel remote cache daemon
