@@ -76,8 +76,7 @@ RUN cd tensorflow \
 
 # Installation
 RUN cd tensorflow \
- && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg \
- && pip3 install --no-cache-dir --prefix=/opt/otbtf /tmp/tensorflow_pkg/tensorflow*.whl \
+ && pip3 install --no-cache-dir --prefix=/opt/otbtf ./bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl \
  && ln -s /opt/otbtf/local/lib/python3.*/* /opt/otbtf/lib/python3 \
  && ln -s /opt/otbtf/local/bin/* /opt/otbtf/bin \
  && ln -s $(find /opt/otbtf -type d -wholename "*/dist-packages/tensorflow/include") /opt/otbtf/include/tf \
