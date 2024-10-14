@@ -194,3 +194,9 @@ Here you can find the list of older releases of OTBTF:
 | **mdl4eo/otbtf:4.3.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
 | **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.3.0-gpu-opt**     | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
 | **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.3.0-gpu-opt-dev** | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.3.1-cpu**                                                         | Ubuntu Jammy  | r2.14 | 9.0.0 | CPU, no optimization   | no        | |
+| **mdl4eo/otbtf:4.3.1-cpu-dev**                                                     | Ubuntu Jammy  | r2.14 | 9.0.0 | CPU, no optimization (dev) |  yes  | |
+| **mdl4eo/otbtf:4.3.1-gpu**                                                         | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
+| **mdl4eo/otbtf:4.3.1-gpu-dev**                                                     | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.3.1-gpu-opt**     | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
+| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.3.1-gpu-opt-dev** | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
