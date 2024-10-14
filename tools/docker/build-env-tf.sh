@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-export BAZEL_COMPILER=$(which clang)
 export CC=$(which clang)
 export CXX=$(which clang++)
 # As in official TF wheels, we avoid "-march=native" to prevent MAVX512 compatibility issues
