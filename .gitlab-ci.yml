@@ -19,7 +19,11 @@ variables:
   CPU_BASE_IMG: ubuntu:22.04
   GPU_BASE_IMG: nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
 
-image: $BRANCH_IMAGE
+image: docker:latest
+services:
+  - name: docker:dind
+  - name: buchgr/bazel-remote-cache
+    alias: bazel-cache
 
 workflow:
   rules:
@@ -42,17 +46,14 @@ cache:
 .docker_build_base:
   allow_failure: false
   tags: [godzilla]
-  image: docker:latest
-  services:
-    - name: docker:dind
+
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
   timeout: 10 hours
 
-docker image:
-  extends: .docker_build_base
+docker_image:
   stage: Build
+  extends: .docker_build_base
   except:
     - develop
   script:
@@ -88,11 +89,13 @@ docker image:
       --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
       --build-arg OTBTESTS="true"
+      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080"
       "."
     - docker push $BRANCH_IMAGE
 
 .static_analysis_base:
   stage: Static Analysis
+  image: $BRANCH_IMAGE
   allow_failure: true
 
 flake8:
@@ -122,6 +125,7 @@ cppcheck:
 
 .doc_base:
   stage: Documentation
+  image: $BRANCH_IMAGE
   before_script:
     - pip install -r doc/doc_requirements.txt
   artifacts:
@@ -147,6 +151,7 @@ pages:
       - public
 
 .tests_base:
+  image: $BRANCH_IMAGE
   tags: [godzilla]
   artifacts:
     paths:
@@ -257,14 +262,14 @@ deploy_cpu-dev-testing:
     - docker tag $BRANCH_IMAGE $DEV_IMAGE
     - docker push $DEV_IMAGE
 
-.ship base:
+.ship_base:
   extends: .docker_build_base
   stage: Ship
   only:
     - master
 
 deploy_cpu:
-  extends: .ship base
+  extends: .ship_base
   variables:
     IMAGE_CPU: $CI_REGISTRY_PUBIMG-cpu
     IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG-cpu-dev
@@ -273,10 +278,10 @@ deploy_cpu:
     DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
   script:
     # cpu
-    - docker build --tag $IMAGE_CPU --build-arg BASE_IMG=$CPU_BASE_IMG .
+    - docker build --tag $IMAGE_CPU --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080" .
     - docker push $IMAGE_CPU
     # cpu-dev
-    - docker build --tag $IMAGE_CPUDEV --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
+    - docker build --tag $IMAGE_CPUDEV --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg KEEP_SRC_OTB=true --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080" .
     - docker push $IMAGE_CPUDEV
     # push images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
@@ -289,7 +294,7 @@ deploy_cpu:
     - docker push $DOCKERHUB_LATEST
 
 deploy_gpu:
-  extends: .ship base
+  extends: .ship_base
   variables:
     IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
     IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
@@ -298,10 +303,10 @@ deploy_gpu:
     DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
   script:
     # gpu
-    - docker build --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG .
+    - docker build --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080" .
     - docker push $IMAGE_GPU
     # gpu-dev
-    - docker build --tag $IMAGE_GPUDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
+    - docker build --tag $IMAGE_GPUDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://bazel-cache:8080" .
     - docker push $IMAGE_GPUDEV
     # push gpu-* images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
