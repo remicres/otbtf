@@ -51,13 +51,7 @@ RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/rele
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
-
-# Using "--config=opt" here will enable 'march=native'
-# (see comments about CPU compatibility and edit CC_OPT_FLAGS in build-env-tf.sh)
-# To disable gcp, aws and hdfs : BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs"
-ARG BZL_CONFIGS
-
-# You may add --remote_cache=http://localhost:9090, see example in tools/docker/multibuild.sh
+# You may add --remote_cache here, see example in tools/docker/multibuild.sh
 ARG BZL_OPTIONS="--verbose_failures"
 
 # Build
@@ -71,7 +65,7 @@ RUN cd tensorflow \
       source ../build-env-tf.sh \
       && ./configure \
       && export TMP=/tmp/bazel \
-      && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS" \
+      && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS" \
       && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" '
 
 # Installation
