@@ -47,14 +47,13 @@ RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/rele
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:build_pip_package"
 
-# "--config=opt" will enable 'march=native'
-# (otherwise read comments about CPU compatibility and edit CC_OPT_FLAGS in
-# build-env-tf.sh)
-ARG BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs --config=opt"
+# Using "--config=opt" here will enable 'march=native'
+# (see comments about CPU compatibility and edit CC_OPT_FLAGS in build-env-tf.sh)
+# To disable gcp, aws and hdfs : BZL_CONFIGS="--config=nogcp --config=noaws --config=nohdfs"
+ARG BZL_CONFIGS
 
-# "--compilation_mode opt" is already enabled by default (see tf repo .bazelrc
-# and configure.py)
-ARG BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:9090"
+# You may add --remote_cache=http://localhost:9090, see example in tools/docker/multibuild.sh
+ARG BZL_OPTIONS="--verbose_failures"
 
 # Build
 ARG ZIP_TF_BIN=false

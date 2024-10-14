@@ -67,10 +67,8 @@ docker image:
       --cache-from $CACHE_IMAGE_BUILDER
       --tag $CACHE_IMAGE_BUILDER
       --build-arg KEEP_SRC_OTB="true"
-      --build-arg BZL_CONFIGS=""
       --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
-      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=$BAZELCACHE"
       --build-arg OTBTESTS="true"
       "."
     - docker push $CACHE_IMAGE_BUILDER
@@ -82,10 +80,8 @@ docker image:
       --cache-from $DEV_IMAGE
       --tag $BRANCH_IMAGE
       --build-arg KEEP_SRC_OTB="true"
-      --build-arg BZL_CONFIGS=""
       --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
-      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=$BAZELCACHE"
       --build-arg OTBTESTS="true"
       "."
     - docker push $BRANCH_IMAGE
@@ -272,10 +268,10 @@ deploy_cpu:
     DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
   script:
     # cpu
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_CPU --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg BZL_CONFIGS="" .
+    - docker build --tag $IMAGE_CPU --build-arg BASE_IMG=$CPU_BASE_IMG .
     - docker push $IMAGE_CPU
     # cpu-dev
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_CPUDEV --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg BZL_CONFIGS="" --build-arg KEEP_SRC_OTB=true .
+    - docker build --tag $IMAGE_CPUDEV --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
     - docker push $IMAGE_CPUDEV
     # push images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
@@ -299,16 +295,16 @@ deploy_gpu:
     DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
   script:
     # gpu-opt
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUOPT --build-arg BASE_IMG=$GPU_BASE_IMG .
+    - docker build --tag $IMAGE_GPUOPT --build-arg BASE_IMG=$GPU_BASE_IMG .
     - docker push $IMAGE_GPUOPT
     # gpu-opt-dev
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUOPTDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
+    - docker build --tag $IMAGE_GPUOPTDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
     - docker push $IMAGE_GPUOPTDEV
     # gpu-basic
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg BZL_CONFIGS="" .
+    - docker build --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG .
     - docker push $IMAGE_GPU
     # gpu-basic-dev
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUDEV --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
+    - docker build --tag $IMAGE_GPUDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
     - docker push $IMAGE_GPUDEV
     # push gpu-basic* images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
@@ -319,4 +315,3 @@ deploy_gpu:
     # latest-gpu = gpu image
     - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST
     - docker push $DOCKERHUB_GPULATEST
-
