@@ -125,7 +125,16 @@ RUN cd /src/otb/otb \
  # Possible ENH: superbuild-all-dependencies switch, with separated build-deps-minimal.txt and build-deps-otbcli.txt)
  #&& if $OTB_SUPERBUILD_ALL; then sed -i -r "s/-DUSE_SYSTEM_([A-Z0-9]*)=ON/-DUSE_SYSTEM_\1=OFF/ " ../build-flags-otb.txt; fi \
  && OTB_FLAGS=$(cat "../build-flags-otb.txt") \
- && cmake ../otb/SuperBuild -DCMAKE_INSTALL_PREFIX=/opt/otbtf $OTB_FLAGS \
+ && cmake ../otb/SuperBuild \
+     -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
+     -DOTB_BUILD_FeaturesExtraction=ON \
+     -DOTB_BUILD_Hyperspectral=ON \
+     -DOTB_BUILD_Learning=ON \
+     -DOTB_BUILD_Miscellaneous=ON \
+     -DOTB_BUILD_RemoteModules=ON \
+     -DOTB_BUILD_SAR=ON \
+     -DOTB_BUILD_Segmentation=ON \
+     -DOTB_BUILD_StereoProcessing=ON \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))")
 
 ### OTBTF - copy (without .git/) or clone repository
