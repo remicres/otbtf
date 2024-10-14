@@ -17,11 +17,9 @@ RUN apt-get update -y && apt-get upgrade -y \
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
 # Upgrade pip
 RUN pip install --no-cache-dir pip --upgrade
-# In case NumPy version is conflicting with system's gdal dep and may require venv
-ARG NUMPY_SPEC=""
-# This is to avoid https://github.com/tensorflow/tensorflow/issues/61551
-ARG PROTO_SPEC="==4.23.*"
-RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" "protobuf$PROTO_SPEC" packaging requests \
+# Numpy 2 support in TF is planned for 2.18, but isn't supported by most libraries for now
+ARG NUMPY_SPEC="<2"
+RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
 # ----------------------------------------------------------------------------
