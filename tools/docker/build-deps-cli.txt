@@ -21,4 +21,5 @@ unzip
 vim
 wget
 sudo
+xz-utils
 zip

@@ -16,7 +16,7 @@ RUN apt-get update -y && apt-get upgrade -y \
 
 # Install clang+llvm from github
 ARG CLANG_VERSION=17.0.6
-RUN wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$CLANG_VERSION/clang+llvm-$CLANG_VERSION-x86_64-linux-gnu-ubuntu-22.04.tar.xz \
+RUN wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-$CLANG_VERSION/clang+llvm-$CLANG_VERSION-x86_64-linux-gnu-ubuntu-22.04.tar.xz \
  && tar -xvf clang+llvm-$CLANG_VERSION-x86_64-linux-gnu-ubuntu-22.04.tar.xz -C /usr/local --strip-components=1 \
  && rm -rf clang+llvm-$CLANG_VERSION-x86_64-linux-gnu-ubuntu-22.04.tar.xz
 
