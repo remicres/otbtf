@@ -4,6 +4,7 @@ curl
 cmake
 file
 git
+gpg
 libc6-dev
 libtool
 lsb-release
@@ -17,6 +18,7 @@ python3-pip
 python3-setuptools
 python3-venv
 swig
+software-properties-common
 unzip
 vim
 wget
