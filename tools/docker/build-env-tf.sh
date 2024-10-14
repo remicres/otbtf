@@ -2,7 +2,6 @@
 # As in official TF wheels, we avoid "-march=native" to prevent MAVX512 compatibility issues
 # Here we disable only AVX512 but enable commons optimizations like FMA, SSE4.2 and AVX2
 export CC_OPT_FLAGS="-Wno-sign-compare --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2"
-export GCC_HOST_COMPILER_PATH=$(which gcc)
 # Required variable since TF 2.16
 export TF_PYTHON_VERSION=$(python3 -c 'import sys; print(sys.version[:4])')
 export PYTHON_BIN_PATH=$(which python)
