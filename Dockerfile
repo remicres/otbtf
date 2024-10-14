@@ -14,11 +14,12 @@ RUN apt-get update -y && apt-get upgrade -y \
  && cat build-deps-cli.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install clang+llvm from github
+# Install clang+llvm
 ARG CLANG_VERSION=17.0.6
-RUN wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-$CLANG_VERSION/clang+llvm-$CLANG_VERSION-x86_64-linux-gnu-ubuntu-22.04.tar.xz \
- && tar -xf clang+llvm-$CLANG_VERSION-x86_64-linux-gnu-ubuntu-22.04.tar.xz -C /usr/local --strip-components=1 \
- && rm -rf clang+llvm-$CLANG_VERSION-x86_64-linux-gnu-ubuntu-22.04.tar.xz
+RUN wget https://apt.llvm.org/llvm.sh \
+ && chmod +x llvm.sh \
+ && ./llvm.sh $CLANG_VERSION \
+ && rm -f llvm.sh
 
 ### Python3 environment
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
