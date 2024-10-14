@@ -29,7 +29,6 @@ NUMPY_SPEC="<2"
 TF=v2.17.0
 OTB=release-9.1
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
-BZL_CONFIGS=""
 BZL_OPTIONS="--verbose_failures"
 ZIP_TF_BIN=false
 KEEP_SRC_OTB=false
@@ -70,23 +69,16 @@ docker build --network='host' -t otbtf:cpu --build-arg BASE_IMG=ubuntu:22.04 .
 # Clear bazel config var (deactivate default optimizations and unset 
 # noaws/nogcp/nohdfs)
 docker build --network='host' -t otbtf:cpu \
-  --build-arg BASE_IMG=ubuntu:22.04 \
-  --build-arg BZL_CONFIGS= .
-
-# Enable MKL
-MKL_CONFIG="--config=nogcp --config=noaws --config=nohdfs --config=opt --config=mkl"
-docker build --network='host' -t otbtf:cpu-mkl \
-  --build-arg BZL_CONFIGS="$MKL_CONFIG" \
   --build-arg BASE_IMG=ubuntu:22.04 .
 
 # Build for GPU (if you're building for your system only you should edit 
 # CUDA_COMPUTE_CAPABILITIES in build-env-tf.sh)
 docker build --network='host' -t otbtf:gpu \
-  --build-arg BASE_IMG=nvidia/cuda:12.1.0-devel-ubuntu22.04 .
+  --build-arg BASE_IMG=nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04 .
 
 # Build latest TF and OTB, set git branches/tags to clone
 docker build --network='host' -t otbtf:gpu-dev \
-  --build-arg BASE_IMG=nvidia/cuda:12.1.0-devel-ubuntu22.04 \
+  --build-arg BASE_IMG=nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04 \
   --build-arg KEEP_SRC_OTB=true \
   --build-arg TF=nightly \
   --build-arg OTB=develop .
