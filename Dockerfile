@@ -1,4 +1,4 @@
-##### Configurable Dockerfile with multi-stage build
+##### OTBTF configurable Dockerfile with multi-stage build
 
 # ----------------------------------------------------------------------------
 # Init base stage - will be cloned as intermediate build env
@@ -24,28 +24,23 @@ RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$N
 # ----------------------------------------------------------------------------
 # Tmp builder stage - dangling cache should persist until "docker builder prune"
 FROM otbtf-base AS builder
-# A smaller value may be required to avoid OOM errors when building OTB
+# A smaller value may be used to limit bazel or to avoid OOM errors while building OTB
 ARG CPU_RATIO=1
 
-# Install clang+llvm
+# Install Clang+LLVM 18
 RUN wget -q https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 18
 ENV CC=/usr/bin/clang-18
 ENV CXX=/usr/bin/clang++-18
 ENV BAZEL_COMPILER=/usr/bin/clang-18
-RUN apt-get update -y && apt-get upgrade -y \
- && apt-get install -y libomp-18-dev \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y libomp-18-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /src/tf /opt/otbtf/bin /opt/otbtf/include /opt/otbtf/lib/python3
-WORKDIR /src/tf
-
-RUN git config --global advice.detachedHead false
 
 ### TF
 ARG TF=v2.18.0-rc1
-ARG WITH_CUDA=false
 ARG WITH_XLA=true
 ARG WITH_MKL=false
+ARG WITH_CUDA=false
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
@@ -57,19 +52,21 @@ ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package
 ARG BZL_OPTIONS="--verbose_failures"
 
 # Build and install TF wheels
+WORKDIR /src/tf
 ARG ZIP_COMP_FILES=false
-RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git
-RUN cd tensorflow \
- && export PATH=$PATH:/opt/otbtf/bin \
- && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/otbtf/lib \
+RUN git config --global advice.detachedHead false
+RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git \
+ && cd tensorflow \
+ && export PATH="$PATH:/opt/otbtf/bin" \
+ && export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/otbtf/lib" \
  && export TMP=/tmp/bazel \
  && export PYTHON_BIN_PATH=$(which python3) \
- && export PYTHON_LIB_PATH=$($PYTHON_BIN_PATH -c "import site; print(site.getsitepackages()[0])") \
- && export TF_PYTHON_VERSION=$($PYTHON_BIN_PATH -c "import sys; print(sys.version[:4])") \
+ && export PYTHON_LIB_PATH=$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])') \
+ && export TF_PYTHON_VERSION=$($PYTHON_BIN_PATH -c 'import sys; print(sys.version[:4])') \
  && export BZL_CONFIGS="--config=release_cpu_linux" \
- && (! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla") \
- && (! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl") \
- && (! $WITH_CUDA || export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel") \
+ && ( ! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
+ && ( ! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
+ && ( ! $WITH_CUDA || export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel" ) \
  && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS $BZL_CONFIGS" \
  && echo "Build env:" && env \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
@@ -86,7 +83,6 @@ RUN cd tensorflow \
 ### OTB
 ARG OTB=release-9.1
 ARG OTBTESTS=false
-
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
 
@@ -178,7 +174,6 @@ RUN if $SUDO; then usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSW
 RUN chown -R otbuser:otbuser /src/otbtf
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
 USER otbuser
-
 # User-only ENV
 ENV PATH="/home/otbuser/.local/bin:$PATH"
 
