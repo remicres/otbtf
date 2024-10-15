@@ -7,32 +7,17 @@ export PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepa
 # Required variable since TF 2.16
 export TF_PYTHON_VERSION="$($PYTHON_BIN_PATH -c 'import sys; print(sys.version[:4])')"
 
-# Disabled features
-export TF_NEED_COMPUTECPP=0
-export TF_NEED_GDR=0
-export TF_NEED_KAFKA=0
-export TF_NEED_MPI=0
-export TF_NEED_OPENCL=0
-export TF_NEED_OPENCL_SYCL=0
-export TF_NEED_VERBS=0
-export TF_SET_ANDROID_WORKSPACE=0
-export TF_NEED_MKL=0
-
 if $WITH_CUDA; then
     export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel"
 else
     export BZL_CONFIGS="--config=release_cpu_linux"
 fi
 
-# Enabled features
-export TF_NEED_JEMALLOC=1
 if $WITH_XLA; then
-    export TF_NEED_XLA=1
     export BZL_CONFIGS="$BZL_CONFIGS --config=xla"
 fi
 
 if $WITH_MKL; then
-    export TF_NEED_MKL=1
     export BZL_CONFIGS="$BZL_CONFIGS --config=mkl"
 fi
 
