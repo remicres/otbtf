@@ -75,7 +75,6 @@ RUN cd tensorflow \
  && echo "Build env:" && env \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
  && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
- cd tensorflow \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf ./bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl \
  && ln -s /opt/otbtf/local/lib/python3.*/* /opt/otbtf/lib/python3 \
  && ln -s /opt/otbtf/local/bin/* /opt/otbtf/bin \
