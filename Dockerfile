@@ -100,7 +100,6 @@ RUN apt-get update -y \
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
 
-# <---------------------------------------- Begin dirty hack
 # This is a dirty hack for release 4.0.0alpha
 # We have to wait that OTB moves from C++14 to C++17
 # See https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb/-/issues/2338
@@ -112,12 +111,10 @@ RUN cd /src/otb/otb \
  && echo "" > Modules/Core/Edge/test/CMakeLists.txt \
  && echo "" > Modules/Core/ImageBase/test/CMakeLists.txt \
  && echo "" > Modules/Learning/DempsterShafer/test/CMakeLists.txt \
-# <---------------------------------------- End dirty hack
+
  && cd .. \
  && mkdir -p build \
  && cd build \
- && if $OTBTESTS; then \
-      echo "-DBUILD_TESTING=ON" >> ../build-flags-otb.txt; fi \
  && cmake ../otb/SuperBuild \
      -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
      -DOTB_BUILD_FeaturesExtraction=ON \
@@ -128,13 +125,13 @@ RUN cd /src/otb/otb \
      -DOTB_BUILD_SAR=ON \
      -DOTB_BUILD_Segmentation=ON \
      -DOTB_BUILD_StereoProcessing=ON \
+     $($OTBTESTS && echo "-DBUILD_TESTING=ON") \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))")
 
-### OTBTF - copy (without .git/) or clone repository
+# Rebuild OTB with OTBTF module
 COPY . /src/otbtf
 RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
 
-# Rebuild OTB with module
 ARG KEEP_SRC_OTB=false
 RUN cd /src/otb/build/OTB/build \
  && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/otbtf/lib \
@@ -147,7 +144,6 @@ RUN cd /src/otb/build/OTB/build \
       -DTENSORFLOW_CC_LIB=/opt/otbtf/local/lib/python3.10/dist-packages/tensorflow/libtensorflow_cc.so.2 \
       -DTENSORFLOW_FRAMEWORK_LIB=/opt/otbtf/local/lib/python3.10/dist-packages/tensorflow/libtensorflow_framework.so.2 \
  && make install -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
- # Cleaning
  && ( $KEEP_SRC_OTB || rm -rf /src/otb ) \
  && rm -rf /root/.cache /tmp/*
 
