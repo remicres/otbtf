@@ -34,6 +34,9 @@ RUN wget -q https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 18
 ENV CC=/usr/bin/clang-18
 ENV CXX=/usr/bin/clang++-18
 ENV BAZEL_COMPILER=/usr/bin/clang-18
+RUN apt-get update -y && apt-get upgrade -y \
+ && apt-get install -y libomp-18-dev \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /src/tf /opt/otbtf/bin /opt/otbtf/include /opt/otbtf/lib/python3
 WORKDIR /src/tf

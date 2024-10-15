@@ -16,6 +16,7 @@ export TF_NEED_OPENCL=0
 export TF_NEED_OPENCL_SYCL=0
 export TF_NEED_VERBS=0
 export TF_SET_ANDROID_WORKSPACE=0
+export TF_NEED_MKL=0
 
 if $WITH_CUDA; then
     export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel"
@@ -26,11 +27,13 @@ fi
 # Enabled features
 export TF_NEED_JEMALLOC=1
 if $WITH_XLA; then
-    export BZL_CONFIGS="$BZL_CONFIGS --config=mkl"
+    export TF_NEED_XLA=1
+    export BZL_CONFIGS="$BZL_CONFIGS --config=xla"
 fi
 
 if $WITH_MKL; then
-    export BZL_CONFIGS="$BZL_CONFIGS --config=xla"
+    export TF_NEED_MKL=1
+    export BZL_CONFIGS="$BZL_CONFIGS --config=mkl"
 fi
 
 echo"Starting build with the following environment variables:"
