@@ -16,9 +16,9 @@ RUN apt-get update -y && apt-get upgrade -y \
 
 # Install clang+llvm
 RUN wget -q https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 17
-ENV BAZEL_COMPILER=/usr/bin/clang-17
 ENV CC=/usr/bin/clang-17
 ENV CXX=/usr/bin/clang++-17
+ENV BAZEL_COMPILER=/usr/bin/clang-17
 
 ### Python3 environment
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
@@ -97,6 +97,9 @@ RUN apt-get update -y \
  && update-ca-certificates \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
  && cd otb && git checkout $OTB
+
+ENV CC=/usr/bin/gcc
+ENV CXX=/usr/bin/g++
 
 # <---------------------------------------- Begin dirty hack
 # This is a dirty hack for release 4.0.0alpha

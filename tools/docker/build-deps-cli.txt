@@ -3,6 +3,8 @@ ca-certificates
 curl
 cmake
 file
+g++
+gcc
 git
 gpg
 libc6-dev

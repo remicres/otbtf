@@ -22,7 +22,6 @@ variables:
 image: docker:latest
 services:
   - name: docker:dind
-  - name: buchgr/bazel-remote-cache
 
 workflow:
   rules:
