@@ -1,7 +1,4 @@
 #!/usr/bin/bash
-# As in official TF wheels, we avoid "-march=native" to prevent MAVX512 compatibility issues
-# Here we disable only AVX512 but enable commons optimizations like FMA, SSE4.2 and AVX2
-export CC_OPT_FLAGS="--copt=-mfma --copt=-msse4.2 --copt=-mavx --copt=-mavx2"
 export PYTHON_BIN_PATH=$(which python3)
 export PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])')"
 # Required variable since TF 2.16
@@ -21,5 +18,5 @@ if $WITH_MKL; then
     export BZL_CONFIGS="$BZL_CONFIGS --config=mkl"
 fi
 
-echo"Starting build with the following environment variables:"
+echo "Starting build with the following environment variables:"
 env

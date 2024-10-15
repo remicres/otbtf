@@ -21,8 +21,6 @@ ARG NUMPY_SPEC="<2"
 RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
-
-
 # ----------------------------------------------------------------------------
 # Tmp builder stage - dangling cache should persist until "docker builder prune"
 FROM otbtf-base AS builder
