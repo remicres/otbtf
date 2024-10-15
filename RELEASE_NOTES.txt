@@ -2,12 +2,14 @@ Version 4.4.0 (?? ??? ????)
 ----------------------------------------------------------------
 * Bump OTB version to 9.1.0
 * Bump TensorFlow to 2.18.0
-* Upgrade TF build workflow to newest specs (LLVM18/Clang, HERMETIC_CUDA)
-* Drop Docker build argument BASE_IMG (ubuntu22 is used for every build)
-* Add Docker build arguments WITH_CUDA=false, WITH_MKL=false, WITH_XLA=true
-* Enable common CPU optimizations by default (FMA, AVX2, SSE4.2)
-* Use default TF compute capabilities from .bazelrc (sm_60,sm_70,sm_80,sm_89,compute_90)
 * Lock numpy version < 2.0
+* Upgrade TF build workflow to latest specs:
+  - Drop Docker build argument BASE_IMG (ubuntu22 is used for every build)
+  - Use official wheels bazel configs (targets --config=release_{cpu,gpu})
+  - Compile with Clang LLVM18, use "HERMETIC_CUDA" 12.5
+  - Use default compute capabilities from .bazelrc (sm_60,sm_70,sm_80,sm_89,compute_90)
+  - Add Docker build arguments WITH_CUDA=false, WITH_MKL=false, WITH_XLA=true
+  - TODO: update python for Keras 3
 * TODO: move packaging spec to pyproject.toml
 
 Version 4.3.1 (02 jan 2024)
