@@ -6,10 +6,10 @@ FROM ubuntu:22.04 AS otbtf-base
 WORKDIR /tmp
 
 ### System packages
-COPY tools/docker/build-deps-cli.txt ./
+COPY apt-dependencies.txt ./
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get upgrade -y \
- && cat build-deps-cli.txt | xargs apt-get install --no-install-recommends -y \
+ && cat apt-dependencies.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ### Python3 environment
@@ -58,7 +58,6 @@ ARG BZL_OPTIONS="--verbose_failures"
 
 # Build and install TF wheels
 ARG ZIP_COMP_FILES=false
-COPY tools/docker/build-env-tf.sh ./
 RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git
 RUN cd tensorflow \
  && export PATH=$PATH:/opt/otbtf/bin \
