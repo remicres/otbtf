@@ -71,8 +71,8 @@ RUN cd tensorflow \
  && (! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla") \
  && (! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl") \
  && (! $WITH_CUDA || export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel") \
- && echo "Build env:" && env \
  && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS $BZL_CONFIGS" \
+ && echo "Build env:" && env \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
  && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
  cd tensorflow \
