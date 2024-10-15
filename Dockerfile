@@ -1,10 +1,8 @@
 ##### Configurable Dockerfile with multi-stage build
-# Mandatory
-ARG BASE_IMG
 
 # ----------------------------------------------------------------------------
 # Init base stage - will be cloned as intermediate build env
-FROM $BASE_IMG AS otbtf-base
+FROM ubuntu:22.04 AS otbtf-base
 WORKDIR /tmp
 
 ### System packages
@@ -13,12 +11,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get upgrade -y \
  && cat build-deps-cli.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install clang+llvm
-RUN wget -q https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 17
-ENV CC=/usr/bin/clang-17
-ENV CXX=/usr/bin/clang++-17
-ENV BAZEL_COMPILER=/usr/bin/clang-17
 
 ### Python3 environment
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
@@ -29,11 +21,19 @@ ARG NUMPY_SPEC="<2"
 RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
+
+
 # ----------------------------------------------------------------------------
 # Tmp builder stage - dangling cache should persist until "docker builder prune"
 FROM otbtf-base AS builder
 # A smaller value may be required to avoid OOM errors when building OTB
 ARG CPU_RATIO=1
+
+# Install clang+llvm
+RUN wget -q https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 18
+ENV CC=/usr/bin/clang-18
+ENV CXX=/usr/bin/clang++-18
+ENV BAZEL_COMPILER=/usr/bin/clang-18
 
 RUN mkdir -p /src/tf /opt/otbtf/bin /opt/otbtf/include /opt/otbtf/lib/python3
 WORKDIR /src/tf
@@ -42,6 +42,9 @@ RUN git config --global advice.detachedHead false
 
 ### TF
 ARG TF=v2.18.0-rc1
+ARG WITH_CUDA=false
+ARG WITH_XLA=true
+ARG WITH_MKL=false
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
@@ -61,12 +64,9 @@ RUN cd tensorflow \
  && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/otbtf/lib \
  && bash -c '\
       source ../build-env-tf.sh \
-      && ./configure \
-	  && export TF_NEED_TENSORRT=0 \
       && export TMP=/tmp/bazel \
-      && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS" \
+      && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS $BZL_CONFIGS" \
       && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" ' \
-# Installation / split command here to debug build
  cd tensorflow \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf ./bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl \
  && ln -s /opt/otbtf/local/lib/python3.*/* /opt/otbtf/lib/python3 \
@@ -192,3 +192,4 @@ RUN python -c "import tensorflow"
 RUN python -c "import otbtf, tricks"
 RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
 RUN python -c "from osgeo import gdal"
+
