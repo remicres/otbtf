@@ -68,7 +68,6 @@ docker_image:
       --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
       --build-arg OTBTESTS="true"
-      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:8080"
       "."
     - docker push $CACHE_IMAGE_BUILDER
     - >
@@ -82,7 +81,6 @@ docker_image:
       --build-arg BASE_IMG=$CPU_BASE_IMG
       --build-arg BUILDKIT_INLINE_CACHE=1
       --build-arg OTBTESTS="true"
-      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:8080"
       "."
     - docker push $BRANCH_IMAGE
 
@@ -271,10 +269,10 @@ deploy_cpu:
     DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
   script:
     # cpu
-    - docker build --tag $IMAGE_CPU --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:8080" .
+    - docker build --tag $IMAGE_CPU --build-arg BASE_IMG=$CPU_BASE_IMG .
     - docker push $IMAGE_CPU
     # cpu-dev
-    - docker build --tag $IMAGE_CPUDEV --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg KEEP_SRC_OTB=true --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:8080" .
+    - docker build --tag $IMAGE_CPUDEV --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
     - docker push $IMAGE_CPUDEV
     # push images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
@@ -296,10 +294,10 @@ deploy_gpu:
     DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
   script:
     # gpu
-    - docker build --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:8080" .
+    - docker build --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG .
     - docker push $IMAGE_GPU
     # gpu-dev
-    - docker build --tag $IMAGE_GPUDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=http://localhost:8080" .
+    - docker build --tag $IMAGE_GPUDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
     - docker push $IMAGE_GPUDEV
     # push gpu-* images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
