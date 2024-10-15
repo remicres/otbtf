@@ -63,19 +63,18 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
 RUN cd tensorflow \
  && export PATH=$PATH:/opt/otbtf/bin \
  && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/otbtf/lib \
- && bash -c '\
-      && export TMP=/tmp/bazel \
-      && export PYTHON_BIN_PATH=$(which python3) \
-      && export PYTHON_LIB_PATH=$($PYTHON_BIN_PATH -c "import site; print(site.getsitepackages()[0])") \
-      && export TF_PYTHON_VERSION=$($PYTHON_BIN_PATH -c "import sys; print(sys.version[:4])") \
-      && export BZL_CONFIGS="--config=release_cpu_linux" \
-      && (! $WITH_CUDA || export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel") \
-      && (! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla") \
-      && (! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl") \
-      && echo "Build env:" && env \
-      && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS $BZL_CONFIGS" \
-      && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
-      && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" ' \
+ && export TMP=/tmp/bazel \
+ && export PYTHON_BIN_PATH=$(which python3) \
+ && export PYTHON_LIB_PATH=$($PYTHON_BIN_PATH -c "import site; print(site.getsitepackages()[0])") \
+ && export TF_PYTHON_VERSION=$($PYTHON_BIN_PATH -c "import sys; print(sys.version[:4])") \
+ && export BZL_CONFIGS="--config=release_cpu_linux" \
+ && (! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla") \
+ && (! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl") \
+ && (! $WITH_CUDA || export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel") \
+ && echo "Build env:" && env \
+ && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS $BZL_CONFIGS" \
+ && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
+ && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
  cd tensorflow \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf ./bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl \
  && ln -s /opt/otbtf/local/lib/python3.*/* /opt/otbtf/lib/python3 \
