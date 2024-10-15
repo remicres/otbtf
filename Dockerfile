@@ -53,11 +53,11 @@ RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/rele
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
-# You may add --remote_cache here, see example in tools/docker/multibuild.sh
+# You could add --remote_cache here, see example in tools/docker/multibuild.sh
 ARG BZL_OPTIONS="--verbose_failures"
 
-# Build
-ARG ZIP_TF_BIN=false
+# Build and install TF wheels
+ARG ZIP_COMP_FILES=false
 COPY tools/docker/build-env-tf.sh ./
 RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git
 RUN cd tensorflow \
@@ -67,25 +67,24 @@ RUN cd tensorflow \
       source ../build-env-tf.sh \
       && export TMP=/tmp/bazel \
       && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS $BZL_CONFIGS" \
+      && echo "Starting build with cmd \"bazel $BZL_CMD\"" \
       && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" ' \
  cd tensorflow \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf ./bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl \
  && ln -s /opt/otbtf/local/lib/python3.*/* /opt/otbtf/lib/python3 \
  && ln -s /opt/otbtf/local/bin/* /opt/otbtf/bin \
  && ln -s $(find /opt/otbtf -type d -wholename "*/dist-packages/tensorflow/include") /opt/otbtf/include/tf \
- # The only missing header in the wheel
- && cp tensorflow/cc/saved_model/tag_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
- && cp tensorflow/cc/saved_model/signature_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
- # Symlink external libs (required for MKL - libiomp5)
+ && cp tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
- # Compress and save TF binaries
- && ( ! $ZIP_TF_BIN || zip -9 -j --symlinks /opt/otbtf/tf-$TF.zip tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h bazel-bin/tensorflow/libtensorflow_cc.so* /tmp/tensorflow_pkg/tensorflow*.whl ) \
- # Cleaning
+ && ( ! $ZIP_COMP_FILES || zip -9 -j --symlinks /opt/otbtf/tf-$TF.zip tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h bazel-bin/tensorflow/libtensorflow_cc.so* bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl ) \
  && rm -rf bazel-* /src/tf /root/.cache/ /tmp/*
 
 ### OTB
 ARG OTB=release-9.1
 ARG OTBTESTS=false
+
+ENV CC=/usr/bin/gcc
+ENV CXX=/usr/bin/g++
 
 RUN mkdir /src/otb
 WORKDIR /src/otb
@@ -96,9 +95,6 @@ RUN apt-get update -y \
  && update-ca-certificates \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
  && cd otb && git checkout $OTB
-
-ENV CC=/usr/bin/gcc
-ENV CXX=/usr/bin/g++
 
 # This is a dirty hack for release 4.0.0alpha
 # We have to wait that OTB moves from C++14 to C++17
