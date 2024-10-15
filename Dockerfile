@@ -41,9 +41,7 @@ WORKDIR /src/tf
 RUN git config --global advice.detachedHead false
 
 ### TF
-ARG TF=v2.17.0
-# 2.17 will be the last release to support TensorRT
-ARG TENSORRT=true
+ARG TF=v2.18.0-rc1
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
@@ -51,7 +49,6 @@ RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/rele
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
-ARG BZL_CONFIGS="--no-tensorrt"
 # You may add --remote_cache here, see example in tools/docker/multibuild.sh
 ARG BZL_OPTIONS="--verbose_failures"
 
@@ -65,12 +62,12 @@ RUN cd tensorflow \
  && bash -c '\
       source ../build-env-tf.sh \
       && ./configure \
+	  && export TF_NEED_TENSORRT=0 \
       && export TMP=/tmp/bazel \
       && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS" \
-      && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" '
-
-# Installation
-RUN cd tensorflow \
+      && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" ' \
+# Installation / split command here to debug build
+ cd tensorflow \
  && pip3 install --no-cache-dir --prefix=/opt/otbtf ./bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl \
  && ln -s /opt/otbtf/local/lib/python3.*/* /opt/otbtf/lib/python3 \
  && ln -s /opt/otbtf/local/bin/* /opt/otbtf/bin \
