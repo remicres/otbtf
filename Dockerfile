@@ -43,7 +43,7 @@ RUN git config --global advice.detachedHead false
 ### TF
 ARG TF=v2.17.0
 # 2.17 will be the last release to support TensorRT
-ARG TENSORRT
+ARG TENSORRT=true
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
@@ -51,6 +51,7 @@ RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/rele
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
+ARG BZL_CONFIGS="--no-tensorrt"
 # You may add --remote_cache here, see example in tools/docker/multibuild.sh
 ARG BZL_OPTIONS="--verbose_failures"
 

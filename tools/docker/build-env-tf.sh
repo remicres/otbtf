@@ -2,10 +2,10 @@
 # As in official TF wheels, we avoid "-march=native" to prevent MAVX512 compatibility issues
 # Here we disable only AVX512 but enable commons optimizations like FMA, SSE4.2 and AVX2
 export CC_OPT_FLAGS="--copt=-mfma --copt=-msse4.2 --copt=-mavx --copt=-mavx2"
-# Required variable since TF 2.16
-export TF_PYTHON_VERSION=$(python3 -c 'import sys; print(sys.version[:4])')
-export PYTHON_BIN_PATH=$(which python)
+export PYTHON_BIN_PATH=$(which python3)
 export PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])')"
+# Required variable since TF 2.16
+export TF_PYTHON_VERSION="$($PYTHON_BIN_PATH -c 'import sys; print(sys.version[:4])')"
 export TF_DOWNLOAD_CLANG=0
 export TF_ENABLE_XLA=1
 export TF_NEED_COMPUTECPP=0
@@ -22,24 +22,14 @@ export TF_NEED_CLANG=1
 ## GPU
 export TF_NEED_ROCM=0
 export TF_NEED_CUDA=0
+export TF_NEED_TENSORRT=0
 export CUDA_TOOLKIT_PATH=$(find /usr/local -maxdepth 1 -type d -name 'cuda-*')
 if  [ ! -z $CUDA_TOOLKIT_PATH ] ; then
-    if [ ! -z $TENSORRT ]; then
-        echo "Building tensorflow with TensorRT support"
-        apt install \
-            libnvinfer8=$TENSORRT \
-            libnvinfer-dev=$TENSORRT \
-            libnvinfer-plugin8=$TENSORRT \
-            libnvinfer-plugin-dev=$TENSORRT
-        export TF_TENSORRT_VERSION=$(cat $(find /usr/ -type f -name NvInferVersion.h) | grep '#define NV_TENSORRT_MAJOR' | cut -f3 -d' ')
-        export TF_NEED_TENSORRT=1
-    fi
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CUDA_TOOLKIT_PATH/lib64:$CUDA_TOOLKIT_PATH/lib64/stubs"
     export TF_CUDA_VERSION=$(echo $CUDA_TOOLKIT_PATH | sed -r 's/.*\/cuda-(.*)/\1/')
-    export TF_CUDA_COMPUTE_CAPABILITIES="5.2,6.1,7.0,7.5,8.0,8.6,8.9,9.0"
+    # Let TF set compute capabilities
+    #export TF_CUDA_COMPUTE_CAPABILITIES="5.2,6.1,7.0,7.5,8.0,8.6,8.9,9.0"
     export TF_NEED_CUDA=1
-    export TF_CUDA_CLANG=1
-    export TF_NEED_TENSORRT=0
     export CUDNN_INSTALL_PATH="/usr/"
     export TF_CUDNN_VERSION=$(sed -n 's/^#define CUDNN_MAJOR\s*\(.*\).*/\1/p' $CUDNN_INSTALL_PATH/include/cudnn_version.h)
     export TF_NCCL_VERSION=2
