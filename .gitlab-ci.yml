@@ -51,7 +51,7 @@ docker_image:
   script:
     - >
       docker buildx build --push -t $BRANCH_IMAGE
-      --cache-from $CACHE_IMAGE
+      --cache-from type=registry,ref=$CACHE_IMAGE
       --cache-to type=registry,ref=$CACHE_IMAGE,mode=max
       --build-arg KEEP_SRC_OTB="true" --build-arg OTBTESTS="true"
       "."
@@ -243,12 +243,12 @@ deploy_cpu:
     # cpu
     - >
       docker buildx build --push -t $IMAGE_CPU
-      --cache-from $CACHE_IMAGE
+      --cache-from type=registry,ref=$CACHE_IMAGE
       .
     # cpu-dev
     - >
       docker buildx build --push -t $IMAGE_CPUDEV
-      --cache-from $CACHE_IMAGE
+      --cache-from type=registry,ref=$CACHE_IMAGE
       --build-arg KEEP_SRC_OTB=true
       .
     # push images on dockerhub
@@ -270,13 +270,13 @@ deploy_gpu:
     # gpu
     - >
       docker buildx build --push -t $IMAGE_GPU
-      --cache-from $CACHE_IMAGE
+      --cache-from type=registry,ref=$CACHE_IMAGE
       --build-arg WITH_CUDA=true
       .
     # gpu-dev
     - >
       docker buildx build --push -t $IMAGE_GPUDEV
-      --cache-from $CACHE_IMAGE
+      --cache-from type=registry,ref=$CACHE_IMAGE
       --build-arg WITH_CUDA=true --build-arg KEEP_SRC_OTB=true
       .
     # push gpu-* images on dockerhub
