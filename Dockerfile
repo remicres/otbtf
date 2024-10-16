@@ -53,8 +53,8 @@ RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/rele
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
-# You could add --remote_cache=http://... here
-ARG BZL_OPTIONS="--verbose_failures"
+# You can use --build-arg BZL_OPTIONS="--remote_cache=http://..." at build time
+ARG BZL_OPTIONS
 
 # Build and install TF wheels
 WORKDIR /src/tf
@@ -72,7 +72,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
  && ( ! $WITH_CUDA || export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel" ) \
  && ( ! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
  && ( ! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
- && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS $BZL_CONFIGS" \
+ && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS $BZL_CONFIGS --verbose_failures" \
  && echo "Build env:" && env \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
  && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
