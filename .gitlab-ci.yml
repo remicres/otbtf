@@ -8,6 +8,7 @@ variables:
   API_TEST_TMP: /tmp/api_tests_tmp
   DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
+  BUILDX_BUILDER: container
   DOCKER_DRIVER: overlay2
   CACHE_IMAGE_BASE: $CI_REGISTRY_IMAGE:otbtf-base
   CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
@@ -49,21 +50,7 @@ docker_image:
     - develop
   script:
     - >
-      docker buildx build --push -t $CACHE_IMAGE_BASE
-      --target otbtf-base
-      --cache-from $CACHE_IMAGE_BASE
-      --cache-to type=registry,ref=$CACHE_IMAGE_BASE --provenance=mode=max
-      "."
-    - >
-      docker buildx build --push -t $CACHE_IMAGE_BUILDER
-      --target builder
-      --cache-from $CACHE_IMAGE_BASE --cache-from $CACHE_IMAGE_BUILDER
-      --cache-to type=registry,ref=$CACHE_IMAGE_BUILDER --provenance=mode=max
-      --build-arg KEEP_SRC_OTB="true" --build-arg OTBTESTS="true"
-      "."
-    - >
       docker buildx build --push -t $BRANCH_IMAGE
-      --cache-from $CACHE_IMAGE_BASE --cache-from $CACHE_IMAGE_BUILDER
       --cache-from $BRANCH_IMAGE --cache-from $DEV_IMAGE
       --cache-to type=registry,ref=$BRANCH_IMAGE --provenance=mode=max
       --build-arg KEEP_SRC_OTB="true" --build-arg OTBTESTS="true"
@@ -283,13 +270,13 @@ deploy_gpu:
     # gpu
     - >
       docker buildx build --push -t $IMAGE_GPU
-      --cache-from $DEV_IMAGE 
+      --cache-from $BRANCH_IMAGE --cache-from $DEV_IMAGE
       --build-arg WITH_CUDA=true
       .
     # gpu-dev
     - >
       docker buildx build --push -t $IMAGE_GPUDEV
-      --cache-from $DEV_IMAGE 
+      --cache-from $BRANCH_IMAGE --cache-from $DEV_IMAGE
       --build-arg WITH_CUDA=true --build-arg KEEP_SRC_OTB=true
       .
     # push gpu-* images on dockerhub
