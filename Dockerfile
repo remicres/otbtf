@@ -151,9 +151,15 @@ RUN for f in /src/otbtf/python/*.py; do if [ -x $f ]; then ln -s $f /opt/otbtf/b
 FROM build-stage AS final-stage
 LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
-# Copy files from intermediate stage
-COPY --from=build-stage /opt/otbtf /opt/otbtf
-COPY --from=build-stage /src /src
+# Default user, directory and command (bash will be the default entrypoint)
+RUN useradd -s /bin/bash -m otbuser
+# Admin rights without password (potential security issue)
+ARG SUDO=true
+RUN if $SUDO; then usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
+
+# Copy built files from intermediate stage
+COPY --from=build-stage --chown otbuser:otbuser /opt/otbtf /opt/otbtf
+COPY --from=build-stage --chown otbuser:otbuser /src /src
 
 # System-wide ENV
 ENV PATH="/opt/otbtf/bin:$PATH"
@@ -161,18 +167,7 @@ ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
 ENV PYTHONPATH="/opt/otbtf/lib/python3/dist-packages:/opt/otbtf/lib/otb/python"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 RUN pip install -e /src/otbtf
-
-# Default user, directory and command (bash will be the default entrypoint)
-RUN useradd -s /bin/bash -m otbuser
 WORKDIR /home/otbuser
-
-# Admin rights without password
-ARG SUDO=true
-RUN if $SUDO; then usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
-
-# Set directories ownership to otbuser
-RUN chown -R otbuser:otbuser /src/otbtf /opt/otbtf
-RUN if [ -d "/src/otb" ]; then chown -R otbuser:otbuser /src/otb; fi
 
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
 USER otbuser
