@@ -17,11 +17,11 @@ RUN apt-get update -y && apt-get upgrade -y \
 
 ### Python3 environment
 RUN ln -s /usr/bin/python3 /usr/local/bin/python && ln -s /usr/bin/pip3 /usr/local/bin/pip
-# Upgrade pip
-RUN pip install --no-cache-dir pip --upgrade
+# Upgrade pip and wheel
+RUN pip install --no-cache-dir -U pip wheel
 # Numpy 2 support in TF is planned for 2.18, but isn't supported by most libraries for now
-ARG NUMPY_SPEC="<2"
-RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$NUMPY_SPEC" packaging requests \
+ARG NUMPY="1.26.4"
+RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
 # ----------------------------------------------------------------------------
