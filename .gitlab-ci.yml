@@ -230,7 +230,7 @@ numpy_gdal_otb:
 rio:
   extends: .applications_test_base
   script:
-    - sudo pip install rasterio
+    - pip install rasterio --no-binary rasterio
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_rio.xml $OTBTF_SRC/test/rio_test.py
 
 nodata:
