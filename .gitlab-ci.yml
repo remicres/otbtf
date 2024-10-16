@@ -52,7 +52,7 @@ docker_image:
     - >
       docker buildx build --push -t $BRANCH_IMAGE
       --cache-from type=registry,ref=$CACHE_IMAGE
-      --cache-to type=registry,ref=$CACHE_IMAGE,mode=max
+      --cache-to type=registry,ref=$CACHE_IMAGE,mode=max,oci-mediatypes=true,image-manifest=true
       --build-arg KEEP_SRC_OTB="true" --build-arg OTBTESTS="true"
       "."
 
