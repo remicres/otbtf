@@ -158,8 +158,8 @@ ARG SUDO=true
 RUN if $SUDO; then usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
 
 # Copy built files from intermediate stage
-COPY --from=build-stage --chown otbuser:otbuser /opt/otbtf /opt/otbtf
-COPY --from=build-stage --chown otbuser:otbuser /src /src
+COPY --from=build-stage --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
+COPY --from=build-stage --chown=otbuser:otbuser /src /src
 
 # System-wide ENV
 ENV PATH="/opt/otbtf/bin:$PATH"
