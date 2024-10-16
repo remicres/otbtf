@@ -36,3 +36,7 @@ training, etc. is done using the so-called `tensorflow.Strategy`
 !!! Note
 
     Read our [tutorial](api_tutorial.html) to know more on working with Keras!
+
+## Major changes between Keras 2 and 3
+
+TODO

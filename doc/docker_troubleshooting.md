@@ -9,16 +9,6 @@ Big thanks to the authors.
 
 ## Common errors
 
-### Manifest unknown
-
-```
-Error response from daemon: 
-manifest for nvidia/cuda:11.0-cudnn8-devel-ubuntu20.04 not found: 
-manifest unknown: manifest unknown
-```
-
-This means that the docker image is missing from dockerhub.
-
 ### failed call to cuInit
 
 ```
@@ -87,7 +77,7 @@ docker create --interactive --tty --volume /home/$USER:/home/otbuser/ \
 !!! warning
 
     Beware of ownership issues, see 
-    [this section](#fix-volume-ownership-sissues).
+    [this section](#fix-volume-ownership-issues).
 
 ### Interactive session
 
