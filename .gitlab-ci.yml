@@ -87,19 +87,19 @@ docker_image:
 flake8:
   extends: .static_analysis_base
   script:
-    - sudo pip install flake8
+    - pip install flake8
     - flake8 $OTBTF_SRC/otbtf --exclude=tensorflow_v1x
 
 pylint:
   extends: .static_analysis_base
   script:
-    - sudo pip install pylint
+    - pip install pylint
     - pylint $OTBTF_SRC/otbtf --ignore=tensorflow_v1x
 
 codespell:
   extends: .static_analysis_base
   script:
-    - sudo pip install codespell
+    - pip install codespell
     - codespell otbtf
     - codespell doc
 
@@ -150,13 +150,13 @@ ctest:
   stage: Test
   script:
     - sudo apt update && sudo apt install -y git-lfs 
-    - cd /src/otb/otb && sudo git lfs fetch --all && sudo git lfs pull
+    - cd /src/otb/otb && git lfs fetch --all && git lfs pull
     - cd $OTB_BUILD/
-    - sudo ctest -L OTBTensorflow
-    - sudo ctest -L OTBPanSharpening
-    - sudo ctest -L OTBProjection
-    - sudo ctest -L OTBTransform
-    - sudo ctest -L OTBIOGDAL
+    - ctest -L OTBTensorflow
+    - ctest -L OTBPanSharpening
+    - ctest -L OTBProjection
+    - ctest -L OTBTransform
+    - ctest -L OTBIOGDAL
   after_script:
     - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
 

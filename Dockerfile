@@ -170,8 +170,10 @@ WORKDIR /home/otbuser
 ARG SUDO=true
 RUN if $SUDO; then usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
 
-# Set /src/otbtf ownership to otbuser (but you'll need root user to rebuild OTB)
+# Set /src/otbtf and /src/otb ownership to otbuser
 RUN chown -R otbuser:otbuser /src/otbtf
+RUN if [ -d "/src/otb" ]; then chown -R otbuser:otbuser /src/otb; fi
+
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
 USER otbuser
 # User-only ENV
