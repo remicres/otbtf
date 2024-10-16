@@ -8,6 +8,7 @@ variables:
   API_TEST_TMP: /tmp/api_tests_tmp
   DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   BUILDX_BUILDER: container
   DOCKER_DRIVER: overlay2
   CACHE_IMAGE: $CI_REGISTRY_IMAGE:cache
@@ -50,8 +51,8 @@ docker_image:
   script:
     - >
       docker buildx build --push -t $BRANCH_IMAGE
-      --cache-from $BRANCH_IMAGE --cache-from $CACHE_IMAGE --cache-from $CI_REGISTRY_IMAGE:builder
-      --cache-to type=registry,ref=$CACHE_IMAGE --provenance=mode=max
+      --cache-from $CACHE_IMAGE
+      --cache-to type=registry,ref=$CACHE_IMAGE,mode=max
       --build-arg KEEP_SRC_OTB="true" --build-arg OTBTESTS="true"
       "."
 
