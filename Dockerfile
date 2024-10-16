@@ -38,9 +38,9 @@ RUN mkdir -p /src/tf /opt/otbtf/bin /opt/otbtf/include /opt/otbtf/lib/python3
 
 ### TF
 ARG TF=v2.18.0-rc1
-ARG WITH_XLA=true
-ARG WITH_MKL=false
 ARG WITH_CUDA=false
+ARG WITH_MKL=false
+ARG WITH_XLA=true
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
@@ -58,15 +58,15 @@ RUN git config --global advice.detachedHead false
 RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git \
  && cd tensorflow \
  && export PATH="$PATH:/opt/otbtf/bin" \
- && export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/otbtf/lib" \
+ && export LD_LIBRARY_PATH="/opt/otbtf/lib" \
  && export TMP=/tmp/bazel \
  && export PYTHON_BIN_PATH=$(which python3) \
  && export PYTHON_LIB_PATH=$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])') \
  && export TF_PYTHON_VERSION=$($PYTHON_BIN_PATH -c 'import sys; print(sys.version[:4])') \
  && export BZL_CONFIGS="--config=release_cpu_linux" \
- && ( ! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
- && ( ! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
  && ( ! $WITH_CUDA || export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel" ) \
+ && ( ! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
+ && ( ! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
  && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS $BZL_CONFIGS" \
  && echo "Build env:" && env \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
@@ -107,7 +107,6 @@ RUN cd /src/otb/otb \
  && echo "" > Modules/Core/Edge/test/CMakeLists.txt \
  && echo "" > Modules/Core/ImageBase/test/CMakeLists.txt \
  && echo "" > Modules/Learning/DempsterShafer/test/CMakeLists.txt \
-
  && cd .. \
  && mkdir -p build \
  && cd build \
@@ -130,7 +129,7 @@ RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
 
 ARG KEEP_SRC_OTB=false
 RUN cd /src/otb/build/OTB/build \
- && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/otbtf/lib \
+ && export LD_LIBRARY_PATH=/opt/otbtf/lib \
  && export PATH=$PATH:/opt/otbtf/bin \
  && cmake /src/otb/otb \
       -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
@@ -163,7 +162,7 @@ COPY --from=build-stage --chown=otbuser:otbuser /src /src
 
 # System-wide ENV
 ENV PATH="/opt/otbtf/bin:$PATH"
-ENV LD_LIBRARY_PATH="/opt/otbtf/lib:$LD_LIBRARY_PATH"
+ENV LD_LIBRARY_PATH="/opt/otbtf/lib"
 ENV PYTHONPATH="/opt/otbtf/lib/python3/dist-packages:/opt/otbtf/lib/otb/python"
 ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 RUN pip install -e /src/otbtf
