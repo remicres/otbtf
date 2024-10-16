@@ -148,12 +148,12 @@ RUN for f in /src/otbtf/python/*.py; do if [ -x $f ]; then ln -s $f /opt/otbtf/b
 
 # ----------------------------------------------------------------------------
 # Final stage
-FROM build-stage as final-stage
+FROM build-stage AS final-stage
 LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
 # Copy files from intermediate stage
-COPY --from=builder /opt/otbtf /opt/otbtf
-COPY --from=builder /src /src
+COPY --from=build-stage /opt/otbtf /opt/otbtf
+COPY --from=build-stage /src /src
 
 # System-wide ENV
 ENV PATH="/opt/otbtf/bin:$PATH"
