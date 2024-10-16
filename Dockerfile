@@ -1,8 +1,11 @@
 ##### OTBTF configurable Dockerfile with multi-stage build
 
 # ----------------------------------------------------------------------------
-# Init base stage - will be cloned as intermediate build env
-FROM ubuntu:22.04 AS base-stage
+# Init base stage - used for intermediate build env and final image
+
+# Freeze ubuntu version to avoid suprise rebuild
+FROM ubuntu:jammy-20240911.1 AS base-stage
+
 WORKDIR /tmp
 
 ### System packages
@@ -37,7 +40,7 @@ RUN apt-get update -y && apt-get upgrade -y && apt-get install -y libomp-18-dev 
 RUN mkdir -p /src/tf /opt/otbtf/bin /opt/otbtf/include /opt/otbtf/lib/python3
 
 ### TF
-ARG TF=v2.18.0-rc1
+ARG TF=v2.18.0-rc2
 ARG WITH_CUDA=false
 ARG WITH_MKL=false
 ARG WITH_XLA=true
