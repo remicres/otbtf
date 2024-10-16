@@ -150,7 +150,7 @@ RUN for f in /src/otbtf/python/*.py; do if [ -x $f ]; then ln -s $f /opt/otbtf/b
 FROM build-stage AS final-stage
 LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
-# Default user, directory and command (bash will be the default entrypoint)
+# Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
 RUN useradd -s /bin/bash -m otbuser
 # Admin rights without password (potential security issue)
 ARG SUDO=true
@@ -168,7 +168,7 @@ ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
 RUN pip install -e /src/otbtf
 WORKDIR /home/otbuser
 
-# Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
+# Default user, directory and command (bash will be the default entrypoint)
 USER otbuser
 # User-only ENV
 ENV PATH="/home/otbuser/.local/bin:$PATH"
