@@ -40,6 +40,7 @@ stages:
   timeout: 10 hours
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker buildx create --name container --driver=docker-container
 
 docker_image:
   stage: Build
@@ -48,36 +49,25 @@ docker_image:
     - develop
   script:
     - >
-      docker build
+      docker buildx build --push -t $CACHE_IMAGE_BASE
       --target otbtf-base
       --cache-from $CACHE_IMAGE_BASE
-      --tag $CACHE_IMAGE_BASE
-      --build-arg BUILDKIT_INLINE_CACHE=1
+      --cache-to type=registry,ref=$CACHE_IMAGE_BASE --provenance=mode=max
       "."
-    - docker push $CACHE_IMAGE_BASE
     - >
-      docker build
+      docker buildx build --push -t $CACHE_IMAGE_BUILDER
       --target builder
-      --cache-from $CACHE_IMAGE_BASE
-      --cache-from $CACHE_IMAGE_BUILDER
-      --tag $CACHE_IMAGE_BUILDER
-      --build-arg BUILDKIT_INLINE_CACHE=1
-      --build-arg KEEP_SRC_OTB="true"
-      --build-arg OTBTESTS="true"
+      --cache-from $CACHE_IMAGE_BASE --cache-from $CACHE_IMAGE_BUILDER
+      --cache-to type=registry,ref=$CACHE_IMAGE_BUILDER --provenance=mode=max
+      --build-arg KEEP_SRC_OTB="true" --build-arg OTBTESTS="true"
       "."
-    - docker push $CACHE_IMAGE_BUILDER
     - >
-      docker build
-      --cache-from $CACHE_IMAGE_BASE
-      --cache-from $CACHE_IMAGE_BUILDER
-      --cache-from $BRANCH_IMAGE
-      --cache-from $DEV_IMAGE
-      --tag $BRANCH_IMAGE
-      --build-arg BUILDKIT_INLINE_CACHE=1
-      --build-arg KEEP_SRC_OTB="true"
-      --build-arg OTBTESTS="true"
+      docker buildx build --push -t $BRANCH_IMAGE
+      --cache-from $CACHE_IMAGE_BASE --cache-from $CACHE_IMAGE_BUILDER
+      --cache-from $BRANCH_IMAGE --cache-from $DEV_IMAGE
+      --cache-to type=registry,ref=$BRANCH_IMAGE --provenance=mode=max
+      --build-arg KEEP_SRC_OTB="true" --build-arg OTBTESTS="true"
       "."
-    - docker push $BRANCH_IMAGE
 
 .static_analysis_base:
   stage: Static Analysis
@@ -264,20 +254,22 @@ deploy_cpu:
     DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
   script:
     # cpu
-    - docker build --tag $IMAGE_CPU .
-    - docker push $IMAGE_CPU
+    - >
+      docker buildx build --push -t $IMAGE_CPU
+      --cache-from $BRANCH_IMAGE --cache-from $DEV_IMAGE
+      .
     # cpu-dev
-    - docker build --tag $IMAGE_CPUDEV --build-arg KEEP_SRC_OTB=true .
-    - docker push $IMAGE_CPUDEV
+    - >
+      docker buildx build --push -t $IMAGE_CPUDEV
+      --cache-from $BRANCH_IMAGE --cache-from $DEV_IMAGE
+      --build-arg KEEP_SRC_OTB=true
+      .
     # push images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
-    - docker tag $IMAGE_CPU $DOCKERHUB_CPU
-    - docker push $DOCKERHUB_CPU
-    - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV
-    - docker push $DOCKERHUB_CPUDEV
+    - docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
+    - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
     # latest = cpu image
-    - docker tag $IMAGE_CPU $DOCKERHUB_LATEST
-    - docker push $DOCKERHUB_LATEST
+    - docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
 
 deploy_gpu:
   extends: .ship_base
@@ -289,17 +281,20 @@ deploy_gpu:
     DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
   script:
     # gpu
-    - docker build --tag $IMAGE_GPU --build-arg WITH_CUDA=true .
-    - docker push $IMAGE_GPU
+    - >
+      docker buildx build --push -t $IMAGE_GPU
+      --cache-from $DEV_IMAGE 
+      --build-arg WITH_CUDA=true
+      .
     # gpu-dev
-    - docker build --tag $IMAGE_GPUDEV --build-arg WITH_CUDA=true --build-arg KEEP_SRC_OTB=true .
-    - docker push $IMAGE_GPUDEV
+    - >
+      docker buildx build --push -t $IMAGE_GPUDEV
+      --cache-from $DEV_IMAGE 
+      --build-arg WITH_CUDA=true --build-arg KEEP_SRC_OTB=true
+      .
     # push gpu-* images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
-    - docker tag $IMAGE_GPU $DOCKERHUB_GPU
-    - docker push $DOCKERHUB_GPU
-    - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV
-    - docker push $DOCKERHUB_GPUDEV
+    - docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
+    - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
     # latest-gpu = gpu image
-    - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST
-    - docker push $DOCKERHUB_GPULATEST
+    - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
