@@ -2,7 +2,7 @@
 
 # ----------------------------------------------------------------------------
 # Init base stage - will be cloned as intermediate build env
-FROM ubuntu:22.04 AS otbtf-base
+FROM ubuntu:22.04 AS base-stage
 WORKDIR /tmp
 
 ### System packages
@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir -U wheel mock six future tqdm deprecated "numpy$N
 
 # ----------------------------------------------------------------------------
 # Tmp builder stage - dangling cache should persist until "docker builder prune"
-FROM otbtf-base AS builder
+FROM base-stage AS build-stage
 # A smaller value may be used to limit bazel or to avoid OOM errors while building OTB
 ARG CPU_RATIO=1
 
@@ -148,7 +148,7 @@ RUN for f in /src/otbtf/python/*.py; do if [ -x $f ]; then ln -s $f /opt/otbtf/b
 
 # ----------------------------------------------------------------------------
 # Final stage
-FROM otbtf-base
+FROM build-stage as final-stage
 LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
 # Copy files from intermediate stage
