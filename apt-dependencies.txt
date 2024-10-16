@@ -2,10 +2,12 @@ apt-transport-https
 ca-certificates
 curl
 cmake
+cppcheck
 file
 g++
 gcc
 git
+git-lfs
 gpg
 libc6-dev
 libtool
@@ -23,6 +25,7 @@ software-properties-common
 swig
 unzip
 vim
+virtualenv
 wget
 sudo
 zip

@@ -83,7 +83,6 @@ codespell:
 cppcheck:
   extends: .static_analysis_base
   script:
-    - sudo apt update && sudo apt install cppcheck -y
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
 .doc_base:
@@ -126,7 +125,6 @@ ctest:
   extends: .tests_base
   stage: Test
   script:
-    - sudo apt update && sudo apt install -y git-lfs 
     - cd /src/otb/otb && git lfs fetch --all && git lfs pull
     - cd $OTB_BUILD/
     - ctest -L OTBTensorflow
