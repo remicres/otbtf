@@ -3,3 +3,6 @@ python/__pycache__
 .gitlab-ci.yml
 .readthedocs.yaml
 mkdocs.yml
+doc/*
+README.md
+RELEASE_NOTES.txt
