@@ -152,7 +152,7 @@ RUN for f in /src/otbtf/python/*.py; do if [ -x $f ]; then ln -s $f /opt/otbtf/b
 
 # ----------------------------------------------------------------------------
 # Final stage
-FROM build-stage AS final-stage
+FROM base-stage AS final-stage
 LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
