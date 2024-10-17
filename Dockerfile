@@ -9,8 +9,8 @@ FROM ubuntu:jammy-20240911.1 AS base-stage
 WORKDIR /tmp
 
 ### System packages
-COPY apt-dependencies.txt ./
 ARG DEBIAN_FRONTEND=noninteractive
+COPY apt-dependencies.txt ./
 RUN apt-get update -y && apt-get upgrade -y \
  && cat apt-dependencies.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
