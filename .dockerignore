@@ -4,5 +4,3 @@ python/__pycache__
 .readthedocs.yaml
 mkdocs.yml
 doc/*
-README.md
-RELEASE_NOTES.txt
