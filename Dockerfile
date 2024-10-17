@@ -39,7 +39,7 @@ WORKDIR /src/tf
 
 # Clang + LLVM
 RUN apt-get update \
- && apt-get install clang-18 llvm-18 libomp-18-dev \
+ && apt-get install --no-install-recommends -y clang-18 llvm-18 libomp-18-dev \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ARG TF=v2.18.0-rc2
