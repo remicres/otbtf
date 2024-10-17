@@ -34,7 +34,14 @@ ARG NUMPY="1.26.4"
 RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
 
-### TF
+### TensorFlow
+WORKDIR /src/tf
+
+# Clang + LLVM
+RUN apt-get update \
+ && apt-get install clang-18 llvm-18 libomp-18-dev \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 ARG TF=v2.18.0-rc2
 ARG WITH_CUDA=false
 ARG WITH_MKL=false
@@ -52,7 +59,6 @@ ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package
 ARG BZL_OPTIONS
 
 # Build and install TF wheels
-WORKDIR /src/tf
 ARG ZIP_COMP_FILES=false
 RUN git config --global advice.detachedHead false
 RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git \

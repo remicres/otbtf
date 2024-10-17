@@ -1,7 +1,6 @@
 apt-transport-https
 ca-certificates
 lsb-release
-software-properties-common
 gpg
 file
 sudo
@@ -11,12 +10,6 @@ curl
 wget
 vim
 nano
-
-python3-dev
-python3-pip
-python3-setuptools
-python3-venv
-virtualenv
 
 pkg-config
 git
@@ -32,6 +25,8 @@ patchelf
 g++
 gcc
 
-clang-18
-llvm-18
-libomp-18-dev
+python3-dev
+python3-pip
+python3-setuptools
+python3-venv
+virtualenv
