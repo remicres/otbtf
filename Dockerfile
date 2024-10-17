@@ -40,7 +40,7 @@ ARG WITH_CUDA=false
 ARG WITH_MKL=false
 ARG WITH_XLA=true
 
-RUN mkdir -p /opt/otbtf/{bin,lib,include}
+RUN mkdir -p /opt/otbtf/bin /opt/otbtf/lib /opt/otbtf/include
 
 # Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
