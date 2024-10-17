@@ -126,6 +126,7 @@ ctest:
   extends: .tests_base
   stage: Test
   script:
+    - git lfs install
     - cd /src/otb/otb && git lfs fetch --all && git lfs pull
     - cd $OTB_BUILD/
     - ctest -L OTBTensorflow
