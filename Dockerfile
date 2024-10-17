@@ -74,7 +74,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
  && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
  && pip install --no-cache-dir ./bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl \
- && ln -s $(find /opt/otbtf/venv -type d -wholename "*/tensorflow/include") /opt/otbtf/include/tf \
+ && ln -s $PYTHON_SITE_PACKAGES/tensorflow/include /opt/otbtf/include/tf \
  && cp tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
  && ( ! $ZIP_COMP_FILES || zip -9 -j --symlinks /opt/otbtf/tf-$TF.zip tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h bazel-bin/tensorflow/libtensorflow_cc.so* bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl ) \
