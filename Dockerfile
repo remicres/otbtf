@@ -9,16 +9,16 @@ WORKDIR /tmp
 
 ### System packages
 ARG DEBIAN_FRONTEND=noninteractive
-COPY apt-dependencies.txt ./
+COPY system-dependencies.txt ./
 RUN apt-get update -y && apt-get upgrade -y \
- && cat apt-dependencies.txt | xargs apt-get install --no-install-recommends -y \
+ && cat system-dependencies.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV PYTHON_VERSION=3.12
 ENV VIRTUAL_ENV=/opt/otbtf/venv
 ENV PATH="$VIRTUAL_ENV/bin:/opt/otbtf/bin:$PATH"
 ENV PYTHON_SITE_PACKAGES="$VIRTUAL_ENV/lib/python$PYTHON_VERSION/site-packages"
-ENV LD_LIBRARY_PATH="/opt/otbtf/lib"
+ENV LD_LIBRARY_PATH=/opt/otbtf/lib
 
 # ----------------------------------------------------------------------------
 # Tmp builder stage - dangling cache should persist until "docker builder prune"
@@ -65,12 +65,13 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
  && cd tensorflow \
  && export TMP=/tmp/bazel \
  && export PYTHON_BIN_PATH=$(which python) \
+ && export PYTHON_LIB_PATH=$PYTHON_SITE_PACKAGES \
  && export TF_PYTHON_VERSION=$PYTHON_VERSION \
  && export BZL_CONFIGS="--config=release_cpu_linux" \
  && ( ! $WITH_CUDA || export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel" ) \
  && ( ! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
  && ( ! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
- && BZL_CMD="build $BZL_TARGETS $BZL_OPTIONS $BZL_CONFIGS --verbose_failures" \
+ && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS --verbose_failures $BZL_OPTIONS" \
  && echo "Build env:" && env \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
  && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
@@ -142,31 +143,34 @@ RUN cd /src/otb/build/OTB/build \
  && ( $KEEP_SRC_OTB || rm -rf /src/otb ) \
  && rm -rf /root/.cache /tmp/*
 
+# Install OTBTF python lib
+RUN pip install -e /src/otbtf
+
 # Symlink executable python files in PATH
 RUN for f in /src/otbtf/python/*.py; do if [ -x $f ]; then ln -s $f /opt/otbtf/bin/; fi; done
 
 # ----------------------------------------------------------------------------
-# Final stage
+# Final stage from a clean base
 FROM base-stage AS final-stage
 LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
+# System-wide ENV
+ENV PYTHONPATH="/opt/otbtf/lib/otb/python"
+ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
+
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
 RUN useradd -s /bin/bash -m otbuser
-# Admin rights without password (potential security issue)
-ARG SUDO=false
-RUN if $SUDO; then usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
 
 # Copy built files from intermediate stage
 COPY --from=build-stage --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
 COPY --from=build-stage --chown=otbuser:otbuser /src /src
 
-# System-wide ENV
-ENV PYTHONPATH="/opt/otbtf/lib/otb/python:$PYTHONPATH"
-ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
-RUN pip install -e /src/otbtf
-WORKDIR /home/otbuser
+# Admin rights without password (not recommended, use `docker run -u root` instead)
+ARG SUDO=false
+RUN if $SUDO; then usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
 
 # Default user, directory and command (bash will be the default entrypoint)
+WORKDIR /home/otbuser
 USER otbuser
 
 # Test python imports
