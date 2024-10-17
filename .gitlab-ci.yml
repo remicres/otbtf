@@ -25,8 +25,14 @@ services:
   - name: docker:dind
 
 workflow:
+  auto_cancel:
+    on_new_commit: interruptible
   rules:
-    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/ # Execute jobs in merge request context, or commit in master branch
+    # Execute jobs in merge request context, or commit in master branch
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/
+    # Ignore pipeline for filthy commits
+    - if: $CI_COMMIT_MESSAGE =~ /^(Draft|WIP|wip)/
+      when: never
 
 stages:
   - Build
@@ -99,6 +105,11 @@ cppcheck:
 
 pages_test:
   extends: .doc_base
+  only:
+    changes:
+      - doc/*
+      - mkdocs.yml
+      - .readthedocs.yaml
   except:
     - master
   script:
@@ -139,6 +150,9 @@ ctest:
 
 .applications_test_base:
   extends: .tests_base
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual
   stage: Applications Test
   before_script:
     - pip install pytest pytest-cov pytest-order
