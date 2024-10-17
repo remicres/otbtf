@@ -11,7 +11,8 @@ variables:
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   BUILDX_BUILDER: container
   DOCKER_DRIVER: overlay2
-  CACHE_IMAGE: $CI_REGISTRY_IMAGE:cache
+  CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
+  CACHE_IMAGE_GPU: $CI_REGISTRY_IMAGE:build-cache-gpu
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   DEV_IMAGE: $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
   CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
@@ -51,8 +52,8 @@ docker_image:
   script:
     - >
       docker buildx build --push -t $BRANCH_IMAGE
-      --cache-from type=registry,ref=$CACHE_IMAGE
-      --cache-to type=registry,ref=$CACHE_IMAGE,mode=max,oci-mediatypes=true,image-manifest=true
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
+      --cache-to type=registry,ref=$CACHE_IMAGE_CPU,mode=max,oci-mediatypes=true,image-manifest=true
       --build-arg KEEP_SRC_OTB="true" --build-arg OTBTESTS="true"
       "."
 
@@ -241,12 +242,12 @@ deploy_cpu:
     # cpu
     - >
       docker buildx build --push -t $IMAGE_CPU
-      --cache-from type=registry,ref=$CACHE_IMAGE
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       .
     # cpu-dev
     - >
       docker buildx build --push -t $IMAGE_CPUDEV
-      --cache-from type=registry,ref=$CACHE_IMAGE
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --build-arg KEEP_SRC_OTB=true
       .
     # push images on dockerhub
@@ -268,13 +269,16 @@ deploy_gpu:
     # gpu
     - >
       docker buildx build --push -t $IMAGE_GPU
-      --cache-from type=registry,ref=$CACHE_IMAGE
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
+      --cache-from type=registry,ref=$CACHE_IMAGE_GPU
+      --cache-to type=registry,ref=$CACHE_IMAGE_GPU,mode=max,oci-mediatypes=true,image-manifest=true
       --build-arg WITH_CUDA=true
       .
     # gpu-dev
     - >
       docker buildx build --push -t $IMAGE_GPUDEV
-      --cache-from type=registry,ref=$CACHE_IMAGE
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
+      --cache-from type=registry,ref=$CACHE_IMAGE_GPU
       --build-arg WITH_CUDA=true --build-arg KEEP_SRC_OTB=true
       .
     # push gpu-* images on dockerhub
