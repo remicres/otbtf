@@ -155,8 +155,9 @@ FROM base-stage AS final-stage
 LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
 # System-wide ENV
-ENV PYTHONPATH="/opt/otbtf/lib/otb/python"
-ENV OTB_APPLICATION_PATH="/opt/otbtf/lib/otb/applications"
+ENV OTB_INSTALL_DIR=/opt/otbtf
+ENV PYTHONPATH=/opt/otbtf/lib/otb/python
+ENV OTB_APPLICATION_PATH=/opt/otbtf/lib/otb/applications
 
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
 RUN useradd -s /bin/bash -m otbuser
