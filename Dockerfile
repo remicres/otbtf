@@ -14,10 +14,10 @@ RUN apt-get update -y && apt-get upgrade -y \
  && cat system-dependencies.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ENV PYTHON_VERSION=3.12
+ENV PY=3.12
 ENV VIRTUAL_ENV=/opt/otbtf/venv
 ENV PATH="$VIRTUAL_ENV/bin:/opt/otbtf/bin:$PATH"
-ENV PYTHON_SITE_PACKAGES="$VIRTUAL_ENV/lib/python$PYTHON_VERSION/site-packages"
+ENV PYTHON_SITE_PACKAGES="$VIRTUAL_ENV/lib/python$PY/site-packages"
 ENV LD_LIBRARY_PATH=/opt/otbtf/lib
 
 # ----------------------------------------------------------------------------
@@ -64,14 +64,12 @@ RUN git config --global advice.detachedHead false
 RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git \
  && cd tensorflow \
  && export TMP=/tmp/bazel \
- && export PYTHON_BIN_PATH=$(which python) \
- && export PYTHON_LIB_PATH=$PYTHON_SITE_PACKAGES \
- && export TF_PYTHON_VERSION=$PYTHON_VERSION \
- && export BZL_CONFIGS="--config=release_cpu_linux" \
- && ( ! $WITH_CUDA || export BZL_CONFIGS="--config=release_gpu_linux --config=cuda_clang --config=cuda_wheel" ) \
+ && export TF_PYTHON_VERSION=$PY \
+ && export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
+ && ( ! $WITH_CUDA || export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ) \
  && ( ! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
  && ( ! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
- && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS --verbose_failures $BZL_OPTIONS" \
+ && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS --verbose_failures" \
  && echo "Build env:" && env \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
  && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
@@ -87,6 +85,7 @@ WORKDIR /src/otb
 
 ARG OTB=release-9.1
 ARG OTBTESTS=false
+
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
 
