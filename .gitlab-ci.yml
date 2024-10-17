@@ -8,6 +8,7 @@ variables:
   API_TEST_TMP: /tmp/api_tests_tmp
   DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
+  BUILDKIT_PROGRESS: plain
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   BUILDX_BUILDER: container
   DOCKER_DRIVER: overlay2
