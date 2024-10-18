@@ -62,7 +62,8 @@ ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package
 ARG BZL_OPTIONS
 
 # Build and install TF wheel
-ARG TF_BUILD_ARTIFACTS=false
+ARG TF_BUILD_ARTIFACTS
+
 ADD https://github.com/tensorflow/tensorflow.git#$TF tensorflow
 # Save local bazel cache with docker mount
 RUN --mount=type=cache,target=/root/.cache/bazel \
@@ -83,7 +84,8 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
  && export TF_MISSING_HEADERS="tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h" \
  && cp $TF_MISSING_HEADERS /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
- && ( ! $TF_BUILD_ARTIFACTS || mkdir -p /tmp/artifacts && mv $TF_WHEEL $TF_MISSING_HEADERS bazel-bin/tensorflow/libtensorflow_cc.so* /tmp/artifacts ) \
+ && export ARTIFACTS="$TF_WHEEL $TF_MISSING_HEADERS bazel-bin/tensorflow/libtensorflow_cc.so*" \
+ && ( [ -z "$TF_BUILD_ARTIFACTS" ] || mkdir -p $TF_BUILD_ARTIFACTS && mv $ARTIFACTS $TF_BUILD_ARTIFACTS ) \
  && rm -rf bazel-* /src/tf
 
 # ----------------------------------------------------------------------------
