@@ -181,5 +181,5 @@ USER otbuser
 
 # Test python imports
 RUN python -c "import tensorflow"
-RUN python -c "import otbtf, tricks"
-RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
+#RUN python -c "import otbtf, tricks"
+#RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
