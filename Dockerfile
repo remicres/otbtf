@@ -96,6 +96,7 @@ WORKDIR /src/otb
 COPY --from=tf-build /opt/otbtf /opt/otbtf
 
 ARG OTB=release-9.1
+ARG OTBTESTS=false
 
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
@@ -127,7 +128,7 @@ RUN cd otb \
      -DOTB_BUILD_SAR=ON \
      -DOTB_BUILD_Segmentation=ON \
      -DOTB_BUILD_StereoProcessing=ON \
-     $( ! $DEV_IMAGE || echo "-DBUILD_TESTING=ON" ) \
+     $( ! $OTBTESTS || echo "-DBUILD_TESTING=ON" ) \
      -DDOWNLOAD_LOCATION=/tmp/SuperBuild-downloads \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  && rm -rf /tmp/SuperBuild-downloads
