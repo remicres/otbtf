@@ -1,6 +1,7 @@
-.git
-python/__pycache__
-.gitlab-ci.yml
-.readthedocs.yaml
-mkdocs.yml
+.*
+.git*
+Dockerfile
+**/__pycache__
 doc/*
+mkdocs.yml
+RELEASE_NOTES.txt
