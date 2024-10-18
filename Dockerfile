@@ -99,8 +99,7 @@ RUN apt-get update -y \
  && update-ca-certificates \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
  && cd otb \
- && git checkout $OTB \
- && rm -rf .git
+ && git checkout $OTB
 
 # This is a dirty hack for release 4.0.0alpha
 # We have to wait that OTB moves from C++14 to C++17
