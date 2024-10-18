@@ -48,8 +48,9 @@ RUN apt-get update -y && apt-get upgrade -y \
 
 ARG TF=v2.18.0-rc2
 ARG WITH_CUDA=false
-ARG WITH_MKL=false
+ARG CUDA_COMPUTE_CAPABILITIES
 ARG WITH_XLA=true
+ARG WITH_MKL=false
 
 RUN mkdir -p /opt/otbtf/bin /opt/otbtf/lib /opt/otbtf/include
 
@@ -71,6 +72,7 @@ RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.gi
  && export TF_PYTHON_VERSION=$PY \
  && export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
  && ( ! $WITH_CUDA || export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ) \
+ && ([ -z "$CUDA_COMPUTE_CAPABILITIES" ] || export BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_COMPUTE_CAPABILITIES") \
  && ( ! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
  && ( ! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
  && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS --verbose_failures" \
@@ -164,8 +166,9 @@ LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
 # System-wide ENV
 ENV OTB_INSTALL_DIR=/opt/otbtf
-ENV PYTHONPATH="/opt/otbtf/lib/otb/python:/opt/otbtf/lib/python$PY/site-packages"
 ENV OTB_APPLICATION_PATH=/opt/otbtf/lib/otb/applications
+# For otbApplication and osgeo modules
+ENV PYTHONPATH="/opt/otbtf/lib/otb/python:/opt/otbtf/lib/python$PY/site-packages"
 
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
 RUN useradd -s /bin/bash -m otbuser
