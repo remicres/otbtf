@@ -8,7 +8,7 @@ variables:
   API_TEST_TMP: /tmp/api_tests_tmp
   DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
-  BUILDKIT_PROGRESS: plain
+  # BUILDKIT_PROGRESS: plain
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   BUILDX_BUILDER: container
   DOCKER_DRIVER: overlay2
@@ -27,7 +27,7 @@ workflow:
     # Execute jobs in merge request context, or commit in master branch
     - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/
     # Ignore pipeline for filthy commits
-    - if: $CI_COMMIT_MESSAGE =~ /^(Draft|WIP|wip)/
+    - if: $CI_COMMIT_MESSAGE =~ /^wip.*/i
       when: never
 
 default:
