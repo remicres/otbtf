@@ -31,12 +31,12 @@ CUDA_COMPUTE_CAPABILITIES=
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
 # Available for additional bazel options, e.g. --remote_cache
 BZL_OPTIONS=
-# Zip and save tf compiled files in /opt/otbtf, to install elsewhere
-ZIP_COMP_FILES=false
+# Path to save tf compiled wheel and libtensorflow_cc
+TF_BUILD_ARTIFACTS=
 # Git branch or tag to checkout
 OTB=release-9.1
-# Keep OTB sources
-KEEP_SRC_OTB=false
+# Keep OTB sources and build test
+DEV_IMAGE=false
 # Enable sudo without password for "otbuser"
 SUDO=false
 ```
@@ -80,7 +80,7 @@ docker build --network='host' -t otbtf:gpu \
 docker build --network='host' -t otbtf:gpu \
    --build-arg BZL_OPTIONS="--remote_cache=http://localhost:9090" \
   --build-arg WITH_CUDA=true \
-  --build-arg KEEP_SRC_OTB=true \
+  --build-arg DEV_IMAGE=true \
   --build-arg TF=nightly \
   --build-arg OTB=develop \
   .
@@ -90,30 +90,27 @@ docker build --network='host' -t otbtf:gpu \
 
 ```bash
 docker build --network='host' -t otbtf:gpu \
+  --mount=type=bind,source=$(pwd)/gpu-build-artifacts,target=/tmp/artifacts \
   --build-arg BZL_OPTIONS="--remote_cache=http://localhost:9090" \
   --build-arg WITH_CUDA=true \
-  --build-arg ZIP_COMP_FILES=true \
+  --build-arg TF_BUILD_ARTIFACTS=/tmp/artifacts \
   .
 
-docker run -v $HOME:/home/otbuser/volume otbtf:custom \
-  cp /opt/otbtf/tf-v2.18.0.zip /home/otbuser/volume
-
 # Target machine shell
-cd $HOME
-unzip tf-v2.18.0.zip
-sudo mkdir -p /opt/tensorflow/lib
-sudo mv tf-v2.18.0/libtensorflow_cc* /opt/tensorflow/lib
+cd gpu-build-artifacts/
+sudo mv libtensorflow_cc* /usr/local/lib
 # You may need to create a virtualenv, here TF and dependencies are installed 
 # next to user's pip packages
 pip3 install -U pip wheel mock six future deprecated "numpy<2"
 pip3 install --no-deps keras_applications keras_preprocessing
-pip3 install tf-v2.18.0/tensorflow-v2.18.0-cp310-cp310-linux_x86_64.whl
+pip3 install tensorflow-v2.18.0-cp310-cp310-linux_x86_64.whl
 
 TF_WHEEL_DIR="$HOME/.local/lib/python3.10/site-packages/tensorflow"
 # If you installed the wheel as regular user, with root pip it should be in 
 # /usr/local/lib/python3.*, or in your virtualenv lib/ directory
-mv tf-v2.18.0/tag_constants.h $TF_WHEEL_DIR/include/tensorflow/cc/saved_model/
-# Then recompile OTB with OTBTF using libraries in /opt/tensorflow/lib and 
+mv tag_constants.h signature_constants.h $TF_WHEEL_DIR/include/tensorflow/cc/saved_model/
+# From a OTB git source tree
+# Recompile OTB with OTBTF using libraries in /opt/tensorflow/lib and 
 # instructions in build_from_sources.md.
 cmake $OTB_GIT \
   -DOTB_USE_TENSORFLOW=ON \

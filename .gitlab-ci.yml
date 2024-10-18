@@ -44,6 +44,7 @@ stages:
   - Applications Test
   - Update dev image
   - Ship
+  - Export TF wheels
 
 .docker_build_base:
   tags: [ godzilla ]
@@ -238,12 +239,6 @@ deploy_cpu-dev-testing:
     - docker tag $BRANCH_IMAGE $DEV_IMAGE
     - docker push $DEV_IMAGE
 
-.ship_base:
-  extends: .docker_build_base
-  stage: Ship
-  only:
-    - master
-
 deploy_cpu:
   extends: .ship_base
   variables:
@@ -301,3 +296,29 @@ deploy_gpu:
     - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
     # latest-gpu = gpu image
     - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
+
+export_tf_wheels:
+  extends: .docker_build_base
+  stage: Export TF wheels
+  rules:
+    - when: manual
+  artifacts:
+    paths:
+      - cpu-build-artifacts
+      - gpu-build-artifacts
+  script:
+    # cpu
+    - >
+      docker buildx build --target=tf-build
+      --mount=type=bind,source=$(pwd)/cpu-build-artifacts,target=/tmp/artifacts
+      --build-arg TF_BUILD_ARTIFACTS=/tmp/artifacts
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
+      .
+    # gpu
+    - >
+      docker buildx build --target=tf-build
+      --mount=type=bind,source=$(pwd)/gpu-build-artifacts,target=/tmp/artifacts
+      --build-arg WITH_CUDA=true
+      --build-arg TF_BUILD_ARTIFACTS=/tmp/artifacts
+      --cache-from type=registry,ref=$CACHE_IMAGE_GPU
+      .

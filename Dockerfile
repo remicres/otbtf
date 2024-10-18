@@ -71,7 +71,7 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && export TF_PYTHON_VERSION=$PY \
  && export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
  && ( ! $WITH_CUDA || export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ) \
- && ( [ -z "$CUDA_COMPUTE_CAPABILITIES" ] || export BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_COMPUTE_CAPABILITIES" ) \
+ && ( [[ -z "$CUDA_COMPUTE_CAPABILITIES" ]] || export BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_COMPUTE_CAPABILITIES" ) \
  && ( ! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
  && ( ! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
  && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS --verbose_failures" \
@@ -85,7 +85,7 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && export TF_MISSING_HEADERS="tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h" \
  && cp $TF_MISSING_HEADERS /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
  && export ARTIFACTS="$TF_WHEEL $TF_MISSING_HEADERS bazel-bin/tensorflow/libtensorflow_cc.so*" \
- && ( [ -z "$TF_BUILD_ARTIFACTS" ] || mkdir -p $TF_BUILD_ARTIFACTS && mv $ARTIFACTS $TF_BUILD_ARTIFACTS ) \
+ && ( [[ -z "$TF_BUILD_ARTIFACTS" ]] || mkdir -p $TF_BUILD_ARTIFACTS && mv $ARTIFACTS $TF_BUILD_ARTIFACTS ) \
  && rm -rf bazel-* /src/tf
 
 # ----------------------------------------------------------------------------
