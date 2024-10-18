@@ -38,7 +38,8 @@ RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY 
 WORKDIR /src/tf
 
 # Clang + LLVM
-RUN wget -q https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 18
+ADD https://apt.llvm.org/llvm.sh llvm.sh
+RUN bash ./llvm.sh 18
 ENV CC=/usr/bin/clang-18
 ENV CXX=/usr/bin/clang++-18
 ENV BAZEL_COMPILER=/usr/bin/clang-18
@@ -55,9 +56,8 @@ ARG WITH_MKL=false
 RUN mkdir -p /opt/otbtf/bin /opt/otbtf/lib /opt/otbtf/include
 
 # Install bazelisk: will read .bazelversion and download the right bazel binary
-RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
- && chmod +x /opt/otbtf/bin/bazelisk \
- && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
+ADD https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64  /opt/otbtf/bin/bazelisk
+RUN chmod +x /opt/otbtf/bin/bazelisk && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
 # You can use --build-arg BZL_OPTIONS="--remote_cache=http://..." at build time
