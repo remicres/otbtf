@@ -62,7 +62,7 @@ ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package
 ARG BZL_OPTIONS
 
 # Build and install TF wheel
-ARG ZIP_COMP_FILES=false
+ARG TF_BUILD_ARTIFACTS=false
 ADD https://github.com/tensorflow/tensorflow.git#$TF tensorflow
 RUN --mount=type=cache,target=/root/.cache/bazel \
  cd tensorflow \
@@ -82,7 +82,7 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
  && export TF_MISSING_HEADERS="tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h" \
  && cp $TF_MISSING_HEADERS /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
- && ( ! $ZIP_COMP_FILES || zip -9 -j --symlinks /opt/otbtf/tf-$TF.zip $TF_WHEEL $TF_MISSING_HEADERS bazel-bin/tensorflow/libtensorflow_cc.so* ) \
+ && ( ! $TF_BUILD_ARTIFACTS || mkdir -p /tmp/artifacts && mv $TF_WHEEL $TF_MISSING_HEADERS bazel-bin/tensorflow/libtensorflow_cc.so* /tmp/artifacts ) \
  && rm -rf bazel-* /src/tf
 
 # ----------------------------------------------------------------------------
@@ -134,7 +134,7 @@ RUN cd otb \
 COPY . /src/otbtf
 RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
 
-ARG KEEP_SRC_OTB=false
+ARG DEV_IMAGE=false
 RUN cd /src/otb/build/OTB/build \
  && cmake /src/otb/otb \
       -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
@@ -146,7 +146,7 @@ RUN cd /src/otb/build/OTB/build \
       -DTENSORFLOW_CC_LIB=$PYTHON_SITE_PACKAGES/tensorflow/libtensorflow_cc.so.2 \
       -DTENSORFLOW_FRAMEWORK_LIB=$PYTHON_SITE_PACKAGES/tensorflow/libtensorflow_framework.so.2 \
  && make install -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
- && ( $KEEP_SRC_OTB || rm -rf /src/otb ) \
+ && ( $DEV_IMAGE || rm -rf /src/otb ) \
  && rm -rf /root/.cache /tmp/*
 
 # Install OTBTF python module
