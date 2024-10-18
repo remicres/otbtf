@@ -3,7 +3,7 @@
 # Init base stage - used for intermediate build env and final image
 
 # Freeze ubuntu version to avoid suprise rebuild
-FROM ubuntu:noble-20241011 AS base-stage
+FROM ubuntu:jammy-20240911.1 AS base-stage
 
 WORKDIR /tmp
 
@@ -14,7 +14,7 @@ RUN apt-get update -y && apt-get upgrade -y \
  && cat system-dependencies.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ENV PY=3.12
+ENV PY=3.10
 ENV VIRTUAL_ENV=/opt/otbtf/venv
 ENV PATH="$VIRTUAL_ENV/bin:/opt/otbtf/bin:$PATH"
 ENV PYTHON_SITE_PACKAGES="$VIRTUAL_ENV/lib/python$PY/site-packages"
@@ -38,8 +38,12 @@ RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY 
 WORKDIR /src/tf
 
 # Clang + LLVM
-RUN apt-get update \
- && apt-get install --no-install-recommends -y clang-18 llvm-18 libomp-18-dev lld-18 \
+RUN wget -q https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 18
+ENV CC=/usr/bin/clang-18
+ENV CXX=/usr/bin/clang++-18
+ENV BAZEL_COMPILER=/usr/bin/clang-18
+RUN apt-get update -y && apt-get upgrade -y \
+ && apt-get install -y lld-18 libomp-18-dev \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ARG TF=v2.18.0-rc2
@@ -49,7 +53,7 @@ ARG WITH_XLA=true
 
 RUN mkdir -p /opt/otbtf/bin /opt/otbtf/lib /opt/otbtf/include
 
-# Install bazelisk (will read .bazelversion and download the right bazel binary - latest by default)
+# Install bazelisk: will read .bazelversion and download the right bazel binary
 RUN wget -qO /opt/otbtf/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
  && chmod +x /opt/otbtf/bin/bazelisk \
  && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
@@ -58,7 +62,7 @@ ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package
 # You can use --build-arg BZL_OPTIONS="--remote_cache=http://..." at build time
 ARG BZL_OPTIONS
 
-# Build and install TF wheels
+# Build and install TF wheel
 ARG ZIP_COMP_FILES=false
 RUN git config --global advice.detachedHead false
 RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git \
@@ -108,7 +112,7 @@ RUN cd /src/otb/otb \
  && echo "" > Modules/Core/ImageBase/test/CMakeLists.txt \
  && echo "" > Modules/Learning/DempsterShafer/test/CMakeLists.txt \
  && cd .. \
- && mkdir -p build \
+ && mkdir -p build /tmp/SuperBuild-downloads \
  && cd build \
  && cmake ../otb/SuperBuild \
      -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
@@ -121,7 +125,9 @@ RUN cd /src/otb/otb \
      -DOTB_BUILD_Segmentation=ON \
      -DOTB_BUILD_StereoProcessing=ON \
      $($OTBTESTS && echo "-DBUILD_TESTING=ON") \
- && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))")
+     -DDOWNLOAD_LOCATION=/tmp/SuperBuild-downloads \
+ && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
+ && rm -rf /tmp/SuperBuild-downloads
 
 # Rebuild OTB with OTBTF module
 COPY . /src/otbtf
@@ -142,7 +148,7 @@ RUN cd /src/otb/build/OTB/build \
  && ( $KEEP_SRC_OTB || rm -rf /src/otb ) \
  && rm -rf /root/.cache /tmp/*
 
-# Install OTBTF python lib
+# Install OTBTF python module
 RUN pip install -e /src/otbtf
 
 # Symlink executable python files in PATH
