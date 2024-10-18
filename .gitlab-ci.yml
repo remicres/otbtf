@@ -40,12 +40,12 @@ stages:
   - Ship
 
 default:
-  tags: [ godzilla ]
   image:
     name: $BRANCH_IMAGE
     pull_policy: always
 
 .docker_build_base:
+  tags: [ godzilla ]
   image: docker:latest
   services:
     - name: docker:dind
@@ -67,6 +67,7 @@ docker_image:
       "."
 
 .static_analysis_base:
+  tags: [ stable ]
   stage: Static Analysis
   allow_failure: true
 
@@ -95,6 +96,7 @@ cppcheck:
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
 .doc_base:
+  tags: [ stable ]
   stage: Documentation
   before_script:
     - pip install -r doc/doc_requirements.txt
@@ -126,6 +128,7 @@ pages:
       - public
 
 .tests_base:
+  tags: [ goldenrunner ]
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
@@ -148,9 +151,9 @@ ctest:
 
 .applications_test_base:
   extends: .tests_base
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: manual
+  #rules:
+  #  - if: $CI_MERGE_REQUEST_ID
+  #    when: manual
   stage: Applications Test
   before_script:
     - pip install pytest pytest-cov pytest-order
