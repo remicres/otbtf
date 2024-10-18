@@ -26,10 +26,10 @@ versions <= 4.3.0 and [forgemia.inra.fr](https://forgemia.inra.fr/orfeo-toolbox/
 
 | Name                                                                               | Os            | TF    | OTB   | Description            | Dev files | Compute capability |
 |------------------------------------------------------------------------------------| ------------- |-------|-------| ---------------------- | --------- | ------------------ |
-| **mdl4eo/otbtf:4.3.2-cpu**                                                         | Ubuntu Jammy  | r2.17 | 9.1.0 | CPU | no        | |
-| **mdl4eo/otbtf:4.3.2-cpu-dev**                                                     | Ubuntu Jammy  | r2.17 | 9.1.0 | CPU (dev) |  yes  | |
-| **mdl4eo/otbtf:4.3.2-gpu**                                                         | Ubuntu Jammy  | r2.17 | 9.1.0 | GPU | no        | 5.2,6.1,7.0,7.5,8.0,8.6,8.9,9.0|
-| **mdl4eo/otbtf:4.3.2-gpu-dev**                                                     | Ubuntu Jammy  | r2.17 | 9.1.0 | GPU (dev) | yes   | 5.2,6.1,7.0,7.5,8.0,8.6,8.9,9.0|
+| **mdl4eo/otbtf:4.4.0-cpu**                                                         | Ubuntu Jammy  | r2.18 | 9.1.0 | CPU | no        | |
+| **mdl4eo/otbtf:4.4.0-cpu-dev**                                                     | Ubuntu Jammy  | r2.18 | 9.1.0 | CPU (dev) |  yes  | |
+| **mdl4eo/otbtf:4.4.0-gpu**                                                         | Ubuntu Jammy  | r2.18 | 9.1.0 | GPU | no        | sm_60,sm_70,sm_80,sm_89,compute_90 |
+| **mdl4eo/otbtf:4.4.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.18 | 9.1.0 | GPU (dev) | yes   |  sm_60,sm_70,sm_80,sm_89,compute_90|
 
 The list of older releases is available [here](#older-images).
 
