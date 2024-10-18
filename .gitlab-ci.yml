@@ -8,7 +8,6 @@ variables:
   API_TEST_TMP: /tmp/api_tests_tmp
   DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
-  # BUILDKIT_PROGRESS: plain
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   BUILDX_BUILDER: container
   DOCKER_DRIVER: overlay2
@@ -58,8 +57,6 @@ stages:
 docker_image:
   stage: Build
   extends: .docker_build_base
-  except:
-    - develop
   script:
     - >
       docker buildx build --push -t $BRANCH_IMAGE
@@ -229,16 +226,6 @@ nodata:
   script:
     - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_nodata.xml $OTBTF_SRC/test/nodata_test.py
 
-deploy_cpu-dev-testing:
-  stage: Update dev image
-  extends: .docker_build_base
-  except:
-    - master
-  script:
-    - docker pull $BRANCH_IMAGE
-    - docker tag $BRANCH_IMAGE $DEV_IMAGE
-    - docker push $DEV_IMAGE
-
 .ship_base:
   extends: .docker_build_base
   stage: Ship
@@ -310,8 +297,8 @@ export_tf_wheels:
     - when: manual
   artifacts:
     paths:
-      - cpu-build-artifacts
-      - gpu-build-artifacts
+      - cpu-build-artifacts/
+      - gpu-build-artifacts/
   script:
     # cpu
     - >
