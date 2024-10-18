@@ -98,7 +98,9 @@ RUN apt-get update -y \
  && apt-get install --reinstall ca-certificates -y \
  && update-ca-certificates \
  && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
- && cd otb && git checkout $OTB
+ && cd otb \
+ && git checkout $OTB \
+ && rm -rf .git
 
 # This is a dirty hack for release 4.0.0alpha
 # We have to wait that OTB moves from C++14 to C++17
@@ -161,7 +163,7 @@ LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
 # System-wide ENV
 ENV OTB_INSTALL_DIR=/opt/otbtf
-ENV PYTHONPATH=/opt/otbtf/lib/otb/python:/opt/otbtf/lib/python3/dist-packages/
+ENV PYTHONPATH="/opt/otbtf/lib/otb/python:/opt/otbtf/lib/python$PY/site-packages"
 ENV OTB_APPLICATION_PATH=/opt/otbtf/lib/otb/applications
 
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
@@ -181,5 +183,5 @@ USER otbuser
 
 # Test python imports
 RUN python -c "import tensorflow"
-#RUN python -c "import otbtf, tricks"
-#RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
+RUN python -c "import otbtf, tricks"
+RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
