@@ -20,10 +20,6 @@ variables:
   DOCKERHUB_BASE: mdl4eo/otbtf
   DOCKERHUB_IMAGE_BASE: ${DOCKERHUB_BASE}:${OTBTF_VERSION}
 
-image: docker:latest
-services:
-  - name: docker:dind
-
 workflow:
   auto_cancel:
     on_new_commit: interruptible
@@ -43,10 +39,16 @@ stages:
   - Update dev image
   - Ship
 
-.docker_build_base:
+default:
   tags: [ godzilla ]
-  allow_failure: false
-  timeout: 10 hours
+  image:
+    name: $BRANCH_IMAGE
+    pull_policy: always
+
+.docker_build_base:
+  image: docker:latest
+  services:
+    - name: docker:dind
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker buildx create --name container --driver=docker-container
@@ -66,9 +68,6 @@ docker_image:
 
 .static_analysis_base:
   stage: Static Analysis
-  image:
-    name: $BRANCH_IMAGE
-    pull_policy: always
   allow_failure: true
 
 flake8:
@@ -97,9 +96,6 @@ cppcheck:
 
 .doc_base:
   stage: Documentation
-  image:
-    name: $BRANCH_IMAGE
-    pull_policy: always
   before_script:
     - pip install -r doc/doc_requirements.txt
   artifacts:
@@ -130,10 +126,6 @@ pages:
       - public
 
 .tests_base:
-  image:
-    name: $BRANCH_IMAGE
-    pull_policy: always
-  tags: [ godzilla ]
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
