@@ -74,19 +74,16 @@ docker_image:
 flake8:
   extends: .static_analysis_base
   script:
-    - pip install flake8
     - flake8 $OTBTF_SRC/otbtf --exclude=tensorflow_v1x
 
 pylint:
   extends: .static_analysis_base
   script:
-    - pip install pylint
     - pylint $OTBTF_SRC/otbtf --ignore=tensorflow_v1x
 
 codespell:
   extends: .static_analysis_base
   script:
-    - pip install codespell
     - codespell otbtf
     - codespell doc
 
@@ -157,7 +154,6 @@ ctest:
   #    when: manual
   stage: Applications Test
   before_script:
-    - pip install pytest pytest-cov pytest-order
     - mkdir -p $ARTIFACT_TEST_DIR
     - cd $CI_PROJECT_DIR
 
