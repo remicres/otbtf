@@ -1,24 +1,24 @@
 # Docker troubleshooting
 
-You can find plenty of help on the web about docker. 
-This section only provides the basics for newcomers that are eager to use 
-OTBTF!
+You can find plenty of help on the web about docker.
+This section only provides the basics for newcomers
+ that are eager to use OTBTF!
 This section is largely inspired from the 
-[moringa docker help](https://gitlab.irstea.fr/raffaele.gaetano/moringa/blob/develop/docker/README.md). 
-Big thanks to the authors.
+[moringa docker help](https://gitlab.irstea.fr/raffaele.gaetano/moringa/blob/develop/docker/README.md).
+ Big thanks to the authors.
 
 ## Common errors
 
 ### failed call to cuInit
 
-```
+```raw
 failed call to cuInit: 
 UNKNOWN ERROR (303) / no NVIDIA GPU device is present: 
 /dev/nvidia0 does not exist
 ```
 
-Nvidia driver is missing or disabled, make sure to add 
-` --gpus=all` to your docker run or create command
+Nvidia driver is missing or disabled, make sure to add
+ ` --gpus=all` to your docker run or create command
 
 ## Useful diagnostic commands
 

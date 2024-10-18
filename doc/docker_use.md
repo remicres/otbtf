@@ -42,10 +42,9 @@ The list of older releases is available [here](#older-images).
 
 ## GPU enabled docker 
 
-In Linux, this is quite straightforward. 
-Just follow the steps described in the 
-[nvidia-docker documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
-You can then use the OTBTF `gpu` tagged docker images with the **NVIDIA runtime** : 
+In Linux, this is quite straightforward. Just follow the steps described in the
+ [nvidia-docker documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
+You can then use the OTBTF `gpu` tagged docker images with the **NVIDIA runtime** :
 
 With Docker version earlier than 19.03 :
 
