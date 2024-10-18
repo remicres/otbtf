@@ -128,7 +128,6 @@ pages:
       - public
 
 .tests_base:
-  tags: [ goldenrunner ]
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
@@ -136,6 +135,7 @@ pages:
     when: on_failure
 
 ctest:
+  tags: [ godzilla ]
   extends: .tests_base
   stage: Test
   script:
@@ -150,6 +150,7 @@ ctest:
     - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
 
 .applications_test_base:
+  tags: [ goldenrunner ]
   extends: .tests_base
   #rules:
   #  - if: $CI_MERGE_REQUEST_ID
