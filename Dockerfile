@@ -174,11 +174,11 @@ COPY --from=otb-build --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
 COPY --from=otb-build --chown=otbuser:otbuser /src /src
 
 # Install test packages for dev image
-RUN if $DEV_IMAGE; then pip install codespell flake8 pylint pytest pytest-cov pytest-order; fi
+RUN ! $DEV_IMAGE || pip install codespell flake8 pylint pytest pytest-cov pytest-order
 
 # Admin rights without password (not recommended, use `docker run -u root` instead)
 ARG SUDO=false
-RUN if $SUDO; then usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
+RUN ! $SUDO || usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Default user, directory and command (bash will be the default entrypoint)
 WORKDIR /home/otbuser
