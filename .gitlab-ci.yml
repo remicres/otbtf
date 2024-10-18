@@ -239,6 +239,12 @@ deploy_cpu-dev-testing:
     - docker tag $BRANCH_IMAGE $DEV_IMAGE
     - docker push $DEV_IMAGE
 
+.ship_base:
+  extends: .docker_build_base
+  stage: Ship
+  only:
+    - master
+
 deploy_cpu:
   extends: .ship_base
   variables:
