@@ -30,6 +30,12 @@ workflow:
     - if: $CI_COMMIT_MESSAGE =~ /^(Draft|WIP|wip)/
       when: never
 
+default:
+  interruptible: true
+  image:
+    name: $BRANCH_IMAGE
+    pull_policy: always
+
 stages:
   - Build
   - Static Analysis
@@ -38,11 +44,6 @@ stages:
   - Applications Test
   - Update dev image
   - Ship
-
-default:
-  image:
-    name: $BRANCH_IMAGE
-    pull_policy: always
 
 .docker_build_base:
   tags: [ godzilla ]
@@ -63,7 +64,7 @@ docker_image:
       docker buildx build --push -t $BRANCH_IMAGE
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --cache-to type=registry,ref=$CACHE_IMAGE_CPU,mode=max,oci-mediatypes=true,image-manifest=true
-      --build-arg KEEP_SRC_OTB="true" --build-arg OTBTESTS="true"
+      --build-arg DEV_IMAGE="true" --build-arg OTBTESTS="true"
       "."
 
 .static_analysis_base:
@@ -261,7 +262,7 @@ deploy_cpu:
     - >
       docker buildx build --push -t $IMAGE_CPUDEV
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
-      --build-arg KEEP_SRC_OTB=true
+      --build-arg DEV_IMAGE=true
       .
     # push images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
@@ -292,7 +293,7 @@ deploy_gpu:
       docker buildx build --push -t $IMAGE_GPUDEV
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --cache-from type=registry,ref=$CACHE_IMAGE_GPU
-      --build-arg WITH_CUDA=true --build-arg KEEP_SRC_OTB=true
+      --build-arg WITH_CUDA=true --build-arg DEV_IMAGE=true
       .
     # push gpu-* images on dockerhub
     - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin

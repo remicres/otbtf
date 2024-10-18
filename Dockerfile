@@ -64,6 +64,7 @@ ARG BZL_OPTIONS
 # Build and install TF wheel
 ARG TF_BUILD_ARTIFACTS=false
 ADD https://github.com/tensorflow/tensorflow.git#$TF tensorflow
+# Save local bazel cache with docker mount
 RUN --mount=type=cache,target=/root/.cache/bazel \
  cd tensorflow \
  && export TF_PYTHON_VERSION=$PY \
@@ -93,7 +94,6 @@ WORKDIR /src/otb
 COPY --from=tf-build /opt/otbtf /opt/otbtf
 
 ARG OTB=release-9.1
-ARG OTBTESTS=false
 
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
@@ -125,7 +125,7 @@ RUN cd otb \
      -DOTB_BUILD_SAR=ON \
      -DOTB_BUILD_Segmentation=ON \
      -DOTB_BUILD_StereoProcessing=ON \
-     $($OTBTESTS && echo "-DBUILD_TESTING=ON") \
+     $( ! $DEV_IMAGE || echo "-DBUILD_TESTING=ON" ) \
      -DDOWNLOAD_LOCATION=/tmp/SuperBuild-downloads \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  && rm -rf /tmp/SuperBuild-downloads
