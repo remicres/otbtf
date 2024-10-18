@@ -1,6 +1,7 @@
 apt-transport-https
 ca-certificates
 lsb-release
+software-properties-common
 gpg
 file
 sudo
