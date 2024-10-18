@@ -19,12 +19,14 @@ ENV VIRTUAL_ENV=/opt/otbtf/venv
 ENV PATH="$VIRTUAL_ENV/bin:/opt/otbtf/bin:$PATH"
 ENV PYTHON_SITE_PACKAGES="$VIRTUAL_ENV/lib/python$PY/site-packages"
 ENV LD_LIBRARY_PATH=/opt/otbtf/lib
-
-# ----------------------------------------------------------------------------
-# Tmp builder stage - dangling cache should persist until "docker builder prune"
-FROM base-stage AS build-stage
 # A smaller value may be used to limit bazel or to avoid OOM errors while building OTB
 ARG CPU_RATIO=1
+
+# ----------------------------------------------------------------------------
+### TensorFlow bazel build stage
+FROM base-stage AS tf-build
+WORKDIR /src/tf
+RUN mkdir -p /opt/otbtf/bin /opt/otbtf/lib /opt/otbtf/include
 
 ### Python venv and packages
 RUN virtualenv $VIRTUAL_ENV
@@ -33,9 +35,6 @@ RUN pip install --no-cache-dir -U pip wheel
 ARG NUMPY="1.26.4"
 RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
-
-### TensorFlow
-WORKDIR /src/tf
 
 # Clang + LLVM
 ADD https://apt.llvm.org/llvm.sh llvm.sh
@@ -46,14 +45,13 @@ ENV BAZEL_COMPILER=/usr/bin/clang-18
 RUN apt-get update -y && apt-get upgrade -y \
  && apt-get install -y lld-18 libomp-18-dev \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
-
+ 
+# TF build arguments
 ARG TF=v2.18.0-rc2
 ARG WITH_CUDA=false
 ARG CUDA_COMPUTE_CAPABILITIES
 ARG WITH_XLA=true
 ARG WITH_MKL=false
-
-RUN mkdir -p /opt/otbtf/bin /opt/otbtf/lib /opt/otbtf/include
 
 # Install bazelisk: will read .bazelversion and download the right bazel binary
 ADD https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64  /opt/otbtf/bin/bazelisk
@@ -87,8 +85,12 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && ( ! $ZIP_COMP_FILES || zip -9 -j --symlinks /opt/otbtf/tf-$TF.zip $TF_WHEEL $TF_MISSING_HEADERS bazel-bin/tensorflow/libtensorflow_cc.so* ) \
  && rm -rf bazel-* /src/tf
 
-### OTB
+# ----------------------------------------------------------------------------
+### OTB cmake build stage
+FROM base-stage as otb-build
 WORKDIR /src/otb
+
+COPY --from=tf-build /opt/otbtf /opt/otbtf
 
 ARG OTB=release-9.1
 ARG OTBTESTS=false
@@ -168,8 +170,8 @@ ENV PYTHONPATH="/opt/otbtf/lib/otb/python:/opt/otbtf/lib/python$PY/site-packages
 RUN useradd -s /bin/bash -m otbuser
 
 # Copy built files from intermediate stage
-COPY --from=build-stage --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
-COPY --from=build-stage --chown=otbuser:otbuser /src /src
+COPY --from=otb-build --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
+COPY --from=otb-build --chown=otbuser:otbuser /src /src
 
 # Admin rights without password (not recommended, use `docker run -u root` instead)
 ARG SUDO=false
