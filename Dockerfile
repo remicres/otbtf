@@ -161,7 +161,7 @@ LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
 # System-wide ENV
 ENV OTB_INSTALL_DIR=/opt/otbtf
-ENV PYTHONPATH=/opt/otbtf/lib/otb/python
+ENV PYTHONPATH=/opt/otbtf/lib/otb/python:/opt/otbtf/lib/python3/dist-packages/
 ENV OTB_APPLICATION_PATH=/opt/otbtf/lib/otb/applications
 
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
