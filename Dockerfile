@@ -88,7 +88,7 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
 
 # ----------------------------------------------------------------------------
 ### OTB cmake build stage
-FROM base-stage as otb-build
+FROM base-stage AS otb-build
 WORKDIR /src/otb
 
 COPY --from=tf-build /opt/otbtf /opt/otbtf
