@@ -65,10 +65,7 @@ ARG BZL_OPTIONS
 
 # Build and install TF wheel
 ARG ZIP_COMP_FILES=false
-RUN git config --global advice.detachedHead false
-RUN git clone --single-branch -b $TF https://github.com/tensorflow/tensorflow.git \
- && cd tensorflow \
- && export TMP=/tmp/bazel \
+ADD https://github.com/tensorflow/tensorflow.git#$TF tensorflow
  && export TF_PYTHON_VERSION=$PY \
  && export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
  && ( ! $WITH_CUDA || export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ) \
@@ -98,17 +95,12 @@ ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
 
 # SuperBuild OTB
-RUN apt-get update -y \
- && apt-get install --reinstall ca-certificates -y \
- && update-ca-certificates \
- && git clone https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git \
- && cd otb \
- && git checkout $OTB
-
+ADD --keep-git-dir=true https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git#$OTB otb
+# <------------------------------------------
 # This is a dirty hack for release 4.0.0alpha
 # We have to wait that OTB moves from C++14 to C++17
 # See https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb/-/issues/2338
-RUN cd /src/otb/otb \
+RUN cd otb \
  && sed -i 's/CMAKE_CXX_STANDARD 14/CMAKE_CXX_STANDARD 17/g' CMakeLists.txt \
  && echo "" > Modules/Core/ImageManipulation/test/CMakeLists.txt \
  && echo "" > Modules/Core/Conversion/test/CMakeLists.txt \
