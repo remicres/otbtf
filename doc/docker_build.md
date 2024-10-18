@@ -15,7 +15,7 @@ in order to preserve OTB sources
 # Limit CPU usage e.g. 0.75
 CPU_RATIO=1
 # Can be used to install a specific numpy version
-NUMPY_SPEC="<2"
+NUMPY="1.26.4"
 # Git branch or tag to checkout
 TF=v2.18.0
 # Build with XLA
@@ -29,7 +29,7 @@ WITH_CUDA=false
 CUDA_COMPUTE_CAPABILITIES=
 # Targets for bazel build cmd
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
-# Availabe for additional bazel options, e.g. --remote_cache
+# Available for additional bazel options, e.g. --remote_cache
 BZL_OPTIONS=
 # Zip and save tf compiled files in /opt/otbtf, to install elsewhere
 ZIP_COMP_FILES=false
