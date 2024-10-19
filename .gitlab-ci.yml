@@ -145,9 +145,7 @@ ctest:
     - ln -s $CI_PROJECT_DIR/test/data $OTBTF_SRC/test/data
     - ln -s $CI_PROJECT_DIR/test/models $OTBTF_SRC/test/models
     - cd $OTB_BUILD
-    - ctest -L $OTB_TEST_UNITS --output-junit=report_ctest.xml
-    - export JUNIT_OUTPUT=$(find . -type f -name report_ctest.xml)
-    - cp -v $JUNIT_OUTPUT $CI_PROJECT_DIR
+    - ctest -L $OTB_TEST_UNITS --output-junit $CI_PROJECT_DIR/report_ctest.xml
   after_script:
     - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
 
