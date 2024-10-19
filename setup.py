@@ -12,7 +12,7 @@ setuptools.setup(
     description="OTBTF: Orfeo ToolBox meets TensorFlow",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://gitlab.irstea.fr/remi.cresson/otbtf",
+    url="https://github.com/remicres/otbtf",
     classifiers=[
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

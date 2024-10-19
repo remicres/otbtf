@@ -66,59 +66,73 @@ docker_image:
 
 flake8:
   extends: .static_analysis_base
+  rules:
+    - changes:
+      - otbtf/**/*
   script:
     - flake8 $OTBTF_SRC/otbtf --exclude=tensorflow_v1x
 
 pylint:
   extends: .static_analysis_base
+  rules:
+    - changes:
+      - otbtf/**/*
   script:
     - pylint $OTBTF_SRC/otbtf --ignore=tensorflow_v1x
 
 codespell:
+  rules:
+    - changes:
+      - otbtf/**/*
+      - "**/*.md"
   extends: .static_analysis_base
   script:
-    - codespell otbtf doc
+    - codespell otbtf doc README.md
 
 cppcheck:
   extends: .static_analysis_base
+  rules:
+    - changes:
+      - app/**/*
+      - include/**/*
   script:
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
-.doc_base:
+pages:
   tags: [ stable ]
   image: python:3.10-slim
   stage: Documentation
-  before_script:
-    - pip install -r doc/doc_requirements.txt
-  artifacts:
-    paths:
-      - public
-      - public_test
-
-pages_test:
-  extends: .doc_base
-  only:
-    changes:
-      - doc/*
+  variables:
+    PTH: "public_test"
+  rules:
+    - changes:
+      - doc/**/*
+      - "*.{md,txt}"
       - mkdocs.yml
       - .readthedocs.yaml
-  except:
-    - master
+    - if: $CI_COMMIT_REF_NAME == /master/
+      variables:
+        PTH: "public"
+  before_script:
+    - pip install -r doc/doc_requirements.txt
   script:
-    - mkdocs build --site-dir public_test
-
-pages:
-  extends: .doc_base
-  only:
-    - master
-  script:
-    - mkdocs build --site-dir public
+    - mkdocs build --site-dir $PTH
   artifacts:
     paths:
-      - public
+      - $PTH
 
 .tests_base:
   tags: [ godzilla ]
+  rules:
+    - changes:
+      - app/**/*
+      - include/**/*
+      - "**/*.py"
+      - "**/CMakeLists.txt"
+      - Dockerfile
+      - .gitlab-ci.yml
+      - otb-module.cmake
+      - setup.py
   variables:
     ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
   artifacts:
@@ -126,7 +140,6 @@ pages:
       junit: report_*.xml
     paths:
       - $ARTIFACT_TEST_DIR/*.*
-
     expire_in: 1 week
     when: on_failure
 
@@ -238,7 +251,7 @@ nodata:
   extends: .docker_build_base
   stage: Ship
   only:
-    - master
+    - tags
 
 deploy_cpu:
   extends: .ship_base

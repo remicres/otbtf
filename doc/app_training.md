@@ -47,7 +47,7 @@ patches images, a convenient method consist in reading patches images as numpy
 arrays using OTB applications (e.g. `ExtractROI`) or GDAL, then do a
 `numpy.reshape` to the dimensions wanted.
 
-![Schema](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/model_training.png)
+![Schema](https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/raw/develop/doc/images/model_training.png)
 
 The application description can be displayed using:
 
