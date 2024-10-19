@@ -186,7 +186,7 @@ class ModelBase(abc.ABC):
             for crop in self.inference_cropping:
                 extra_output_key = cropped_tensor_name(out_key, crop)
                 extra_output_name = cropped_tensor_name(
-                    out_tensor._keras_history.layer.name, crop
+                    out_tensor._keras_history.operation.name, crop
                 )
                 logging.info(
                     "Adding extra output for tensor %s with crop %s (%s)",
