@@ -128,15 +128,13 @@ RUN cd otb \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  && rm -rf /tmp/SuperBuild-downloads
 
-# Copy cpp and cmake files from build context
+# Copy cpp and cmake files from build context (TODO: use `COPY --parents` feature when released)
 WORKDIR /src/otbtf
 COPY app ./app
 COPY include ./include
 COPY CMakeLists.txt otb-module.cmake ./
 RUN mkdir test
 COPY test/CMakeLists.txt test/*.cxx test/
-
-RUN ls -alrh
 
 # Rebuild OTB with OTBTF module
 ARG DEV_IMAGE=false
