@@ -16,16 +16,15 @@ OTB_TF_NSOURCES=2 otbcli_TensorflowModelServe \
 ```
 
 """
-
-import keras
+import tensorflow as tf
 
 # Input
-x1 = keras.Input(shape=[None, None, None], name="x1")  # [1, h, w, N]
-x2 = keras.Input(shape=[None, None, None], name="x2")  # [1, h, w, N]
+x1 = tf.keras.Input(shape=[None, None, None], name="x1")  # [1, h, w, N]
+x2 = tf.keras.Input(shape=[None, None, None], name="x2")  # [1, h, w, N]
 
 # Compute scalar product
-y = keras.ops.reduce_sum(keras.ops.multiply(x1, x2), axis=-1)
+y = tf.reduce_sum(tf.multiply(x1, x2), axis=-1)
 
 # Create model
-model = keras.Model(inputs={"x1": x1, "x2": x2}, outputs={"y": y})
-model.export("scalar_product_savedmodel")
+model = tf.keras.Model(inputs={"x1": x1, "x2": x2}, outputs={"y": y})
+model.save("scalar_product_savedmodel")

@@ -1,18 +1,16 @@
 """
 Implementation of a small U-Net like model
 """
-
 import logging
 
 import tensorflow as tf
-import keras
 
 from otbtf.model import ModelBase
 
 logging.basicConfig(
-    format="%(asctime)s %(levelname)-8s %(message)s",
+    format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
-    datefmt="%Y-%m-%d %H:%M:%S",
+    datefmt='%Y-%m-%d %H:%M:%S'
 )
 
 # Number of classes estimated by the model
@@ -53,7 +51,7 @@ class FCNNModel(ModelBase):
         Returns:
             dict of normalized inputs, ready to be used from `get_outputs()`
         """
-        return {INPUT_NAME: keras.ops.cast(inputs[INPUT_NAME], tf.float32) * 0.0001}
+        return {INPUT_NAME: tf.cast(inputs[INPUT_NAME], tf.float32) * 0.0001}
 
     def get_outputs(self, normalized_inputs: dict) -> dict:
         """
@@ -73,24 +71,24 @@ class FCNNModel(ModelBase):
         norm_inp = normalized_inputs[INPUT_NAME]
 
         def _conv(inp, depth, name):
-            conv_op = keras.layers.Conv2D(
+            conv_op = tf.keras.layers.Conv2D(
                 filters=depth,
                 kernel_size=3,
                 strides=2,
                 activation="relu",
                 padding="same",
-                name=name,
+                name=name
             )
             return conv_op(inp)
 
         def _tconv(inp, depth, name, activation="relu"):
-            tconv_op = keras.layers.Conv2DTranspose(
+            tconv_op = tf.keras.layers.Conv2DTranspose(
                 filters=depth,
                 kernel_size=3,
                 strides=2,
                 activation=activation,
                 padding="same",
-                name=name,
+                name=name
             )
             return tconv_op(inp)
 
@@ -112,7 +110,7 @@ class FCNNModel(ModelBase):
         # command.
         #
         # Do not confuse **the name of the output layers** (i.e. the "name"
-        # property of the keras.layer that is used to generate an output
+        # property of the tf.keras.layer that is used to generate an output
         # tensor) and **the key of the output tensor**, in the dict returned
         # from `MyModel.get_output()`. They are two identifiers with a
         # different purpose:
@@ -122,7 +120,7 @@ class FCNNModel(ModelBase):
         #    fit the targets to model outputs during training process, but it
         #    can also be used to access the tensors as tf/keras objects, for
         #    instance to display previews images in TensorBoard.
-        softmax_op = keras.layers.Softmax(name=OUTPUT_SOFTMAX_NAME)
+        softmax_op = tf.keras.layers.Softmax(name=OUTPUT_SOFTMAX_NAME)
         predictions = softmax_op(out_tconv4)
 
         # note that we could also add additional outputs, for instance the
@@ -160,12 +158,10 @@ def dataset_preprocessing_fn(examples: dict):
     """
     return {
         INPUT_NAME: examples["input_xs_patches"],
-        TARGET_NAME: keras.ops.one_hot(
-            keras.ops.squeeze(
-                keras.ops.cast(examples["labels_patches"], tf.int32), axis=-1
-            ),
-            N_CLASSES,
-        ),
+        TARGET_NAME: tf.one_hot(
+            tf.squeeze(tf.cast(examples["labels_patches"], tf.int32), axis=-1),
+            depth=N_CLASSES
+        )
     }
 
 
@@ -194,12 +190,18 @@ def train(params, ds_train, ds_valid, ds_test):
         # This ensures a better optimization control, and also avoids lots of
         # useless outputs (e.g. metrics computed over extra outputs).
         model.compile(
-            loss=keras.losses.CategoricalCrossentropy(),
-            optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
-            metrics=[
-                keras.metrics.Precision(class_id=1),
-                keras.metrics.Recall(class_id=1),
-            ],
+            loss={
+                TARGET_NAME: tf.keras.losses.CategoricalCrossentropy()
+            },
+            optimizer=tf.keras.optimizers.Adam(
+                learning_rate=params.learning_rate
+            ),
+            metrics={
+                TARGET_NAME: [
+                    tf.keras.metrics.Precision(class_id=1),
+                    tf.keras.metrics.Recall(class_id=1)
+                ]
+            }
         )
 
         # Summarize the model (in CLI)
@@ -213,4 +215,4 @@ def train(params, ds_train, ds_valid, ds_test):
             model.evaluate(ds_test, batch_size=params.batch_size)
 
         # Save trained model as SavedModel
-        model.export(params.model_dir)
+        model.save(params.model_dir)
