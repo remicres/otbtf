@@ -98,12 +98,12 @@ cppcheck:
   script:
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
-pages:
+build_docs:
   tags: [ stable ]
   image: python:3.10-slim
   stage: Documentation
   variables:
-    PTH: "public_test"
+    PTH: public_test
   rules:
     - changes:
       - doc/**/*
@@ -112,14 +112,15 @@ pages:
       - .readthedocs.yaml
     - if: $CI_COMMIT_REF_NAME == /master/
       variables:
-        PTH: "public"
+        PTH: public
   before_script:
     - pip install -r doc/doc_requirements.txt
   script:
     - mkdocs build --site-dir $PTH
   artifacts:
     paths:
-      - $PTH
+      - public
+      - public_test
 
 .tests_base:
   tags: [ godzilla ]
