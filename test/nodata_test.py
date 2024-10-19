@@ -29,9 +29,9 @@ class NodataInferenceTest(unittest.TestCase):
 
         # Create model
         x = tf.keras.Input(shape=[None, None, None], name="x")
-        y = tf.keras.ops.norm(x, axis=-1)
+        y = tf.norm(x, axis=-1)
         model = tf.keras.Model(inputs={"x": x}, outputs={"y": y})
-        model.export(sm_dir)
+        model.save(sm_dir)
 
         # Input image: f(x, y) = x * y if x > y else 0
         bmx = otbApplication.Registry.CreateApplication("BandMathX")

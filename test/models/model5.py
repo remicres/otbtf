@@ -21,5 +21,5 @@ y4 = tf.reshape(x, shape=(b, h, w, 1))  # [b, h, w, 1]
 
 # Create model
 model = tf.keras.Model(inputs={"x": x}, outputs={"y1": y1, "y2": y2, "y3": y3, "y4": y4})
-model.export("model5")
+model.save("model5")
 
