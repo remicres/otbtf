@@ -137,8 +137,8 @@ ctest:
   stage: Test
   script:
     - cd /src/otb/otb && git lfs fetch --all && git lfs pull
-    - ln -s $(pwd)/test/data /src/otbtf/test/data
-    - ln -s $(pwd)/test/models /src/otbtf/test/models
+    - ln -s $CI_PROJECT_DIR/test/data $OTB_BUILD/Modules/Remote/otbtf/test/data
+    - ln -s $CI_PROJECT_DIR/test/models $OTB_BUILD/Modules/Remote/otbtf/test/models
     - cd $OTB_BUILD/
     - ctest -L OTBTensorflow
     - ctest -L OTBPanSharpening
@@ -166,7 +166,7 @@ crc_book:
     - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml test/tutorial_unittest.py
   after_script:
     - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
-    
+
 sr4rs:
   extends: .applications_test_base
   script:
