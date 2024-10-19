@@ -137,8 +137,8 @@ ctest:
   stage: Test
   script:
     - cd /src/otb/otb && git lfs fetch --all && git lfs pull
-    - ln -s $CI_PROJECT_DIR/test/data $OTB_BUILD/Modules/Remote/otbtf/test/data
-    - ln -s $CI_PROJECT_DIR/test/models $OTB_BUILD/Modules/Remote/otbtf/test/models
+    - cp -r $CI_PROJECT_DIR/test/data $OTB_BUILD/Modules/Remote/otbtf/test/data
+    - cp -r $CI_PROJECT_DIR/test/models $OTB_BUILD/Modules/Remote/otbtf/test/models
     - cd $OTB_BUILD/
     - ctest -L OTBTensorflow
     - ctest -L OTBPanSharpening
