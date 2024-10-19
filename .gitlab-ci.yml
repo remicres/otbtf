@@ -142,7 +142,7 @@ ctest:
     - ln -s $CI_PROJECT_DIR/test/data $OTBTF_SRC/test/data
     - ln -s $CI_PROJECT_DIR/test/models $OTBTF_SRC/test/models
     - cd $OTB_BUILD/
-    - ctest --output-junit=report_ctest.xml -L "OTBTensorflow|OTBPanSharpening|OTBProjection|OTBTransform|OTBIOGDAL"
+    - ctest --output-junit=$CI_PROJECT_DIR/report_ctest.xml -L "OTBTensorflow|OTBPanSharpening|OTBProjection|OTBTransform|OTBIOGDAL"
   after_script:
     - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
 
