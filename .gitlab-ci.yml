@@ -137,12 +137,15 @@ pages:
 ctest:
   extends: .tests_base
   stage: Test
+  variables:
+    OTB_TEST_UNITS: "Tensorflow|PanSharpening|Projection|Transform|IOGDAL"
   script:
     - cd /src/otb/otb && git lfs fetch --all && git lfs pull
     - ln -s $CI_PROJECT_DIR/test/data $OTBTF_SRC/test/data
     - ln -s $CI_PROJECT_DIR/test/models $OTBTF_SRC/test/models
     - cd $CI_PROJECT_DIR
-    - ctest $OTB_BUILD -L "OTBTensorflow|OTBPanSharpening|OTBProjection|OTBTransform|OTBIOGDAL" --output-junit=report_ctest.xml
+    - export 
+    - ctest --test-dir $OTB_BUILD -L $OTB_TEST_UNITS --output-junit=report_ctest.xml
   after_script:
     - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
 
