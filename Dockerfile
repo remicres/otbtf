@@ -130,9 +130,10 @@ RUN cd otb \
 
 # Copy cpp and cmake files from build context
 WORKDIR /src/otbtf
-COPY app include CMakeLists.txt otb-module.cmake .
+COPY app include CMakeLists.txt otb-module.cmake ./
 RUN mkdir test
 COPY test/CMakeLists.txt test/*.cxx test/
+RUN pwd && ls -alh .
 
 # Rebuild OTB with OTBTF module
 ARG DEV_IMAGE=false
