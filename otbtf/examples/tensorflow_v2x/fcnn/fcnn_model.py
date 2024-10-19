@@ -194,14 +194,12 @@ def train(params, ds_train, ds_valid, ds_test):
         # This ensures a better optimization control, and also avoids lots of
         # useless outputs (e.g. metrics computed over extra outputs).
         model.compile(
-            loss={TARGET_NAME: keras.losses.CategoricalCrossentropy()},
+            loss=keras.losses.CategoricalCrossentropy(),
             optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
-            metrics={
-                TARGET_NAME: [
-                    keras.metrics.Precision(class_id=1),
-                    keras.metrics.Recall(class_id=1),
-                ]
-            },
+            metrics=[
+                keras.metrics.Precision(class_id=1),
+                keras.metrics.Recall(class_id=1),
+            ],
         )
 
         # Summarize the model (in CLI)
