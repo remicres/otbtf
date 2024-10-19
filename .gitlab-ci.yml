@@ -138,6 +138,7 @@ ctest:
   extends: .tests_base
   stage: Test
   variables:
+    CTEST_OUTPUT_ON_FAILURE: 1
     OTB_TEST_UNITS: "Tensorflow|PanSharpening|Projection|Transform|IOGDAL"
   script:
     - cd /src/otb/otb && git lfs fetch --all && git lfs pull
@@ -145,13 +146,10 @@ ctest:
     - ln -s $CI_PROJECT_DIR/test/models $OTBTF_SRC/test/models
     - cd $OTB_BUILD
     - ctest -L $OTB_TEST_UNITS --output-junit=report_ctest.xml
-    - ls
+    - export JUNIT_OUTPUT=$(find . -type f -name report_ctest.xml)
+    - cp -v $JUNIT_OUTPUT $CI_PROJECT_DIR
   after_script:
     - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
-    - ls $ARTIFACT_TEST_DIR
-  artifacts:
-    reports:
-      junit: $ARTIFACT_TEST_DIR/report_ctest.xml
 
 .applications_test_base:
   extends: .tests_base
