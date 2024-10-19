@@ -57,14 +57,13 @@ ARG WITH_MKL=false
 ADD https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64  /opt/otbtf/bin/bazelisk
 RUN chmod +x /opt/otbtf/bin/bazelisk && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
+# Build and install TF wheel
+ADD https://github.com/tensorflow/tensorflow.git#$TF tensorflow
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
 # You can use --build-arg BZL_OPTIONS="--remote_cache=http://..." at build time
 ARG BZL_OPTIONS
-
-# Build and install TF wheel
 ARG TF_BUILD_ARTIFACTS
 
-ADD https://github.com/tensorflow/tensorflow.git#$TF tensorflow
 # Save local bazel cache with docker mount
 RUN --mount=type=cache,target=/root/.cache/bazel \
  cd tensorflow \
@@ -95,14 +94,10 @@ WORKDIR /src/otb
 
 COPY --from=tf-build /opt/otbtf /opt/otbtf
 
-ARG OTB=release-9.1
-ARG OTBTESTS=false
-
-ENV CC=/usr/bin/gcc
-ENV CXX=/usr/bin/g++
-
 # SuperBuild OTB
+ARG OTB=release-9.1
 ADD --keep-git-dir=true https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git#$OTB otb
+ARG OTBTESTS=false
 # <------------------------------------------
 # This is a dirty hack for release 4.0.0alpha
 # We have to wait that OTB moves from C++14 to C++17
