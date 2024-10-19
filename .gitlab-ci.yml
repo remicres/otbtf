@@ -93,6 +93,7 @@ cppcheck:
 
 .doc_base:
   tags: [ stable ]
+  image: python:3.10-slim
   stage: Documentation
   before_script:
     - pip install -r doc/doc_requirements.txt
