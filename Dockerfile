@@ -130,7 +130,9 @@ RUN cd otb \
 
 # Copy cpp and cmake files from build context
 WORKDIR /src/otbtf
-COPY app/ include/ CMakeLists.txt otb-module.cmake ./
+COPY app ./app
+COPY include ./include
+COPY CMakeLists.txt otb-module.cmake ./
 RUN mkdir test
 COPY test/CMakeLists.txt test/*.cxx test/
 
