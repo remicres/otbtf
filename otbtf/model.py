@@ -27,6 +27,7 @@ from typing import List, Dict, Any
 import abc
 import logging
 import tensorflow as tf
+import keras
 
 Tensor = Any
 TensorsDict = Dict[str, Tensor]
@@ -116,7 +117,7 @@ class ModelBase(abc.ABC):
             if len(new_shape) > 2:
                 new_shape[0] = None
                 new_shape[1] = None
-            placeholder = tf.keras.Input(shape=new_shape, name=key)
+            placeholder = keras.Input(shape=new_shape, name=key)
             logging.info("New shape for input %s: %s", key, new_shape)
             model_inputs.update({key: placeholder})
         return model_inputs
@@ -192,14 +193,14 @@ class ModelBase(abc.ABC):
                     out_key, crop, extra_output_name
                 )
                 cropped = out_tensor[:, crop:-crop, crop:-crop, :]
-                identity = tf.keras.layers.Activation(
+                identity = keras.layers.Activation(
                     'linear', name=extra_output_name
                 )
                 extra_outputs[extra_output_key] = identity(cropped)
 
         return extra_outputs
 
-    def create_network(self) -> tf.keras.Model:
+    def create_network(self) -> keras.Model:
         """
         This method returns the Keras model. This needs to be called
         **inside** the strategy.scope(). Can be reimplemented depending on the
@@ -230,7 +231,7 @@ class ModelBase(abc.ABC):
         outputs.update(postprocessed_outputs)
 
         # Return the keras model
-        return tf.keras.Model(
+        return keras.Model(
             inputs=inputs,
             outputs=outputs,
             name=self.__class__.__name__
@@ -265,7 +266,7 @@ class ModelBase(abc.ABC):
 
         # When multiworker strategy, only plot if the worker is chief
         if not strategy or _is_chief(strategy):
-            tf.keras.utils.plot_model(
+            keras.utils.plot_model(
                 self.model, output_path, show_shapes=show_shapes
             )
 

@@ -1,6 +1,7 @@
 """
 Implementation of a small U-Net like model
 """
+
 import logging
 
 import tensorflow as tf
@@ -9,9 +10,9 @@ import keras
 from otbtf.model import ModelBase
 
 logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
+    format="%(asctime)s %(levelname)-8s %(message)s",
     level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S'
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 # Number of classes estimated by the model
@@ -78,7 +79,7 @@ class FCNNModel(ModelBase):
                 strides=2,
                 activation="relu",
                 padding="same",
-                name=name
+                name=name,
             )
             return conv_op(inp)
 
@@ -89,7 +90,7 @@ class FCNNModel(ModelBase):
                 strides=2,
                 activation=activation,
                 padding="same",
-                name=name
+                name=name,
             )
             return tconv_op(inp)
 
@@ -160,9 +161,11 @@ def dataset_preprocessing_fn(examples: dict):
     return {
         INPUT_NAME: examples["input_xs_patches"],
         TARGET_NAME: keras.ops.one_hot(
-            keras.ops.squeeze(keras.ops.cast(examples["labels_patches"], tf.int32), axis=-1),
-            depth=N_CLASSES
-        )
+            keras.ops.squeeze(
+                keras.ops.cast(examples["labels_patches"], tf.int32), axis=-1
+            ),
+            depth=N_CLASSES,
+        ),
     }
 
 
@@ -191,18 +194,14 @@ def train(params, ds_train, ds_valid, ds_test):
         # This ensures a better optimization control, and also avoids lots of
         # useless outputs (e.g. metrics computed over extra outputs).
         model.compile(
-            loss={
-                TARGET_NAME: keras.losses.CategoricalCrossentropy()
-            },
-            optimizer=keras.optimizers.Adam(
-                learning_rate=params.learning_rate
-            ),
+            loss={TARGET_NAME: keras.losses.CategoricalCrossentropy()},
+            optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
             metrics={
                 TARGET_NAME: [
                     keras.metrics.Precision(class_id=1),
-                    keras.metrics.Recall(class_id=1)
+                    keras.metrics.Recall(class_id=1),
                 ]
-            }
+            },
         )
 
         # Summarize the model (in CLI)
