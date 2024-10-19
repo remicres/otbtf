@@ -125,6 +125,7 @@ pages:
       - public
 
 .tests_base:
+  tags: [ godzilla ]
   artifacts:
     paths:
       - $ARTIFACT_TEST_DIR/*.*
@@ -132,7 +133,6 @@ pages:
     when: on_failure
 
 ctest:
-  tags: [ godzilla ]
   extends: .tests_base
   stage: Test
   script:
@@ -149,7 +149,6 @@ ctest:
     - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
 
 .applications_test_base:
-  tags: [ goldenrunner ]
   extends: .tests_base
   #rules:
   #  - if: $CI_MERGE_REQUEST_ID
@@ -170,10 +169,10 @@ crc_book:
 sr4rs:
   extends: .applications_test_base
   script:
-    - wget -O sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+    - wget -qO sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
       https://nextcloud.inrae.fr/s/EZL2JN7SZyDK8Cf/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
     - unzip -o sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-    - wget -O sr4rs_data.zip https://nextcloud.inrae.fr/s/kDms9JrRMQE2Q5z/download
+    - wget -qO sr4rs_data.zip https://nextcloud.inrae.fr/s/kDms9JrRMQE2Q5z/download
     - unzip -o sr4rs_data.zip
     - rm -rf sr4rs
     - git clone https://github.com/remicres/sr4rs.git
@@ -185,7 +184,7 @@ decloud:
   script:
     - git clone https://github.com/CNES/decloud.git
     - pip install -r $PWD/decloud/docker/requirements.txt
-    - wget https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download -O file.zip && unzip file.zip
+    - wget -q https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download -O file.zip && unzip file.zip
     - export DECLOUD_DATA_DIR="$PWD/decloud_data"
     - pytest decloud/tests/train_from_tfrecords_unittest.py
 
