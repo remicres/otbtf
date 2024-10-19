@@ -164,7 +164,7 @@ def dataset_preprocessing_fn(examples: dict):
             keras.ops.squeeze(
                 keras.ops.cast(examples["labels_patches"], tf.int32), axis=-1
             ),
-            depth=N_CLASSES,
+            N_CLASSES,
         ),
     }
 
