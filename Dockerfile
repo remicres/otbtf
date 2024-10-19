@@ -136,6 +136,8 @@ COPY CMakeLists.txt otb-module.cmake ./
 RUN mkdir test
 COPY test/CMakeLists.txt test/*.cxx test/
 
+RUN ls -alrh
+
 # Rebuild OTB with OTBTF module
 ARG DEV_IMAGE=false
 RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
@@ -153,7 +155,9 @@ RUN cd /src/otb/build/OTB/build \
  && rm -rf /root/.cache /tmp/*
 
 # Install OTBTF python module
-COPY otbtf tricks README.md setup.py .
+COPY otbtf ./otbtf
+COPY tricks ./tricks
+COPY README.md setup.py .
 RUN pip install -e .
 
 # ----------------------------------------------------------------------------
