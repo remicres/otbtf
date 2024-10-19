@@ -143,10 +143,15 @@ ctest:
     - cd /src/otb/otb && git lfs fetch --all && git lfs pull
     - ln -s $CI_PROJECT_DIR/test/data $OTBTF_SRC/test/data
     - ln -s $CI_PROJECT_DIR/test/models $OTBTF_SRC/test/models
-    - cd $CI_PROJECT_DIR
-    - ctest --test-dir $OTB_BUILD -L $OTB_TEST_UNITS --output-junit=report_ctest.xml
+    - cd $OTB_BUILD
+    - ctest -L $OTB_TEST_UNITS --output-junit=report_ctest.xml
+    - ls
   after_script:
     - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
+    - ls $ARTIFACT_TEST_DIR
+  artifacts:
+    reports:
+      junit: $ARTIFACT_TEST_DIR/report_ctest.xml
 
 .applications_test_base:
   extends: .tests_base
