@@ -132,7 +132,7 @@ RUN cd otb \
 WORKDIR /src/otbtf
 COPY app include CMakeLists.txt otb-module.cmake .
 RUN mkdir test
-COPY test/CMakeLists.txt test/*.cxx ./test
+COPY test/CMakeLists.txt test/*.cxx test/
 
 # Rebuild OTB with OTBTF module
 ARG DEV_IMAGE=false
@@ -141,7 +141,6 @@ RUN cd /src/otb/build/OTB/build \
  && cmake /src/otb/otb \
       -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
       -DOTB_WRAP_PYTHON=ON \
-      -DPYTHON_EXECUTABLE=$(which python) \
       -DOTB_USE_TENSORFLOW=ON \
       -DModule_OTBTensorflow=ON \
       -Dtensorflow_include_dir=/opt/otbtf/include/tf \
