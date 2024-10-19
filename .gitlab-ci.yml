@@ -24,6 +24,7 @@ workflow:
       when: never
 
 default:
+  tags: [ godzilla ]
   interruptible: true
   image:
     name: $BRANCH_IMAGE
@@ -35,12 +36,10 @@ stages:
   - Documentation
   - Test
   - Applications Test
-  - Update dev image
   - Ship
-  - Export TF wheels
+  - Export TensorFlow
 
 .docker_build_base:
-  tags: [ godzilla ]
   image: docker:latest
   services:
     - name: docker:dind
@@ -60,7 +59,6 @@ docker_image:
       "."
 
 .static_analysis_base:
-  tags: [ stable ]
   stage: Static Analysis
   allow_failure: true
 
@@ -123,7 +121,6 @@ build_docs:
       - public_test
 
 .tests_base:
-  tags: [ godzilla ]
   rules:
     - changes:
       - app/**/*
@@ -251,8 +248,8 @@ nodata:
 .ship_base:
   extends: .docker_build_base
   stage: Ship
-  only:
-    - tags
+  rules:
+  - if: $CI_COMMIT_TAG
 
 deploy_cpu:
   extends: .ship_base
@@ -314,7 +311,7 @@ deploy_gpu:
 
 export_tf_wheels:
   extends: .docker_build_base
-  stage: Export TF wheels
+  stage: Export TensorFlow
   rules:
     - when: manual
   artifacts:
