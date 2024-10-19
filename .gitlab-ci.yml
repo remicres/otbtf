@@ -160,7 +160,7 @@ crc_book:
   extends: .applications_test_base
   script:
     - mkdir -p $CRC_BOOK_TMP
-    - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
+    - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml test/tutorial_unittest.py
   after_script:
     - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
     
@@ -175,7 +175,7 @@ sr4rs:
     - rm -rf sr4rs
     - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml test/sr4rs_unittest.py
 
 decloud:
   extends: .applications_test_base
@@ -190,41 +190,41 @@ otbtf_api:
   extends: .applications_test_base
   script:
     - mkdir $API_TEST_TMP
-    - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_api.xml $OTBTF_SRC/test/api_unittest.py
+    - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_api.xml test/api_unittest.py
   after_script:
     - cp $API_TEST_TMP/*.* $ARTIFACT_TEST_DIR/
 
 geos_enabled:
   extends: .applications_test_base
   script:
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_geos_enabled.xml $OTBTF_SRC/test/geos_test.py
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_geos_enabled.xml test/geos_test.py
 
 planetary_computer:
   extends: .applications_test_base
   script:
     - pip install pystac_client planetary_computer
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_pc_enabled.xml $OTBTF_SRC/test/pc_test.py
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_pc_enabled.xml test/pc_test.py
 
 imports:
   extends: .applications_test_base
   script:
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_imports.xml $OTBTF_SRC/test/imports_test.py
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_imports.xml test/imports_test.py
 
 numpy_gdal_otb:
   extends: .applications_test_base
   script:
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_numpy.xml $OTBTF_SRC/test/numpy_test.py
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_numpy.xml test/numpy_test.py
 
 rio:
   extends: .applications_test_base
   script:
     - pip install rasterio --no-binary rasterio
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_rio.xml $OTBTF_SRC/test/rio_test.py
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_rio.xml test/rio_test.py
 
 nodata:
   extends: .applications_test_base
   script:
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_nodata.xml $OTBTF_SRC/test/nodata_test.py
+    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_nodata.xml test/nodata_test.py
 
 .ship_base:
   extends: .docker_build_base

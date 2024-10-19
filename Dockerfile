@@ -9,7 +9,7 @@ WORKDIR /tmp
 
 ### System packages
 ARG DEBIAN_FRONTEND=noninteractive
-COPY system-dependencies.txt ./
+COPY system-dependencies.txt .
 RUN apt-get update -y && apt-get upgrade -y \
  && cat system-dependencies.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -128,11 +128,15 @@ RUN cd otb \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  && rm -rf /tmp/SuperBuild-downloads
 
-# Rebuild OTB with OTBTF module
-COPY . /src/otbtf
-RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
+# Copy cpp and cmake files from build context
+WORKDIR /src/otbtf
+COPY app include CMakeLists.txt otb-module.cmake .
+RUN mkdir test
+COPY test/CMakeLists.txt test/*.cxx ./test
 
+# Rebuild OTB with OTBTF module
 ARG DEV_IMAGE=false
+RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
 RUN cd /src/otb/build/OTB/build \
  && cmake /src/otb/otb \
       -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
@@ -148,10 +152,8 @@ RUN cd /src/otb/build/OTB/build \
  && rm -rf /root/.cache /tmp/*
 
 # Install OTBTF python module
-RUN pip install -e /src/otbtf
-
-# Symlink executable python files in PATH
-RUN for f in /src/otbtf/python/*.py; do if [ -x $f ]; then ln -s $f /opt/otbtf/bin/; fi; done
+COPY otbtf tricks README.md setup.py .
+RUN pip install -e .
 
 # ----------------------------------------------------------------------------
 # Final stage from a clean base
