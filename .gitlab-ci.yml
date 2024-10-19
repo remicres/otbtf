@@ -168,11 +168,13 @@ crc_book:
 
 sr4rs:
   extends: .applications_test_base
+  variables:
+    DATASET_S2: https://nextcloud.inrae.fr/s/EZL2JN7SZyDK8Cf/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+    DATASET_SR4RS: https://nextcloud.inrae.fr/s/kDms9JrRMQE2Q5z/download
   script:
-    - wget -qO sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-      https://nextcloud.inrae.fr/s/EZL2JN7SZyDK8Cf/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
+    - wget -qO sr4rs_sentinel2_bands4328_france2020_savedmodel.zip $DATASET_S2
     - unzip -o sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-    - wget -qO sr4rs_data.zip https://nextcloud.inrae.fr/s/kDms9JrRMQE2Q5z/download
+    - wget -qO sr4rs_data.zip $DATASET_SR4RS
     - unzip -o sr4rs_data.zip
     - rm -rf sr4rs
     - git clone https://github.com/remicres/sr4rs.git
@@ -181,10 +183,12 @@ sr4rs:
 
 decloud:
   extends: .applications_test_base
+  variables:
+    DATASET_DECLOUD: https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download
   script:
     - git clone https://github.com/CNES/decloud.git
     - pip install -r $PWD/decloud/docker/requirements.txt
-    - wget -q https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download -O file.zip && unzip file.zip
+    - wget -q $DATASET_DECLOUD -O file.zip && unzip file.zip
     - export DECLOUD_DATA_DIR="$PWD/decloud_data"
     - pytest decloud/tests/train_from_tfrecords_unittest.py
 
