@@ -26,6 +26,7 @@ and train deep nets.
 """
 from typing import List, Tuple, Any
 import tensorflow as tf
+import keras
 
 
 Tensor = Any
@@ -44,5 +45,5 @@ def one_hot(labels: Tensor, nb_classes: int):
         one-hot encoded vector (shape [x, y, nb_classes])
 
     """
-    labels_xy = tf.squeeze(tf.cast(labels, tf.int32), axis=-1)  # shape [x, y]
-    return tf.one_hot(labels_xy, depth=nb_classes)  # shape [x, y, nb_classes]
+    labels_xy = keras.ops.squeeze(keras.ops.cast(labels, tf.int32), axis=-1)  # shape [x, y]
+    return keras.ops.one_hot(labels_xy, depth=nb_classes)  # shape [x, y, nb_classes]

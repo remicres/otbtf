@@ -215,4 +215,4 @@ def train(params, ds_train, ds_valid, ds_test):
             model.evaluate(ds_test, batch_size=params.batch_size)
 
         # Save trained model as SavedModel
-        model.save(params.model_dir)
+        model.export(params.model_dir)

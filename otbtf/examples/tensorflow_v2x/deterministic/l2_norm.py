@@ -14,14 +14,15 @@ otbcli_TensorflowModelServe \
 ```
 
 """
-import tensorflow as tf
+import keras
+
 
 # Input
-x = tf.keras.Input(shape=[None, None, None], name="x")  # [1, h, w, N]
+x = keras.Input(shape=[None, None, None], name="x")  # [1, h, w, N]
 
 # Compute norm on the last axis
-y = tf.norm(x, axis=-1)
+y = keras.ops.norm(x, axis=-1)
 
 # Create model
-model = tf.keras.Model(inputs={"x": x}, outputs={"y": y})
-model.save("l2_norm_savedmodel")
+model = keras.Model(inputs={"x": x}, outputs={"y": y})
+model.export("l2_norm_savedmodel")
