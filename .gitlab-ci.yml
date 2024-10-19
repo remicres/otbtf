@@ -1,16 +1,10 @@
 variables:
   OTBTF_VERSION: 4.4.0
-  OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
-  OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
-  OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
-  ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
-  CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
-  API_TEST_TMP: /tmp/api_tests_tmp
+  OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
   DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   BUILDX_BUILDER: container
-  DOCKER_DRIVER: overlay2
   CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
   CACHE_IMAGE_GPU: $CI_REGISTRY_IMAGE:build-cache-gpu
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
@@ -125,6 +119,8 @@ pages:
 
 .tests_base:
   tags: [ godzilla ]
+  variables:
+    ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
   artifacts:
     reports:
       junit: report_*.xml
@@ -140,6 +136,7 @@ ctest:
   variables:
     CTEST_OUTPUT_ON_FAILURE: 1
     OTB_TEST_UNITS: "Tensorflow|PanSharpening|Projection|Transform|IOGDAL"
+    OTB_BUILD: /src/otb/build/OTB/build
   script:
     - cd /src/otb/otb && git lfs fetch --all && git lfs pull
     - ln -s $CI_PROJECT_DIR/test/data $OTBTF_SRC/test/data
@@ -147,7 +144,7 @@ ctest:
     - cd $OTB_BUILD
     - ctest -L $OTB_TEST_UNITS --output-junit $CI_PROJECT_DIR/report_ctest.xml
   after_script:
-    - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
+    - cp -r $OTB_BUILD/Testing/Temporary $ARTIFACT_TEST_DIR
 
 .applications_test_base:
   extends: .tests_base
@@ -161,6 +158,8 @@ ctest:
 
 crc_book:
   extends: .applications_test_base
+  variables:
+    CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
   script:
     - mkdir -p $CRC_BOOK_TMP
     - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=report_tutorial.xml test/tutorial_unittest.py
@@ -195,6 +194,8 @@ decloud:
 
 otbtf_api:
   extends: .applications_test_base
+  variables:
+    API_TEST_TMP: /tmp/api_tests_tmp
   script:
     - mkdir $API_TEST_TMP
     - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=report_api.xml test/api_unittest.py
