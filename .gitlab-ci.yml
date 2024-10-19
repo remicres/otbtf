@@ -83,8 +83,7 @@ pylint:
 codespell:
   extends: .static_analysis_base
   script:
-    - codespell otbtf
-    - codespell doc
+    - codespell otbtf doc
 
 cppcheck:
   extends: .static_analysis_base
