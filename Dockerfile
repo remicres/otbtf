@@ -51,7 +51,8 @@ RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY 
 # TF build arguments
 ARG TF=v2.18.0-rc2
 ARG WITH_CUDA=false
-ARG CUDA_COMPUTE_CAPABILITIES
+# Custom compute capabilities, else use default one from .bazelrc
+ARG CUDA_CC
 ARG WITH_XLA=true
 ARG WITH_MKL=false
 
@@ -72,7 +73,7 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && export TF_PYTHON_VERSION=$PY \
  && export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
  && ( ! $WITH_CUDA || export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ) \
- && ( [ -z "$CUDA_COMPUTE_CAPABILITIES" ] || export BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_COMPUTE_CAPABILITIES" ) \
+ && ( [ -z "$CUDA_COMPUTE_CAPABILITIES" ] || export BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_CC" ) \
  && ( ! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
  && ( ! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
  && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS --verbose_failures" \
