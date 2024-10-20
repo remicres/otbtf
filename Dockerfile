@@ -23,10 +23,22 @@ ENV LD_LIBRARY_PATH=/opt/otbtf/lib
 ARG CPU_RATIO=1
 
 # ----------------------------------------------------------------------------
-### TensorFlow bazel build stage
+### Builder stage: bazel clang tensorflow
 FROM base-stage AS tf-build
 WORKDIR /src/tf
 RUN mkdir -p /opt/otbtf/bin /opt/otbtf/lib /opt/otbtf/include
+
+# Clang + LLVM
+ARG LLVM=18
+
+ADD https://apt.llvm.org/llvm.sh llvm.sh
+RUN bash ./llvm.sh $LLVM
+ENV CC=/usr/bin/clang-$LLVM
+ENV CXX=/usr/bin/clang++-$LLVM
+ENV BAZEL_COMPILER="/usr/bin/clang-$LLVM"
+RUN apt-get update -y && apt-get upgrade -y \
+ && apt-get install -y lld-$LLVM libomp-$LLVM-dev \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ### Python venv and packages
 RUN virtualenv $VIRTUAL_ENV
@@ -35,16 +47,6 @@ RUN pip install --no-cache-dir -U pip wheel
 ARG NUMPY="1.26.4"
 RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY packaging requests \
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
-
-# Clang + LLVM
-ADD https://apt.llvm.org/llvm.sh llvm.sh
-RUN bash ./llvm.sh 18
-ENV CC=/usr/bin/clang-18
-ENV CXX=/usr/bin/clang++-18
-ENV BAZEL_COMPILER=/usr/bin/clang-18
-RUN apt-get update -y && apt-get upgrade -y \
- && apt-get install -y lld-18 libomp-18-dev \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
  
 # TF build arguments
 ARG TF=v2.18.0-rc2
@@ -88,7 +90,7 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && rm -rf bazel-* /src/tf
 
 # ----------------------------------------------------------------------------
-### OTB cmake build stage
+### Builder stage: cmake gcc otb
 FROM base-stage AS otb-build
 WORKDIR /src/otb
 
@@ -136,7 +138,7 @@ COPY CMakeLists.txt otb-module.cmake ./
 RUN mkdir test
 COPY test/CMakeLists.txt test/*.cxx test/
 
-# Rebuild OTB with OTBTF module
+# Build OTBTF cpp
 ARG DEV_IMAGE=false
 RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
 RUN cd /src/otb/build/OTB/build \
@@ -152,14 +154,8 @@ RUN cd /src/otb/build/OTB/build \
  && ( $DEV_IMAGE || rm -rf /src/otb ) \
  && rm -rf /root/.cache /tmp/*
 
-# Install OTBTF python module
-COPY otbtf ./otbtf
-COPY tricks ./tricks
-COPY README.md setup.py .
-RUN pip install -e .
-
 # ----------------------------------------------------------------------------
-# Final stage from a clean base
+# Final stage: copy binaries from middle layers and install python module
 FROM base-stage AS final-stage
 LABEL maintainer="Remi Cresson <remi.cresson[at]inrae[dot]fr>"
 
@@ -172,22 +168,28 @@ ENV PYTHONPATH="/opt/otbtf/lib/otb/python:/opt/otbtf/lib/python$PY/site-packages
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
 RUN useradd -s /bin/bash -m otbuser
 
-# Copy built files from intermediate stage
-COPY --from=otb-build --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
-COPY --from=otb-build --chown=otbuser:otbuser /src /src
-
-# Install test packages for dev image
-RUN ! $DEV_IMAGE || pip install codespell flake8 pylint pytest pytest-cov pytest-order
-
 # Admin rights without password (not recommended, use `docker run -u root` instead)
 ARG SUDO=false
 RUN ! $SUDO || usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Default user, directory and command (bash will be the default entrypoint)
-WORKDIR /home/otbuser
+# Allow user to install packages in prefix /opt/otbtf and venv without being root
+COPY --from=otb-build --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
+COPY --from=otb-build --chown=otbuser:otbuser /src /src
 USER otbuser
 
+# Install OTBTF python module
+WORKDIR /src/otbtf
+COPY otbtf /otbtf
+COPY tricks ./tricks
+COPY README.md setup.py .
+RUN pip install -e .
+
+# Install test packages for dev image
+RUN ! $DEV_IMAGE || pip install codespell flake8 pylint pytest pytest-cov pytest-order
+
+WORKDIR /home/otbuser
+
 # Test python imports
-RUN python -c "import tensorflow"
-RUN python -c "import otbtf, tricks"
+RUN python -c "import tensorflow ; import keras"
 RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
+RUN python -c "from osgeo import gdal ; import otbtf ; import tricks"
