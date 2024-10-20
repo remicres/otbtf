@@ -25,13 +25,14 @@ The utils module provides some useful keras layers to build deep nets.
 """
 from typing import List, Tuple, Any
 import tensorflow as tf
+import keras
 
 
 Tensor = Any
 Scalars = List[float] | Tuple[float]
 
 
-class DilatedMask(tf.keras.layers.Layer):
+class DilatedMask(keras.layers.Layer):
     """Layer to dilate a binary mask."""
     def __init__(self, nodata_value: float, radius: int, name: str = None):
         """
@@ -70,7 +71,7 @@ class DilatedMask(tf.keras.layers.Layer):
         return tf.cast(conv2d_out, tf.uint8)
 
 
-class ApplyMask(tf.keras.layers.Layer):
+class ApplyMask(keras.layers.Layer):
     """Layer to apply a binary mask to one input."""
     def __init__(self, out_nodata: float, name: str = None):
         """
@@ -95,7 +96,7 @@ class ApplyMask(tf.keras.layers.Layer):
         return tf.where(mask == 1, float(self.out_nodata), inp)
 
 
-class ScalarsTile(tf.keras.layers.Layer):
+class ScalarsTile(keras.layers.Layer):
     """
     Layer to duplicate some scalars in a whole array.
     Simple example with only one scalar = 0.152:
@@ -127,7 +128,7 @@ class ScalarsTile(tf.keras.layers.Layer):
         return tf.tile(inp, [1, tf.shape(ref)[1], tf.shape(ref)[2], 1])
 
 
-class Argmax(tf.keras.layers.Layer):
+class Argmax(keras.layers.Layer):
     """
     Layer to compute the argmax of a tensor.
 
@@ -165,7 +166,7 @@ class Argmax(tf.keras.layers.Layer):
         return argmax
 
 
-class Max(tf.keras.layers.Layer):
+class Max(keras.layers.Layer):
     """
     Layer to compute the max of a tensor.
 
