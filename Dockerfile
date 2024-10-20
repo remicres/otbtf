@@ -179,7 +179,7 @@ USER otbuser
 
 # Install OTBTF python module
 WORKDIR /src/otbtf
-COPY otbtf /otbtf
+COPY otbtf ./otbtf
 COPY tricks ./tricks
 COPY README.md setup.py .
 RUN pip install -e .
