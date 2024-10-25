@@ -2,7 +2,8 @@ variables:
   DOCKER_BUILDKIT: 1
   BUILDX_BUILDER: container
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
-  OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
+  OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image*
+  DATADIR: $CI_PROJECT_DIR/test/data
   CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
   CACHE_IMAGE_GPU: $CI_REGISTRY_IMAGE:build-cache-gpu
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
