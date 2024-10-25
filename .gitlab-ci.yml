@@ -7,7 +7,6 @@ variables:
   CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
   CACHE_IMAGE_GPU: $CI_REGISTRY_IMAGE:build-cache-gpu
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-  DEV_IMAGE: $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
 
 workflow:
   auto_cancel:
