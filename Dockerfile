@@ -45,8 +45,7 @@ RUN virtualenv $VIRTUAL_ENV
 RUN pip install --no-cache-dir -U pip wheel
 # Numpy 2 support in TF is planned for 2.18, but isn't supported by most libraries for now
 ARG NUMPY="1.26.4"
-RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY packaging requests \
- && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
+RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY packaging requests
  
 # TF build arguments
 ARG TF=v2.18.0
