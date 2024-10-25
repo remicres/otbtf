@@ -11,9 +11,14 @@ variables:
 workflow:
   auto_cancel:
     on_new_commit: interruptible
+    # Execute in merge request context or commit in master branch
   rules:
-    # Execute jobs on tags, in merge request context or commit in master branch
-    - if: $CI_COMMIT_TAG || $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Avoid duplicated pipelines in MR context
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_REF_PROTECTED == "true"
     # Ignore pipeline for filthy commits
     - if: $CI_COMMIT_MESSAGE =~ /^wip.*/i
       when: never
@@ -44,6 +49,9 @@ stages:
 
 docker_image:
   stage: Build
+  only:
+    - merge_requests
+    - develop
   extends: .docker_build_base
   script:
     - >
@@ -56,6 +64,8 @@ docker_image:
 .static_analysis_base:
   stage: Static Analysis
   allow_failure: true
+  only:
+    - merge_requests
 
 flake8:
   extends: .static_analysis_base
@@ -116,6 +126,8 @@ build_docs:
       - public_test
 
 .tests_base:
+  only:
+    - merge_requests
   rules:
     - changes:
       - app/**/*
@@ -272,11 +284,11 @@ deploy_cpu:
       --build-arg DEV_IMAGE=true
       .
     # push images on dockerhub
-    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
-    - docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
-    - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
+    #- echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
+    #- docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
+    #- docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
     # latest = cpu image
-    - docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
+    #- docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
 
 deploy_gpu:
   extends: .ship_base
@@ -303,11 +315,11 @@ deploy_gpu:
       --build-arg WITH_CUDA=true --build-arg DEV_IMAGE=true
       .
     # push gpu-* images on dockerhub
-    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
-    - docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
-    - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
+    #- echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
+    #- docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
+    #- docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
     # latest-gpu = gpu image
-    - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
+    #- docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
 
 export_tf_wheels:
   extends: .docker_build_base
