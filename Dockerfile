@@ -71,10 +71,10 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  cd tensorflow \
  && export TF_PYTHON_VERSION=$PY \
  && export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
- && ( ! $WITH_CUDA || export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ) \
+ && ( [ "$WITH_CUDA" != "true" ] || export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ) \
  && ( [ -z "$CUDA_CC" ] || export BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_CC" ) \
- && ( ! $WITH_MKL || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
- && ( ! $WITH_XLA || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
+ && ( [ "$WITH_MKL" != "true" ] || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
+ && ( [ "$WITH_XLA" != "true" ] || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
  && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS --verbose_failures" \
  && echo "Build env:" && env \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
@@ -125,7 +125,7 @@ RUN cd otb \
      -DOTB_BUILD_SAR=ON \
      -DOTB_BUILD_Segmentation=ON \
      -DOTB_BUILD_StereoProcessing=ON \
-     $( ! $OTBTESTS || echo "-DBUILD_TESTING=ON" ) \
+     $( [ "$OTBTESTS" != "true" ] || echo "-DBUILD_TESTING=ON" ) \
      -DDOWNLOAD_LOCATION=/tmp/SuperBuild-downloads \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  && rm -rf /tmp/SuperBuild-downloads
@@ -170,7 +170,7 @@ RUN useradd -s /bin/bash -m otbuser
 
 # Admin rights without password (not recommended, use `docker run -u root` instead)
 ARG SUDO=false
-RUN ! $SUDO || usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN [ "$SUDO" != "true" ] || usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Allow user to install packages in prefix /opt/otbtf and venv without being root
 COPY --from=otb-build --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
@@ -185,7 +185,7 @@ COPY README.md setup.py .
 RUN pip install -e .
 
 # Install test packages for dev image
-RUN ! $DEV_IMAGE || pip install codespell flake8 pylint pytest pytest-cov pytest-order
+RUN [ "$DEV_IMAGE" != "true" ] || pip install codespell flake8 pylint pytest pytest-cov pytest-order
 
 WORKDIR /home/otbuser
 
