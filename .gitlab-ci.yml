@@ -1,17 +1,12 @@
 variables:
-  OTBTF_VERSION: 4.4.0
-  OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
-  DATADIR: $CI_PROJECT_DIR/test/data
   DOCKER_BUILDKIT: 1
-  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   BUILDX_BUILDER: container
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+  OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
   CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
   CACHE_IMAGE_GPU: $CI_REGISTRY_IMAGE:build-cache-gpu
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   DEV_IMAGE: $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
-  CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
-  DOCKERHUB_BASE: mdl4eo/otbtf
-  DOCKERHUB_IMAGE_BASE: ${DOCKERHUB_BASE}:${OTBTF_VERSION}
 
 workflow:
   auto_cancel:
@@ -250,6 +245,11 @@ nodata:
   stage: Ship
   rules:
   - if: $CI_COMMIT_TAG
+  variables:
+    OTBTF_VERSION: $CI_COMMIT_TAG
+    DOCKERHUB_BASE: mdl4eo/otbtf
+    CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
+    DOCKERHUB_IMAGE_BASE: ${DOCKERHUB_BASE}:${OTBTF_VERSION}
 
 deploy_cpu:
   extends: .ship_base
