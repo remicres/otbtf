@@ -144,7 +144,7 @@ ctest:
     OTB_TEST_UNITS: "Tensorflow|PanSharpening|Projection|Transform|IOGDAL"
     OTB_BUILD: /src/otb/build/OTB/build
   script:
-    - cd /src/otb/otb && git lfs fetch --all && git lfs pull
+    - cd /src/otb/otb && git lfs pull
     - ln -s $CI_PROJECT_DIR/test/data $OTBTF_SRC/test/data
     - ln -s $CI_PROJECT_DIR/test/models $OTBTF_SRC/test/models
     - cd $OTB_BUILD
