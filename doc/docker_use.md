@@ -140,44 +140,30 @@ Here you can find the list of older releases of OTBTF:
 | **mdl4eo/otbtf:3.3.0-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.0-gpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.0-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.0-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.0-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.2-cpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.2-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.2-gpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.2-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.2-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.2-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.3-cpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.3-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.3-gpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.3.3-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.3-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.3.3-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.4.0-cpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.4.0-cpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.4.0-gpu**                                                         | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:3.4.0-gpu-dev**                                                     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.4.0-gpu-opt**     | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:3.4.0-gpu-opt-dev** | Ubuntu Focal  | r2.8   | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.0.0-cpu**                                                         | Ubuntu Jammy  | r2.12  | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.0.0-cpu-dev**                                                     | Ubuntu Jammy  | r2.12  | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.0.0-gpu**                                                         | Ubuntu Jammy  | r2.12  | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.0.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.12  | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.0.0-gpu-opt**     | Ubuntu Jammy  | r2.12  | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.0.0-gpu-opt-dev** | Ubuntu Jammy  | r2.12  | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.1.0-cpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.1.0-cpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.1.0-gpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.1.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.1.0-gpu-opt**     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.1.0-gpu-opt-dev** | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.2.0-cpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.2.0-cpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.2.0-gpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.2.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.2.0-gpu-opt**     | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **gitlab.irstea.fr/remi.cresson/otbtf/container_registry/otbtf:4.2.0-gpu-opt-dev** | Ubuntu Jammy  | r2.12 | 8.1.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.2.1-cpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.2 | CPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.2.1-cpu-dev**                                                     | Ubuntu Jammy  | r2.12 | 8.1.2 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.2.1-gpu**                                                         | Ubuntu Jammy  | r2.12 | 8.1.2 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
@@ -200,5 +186,3 @@ Here you can find the list of older releases of OTBTF:
 | **mdl4eo/otbtf:4.3.1-cpu-dev**                                      | Ubuntu Jammy  | r2.14 | 9.0.0 | CPU, no optimization (dev) |  yes  | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.3.1-gpu**                                          | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU, no optimization   | no        | 5.2,6.1,7.0,7.5,8.6|
 | **mdl4eo/otbtf:4.3.1-gpu-dev**                                      | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU, no optimization (dev) | yes   | 5.2,6.1,7.0,7.5,8.6|
-| **registry.forgemia.inra.fr/orfeo-toolbox/otbtf:4.3.1-gpu-opt**     | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU with opt.          | no        | 5.2,6.1,7.0,7.5,8.6|
-| **registry.forgemia.inra.fr/orfeo-toolbox/otbtf:4.3.1-gpu-opt-dev** | Ubuntu Jammy  | r2.14 | 9.0.0 | GPU with opt. (dev)    | yes       | 5.2,6.1,7.0,7.5,8.6|
