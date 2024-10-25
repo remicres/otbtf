@@ -151,7 +151,7 @@ RUN cd /src/otb/build/OTB/build \
       -DTENSORFLOW_CC_LIB=$PYTHON_SITE_PACKAGES/tensorflow/libtensorflow_cc.so.2 \
       -DTENSORFLOW_FRAMEWORK_LIB=$PYTHON_SITE_PACKAGES/tensorflow/libtensorflow_framework.so.2 \
  && make install -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
- && ( $DEV_IMAGE || rm -rf /src/otb ) \
+ && ( [ "$DEV_IMAGE" = "true" ] || rm -rf /src/otb ) \
  && rm -rf /root/.cache /tmp/*
 
 # ----------------------------------------------------------------------------
@@ -170,7 +170,7 @@ RUN useradd -s /bin/bash -m otbuser
 
 # Admin rights without password (not recommended, use `docker run -u root` instead)
 ARG SUDO=false
-RUN [ "$SUDO" != "true" ] || usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN if [ "$SUDO" = "true" ] ; then usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; fi
 
 # Allow user to install packages in prefix /opt/otbtf and venv without being root
 COPY --from=otb-build --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
@@ -185,7 +185,7 @@ COPY README.md setup.py .
 RUN pip install -e .
 
 # Install test packages for dev image
-RUN [ "$DEV_IMAGE" != "true" ] || pip install codespell flake8 pylint pytest pytest-cov pytest-order
+RUN if [ "$DEV_IMAGE" = "true" ] ; then pip install codespell flake8 pylint pytest pytest-cov pytest-order; fi
 
 WORKDIR /home/otbuser
 
