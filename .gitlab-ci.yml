@@ -69,35 +69,22 @@ docker_image:
 
 flake8:
   extends: .static_analysis_base
-  rules:
-    - changes:
-      - otbtf/**/*
   script:
     - flake8 $OTBTF_SRC/otbtf --exclude=tensorflow_v1x
 
 pylint:
   extends: .static_analysis_base
-  rules:
-    - changes:
-      - otbtf/**/*
   script:
     - pylint $OTBTF_SRC/otbtf --ignore=tensorflow_v1x
 
 codespell:
   rules:
-    - changes:
-      - otbtf/**/*
-      - "**/*.md"
   extends: .static_analysis_base
   script:
     - codespell otbtf doc README.md
 
 cppcheck:
   extends: .static_analysis_base
-  rules:
-    - changes:
-      - app/**/*
-      - include/**/*
   script:
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
@@ -128,16 +115,6 @@ build_docs:
 .tests_base:
   only:
     - merge_requests
-  rules:
-    - changes:
-      - app/**/*
-      - include/**/*
-      - "**/*.py"
-      - "**/CMakeLists.txt"
-      - Dockerfile
-      - .gitlab-ci.yml
-      - otb-module.cmake
-      - setup.py
   variables:
     ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
   artifacts:
@@ -255,8 +232,8 @@ nodata:
 .ship_base:
   extends: .docker_build_base
   stage: Ship
-  rules:
-  - if: $CI_COMMIT_TAG
+  only:
+    - tags
   variables:
     OTBTF_VERSION: $CI_COMMIT_TAG
     DOCKERHUB_BASE: mdl4eo/otbtf
