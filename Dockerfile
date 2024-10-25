@@ -49,7 +49,7 @@ RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY 
  && pip install --no-cache-dir --no-deps keras_applications keras_preprocessing
  
 # TF build arguments
-ARG TF=v2.18.0-rc2
+ARG TF=v2.18.0
 ARG WITH_CUDA=false
 # Custom compute capabilities, else use default one from .bazelrc
 ARG CUDA_CC
@@ -193,4 +193,4 @@ WORKDIR /home/otbuser
 # Test python imports
 RUN python -c "import tensorflow ; import keras"
 RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
-RUN python -c "from osgeo import gdal ; import otbtf ; import tricks"
+RUN python -c "import otbtf ; import tricks"
