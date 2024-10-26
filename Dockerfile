@@ -99,7 +99,8 @@ COPY --from=tf-build /opt/otbtf /opt/otbtf
 # SuperBuild OTB
 ARG OTB=release-9.1
 ADD --keep-git-dir=true https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git#$OTB otb
-ARG OTBTESTS=false
+ARG DEV_IMAGE=false
+
 # <------------------------------------------
 # This is a dirty hack for release 4.0.0alpha
 # We have to wait that OTB moves from C++14 to C++17
@@ -125,7 +126,7 @@ RUN cd otb \
      -DOTB_BUILD_SAR=ON \
      -DOTB_BUILD_Segmentation=ON \
      -DOTB_BUILD_StereoProcessing=ON \
-     $( [ "$OTBTESTS" != "true" ] || echo "-DBUILD_TESTING=ON" ) \
+     $( [ "$DEV_IMAGE" != "true" ] || echo "-DBUILD_TESTING=ON" ) \
      -DDOWNLOAD_LOCATION=/tmp/SuperBuild-downloads \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  && rm -rf /tmp/SuperBuild-downloads
@@ -139,7 +140,6 @@ RUN mkdir test
 COPY test/CMakeLists.txt test/*.cxx test/
 
 # Build OTBTF cpp
-ARG DEV_IMAGE=false
 RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
 RUN cd /src/otb/build/OTB/build \
  && cmake /src/otb/otb \
