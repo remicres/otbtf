@@ -69,13 +69,13 @@ ARG TF_BUILD_ARTIFACTS
 # Save local bazel cache with docker mount
 RUN --mount=type=cache,target=/root/.cache/bazel \
  cd tensorflow \
- && TF_PYTHON_VERSION=$PY \
  && BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
  && if [ "$WITH_CUDA" = "true" ] ; then BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ; fi \
  && if [ -n "$CUDA_CC" ] ; then BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_CC"; fi \
  && if [ "$WITH_MKL" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ; fi \
  && if [ "$WITH_XLA" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=xla" ; fi \
  && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS --verbose_failures" \
+ && export HERMETIC_PYTHON_VERSION=$PY \
  && echo "Build env:" && env \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
  && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
@@ -145,6 +145,7 @@ RUN cd /src/otb/build/OTB/build \
  && cmake /src/otb/otb \
       -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
       -DOTB_WRAP_PYTHON=ON \
+      -DPython_EXECUTABLE=$(which python) \
       -DOTB_USE_TENSORFLOW=ON \
       -DModule_OTBTensorflow=ON \
       -Dtensorflow_include_dir=/opt/otbtf/include/tf \
