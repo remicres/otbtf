@@ -58,7 +58,7 @@ docker_image:
       docker buildx build --push -t $BRANCH_IMAGE
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --cache-to type=registry,ref=$CACHE_IMAGE_CPU,mode=max,oci-mediatypes=true,image-manifest=true
-      --build-arg DEV_IMAGE=true --build-arg OTBTESTS=true
+      --build-arg DEV_IMAGE=true
       "."
 
 .static_analysis_base:
