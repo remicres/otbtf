@@ -99,7 +99,6 @@ COPY --from=tf-build /opt/otbtf /opt/otbtf
 # SuperBuild OTB
 ARG OTB=release-9.1
 ADD --keep-git-dir=true https://gitlab.orfeo-toolbox.org/orfeotoolbox/otb.git#$OTB otb
-ARG DEV_IMAGE=false
 
 # <------------------------------------------
 # This is a dirty hack for release 4.0.0alpha
@@ -126,7 +125,6 @@ RUN cd otb \
      -DOTB_BUILD_SAR=ON \
      -DOTB_BUILD_Segmentation=ON \
      -DOTB_BUILD_StereoProcessing=ON \
-     $( [ "$DEV_IMAGE" != "true" ] || echo "-DBUILD_TESTING=ON" ) \
      -DDOWNLOAD_LOCATION=/tmp/SuperBuild-downloads \
  && make -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  && rm -rf /tmp/SuperBuild-downloads
@@ -140,6 +138,7 @@ RUN mkdir test
 COPY test/CMakeLists.txt test/*.cxx test/
 
 # Build OTBTF cpp
+ARG DEV_IMAGE=false
 RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
 RUN cd /src/otb/build/OTB/build \
  && cmake /src/otb/otb \
@@ -151,6 +150,7 @@ RUN cd /src/otb/build/OTB/build \
       -Dtensorflow_include_dir=/opt/otbtf/include/tf \
       -DTENSORFLOW_CC_LIB=$PYTHON_SITE_PACKAGES/tensorflow/libtensorflow_cc.so.2 \
       -DTENSORFLOW_FRAMEWORK_LIB=$PYTHON_SITE_PACKAGES/tensorflow/libtensorflow_framework.so.2 \
+      $( [ "$DEV_IMAGE" != "true" ] || echo "-DBUILD_TESTING=ON" ) \
  && make install -j $(python -c "import os; print(round( os.cpu_count() * $CPU_RATIO ))") \
  && ( [ "$DEV_IMAGE" = "true" ] || rm -rf /src/otb ) \
  && rm -rf /root/.cache /tmp/*
