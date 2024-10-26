@@ -63,6 +63,7 @@ docker_image:
 
 .static_analysis_base:
   stage: Static Analysis
+  needs: []
   allow_failure: true
   only:
     - merge_requests
@@ -300,7 +301,7 @@ deploy_gpu:
     #- docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
 
 export_tf_wheels:
-  extends: .docker_build_base
+  extends: .ship_base
   stage: Export TensorFlow
   needs: ["deploy_cpu", "deploy_gpu"]
   rules:
