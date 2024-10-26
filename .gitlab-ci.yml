@@ -95,14 +95,16 @@ build_docs:
   variables:
     PTH: public_test
   rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual
+    - if: $CI_COMMIT_REF_NAME == /master/
+      variables:
+        PTH: public
     - changes:
       - doc/**/*
       - "*.{md,txt}"
       - mkdocs.yml
       - .readthedocs.yaml
-    - if: $CI_COMMIT_REF_NAME == /master/
-      variables:
-        PTH: public
   before_script:
     - pip install -r doc/doc_requirements.txt
   script:
@@ -143,9 +145,7 @@ ctest:
 
 .applications_test_base:
   extends: .tests_base
-  #rules:
-  #  - if: $CI_MERGE_REQUEST_ID
-  #    when: manual
+  #when: manual
   stage: Applications Test
   before_script:
     - mkdir -p $ARTIFACT_TEST_DIR
