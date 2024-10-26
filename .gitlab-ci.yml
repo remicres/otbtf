@@ -88,7 +88,7 @@ cppcheck:
   script:
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
-build_docs:
+docs:
   tags: [ stable ]
   image: python:3.10-slim
   stage: Documentation
@@ -115,6 +115,7 @@ build_docs:
       - public_test
 
 .tests_base:
+  needs: ["docker_image"]
   only:
     - merge_requests
   variables:
@@ -301,6 +302,7 @@ deploy_gpu:
 export_tf_wheels:
   extends: .docker_build_base
   stage: Export TensorFlow
+  needs: ["deploy_cpu", "deploy_gpu"]
   rules:
     - when: manual
   artifacts:
