@@ -69,24 +69,24 @@ ARG TF_BUILD_ARTIFACTS
 # Save local bazel cache with docker mount
 RUN --mount=type=cache,target=/root/.cache/bazel \
  cd tensorflow \
- && export TF_PYTHON_VERSION=$PY \
- && export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
- && ( [ "$WITH_CUDA" != "true" ] || export BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ) \
- && ( [ -z "$CUDA_CC" ] || export BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_CC" ) \
- && ( [ "$WITH_MKL" != "true" ] || export BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ) \
- && ( [ "$WITH_XLA" != "true" ] || export BZL_CONFIGS="$BZL_CONFIGS --config=xla" ) \
+ && TF_PYTHON_VERSION=$PY \
+ && BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
+ && if [ "$WITH_CUDA" = "true" ] ; then BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ; fi \
+ && if [ -n "$CUDA_CC" ] ; then BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_CC"; fi \
+ && if [ "$WITH_MKL" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ; fi \
+ && if [ "$WITH_XLA" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=xla" ; fi \
  && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS --verbose_failures" \
  && echo "Build env:" && env \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
  && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
- && export TF_WHEEL="bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl" \
+ && TF_WHEEL="bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl" \
  && pip install --no-cache-dir $TF_WHEEL \
  && ln -s $PYTHON_SITE_PACKAGES/tensorflow/include /opt/otbtf/include/tf \
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
- && export TF_MISSING_HEADERS="tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h" \
+ && TF_MISSING_HEADERS="tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h" \
  && cp $TF_MISSING_HEADERS /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
- && export ARTIFACTS="$TF_WHEEL $TF_MISSING_HEADERS bazel-bin/tensorflow/libtensorflow_cc.so*" \
- && ( [ -z "$TF_BUILD_ARTIFACTS" ] || (mkdir -p $TF_BUILD_ARTIFACTS && mv $ARTIFACTS $TF_BUILD_ARTIFACTS) ) \
+ && ARTIFACTS="$TF_WHEEL $TF_MISSING_HEADERS bazel-bin/tensorflow/libtensorflow_cc.so*" \
+ && if [ -n "$TF_BUILD_ARTIFACTS" ] ; then mkdir -p $TF_BUILD_ARTIFACTS && mv $ARTIFACTS $TF_BUILD_ARTIFACTS ; fi \
  && rm -rf bazel-* /src/tf
 
 # ----------------------------------------------------------------------------
