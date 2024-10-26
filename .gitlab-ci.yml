@@ -304,8 +304,7 @@ export_tf_wheels:
   extends: .ship_base
   stage: Export TensorFlow
   needs: ["deploy_cpu", "deploy_gpu"]
-  rules:
-    - when: manual
+  when: manual
   artifacts:
     paths:
       - cpu-build-artifacts/
