@@ -70,7 +70,7 @@ ARG TF_BUILD_ARTIFACTS
 RUN --mount=type=cache,target=/root/.cache/bazel \
  cd tensorflow \
  && BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
- && if [ "$WITH_CUDA" = "true" ] ; then BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --@local_config_cuda//cuda:include_cuda_libs=true" ; fi \
+ && if [ "$WITH_CUDA" = "true" ] ; then BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ; fi \
  && if [ -n "$CUDA_CC" ] ; then BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_CC"; fi \
  && if [ "$WITH_MKL" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ; fi \
  && if [ "$WITH_XLA" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=xla" ; fi \
@@ -79,8 +79,8 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS --announce_rc --verbose_failures $BZL_OPTIONS" \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
  && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
- && TF_WHEEL="bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl" \
- && pip install --no-cache-dir $TF_WHEEL \
+ && TF_WHEEL=$(find bazel-bin/tensorflow/tools/pip_package/wheel_house/ -type f -name "tensorflow*.whl") \
+ && pip install --no-cache-dir "$TF_WHEEL$(! $WITH_CUDA || echo '[and-cuda]')" \
  && ln -s $PYTHON_SITE_PACKAGES/tensorflow/include /opt/otbtf/include/tf \
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
  && TF_MISSING_HEADERS="tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h" \
