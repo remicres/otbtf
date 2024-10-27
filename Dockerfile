@@ -70,7 +70,7 @@ ARG TF_BUILD_ARTIFACTS
 RUN --mount=type=cache,target=/root/.cache/bazel \
  cd tensorflow \
  && BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
- && if [ "$WITH_CUDA" = "true" ] ; then BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux --config=cuda_wheel" ; fi \
+ && if [ "$WITH_CUDA" = "true" ] ; then BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow --config=release_gpu_linux" ; fi \
  && if [ -n "$CUDA_CC" ] ; then BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_CC"; fi \
  && if [ "$WITH_MKL" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ; fi \
  && if [ "$WITH_XLA" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=xla" ; fi \
