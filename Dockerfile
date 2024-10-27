@@ -76,7 +76,7 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && if [ "$WITH_XLA" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=xla" ; fi \
  && export HERMETIC_PYTHON_VERSION=$PY \
  && echo "Build env:" && env \
- && bazel cquery //tensorflow/tools/pip_package:wheel $BZL_CONFIGS $BZL_OPTIONS \
+ && bazel cquery //tensorflow/tools/pip_package:wheel $BZL_CONFIGS $BZL_OPTIONS --output=build \
  && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS --verbose_failures" \
  && echo "Starting build with cmd: \"bazel $BZL_CMD\"" \
  && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
