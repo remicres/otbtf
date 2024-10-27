@@ -47,7 +47,7 @@ RUN pip install --no-cache-dir -U pip wheel
 ARG NUMPY="1.26.4"
 RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY packaging requests
  
-# TF build arguments
+# TensorFlow build arguments
 ARG TF=v2.18.0
 ARG WITH_CUDA=false
 # Custom compute capabilities, else use default one from .bazelrc
@@ -59,14 +59,14 @@ ARG WITH_MKL=false
 ADD https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64  /opt/otbtf/bin/bazelisk
 RUN chmod +x /opt/otbtf/bin/bazelisk && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf/bin/bazel
 
-# Build and install TF wheel
+# Build and install tf wheel
 ADD https://github.com/tensorflow/tensorflow.git#$TF tensorflow
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
 # You can use --build-arg BZL_OPTIONS="--remote_cache=http://..." at build time
 ARG BZL_OPTIONS
 ARG TF_BUILD_ARTIFACTS
 
-# Save local bazel cache with docker mount
+# Run build with local bazel cache using docker mount
 RUN --mount=type=cache,target=/root/.cache/bazel \
  cd tensorflow \
  && BZL_CONFIGS="--repo_env=WHEEL_NAME=tensorflow_cpu --config=release_cpu_linux" \
