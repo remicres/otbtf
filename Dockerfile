@@ -61,7 +61,7 @@ RUN chmod +x /opt/otbtf/bin/bazelisk && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf
 
 # Build and install TF wheel
 ADD https://github.com/tensorflow/tensorflow.git#$TF tensorflow
-ARG BZL_TARGETS="'//tensorflow:libtensorflow_cc.so' '//tensorflow/tools/pip_package:wheel'"
+ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
 # You can use --build-arg BZL_OPTIONS="--remote_cache=http://..." at build time
 ARG BZL_OPTIONS
 ARG TF_BUILD_ARTIFACTS
@@ -74,12 +74,12 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && if [ -n "$CUDA_CC" ] ; then BZL_CONFIGS="$BZL_CONFIGS --repo_env=HERMETIC_CUDA_COMPUTE_CAPABILITIES=$CUDA_CC"; fi \
  && if [ "$WITH_MKL" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=mkl" ; fi \
  && if [ "$WITH_XLA" = "true" ] ; then BZL_CONFIGS="$BZL_CONFIGS --config=xla" ; fi \
- && BZL_ARGS="$BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS --verbose_failures" \
  && export HERMETIC_PYTHON_VERSION=$PY \
  && echo "Build env:" && env \
- && bazel cquery $BZL_ARGS \
- && echo "Starting build with cmd: \"bazel build $BZL_ARGS\"" \
- && bazel build $BZL_ARGS --jobs="HOST_CPUS*$CPU_RATIO" \
+ && bazel cquery //tensorflow/tools/pip_package:wheel $BZL_CONFIGS $BZL_OPTIONS \
+ && BZL_CMD="build $BZL_TARGETS $BZL_CONFIGS $BZL_OPTIONS --verbose_failures" \
+ && echo "Starting build with cmd: \"bazel build $BZL_CMD\"" \
+ && bazel $BZL_CMD --jobs="HOST_CPUS*$CPU_RATIO" \
  && TF_WHEEL="bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl" \
  && pip install --no-cache-dir $TF_WHEEL \
  && ln -s $PYTHON_SITE_PACKAGES/tensorflow/include /opt/otbtf/include/tf \
