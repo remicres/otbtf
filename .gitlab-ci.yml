@@ -2,6 +2,7 @@ variables:
   DOCKER_BUILDKIT: 1
   BUILDX_BUILDER: container
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+  OTBTF_VERSION: 4.4.0
   OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image*
   DATADIR: $CI_PROJECT_DIR/test/data
   CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
@@ -96,6 +97,8 @@ docs:
   variables:
     PTH: public_test
   rules:
+    - if: $CI_COMMIT_TAG
+      when: never
     - if: $CI_COMMIT_REF_NAME == /master/
       variables:
         PTH: public
@@ -234,10 +237,9 @@ nodata:
   only:
     - tags
   variables:
-    OTBTF_VERSION: $CI_COMMIT_TAG
     DOCKERHUB_BASE: mdl4eo/otbtf
     CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
-    DOCKERHUB_IMAGE_BASE: ${DOCKERHUB_BASE}:${OTBTF_VERSION}
+    DOCKERHUB_IMAGE_BASE: $DOCKERHUB_BASE:$OTBTF_VERSION
 
 deploy_cpu:
   extends: .ship_base
