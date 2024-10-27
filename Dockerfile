@@ -61,7 +61,7 @@ RUN chmod +x /opt/otbtf/bin/bazelisk && ln -s /opt/otbtf/bin/bazelisk /opt/otbtf
 
 # Build and install TF wheel
 ADD https://github.com/tensorflow/tensorflow.git#$TF tensorflow
-ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
+ARG BZL_TARGETS="'//tensorflow:libtensorflow_cc.so' '//tensorflow/tools/pip_package:wheel'"
 # You can use --build-arg BZL_OPTIONS="--remote_cache=http://..." at build time
 ARG BZL_OPTIONS
 ARG TF_BUILD_ARTIFACTS
