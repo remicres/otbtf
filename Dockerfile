@@ -7,13 +7,14 @@ FROM ubuntu:jammy-20240911.1 AS base-stage
 
 WORKDIR /tmp
 
-### System packages
+# System packages
 ARG DEBIAN_FRONTEND=noninteractive
 COPY system-dependencies.txt .
 RUN apt-get update -y && apt-get upgrade -y \
  && cat system-dependencies.txt | xargs apt-get install --no-install-recommends -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Env required during build and for the final image
 ENV PY=3.10
 ENV VIRTUAL_ENV=/opt/otbtf/venv
 ENV PATH="$VIRTUAL_ENV/bin:/opt/otbtf/bin:$PATH"
@@ -23,7 +24,7 @@ ENV LD_LIBRARY_PATH=/opt/otbtf/lib
 ARG CPU_RATIO=1
 
 # ----------------------------------------------------------------------------
-### Builder stage: bazel clang tensorflow
+# Builder stage: bazel clang tensorflow
 FROM base-stage AS tf-build
 WORKDIR /src/tf
 RUN mkdir -p /opt/otbtf/bin /opt/otbtf/lib /opt/otbtf/include
@@ -90,7 +91,7 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && rm -rf bazel-* /src/tf
 
 # ----------------------------------------------------------------------------
-### Builder stage: cmake gcc otb
+# Builder stage: cmake gcc otb
 FROM base-stage AS otb-build
 WORKDIR /src/otb
 
