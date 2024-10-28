@@ -1,13 +1,12 @@
 # Build your own docker images
 
-Docker build has to be called from the root of the repository (i.e. `docker
- build .`.
+Docker build has to be called from the root of the repository
+ (i.e. `docker build .`.
 You can select target versions using `--build-arg`:
 
-- **TensorFlow** : `TF` arg for the git branch or tag, `ZIP_COMP_FILES`
- allows you to save compiled tf binaries if you want to install it elsewhere.
-- **OrfeoToolBox** : `OTB` arg for the git branch or tag, set `KEEP_SRC_OTB`
-in order to preserve OTB sources
+- **TensorFlow** : `TF` arg for the git branch or tag
+- **OrfeoToolBox** : `OTB` arg for the git branch or tag,
+ set `KEEP_SRC_OTB` in order to preserve OTB sources
 
 ## Default build arguments
 
@@ -31,8 +30,6 @@ CUDA_COMPUTE_CAPABILITIES=
 BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
 # Available for additional bazel options, e.g. --remote_cache
 BZL_OPTIONS=
-# Path to save tf compiled wheel and libtensorflow_cc
-TF_BUILD_ARTIFACTS=
 # Git branch or tag to checkout
 OTB=release-9.1
 # Keep OTB sources and build test
@@ -89,20 +86,19 @@ docker build --network='host' -t otbtf:gpu \
 ### Build for another machine and save TF compiled files
 
 ```bash
-docker build --network='host' -t otbtf:gpu \
-  --mount=type=bind,source=$(pwd)/gpu-build-artifacts,target=/tmp/artifacts \
+docker build --network='host' --target=tf-build -t otbtf:gpu \
   --build-arg BZL_OPTIONS="--remote_cache=http://localhost:9090" \
   --build-arg WITH_CUDA=true \
-  --build-arg TF_BUILD_ARTIFACTS=/tmp/artifacts \
   .
 
 # Target machine shell
-cd gpu-build-artifacts/
+docker run -v gpu-build-artifacts:/artifacts otbtf:gpu mv /tmp/artifacts /artifacts
 sudo mv libtensorflow_cc* /usr/local/lib
 # You may need to create a virtualenv, here TF and dependencies are installed 
 # next to user's pip packages
 pip3 install -U pip wheel mock six future deprecated "numpy<2"
 pip3 install --no-deps keras_applications keras_preprocessing
+cd gpu-build-artifacts
 pip3 install tensorflow-v2.18.0-cp310-cp310-linux_x86_64.whl
 
 TF_WHEEL_DIR="$HOME/.local/lib/python3.10/site-packages/tensorflow"

@@ -65,7 +65,6 @@ ADD https://github.com/tensorflow/tensorflow.git#$TF tensorflow
 ARG BZL_TARGETS="//tensorflow:libtensorflow_cc.so //tensorflow/tools/pip_package:wheel"
 # You can use --build-arg BZL_OPTIONS="--remote_cache=http://..." at build time
 ARG BZL_OPTIONS
-ARG TF_BUILD_ARTIFACTS
 
 # Run build with local bazel cache using docker mount
 RUN --mount=type=cache,target=/root/.cache/bazel \
@@ -86,8 +85,7 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && for f in $(find -L /opt/otbtf/include/tf -wholename "*/external/*/*.so"); do ln -s $f /opt/otbtf/lib/; done \
  && TF_MISSING_HEADERS="tensorflow/cc/saved_model/tag_constants.h tensorflow/cc/saved_model/signature_constants.h" \
  && cp $TF_MISSING_HEADERS /opt/otbtf/include/tf/tensorflow/cc/saved_model/ \
- && ARTIFACTS="$TF_WHEEL $TF_MISSING_HEADERS bazel-bin/tensorflow/libtensorflow_cc.so*" \
- && if [ -n "$TF_BUILD_ARTIFACTS" ] ; then mkdir -p $TF_BUILD_ARTIFACTS && mv $ARTIFACTS $TF_BUILD_ARTIFACTS ; fi \
+ && mkdir /tmp/artifacts && mv bazel-bin/tensorflow/libtensorflow_cc.so* $TF_WHEEL $TF_MISSING_HEADERS /tmp/artifacts \
  && rm -rf bazel-* /src/tf
 
 # ----------------------------------------------------------------------------

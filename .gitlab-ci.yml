@@ -312,13 +312,11 @@ export_tf_wheels:
     - >
       docker buildx build --target=tf-build -t tf-build-cpu
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
-      --build-arg TF_BUILD_ARTIFACTS=/tmp/artifacts
       .
     - docker run -v cpu-build-artifacts:/artifacts tf-build-cpu mv /tmp/artifacts/* /artifacts/
     - >
       docker buildx build --target=tf-build -t tf-build-gpu
       --cache-from type=registry,ref=$CACHE_IMAGE_GPU
       --build-arg WITH_CUDA=true
-      --build-arg TF_BUILD_ARTIFACTS=/tmp/artifacts
       .
     - docker run -v gpu-build-artifacts:/artifacts tf-build-gpu mv /tmp/artifacts/* /artifacts/
