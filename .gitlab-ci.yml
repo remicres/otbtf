@@ -149,7 +149,7 @@ ctest:
 .applications_test_base:
   extends: .tests_base
   stage: Applications Test
-  #when: manual
+  when: manual
   before_script:
     - mkdir -p $ARTIFACT_TEST_DIR
 
@@ -234,8 +234,8 @@ nodata:
 .ship_base:
   extends: .docker_build_base
   stage: Ship
-  only:
-    - tags
+  #only:
+  #  - tags
   variables:
     DOCKERHUB_BASE: mdl4eo/otbtf
     CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
@@ -313,6 +313,8 @@ export_tf_wheels:
       docker buildx build --target=tf-build -t tf-build-cpu
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       .
+    - docker images
+    - docker buildx ls
     - docker run -v cpu-build-artifacts:/artifacts tf-build-cpu mv /tmp/artifacts/* /artifacts/
     - >
       docker buildx build --target=tf-build -t tf-build-gpu
