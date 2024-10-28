@@ -236,8 +236,6 @@ nodata:
 .ship_base:
   extends: .docker_build_base
   stage: Ship
-  only:
-    - tags
   variables:
     DOCKERHUB_BASE: mdl4eo/otbtf
     CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
