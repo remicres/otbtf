@@ -46,7 +46,9 @@ stages:
     - name: docker:dind
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker buildx create --name container --driver=docker-container
+    - docker buildx create --name=container --driver=docker-container --use --bootstrap
+  after_script:
+    - docker buildx rm --keep-state container
 
 docker_image:
   stage: Build
@@ -262,11 +264,11 @@ deploy_cpu:
       --build-arg DEV_IMAGE=true
       .
     # push images on dockerhub
-    #- echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
-    #- docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
-    #- docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
+    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
+    - docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
+    - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
     # latest = cpu image
-    #- docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
+    - docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
 
 deploy_gpu:
   extends: .ship_base
@@ -293,17 +295,17 @@ deploy_gpu:
       --build-arg WITH_CUDA=true --build-arg DEV_IMAGE=true
       .
     # push gpu-* images on dockerhub
-    #- echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
-    #- docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
-    #- docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
+    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
+    - docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
+    - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
     # latest-gpu = gpu image
-    #- docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
+    - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
 
 export_tf_wheels:
   extends: .ship_base
   stage: Export TensorFlow
   needs: ["deploy_cpu", "deploy_gpu"]
-  #when: manual
+  when: manual
   artifacts:
     paths:
       - cpu-build-artifacts/
@@ -311,13 +313,13 @@ export_tf_wheels:
   script:
     - >
       docker buildx build --load
-      --target=tf-build -t tf-build-cpu
+      --target tf-build -t tf-build-cpu
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       .
     - docker run -v cpu-build-artifacts:/artifacts tf-build-cpu mv /tmp/artifacts/* /artifacts/
     - >
       docker buildx build --load
-      --target=tf-build -t tf-build-gpu
+      --target tf-build -t tf-build-gpu
       --cache-from type=registry,ref=$CACHE_IMAGE_GPU
       --build-arg WITH_CUDA=true
       .
