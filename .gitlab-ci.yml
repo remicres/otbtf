@@ -236,15 +236,20 @@ nodata:
 .ship_base:
   extends: .docker_build_base
   stage: Ship
-  #only:
-  #  - tags
+  only:
+    - tags
   variables:
     DOCKERHUB_BASE: mdl4eo/otbtf
     CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
     DOCKERHUB_IMAGE_BASE: $DOCKERHUB_BASE:$OTBTF_VERSION
+  before_script:
+    - docker buildx create --name=container --driver=docker-container --use --bootstrap
+    #- echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
 
 deploy_cpu:
   extends: .ship_base
+  only:
+    - tags
   variables:
     IMAGE_CPU: $CI_REGISTRY_PUBIMG-cpu
     IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG-cpu-dev
@@ -264,14 +269,15 @@ deploy_cpu:
       --build-arg DEV_IMAGE=true
       .
     # push images on dockerhub
-    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
-    - docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
-    - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
+    #- docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
+    #- docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
     # latest = cpu image
-    - docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
+    #- docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
 
 deploy_gpu:
   extends: .ship_base
+  only:
+    - tags
   variables:
     IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
     IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
@@ -282,30 +288,29 @@ deploy_gpu:
     # gpu
     - >
       docker buildx build --push -t $IMAGE_GPU
-      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --cache-from type=registry,ref=$CACHE_IMAGE_GPU
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --cache-to type=registry,ref=$CACHE_IMAGE_GPU,mode=max,oci-mediatypes=true,image-manifest=true
       --build-arg WITH_CUDA=true
       .
     # gpu-dev
     - >
       docker buildx build --push -t $IMAGE_GPUDEV
-      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --cache-from type=registry,ref=$CACHE_IMAGE_GPU
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --build-arg WITH_CUDA=true --build-arg DEV_IMAGE=true
       .
     # push gpu-* images on dockerhub
-    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
-    - docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
-    - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
+    #- docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
+    #- docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
     # latest-gpu = gpu image
-    - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
+    #- docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
 
 export_tf_wheels:
   extends: .ship_base
   stage: Export TensorFlow
-  needs: ["deploy_cpu", "deploy_gpu"]
-  when: manual
+  #needs: ["deploy_cpu", "deploy_gpu"]
+  #when: manual
   artifacts:
     paths:
       - cpu-build-artifacts/
