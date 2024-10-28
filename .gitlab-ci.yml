@@ -303,21 +303,21 @@ export_tf_wheels:
   extends: .ship_base
   stage: Export TensorFlow
   needs: ["deploy_cpu", "deploy_gpu"]
-  when: manual
+  #when: manual
   artifacts:
     paths:
       - cpu-build-artifacts/
       - gpu-build-artifacts/
   script:
     - >
-      docker buildx build --target=tf-build -t tf-build-cpu
+      docker buildx build --load
+      --target=tf-build -t tf-build-cpu
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       .
-    - docker images
-    - docker buildx ls
     - docker run -v cpu-build-artifacts:/artifacts tf-build-cpu mv /tmp/artifacts/* /artifacts/
     - >
-      docker buildx build --target=tf-build -t tf-build-gpu
+      docker buildx build --load
+      --target=tf-build -t tf-build-gpu
       --cache-from type=registry,ref=$CACHE_IMAGE_GPU
       --build-arg WITH_CUDA=true
       .
