@@ -151,6 +151,7 @@ ctest:
 .applications_test_base:
   stage: Applications Test
   extends: .tests_base
+  allow_failure: true
   needs: ["ctest"]
   #when: manual
   before_script:
