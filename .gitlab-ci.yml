@@ -132,8 +132,8 @@ docs:
     when: on_failure
 
 ctest:
-  extends: .tests_base
   stage: Test
+  extends: .tests_base
   needs: ["docker_image"]
   variables:
     CTEST_OUTPUT_ON_FAILURE: 1
@@ -149,8 +149,8 @@ ctest:
     - cp -r $OTB_BUILD/Testing/Temporary $ARTIFACT_TEST_DIR
 
 .applications_test_base:
-  extends: .tests_base
   stage: Applications Test
+  extends: .tests_base
   needs: ["ctest"]
   #when: manual
   before_script:
@@ -236,18 +236,15 @@ nodata:
 
 .ship_base:
   extends: .docker_build_base
-  stage: Ship
   #only:
   #  - tags
   variables:
     DOCKERHUB_BASE: mdl4eo/otbtf
     CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
     DOCKERHUB_IMAGE_BASE: $DOCKERHUB_BASE:$OTBTF_VERSION
-  before_script:
-    - docker buildx create --name=container --driver=docker-container --use --bootstrap
-    #- echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
 
 deploy_cpu:
+  stage: Ship
   extends: .ship_base
   variables:
     IMAGE_CPU: $CI_REGISTRY_PUBIMG-cpu
@@ -268,12 +265,14 @@ deploy_cpu:
       --build-arg DEV_IMAGE=true
       .
     # push images on dockerhub
+    #- echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
     #- docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
     #- docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
     # latest = cpu image
     #- docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
 
 deploy_gpu:
+  stage: Ship
   extends: .ship_base
   variables:
     IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
@@ -298,15 +297,16 @@ deploy_gpu:
       --build-arg WITH_CUDA=true --build-arg DEV_IMAGE=true
       .
     # push gpu-* images on dockerhub
+    #- echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
     #- docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
     #- docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
     # latest-gpu = gpu image
     #- docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
 
 export_tf_wheels:
-  extends: .ship_base
   stage: Export TensorFlow
-  when: manual
+  extends: .ship_base
+  #when: manual
   artifacts:
     paths:
       - cpu-build-artifacts/
