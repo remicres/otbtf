@@ -151,9 +151,8 @@ ctest:
 .applications_test_base:
   stage: Applications Test
   extends: .tests_base
-  allow_failure: true
   needs: ["ctest"]
-  #when: manual
+  when: manual
   before_script:
     - mkdir -p $ARTIFACT_TEST_DIR
 
