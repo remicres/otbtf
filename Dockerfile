@@ -88,8 +88,6 @@ RUN --mount=type=cache,target=/root/.cache/bazel \
  && mkdir /tmp/artifacts && mv bazel-bin/tensorflow/libtensorflow_cc.so* $TF_WHEEL $TF_MISSING_HEADERS /tmp/artifacts \
  && rm -rf bazel-* /src/tf
 
-RUN ls /tmp/artifacts
-
 # ----------------------------------------------------------------------------
 # Builder stage: cmake gcc otb
 FROM base-stage AS otb-build
