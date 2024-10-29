@@ -119,7 +119,6 @@ docs:
       - public_test
 
 .tests_base:
-  needs: ["docker_image"]
   only:
     - merge_requests
   variables:
@@ -135,6 +134,7 @@ docs:
 ctest:
   extends: .tests_base
   stage: Test
+  needs: ["docker_image"]
   variables:
     CTEST_OUTPUT_ON_FAILURE: 1
     OTB_TEST_UNITS: "Tensorflow|PanSharpening|Projection|Transform|IOGDAL"
@@ -151,6 +151,7 @@ ctest:
 .applications_test_base:
   extends: .tests_base
   stage: Applications Test
+  needs: ["ctest"]
   #when: manual
   before_script:
     - mkdir -p $ARTIFACT_TEST_DIR
@@ -305,7 +306,6 @@ deploy_gpu:
 export_tf_wheels:
   extends: .ship_base
   stage: Export TensorFlow
-  needs: ["deploy_cpu", "deploy_gpu"]
   when: manual
   artifacts:
     paths:
