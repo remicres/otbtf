@@ -151,7 +151,7 @@ ctest:
 .applications_test_base:
   extends: .tests_base
   stage: Applications Test
-  when: manual
+  #when: manual
   before_script:
     - mkdir -p $ARTIFACT_TEST_DIR
 
@@ -236,6 +236,8 @@ nodata:
 .ship_base:
   extends: .docker_build_base
   stage: Ship
+  #only:
+  #  - tags
   variables:
     DOCKERHUB_BASE: mdl4eo/otbtf
     CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
@@ -246,8 +248,6 @@ nodata:
 
 deploy_cpu:
   extends: .ship_base
-  only:
-    - tags
   variables:
     IMAGE_CPU: $CI_REGISTRY_PUBIMG-cpu
     IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG-cpu-dev
@@ -274,8 +274,6 @@ deploy_cpu:
 
 deploy_gpu:
   extends: .ship_base
-  only:
-    - tags
   variables:
     IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
     IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
@@ -307,8 +305,8 @@ deploy_gpu:
 export_tf_wheels:
   extends: .ship_base
   stage: Export TensorFlow
-  #needs: ["deploy_cpu", "deploy_gpu"]
-  #when: manual
+  needs: ["deploy_cpu", "deploy_gpu"]
+  when: manual
   artifacts:
     paths:
       - cpu-build-artifacts/
