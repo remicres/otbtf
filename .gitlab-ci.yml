@@ -1,17 +1,4 @@
-variables:
-  DOCKER_BUILDKIT: 1
-  BUILDX_BUILDER: container
-  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
-  OTBTF_VERSION: 4.4.0-rc1
-  OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
-  DATADIR: $CI_PROJECT_DIR/test/data
-  CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
-  CACHE_IMAGE_GPU: $CI_REGISTRY_IMAGE:build-cache-gpu
-  BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-
 workflow:
-  auto_cancel:
-    on_new_commit: interruptible
   rules:
     # Execute on tags, MR or protected branches
     - if: $CI_COMMIT_TAG
@@ -23,13 +10,8 @@ workflow:
     # Ignore pipeline for filthy commits
     - if: $CI_COMMIT_MESSAGE =~ /^wip.*/i
       when: never
-
-default:
-  tags: [ godzilla ]
-  interruptible: true
-  image:
-    name: $BRANCH_IMAGE
-    pull_policy: always
+  auto_cancel:
+    on_new_commit: interruptible
 
 stages:
   - Build
@@ -38,6 +20,24 @@ stages:
   - Test
   - Applications Test
   - Ship
+
+variables:
+  DOCKER_BUILDKIT: 1
+  BUILDX_BUILDER: container
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+  OTBTF_VERSION: 4.4.0-rc1
+  OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
+  DATADIR: $CI_PROJECT_DIR/test/data
+  CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
+  CACHE_IMAGE_GPU: $CI_REGISTRY_IMAGE:build-cache-gpu
+  BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+
+default:
+  tags: [ godzilla ]
+  interruptible: true
+  image:
+    name: $BRANCH_IMAGE
+    pull_policy: always
 
 .docker_build_base:
   image: docker:latest
