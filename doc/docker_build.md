@@ -83,35 +83,35 @@ docker build --network='host' -t otbtf:gpu \
   .
 ```
 
-### Build for another machine and save TF compiled files
+### Build only tensorflow C++ lib and python wheel to install outside of Docker
 
 ```bash
-docker build --network='host' --target=tf-build -t otbtf:gpu \
+docker build --network='host' --target=tf-build -t tf:gpu \
   --build-arg BZL_OPTIONS="--remote_cache=http://localhost:9090" \
   --build-arg WITH_CUDA=true \
   .
 
 # Target machine shell
-docker run -v gpu-build-artifacts:/artifacts otbtf:gpu mv /tmp/artifacts /artifacts
-sudo mv libtensorflow_cc* /usr/local/lib
+docker run -v gpu-build-artifacts:/artifacts tf:gpu mv /tmp/artifacts /artifacts
+cd gpu-build-artifacts
+sudo mv libtensorflow_cc* /usr/local/lib  # Or another path you may add to LD_LIBRARY_PATH
 # You may need to create a virtualenv, here TF and dependencies are installed 
 # next to user's pip packages
 pip3 install -U pip wheel mock six future deprecated "numpy<2"
 pip3 install --no-deps keras_applications keras_preprocessing
-cd gpu-build-artifacts
 pip3 install tensorflow-v2.18.0-cp310-cp310-linux_x86_64.whl
 
 TF_WHEEL_DIR="$HOME/.local/lib/python3.10/site-packages/tensorflow"
 # If you installed the wheel as regular user, with root pip it should be in 
 # /usr/local/lib/python3.*, or in your virtualenv lib/ directory
 mv tag_constants.h signature_constants.h $TF_WHEEL_DIR/include/tensorflow/cc/saved_model/
-# From a OTB git source tree
+# From an OTB git source tree
 # Recompile OTB with OTBTF using libraries in /opt/tensorflow/lib and 
 # instructions in build_from_sources.md.
 cmake $OTB_GIT \
   -DOTB_USE_TENSORFLOW=ON \
   -DModule_OTBTensorflow=ON \
-  -DTENSORFLOW_CC_LIB="/opt/tensorflow/lib/libtensorflow_cc.so.2" \
+  -DTENSORFLOW_CC_LIB="/usr/local/lib/libtensorflow_cc.so.2" \
   -Dtensorflow_include_dir="$TF_WHEEL_DIR/include" \
   -DTENSORFLOW_FRAMEWORK_LIB="$TF_WHEEL_DIR/libtensorflow_framework.so.2" \
 && make install -j 
