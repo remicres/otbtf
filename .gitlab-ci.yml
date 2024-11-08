@@ -22,6 +22,7 @@ stages:
   - Ship
 
 variables:
+  DOCKER_DRIVER: overlay2
   DOCKER_BUILDKIT: 1
   BUILDX_BUILDER: container
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
