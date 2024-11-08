@@ -41,9 +41,9 @@ default:
     pull_policy: always
 
 .docker_build_base:
-  image: docker:latest
+  image: docker:27.3.1
   services:
-    - name: docker:dind
+    - name: docker:27.3.1-dind
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker buildx create --name=container --driver=docker-container --use --bootstrap
@@ -60,7 +60,7 @@ docker_image:
     - >
       docker buildx build --push -t $BRANCH_IMAGE
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
-      --cache-to type=registry,ref=$CACHE_IMAGE_CPU,mode=max,oci-mediatypes=true,image-manifest=true
+      --cache-to type=registry,ref=$CACHE_IMAGE_CPU,mode=max
       --build-arg DEV_IMAGE=true
       "."
 
@@ -286,7 +286,7 @@ deploy_gpu:
       docker buildx build --push -t $IMAGE_GPU
       --cache-from type=registry,ref=$CACHE_IMAGE_GPU
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
-      --cache-to type=registry,ref=$CACHE_IMAGE_GPU,mode=max,oci-mediatypes=true,image-manifest=true
+      --cache-to type=registry,ref=$CACHE_IMAGE_GPU,mode=max
       --build-arg WITH_CUDA=true
       .
     # gpu-dev
