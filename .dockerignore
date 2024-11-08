@@ -1,4 +1,4 @@
-.git
+.git*
 Dockerfile
 **/__pycache__
 .readthedocs.yaml
