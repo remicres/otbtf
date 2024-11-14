@@ -224,10 +224,17 @@ class ModelBase(abc.ABC):
         # Post-processing for inference
         postprocessed_outputs = self.postprocess_outputs(
             outputs=outputs,
-            inputs=inputs,
+            inputs=list(inputs.values()),
             normalized_inputs=normalized_inputs
         )
         outputs.update(postprocessed_outputs)
+
+        # Dirty fix for Keras 3 : we can't pass a dict of outputs
+        # We need to wrap the last layer in a new layer with the desired name
+        outputs = [
+            keras.layers.Lambda(lambda x: x, name=key)(prediction)
+            for key, prediction in outputs.items()
+        ]
 
         # Return the keras model
         return keras.Model(
