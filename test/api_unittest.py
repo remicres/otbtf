@@ -32,7 +32,7 @@ class APITest(unittest.TestCase):
         ])
         train_from_patchesimages.train(params=params)
         self.assertTrue(files_exist([
-            '$TMPDIR/model_from_pimg/keras_metadata.pb',
+            '$TMPDIR/model_from_pimg/fingerprint.pb',
             '$TMPDIR/model_from_pimg/saved_model.pb',
             '$TMPDIR/model_from_pimg/variables/variables.data-00000-of-00001',
             '$TMPDIR/model_from_pimg/variables/variables.index'
@@ -109,7 +109,7 @@ class APITest(unittest.TestCase):
         ])
         train_from_tfrecords.train(params=params)
         self.assertTrue(files_exist([
-            '$TMPDIR/model_from_tfrecs/keras_metadata.pb',
+            '$TMPDIR/model_from_tfrecs/fingerprint.pb',
             '$TMPDIR/model_from_tfrecs/saved_model.pb',
             '$TMPDIR/model_from_tfrecs/variables/variables.data-00000-of-00001',
             '$TMPDIR/model_from_tfrecs/variables/variables.index'
