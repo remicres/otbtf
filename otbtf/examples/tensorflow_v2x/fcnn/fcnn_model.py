@@ -196,10 +196,12 @@ def train(params, ds_train, ds_valid, ds_test):
         model.compile(
             loss=keras.losses.CategoricalCrossentropy(),
             optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
-            metrics=[
-                keras.metrics.Precision(class_id=1),
-                keras.metrics.Recall(class_id=1),
-            ],
+            metrics={
+                TARGET_NAME: [
+                    keras.metrics.Precision(class_id=1),
+                    keras.metrics.Recall(class_id=1),
+                ]
+            },
         )
 
         # Summarize the model (in CLI)

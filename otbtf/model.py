@@ -232,7 +232,7 @@ class ModelBase(abc.ABC):
         # Dirty fix for Keras 3 : we can't pass a dict of outputs
         # We need to wrap the last layer in a new layer with the desired name
         outputs = [
-            keras.layers.Lambda(lambda x: x, name=key)(prediction)
+            keras.layers.Identity(name=key)(prediction)
             for key, prediction in outputs.items()
         ]
 
