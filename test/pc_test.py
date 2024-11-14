@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import pytest
 import unittest
 import planetary_computer
 import pystac_client

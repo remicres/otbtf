@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import pytest
 import unittest
 from test_utils import run_command, run_command_and_test_exist, run_command_and_compare
