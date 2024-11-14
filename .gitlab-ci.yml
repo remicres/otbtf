@@ -127,7 +127,7 @@ docs:
     reports:
       junit: report_*.xml
     paths:
-      - $ARTIFACT_TEST_DIR/*.*
+      - $ARTIFACT_TEST_DIR
     expire_in: 1 week
     when: on_failure
 
@@ -164,7 +164,7 @@ crc_book:
     - mkdir -p $CRC_BOOK_TMP
     - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=report_tutorial.xml test/tutorial_unittest.py
   after_script:
-    - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
+    - cp -r $CRC_BOOK_TMP/* $ARTIFACT_TEST_DIR/
 
 sr4rs:
   extends: .applications_test_base
@@ -200,7 +200,7 @@ otbtf_api:
     - mkdir $API_TEST_TMP
     - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=report_api.xml test/api_unittest.py
   after_script:
-    - cp $API_TEST_TMP/*.* $ARTIFACT_TEST_DIR/
+    - cp -r $API_TEST_TMP/* $ARTIFACT_TEST_DIR/
 
 geos_enabled:
   extends: .applications_test_base
