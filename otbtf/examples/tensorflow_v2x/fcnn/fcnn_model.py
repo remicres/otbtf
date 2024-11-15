@@ -132,7 +132,7 @@ class FCNNModel(ModelBase):
         # "labels_crop32", "labels_crop64", ...,
         # "predictions_softmax_tensor_crop16", ..., etc).
 
-        return [predictions]
+        return predictions
 
 
 def dataset_preprocessing_fn(examples: dict):
@@ -188,6 +188,7 @@ def train(params, ds_train, ds_valid, ds_test):
         # over which the losses/metrics are computed.
         # This ensures a better optimization control, and also avoids lots of
         # useless outputs (e.g. metrics computed over extra outputs).
+        print("Compiling model...")
         model.compile(
             loss=keras.losses.CategoricalCrossentropy(),
             optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
