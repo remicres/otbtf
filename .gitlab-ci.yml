@@ -145,10 +145,22 @@ ctest:
     paths:
       - $OTB_BUILD/Testing/Temporary
 
+otbtf_api:
+  stage: Test
+  extends: .tests_base
+  variables:
+    API_TEST_TMP: /tmp/api_tests_tmp
+  script:
+    - mkdir $API_TEST_TMP
+    - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=report_api.xml test/api_unittest.py
+  artifacts:
+    paths:
+      - $API_TEST_TMP
+
 .applications_test_base:
   stage: Applications Test
   extends: .tests_base
-  needs: ["ctest"]
+  needs: ["ctest", "otbtf_api"]
   #when: manual
 
 crc_book:
@@ -162,6 +174,18 @@ crc_book:
   artifacts:
     paths:
       - $CRC_BOOK_TMP
+
+decloud:
+  extends: .applications_test_base
+  allow_failure: true
+  variables:
+    DATASET_DECLOUD: https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download
+  script:
+    - git clone https://github.com/CNES/decloud.git
+    - pip install -r $PWD/decloud/docker/requirements.txt
+    - wget -q $DATASET_DECLOUD -O file.zip && unzip file.zip
+    - export DECLOUD_DATA_DIR="$PWD/decloud_data"
+    - pytest decloud/tests/train_from_tfrecords_unittest.py
 
 sr4rs:
   extends: .applications_test_base
@@ -177,29 +201,6 @@ sr4rs:
     - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest --junitxml=report_sr4rs.xml test/sr4rs_unittest.py
-
-decloud:
-  extends: .applications_test_base
-  allow_failure: true
-  variables:
-    DATASET_DECLOUD: https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download
-  script:
-    - git clone https://github.com/CNES/decloud.git
-    - pip install -r $PWD/decloud/docker/requirements.txt
-    - wget -q $DATASET_DECLOUD -O file.zip && unzip file.zip
-    - export DECLOUD_DATA_DIR="$PWD/decloud_data"
-    - pytest decloud/tests/train_from_tfrecords_unittest.py
-
-otbtf_api:
-  extends: .applications_test_base
-  variables:
-    API_TEST_TMP: /tmp/api_tests_tmp
-  script:
-    - mkdir $API_TEST_TMP
-    - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=report_api.xml test/api_unittest.py
-  artifacts:
-    paths:
-      - $API_TEST_TMP
 
 geos_enabled:
   extends: .applications_test_base
