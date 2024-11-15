@@ -217,17 +217,5 @@ def train(params, ds_train, ds_valid, ds_test):
         if ds_test is not None:
             otbtf_model.model.evaluate(ds_test, batch_size=params.batch_size)
 
-        @tf.function(input_signature=[INPUT_SIGNATURE])
-        def model_signature(input_xs):
-            outputs = otbtf_model.model(input_xs)
-            return {
-                name: outputs[i]
-                for i, name in enumerate(otbtf_model.outputs_names)
-            }
-
-        # Prepare model export
-        export_archive = keras.export.ExportArchive()
-        export_archive.track(otbtf_model.model)
-        export_archive.add_function("serving_default", model_signature)
         # Save trained model as SavedModel
-        export_archive.write_out(params.model_dir)
+        otbtf_model.model.export(params.model_dir)
