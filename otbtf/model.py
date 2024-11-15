@@ -214,13 +214,11 @@ class ModelBase(abc.ABC):
         logging.info("Normalized model inputs: %s", normalized_inputs)
 
         # Build the model
-        outputs = self.get_outputs(normalized_inputs=normalized_inputs)
+        outputs = self.get_outputs(normalized_inputs)
         logging.info("Model outputs: %s", outputs)
 
         # Post-processing for inference
-        outputs = self.postprocess_outputs(
-            outputs=outputs, inputs=inputs, normalized_inputs=normalized_inputs
-        )
+        outputs = self.postprocess_outputs(outputs, inputs, normalized_inputs)
 
         # Return the keras model
         return keras.Model(inputs=inputs, outputs=outputs, name=self.__class__.__name__)

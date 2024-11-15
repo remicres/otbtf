@@ -55,7 +55,7 @@ class FCNNModel(ModelBase):
             for key, layer in inputs.items()
         }
 
-    def get_outputs(self, normalized_inputs: TensorsDict) -> Tensor | TensorsList:
+    def get_outputs(self, normalized_inputs: TensorsDict) -> TensorsList:
         """
         Inherits from `ModelBase`
 
@@ -132,7 +132,7 @@ class FCNNModel(ModelBase):
         # "labels_crop32", "labels_crop64", ...,
         # "predictions_softmax_tensor_crop16", ..., etc).
 
-        return predictions
+        return [predictions]
 
 
 def dataset_preprocessing_fn(examples: dict):
