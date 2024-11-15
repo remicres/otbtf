@@ -189,14 +189,14 @@ def train(params, ds_train, ds_valid, ds_test):
         # Model instantiation. Note that the normalize_fn is now part of the
         # model. It is mandatory to instantiate the model inside the strategy
         # scope.
-        model = FCNNModel(dataset_element_spec=ds_train.element_spec)
+        otbtf_model = FCNNModel(dataset_element_spec=ds_train.element_spec)
 
         # Compile the model
         # It is a good practice to use a `dict` to explicitly name the outputs
         # over which the losses/metrics are computed.
         # This ensures a better optimization control, and also avoids lots of
         # useless outputs (e.g. metrics computed over extra outputs).
-        model.compile(
+        otbtf_model.model.compile(
             loss=keras.losses.CategoricalCrossentropy(),
             optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
             metrics={
@@ -208,21 +208,21 @@ def train(params, ds_train, ds_valid, ds_test):
         )
 
         # Summarize the model (in CLI)
-        model.summary()
+        otbtf_model.model.summary()
 
         # Train
-        model.fit(ds_train, epochs=params.nb_epochs, validation_data=ds_valid)
+        otbtf_model.model.fit(ds_train, epochs=params.nb_epochs, validation_data=ds_valid)
 
         # Evaluate against test data
         if ds_test is not None:
-            model.evaluate(ds_test, batch_size=params.batch_size)
+            otbtf_model.model.evaluate(ds_test, batch_size=params.batch_size)
 
         # Prepare model export
         export_archive = keras.export.ExportArchive()
-        export_archive.track(model)
+        export_archive.track(otbtf_model.model)
         export_archive.add_endpoint(
             name="serve",
-            fn=model.call,
+            fn=otbtf_model.model.call,
             input_signature=INPUT_SIGNATURE,
         )
         # Save trained model as SavedModel

@@ -147,10 +147,9 @@ ctest:
     paths:
       - $CI_PROJECT_DIR/artifacts_ctest
 
-otbtf_api:
+python_api:
   stage: Test
   extends: .tests_base
-  needs: ["ctest"]
   variables:
     API_TEST_TMP: /tmp/api_tests_tmp
   script:
@@ -166,7 +165,7 @@ otbtf_api:
 .applications_test_base:
   stage: Applications Test
   extends: .tests_base
-  needs: ["ctest", "otbtf_api"]
+  needs: ["ctest", "python_api"]
   #when: manual
 
 crc_book:
