@@ -223,7 +223,7 @@ def train(params, ds_train, ds_valid, ds_test):
         export_archive.add_endpoint(
             name="serve",
             fn=otbtf_model.model.call,
-            input_signature=INPUT_SIGNATURE,
+            input_signature=[INPUT_SIGNATURE],
         )
         # Save trained model as SavedModel
         export_archive.write_out(params.model_dir)
