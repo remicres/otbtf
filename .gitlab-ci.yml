@@ -154,7 +154,7 @@ otbtf_api:
     API_TEST_TMP: /tmp/api_tests_tmp
   script:
     - mkdir $API_TEST_TMP
-    - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=report_api.xml test/api_unittest.py
+    - TMPDIR=$API_TEST_TMP python -m pytest -vv --junitxml=report_api.xml test/api_unittest.py
   after_script:
     - saved_model_cli show --dir $API_TEST_TMP/model_from_pimg --all
     - cp -r $API_TEST_TMP $CI_PROJECT_DIR/artifacts_test_api
@@ -175,7 +175,7 @@ crc_book:
     CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
   script:
     - mkdir -p $CRC_BOOK_TMP
-    - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=report_tutorial.xml test/tutorial_unittest.py
+    - TMPDIR=$CRC_BOOK_TMP python -m pytest -vv --junitxml=report_tutorial.xml test/tutorial_unittest.py
   after_script:
     - cp -r $CRC_BOOK_TMP $CI_PROJECT_DIR/artifacts_crc_book
   artifacts:
@@ -192,7 +192,7 @@ decloud:
     - pip install -r $PWD/decloud/docker/requirements.txt
     - wget -q $DATASET_DECLOUD -O file.zip && unzip file.zip
     - export DECLOUD_DATA_DIR="$PWD/decloud_data"
-    - pytest decloud/tests/train_from_tfrecords_unittest.py
+    - pytest -vv decloud/tests/train_from_tfrecords_unittest.py
 
 sr4rs:
   extends: .applications_test_base
@@ -207,34 +207,34 @@ sr4rs:
     - rm -rf sr4rs
     - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
-    - python -m pytest --junitxml=report_sr4rs.xml test/sr4rs_unittest.py
+    - python -m pytest -vv --junitxml=report_sr4rs.xml test/sr4rs_unittest.py
 
 geos_enabled:
   extends: .applications_test_base
   script:
-    - python -m pytest --junitxml=report_geos_enabled.xml test/geos_test.py
+    - python -m pytest -vv --junitxml=report_geos_enabled.xml test/geos_test.py
 
 planetary_computer:
   extends: .applications_test_base
   script:
     - pip install pystac_client planetary_computer
-    - python -m pytest --junitxml=report_pc_enabled.xml test/pc_test.py
+    - python -m pytest -vv --junitxml=report_pc_enabled.xml test/pc_test.py
 
 numpy_gdal_otb:
   extends: .applications_test_base
   script:
-    - python -m pytest --junitxml=report_numpy.xml test/numpy_test.py
+    - python -m pytest -vv --junitxml=report_numpy.xml test/numpy_test.py
 
 rio:
   extends: .applications_test_base
   script:
     - pip install rasterio --no-binary rasterio
-    - python -m pytest --junitxml=report_rio.xml test/rio_test.py
+    - python -m pytest -vv --junitxml=report_rio.xml test/rio_test.py
 
 nodata:
   extends: .applications_test_base
   script:
-    - python -m pytest --junitxml=report_nodata.xml test/nodata_test.py
+    - python -m pytest -vv --junitxml=report_nodata.xml test/nodata_test.py
 
 .ship_base:
   extends: .docker_build_base
