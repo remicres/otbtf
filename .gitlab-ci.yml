@@ -150,8 +150,6 @@ ctest:
   extends: .tests_base
   needs: ["ctest"]
   #when: manual
-  before_script:
-    - mkdir -p $ARTIFACT_TEST_DIR
 
 crc_book:
   extends: .applications_test_base
