@@ -229,17 +229,10 @@ class ModelBase(abc.ABC):
         )
         outputs.update(postprocessed_outputs)
 
-        # Dirty fix for Keras 3 : we can't pass a dict of outputs
-        # We need to wrap the last layer in a new layer with the desired name
-        outputs = [
-            keras.layers.Identity(name=key)(layer)
-            for key, layer in outputs.items()
-        ]
-
         # Return the keras model
         return keras.Model(
             inputs=inputs,
-            outputs=outputs,
+            outputs=list(outputs.values()),
             name=self.__class__.__name__
         )
 

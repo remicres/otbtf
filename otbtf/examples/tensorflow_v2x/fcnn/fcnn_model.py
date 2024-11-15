@@ -200,7 +200,7 @@ def train(params, ds_train, ds_valid, ds_test):
             loss=keras.losses.CategoricalCrossentropy(),
             optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
             metrics={
-                TARGET_NAME: [
+                OUTPUT_SOFTMAX_NAME: [
                     keras.metrics.Precision(class_id=1),
                     keras.metrics.Recall(class_id=1),
                 ]
