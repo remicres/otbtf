@@ -225,6 +225,7 @@ class ModelBase(abc.ABC):
 
         # Dirty fix for Keras 3 : we can't pass a dict of outputs
         # We need to wrap the last layer in a new layer with the desired name
+        self.outputs_names = list(outputs)
         outputs = [
             keras.layers.Identity(name=key)(prediction)
             for key, prediction in outputs.items()

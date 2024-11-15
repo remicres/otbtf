@@ -21,6 +21,9 @@ N_CLASSES = 2
 # Name of the input in the `FCNNModel` instance, also name of the input node
 # in the SavedModel
 INPUT_NAME = "input_xs"
+INPUT_SPEC = tf.TensorSpec(
+    shape=[None, None, None, 4], dtype=tf.float32, name=INPUT_NAME
+)
 
 # Name of the output in the `FCNNModel` instance
 TARGET_NAME = "predictions"
@@ -55,7 +58,7 @@ class FCNNModel(ModelBase):
         """
         return {INPUT_NAME: keras.ops.cast(inputs[INPUT_NAME], tf.float32) * 0.0001}
 
-    def get_outputs(self, normalized_inputs: dict) -> dict:
+    def get_outputs(self, normalized_inputs: dict) -> list:
         """
         Inherits from `ModelBase`
 
@@ -214,5 +217,16 @@ def train(params, ds_train, ds_valid, ds_test):
         if ds_test is not None:
             model.evaluate(ds_test, batch_size=params.batch_size)
 
+        # This signature function should ensure output names aren't lost
+        # (due to Keras optimizations)
+        @tf.function(input_signature=[INPUT_SPEC])
+        def serving(input_xs):
+            predictions = model(input_xs)
+            # Return a dictionary of named outputs
+            return {
+                model.outputs_names[i]: predictions[i]
+                for i in range(len(predictions))
+            }
+
         # Save trained model as SavedModel
-        model.export(params.model_dir)
+        model.export(params.model_dir, signatures={"serving_default": serving})
