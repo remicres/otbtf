@@ -153,6 +153,7 @@ otbtf_api:
   script:
     - mkdir $API_TEST_TMP
     - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=report_api.xml test/api_unittest.py
+    - saved_model_cli show --dir $API_TEST_TMP/model_from_pimg --all
   artifacts:
     paths:
       - $API_TEST_TMP
