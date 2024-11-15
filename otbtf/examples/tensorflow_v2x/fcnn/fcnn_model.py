@@ -21,7 +21,7 @@ N_CLASSES = 2
 # Name of the input in the `FCNNModel` instance, also name of the input node
 # in the SavedModel
 INPUT_NAME = "input_xs"
-INPUT_SPEC = tf.TensorSpec(
+INPUT_SIGNATURE = tf.TensorSpec(
     shape=[None, None, None, 4], dtype=tf.float32, name=INPUT_NAME
 )
 
@@ -217,15 +217,13 @@ def train(params, ds_train, ds_valid, ds_test):
         if ds_test is not None:
             model.evaluate(ds_test, batch_size=params.batch_size)
 
-        # This signature function should ensure output names aren't lost
-        # (due to Keras optimizations)
-        @tf.function(input_signature=[INPUT_SPEC])
-        def serving(input_xs):
-            predictions = model(input_xs)
-            return {
-                model.outputs_names[i]: predictions[i]
-                for i in range(len(predictions))
-            }
-
+        # Prepare model export
+        export_archive = keras.ExportArchive()
+        export_archive.track(model)
+        export_archive.add_endpoint(
+            name="serve",
+            fn=model.call,
+            input_signature=INPUT_SIGNATURE,
+        )
         # Save trained model as SavedModel
-        model.save(params.model_dir, signatures={"serving_default": serving})
+        export_archive.write_out(params.model_dir)
