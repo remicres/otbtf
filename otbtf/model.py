@@ -29,6 +29,7 @@ import tensorflow as tf
 import keras
 
 Tensor = Any
+TensorsList = List[Tensor]
 TensorsDict = Dict[str, Tensor]
 
 
@@ -38,10 +39,10 @@ class ModelBase(abc.ABC):
     """
 
     def __init__(
-            self,
-            dataset_element_spec: tf.TensorSpec,
-            input_keys: List[str] = None,
-            inference_cropping: List[int] = None
+        self,
+        dataset_element_spec: tf.TensorSpec,
+        input_keys: List[str] = None,
+        inference_cropping: List[int] = None,
     ):
         """
         Model initializer, must be called **inside** the strategy.scope().
@@ -60,18 +61,14 @@ class ModelBase(abc.ABC):
         """
         # Retrieve dataset inputs shapes
         dataset_input_element_spec = dataset_element_spec[0]
-        logging.info(
-            "Dataset input element spec: %s", dataset_input_element_spec
-        )
+        logging.info("Dataset input element spec: %s", dataset_input_element_spec)
 
         if input_keys:
             self.dataset_input_keys = input_keys
             logging.info("Using input keys: %s", self.dataset_input_keys)
         else:
             self.dataset_input_keys = list(dataset_input_element_spec)
-            logging.info(
-                "Found dataset input keys: %s", self.dataset_input_keys
-            )
+            logging.info("Found dataset input keys: %s", self.dataset_input_keys)
 
         self.inputs_shapes = {
             key: dataset_input_element_spec[key].shape[1:]
@@ -122,7 +119,7 @@ class ModelBase(abc.ABC):
         return model_inputs
 
     @abc.abstractmethod
-    def get_outputs(self, normalized_inputs: TensorsDict) -> TensorsDict:
+    def get_outputs(self, normalized_inputs: TensorsDict) -> Tensor | TensorsList:
         """
         Implementation of the model, from the normalized inputs.
 
@@ -158,14 +155,14 @@ class ModelBase(abc.ABC):
         return inputs
 
     def postprocess_outputs(
-            self,
-            outputs: TensorsDict,
-            inputs: TensorsDict = None,
-            normalized_inputs: TensorsDict = None
-    ) -> TensorsDict:
+        self,
+        outputs: Tensor | list[Tensor],
+        inputs: TensorsDict = None,
+        normalized_inputs: TensorsDict = None,
+    ) -> Tensor | TensorsList:
         """
         Post-process the model outputs.
-        Takes the dicts of inputs and outputs, and returns a dict of
+        Takes the dicts of inputs and list of outputs, and returns a list of
         post-processed outputs.
         The default implementation provides a set of cropped output tensors.
 
@@ -175,29 +172,28 @@ class ModelBase(abc.ABC):
             normalized_inputs: dict of normalized model inputs (optional)
 
         Returns:
-            a dict of post-processed model outputs
+            a list of post-processed model named outputs
 
         """
+        if not isinstance(outputs, list):
+            outputs = [outputs]
 
         # Add extra outputs for inference
-        extra_outputs = {}
-        for out_key, out_tensor in outputs.items():
+        for out_tensor in outputs:
             for crop in self.inference_cropping:
-                extra_output_key = cropped_tensor_name(out_key, crop)
-                extra_output_name = cropped_tensor_name(
+                name = cropped_tensor_name(
                     out_tensor._keras_history.operation.name, crop
                 )
                 logging.info(
-                    "Adding extra output for tensor %s with crop %s (%s)",
-                    out_key, crop, extra_output_name
+                    "Adding extra output for tensor %s with crop %s",
+                    name,
+                    crop,
                 )
                 cropped = out_tensor[:, crop:-crop, crop:-crop, :]
-                identity = keras.layers.Activation(
-                    'linear', name=extra_output_name
-                )
-                extra_outputs[extra_output_key] = identity(cropped)
+                identity = keras.layers.Activation("linear", name=name)
+                outputs.append(identity(cropped))
 
-        return extra_outputs
+        return outputs
 
     def create_network(self) -> keras.Model:
         """
@@ -222,19 +218,12 @@ class ModelBase(abc.ABC):
         logging.info("Model outputs: %s", outputs)
 
         # Post-processing for inference
-        postprocessed_outputs = self.postprocess_outputs(
-            outputs=outputs,
-            inputs=inputs,
-            normalized_inputs=normalized_inputs
+        outputs = self.postprocess_outputs(
+            outputs=outputs, inputs=inputs, normalized_inputs=normalized_inputs
         )
-        outputs.update(postprocessed_outputs)
 
         # Return the keras model
-        return keras.Model(
-            inputs=inputs,
-            outputs=list(outputs.values()),
-            name=self.__class__.__name__
-        )
+        return keras.Model(inputs=inputs, outputs=outputs, name=self.__class__.__name__)
 
     def summary(self, strategy=None):
         """
@@ -260,14 +249,13 @@ class ModelBase(abc.ABC):
             show_shapes: annotate with shapes values (True or False)
 
         """
-        assert self.model, "Plot() only works if create_network() has been " \
-                           "called beforehand"
+        assert self.model, (
+            "Plot() only works if create_network() has been " "called beforehand"
+        )
 
         # When multiworker strategy, only plot if the worker is chief
         if not strategy or _is_chief(strategy):
-            keras.utils.plot_model(
-                self.model, output_path, show_shapes=show_shapes
-            )
+            keras.utils.plot_model(self.model, output_path, show_shapes=show_shapes)
 
 
 def _is_chief(strategy):
@@ -294,9 +282,11 @@ def _is_chief(strategy):
     if strategy.cluster_resolver:  # this means MultiWorkerMirroredStrategy
         task_type = strategy.cluster_resolver.task_type
         task_id = strategy.cluster_resolver.task_id
-        return (task_type == 'chief') \
-            or (task_type == 'worker' and task_id == 0) \
+        return (
+            (task_type == "chief")
+            or (task_type == "worker" and task_id == 0)
             or task_type is None
+        )
     # strategy with only one worker
     return True
 
