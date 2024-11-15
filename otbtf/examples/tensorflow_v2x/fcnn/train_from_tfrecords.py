@@ -51,7 +51,7 @@ def train(params):
 
     kwargs = {
         "batch_size": params.batch_size,
-        "target_keys": [fcnn_model.TARGET_NAME],
+        "target_keys": [fcnn_model.OUTPUT_SOFTMAX_NAME],
         "preprocessing_fn": fcnn_model.dataset_preprocessing_fn
     }
 

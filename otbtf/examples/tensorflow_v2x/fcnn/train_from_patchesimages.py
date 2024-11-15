@@ -90,7 +90,7 @@ def create_dataset(
     tf_ds = dataset.get_tf_dataset(
         batch_size=batch_size,
         preprocessing_fn=fcnn_model.dataset_preprocessing_fn,
-        targets_keys=targets_keys or [fcnn_model.TARGET_NAME]
+        targets_keys=targets_keys or [fcnn_model.OUTPUT_SOFTMAX_NAME]
     )
 
     return tf_ds
