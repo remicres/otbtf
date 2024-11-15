@@ -53,7 +53,10 @@ class FCNNModel(ModelBase):
         Returns:
             dict of normalized inputs, ready to be used from `get_outputs()`
         """
-        return {INPUT_NAME: keras.ops.cast(inputs[INPUT_NAME], tf.float32) * 0.0001}
+        return {
+            key: keras.ops.cast(layer, tf.float32) * 0.0001
+            for key, layer in inputs.items()
+        }
 
     def get_outputs(self, normalized_inputs: dict) -> dict:
         """
