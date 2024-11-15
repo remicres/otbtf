@@ -150,6 +150,7 @@ ctest:
 otbtf_api:
   stage: Test
   extends: .tests_base
+  needs: ["ctest"]
   variables:
     API_TEST_TMP: /tmp/api_tests_tmp
   script:

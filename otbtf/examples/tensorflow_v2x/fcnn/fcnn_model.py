@@ -218,7 +218,7 @@ def train(params, ds_train, ds_valid, ds_test):
             model.evaluate(ds_test, batch_size=params.batch_size)
 
         # Prepare model export
-        export_archive = keras.ExportArchive()
+        export_archive = keras.export.ExportArchive()
         export_archive.track(model)
         export_archive.add_endpoint(
             name="serve",
