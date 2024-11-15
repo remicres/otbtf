@@ -7,7 +7,7 @@ import logging
 import tensorflow as tf
 import keras
 
-from otbtf.model import ModelBase, Tensor, TensorsList, TensorsDict
+from otbtf.model import ModelBase
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -22,8 +22,11 @@ N_CLASSES = 2
 # in the SavedModel
 INPUT_NAME = "input_xs"
 
+# Name of the output in the `FCNNModel` instance
+TARGET_NAME = "predictions"
+
 # Name (prefix) of the output node in the SavedModel
-OUTPUT_SOFTMAX_NAME = "predictions_softmax"
+OUTPUT_SOFTMAX_NAME = "predictions_softmax_tensor"
 
 
 class FCNNModel(ModelBase):
@@ -50,12 +53,9 @@ class FCNNModel(ModelBase):
         Returns:
             dict of normalized inputs, ready to be used from `get_outputs()`
         """
-        return {
-            key: keras.ops.cast(layer, tf.float32) * 0.0001
-            for key, layer in inputs.items()
-        }
+        return {INPUT_NAME: keras.ops.cast(inputs[INPUT_NAME], tf.float32) * 0.0001}
 
-    def get_outputs(self, normalized_inputs: TensorsDict) -> TensorsList:
+    def get_outputs(self, normalized_inputs: dict) -> dict:
         """
         Inherits from `ModelBase`
 
@@ -111,28 +111,33 @@ class FCNNModel(ModelBase):
         # the `saved_model_cli show --dir /path/to/your/savedmodel --all`
         # command.
         #
-        # Since TF 2.18, there are no distinction between output tensor name
-        # and output keys. You must use tensor names to specify outputs,
-        # or target for metrics.
-        # You can't pass a dict of named outputs when building the model,
-        # instead you must ensure you're using the right names
-        # when adding layers to your model
+        # Do not confuse **the name of the output layers** (i.e. the "name"
+        # property of the keras.layer that is used to generate an output
+        # tensor) and **the key of the output tensor**, in the dict returned
+        # from `MyModel.get_output()`. They are two identifiers with a
+        # different purpose:
+        #  - the output layer name is used only at inference time, to identify
+        #    the output tensor from which generate the output image,
+        #  - the output tensor key identifies the output tensors, mainly to
+        #    fit the targets to model outputs during training process, but it
+        #    can also be used to access the tensors as tf/keras objects, for
+        #    instance to display previews images in TensorBoard.
         softmax_op = keras.layers.Softmax(name=OUTPUT_SOFTMAX_NAME)
         predictions = softmax_op(out_tconv4)
 
-        # Note that we could also add additional outputs
-        # and return a list, for instance the argmax of the softmax:
+        # note that we could also add additional outputs, for instance the
+        # argmax of the softmax:
         #
         # argmax_op = otbtf.layers.Argmax(name="labels")
         # labels = argmax_op(predictions)
-        # return [predictions, labels]
+        # return {TARGET_NAME: predictions, OUTPUT_ARGMAX_NAME: labels}
         # The default extra outputs (i.e. output tensors with cropping in
         # physical domain) are append by `otbtf.ModelBase` for all returned
         # outputs of this function to be used at inference time (e.g.
         # "labels_crop32", "labels_crop64", ...,
         # "predictions_softmax_tensor_crop16", ..., etc).
 
-        return predictions
+        return {TARGET_NAME: predictions}
 
 
 def dataset_preprocessing_fn(examples: dict):
@@ -155,7 +160,7 @@ def dataset_preprocessing_fn(examples: dict):
     """
     return {
         INPUT_NAME: examples["input_xs_patches"],
-        OUTPUT_SOFTMAX_NAME: keras.ops.one_hot(
+        TARGET_NAME: keras.ops.one_hot(
             keras.ops.squeeze(
                 keras.ops.cast(examples["labels_patches"], tf.int32), axis=-1
             ),
@@ -188,12 +193,11 @@ def train(params, ds_train, ds_valid, ds_test):
         # over which the losses/metrics are computed.
         # This ensures a better optimization control, and also avoids lots of
         # useless outputs (e.g. metrics computed over extra outputs).
-        print("Compiling model...")
         model.compile(
             loss=keras.losses.CategoricalCrossentropy(),
             optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
             metrics={
-                OUTPUT_SOFTMAX_NAME: [
+                TARGET_NAME: [
                     keras.metrics.Precision(class_id=1),
                     keras.metrics.Recall(class_id=1),
                 ]
