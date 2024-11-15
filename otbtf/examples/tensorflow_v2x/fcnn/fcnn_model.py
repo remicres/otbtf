@@ -198,7 +198,9 @@ def train(params, ds_train, ds_valid, ds_test):
         # useless outputs (e.g. metrics computed over extra outputs).
         model.compile(
             loss=keras.losses.CategoricalCrossentropy(),
-            optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
+            optimizer=keras.optimizers.Adam(
+                learning_rate=params.learning_rate
+            ),
             metrics={
                 OUTPUT_SOFTMAX_NAME: [
                     keras.metrics.Precision(class_id=1),
