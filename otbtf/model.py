@@ -239,7 +239,7 @@ class ModelBase(abc.ABC):
         # Return the keras model
         return keras.Model(
             inputs=inputs,
-            outputs=list(outputs.values()),
+            outputs=outputs,
             name=self.__class__.__name__
         )
 

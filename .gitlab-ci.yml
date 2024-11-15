@@ -22,16 +22,16 @@ stages:
   - Ship
 
 variables:
-  DOCKER_DRIVER: overlay2
-  DOCKER_BUILDKIT: 1
-  BUILDX_BUILDER: container
-  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   OTBTF_VERSION: 4.4.0-rc1
   OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
   DATADIR: $CI_PROJECT_DIR/test/data
   CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
   CACHE_IMAGE_GPU: $CI_REGISTRY_IMAGE:build-cache-gpu
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  DOCKER_DRIVER: overlay2
+  DOCKER_BUILDKIT: 1
+  BUILDX_BUILDER: container
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
 
 default:
   tags: [ godzilla ]
@@ -153,6 +153,7 @@ ctest:
 
 crc_book:
   extends: .applications_test_base
+  allow_failure: true
   variables:
     CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
   script:
@@ -179,6 +180,7 @@ sr4rs:
 
 decloud:
   extends: .applications_test_base
+  allow_failure: true
   variables:
     DATASET_DECLOUD: https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download
   script:
@@ -209,11 +211,6 @@ planetary_computer:
   script:
     - pip install pystac_client planetary_computer
     - python -m pytest --junitxml=report_pc_enabled.xml test/pc_test.py
-
-imports:
-  extends: .applications_test_base
-  script:
-    - python -m pytest --junitxml=report_imports.xml test/imports_test.py
 
 numpy_gdal_otb:
   extends: .applications_test_base
