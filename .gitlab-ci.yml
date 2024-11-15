@@ -141,9 +141,11 @@ ctest:
     - ln -s $CI_PROJECT_DIR/test/models $OTBTF_SRC/test/models
     - cd $OTB_BUILD
     - ctest -L $OTB_TEST_UNITS --output-junit $CI_PROJECT_DIR/report_ctest.xml
+  after_script:
+    - cp -r $OTB_BUILD/Testing/Temporary/* $CI_PROJECT_DIR/artifacts_ctest
   artifacts:
     paths:
-      - $OTB_BUILD/Testing/Temporary
+      - $CI_PROJECT_DIR/artifacts_ctest
 
 otbtf_api:
   stage: Test
@@ -153,10 +155,12 @@ otbtf_api:
   script:
     - mkdir $API_TEST_TMP
     - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=report_api.xml test/api_unittest.py
+  after_script:
     - saved_model_cli show --dir $API_TEST_TMP/model_from_pimg --all
+    - cp -r $API_TEST_TMP $CI_PROJECT_DIR/artifacts_test_api
   artifacts:
     paths:
-      - $API_TEST_TMP
+      - $CI_PROJECT_DIR/artifacts_test_api
 
 .applications_test_base:
   stage: Applications Test
@@ -172,9 +176,11 @@ crc_book:
   script:
     - mkdir -p $CRC_BOOK_TMP
     - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=report_tutorial.xml test/tutorial_unittest.py
+  after_script:
+    - cp -r $CRC_BOOK_TMP $CI_PROJECT_DIR/artifacts_crc_book
   artifacts:
     paths:
-      - $CRC_BOOK_TMP
+      - $CI_PROJECT_DIR/artifacts_crc_book
 
 decloud:
   extends: .applications_test_base
