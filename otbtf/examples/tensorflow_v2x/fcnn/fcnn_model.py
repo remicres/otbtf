@@ -222,11 +222,10 @@ def train(params, ds_train, ds_valid, ds_test):
         @tf.function(input_signature=[INPUT_SPEC])
         def serving(input_xs):
             predictions = model(input_xs)
-            # Return a dictionary of named outputs
             return {
                 model.outputs_names[i]: predictions[i]
                 for i in range(len(predictions))
             }
 
         # Save trained model as SavedModel
-        model.export(params.model_dir, signatures={"serving_default": serving})
+        model.save(params.model_dir, signatures={"serving_default": serving})
