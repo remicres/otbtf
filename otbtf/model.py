@@ -190,7 +190,7 @@ class ModelBase(abc.ABC):
                     extra_output_name,
                 )
                 cropped = out_tensor[:, crop:-crop, crop:-crop, :]
-                identity = keras.layers.Activation("linear", name=extra_output_name)
+                identity = keras.layers.Identity(name=extra_output_name)
                 extra_outputs[extra_output_key] = identity(cropped)
 
         return extra_outputs
@@ -223,13 +223,12 @@ class ModelBase(abc.ABC):
         )
         outputs.update(postprocessed_outputs)
 
-        # Dirty fix for Keras 3 : we can't pass a dict of outputs
-        # We need to wrap the last layer in a new layer with the desired name
-        self.outputs_names = list(outputs)
-        outputs = [
-            keras.layers.Identity(name=key)(prediction)
+        # Since Keras 3, outputs are named after the key in the returned
+        # dict of `get_outputs()`
+        outputs = {
+            key: keras.layers.Identity(name=key)(prediction)
             for key, prediction in outputs.items()
-        ]
+        }
 
         # Return the keras model
         return keras.Model(inputs=inputs, outputs=outputs, name=self.__class__.__name__)
