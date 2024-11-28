@@ -183,7 +183,7 @@ def train(params, ds_train, ds_valid, ds_test):
         # Since Keras 3 it is mandatory to use a `dict` to explicitly name the
         # outputs over which the losses/metrics are computed, e.g.
         # `loss: {TARGET_NAME: "categorical_crossentropy"}`
-        model.model.compile(
+        model.compile(
             loss={TARGET_NAME: keras.losses.CategoricalCrossentropy()},
             optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
             metrics={
@@ -195,14 +195,14 @@ def train(params, ds_train, ds_valid, ds_test):
         )
 
         # Summarize the model (in CLI)
-        model.model.summary()
+        model.summary()
 
         # Train
-        model.model.fit(ds_train, epochs=params.nb_epochs, validation_data=ds_valid)
+        model.fit(ds_train, epochs=params.nb_epochs, validation_data=ds_valid)
 
         # Evaluate against test data
         if ds_test is not None:
-            model.model.evaluate(ds_test, batch_size=params.batch_size)
+            model.evaluate(ds_test, batch_size=params.batch_size)
 
         # Save trained model as SavedModel
-        model.model.export(params.model_dir)
+        model.export(params.model_dir)
