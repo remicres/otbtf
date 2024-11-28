@@ -55,7 +55,7 @@ class FCNNModel(ModelBase):
         """
         return {INPUT_NAME: keras.ops.cast(inputs[INPUT_NAME], tf.float32) * 0.0001}
 
-    def get_outputs(self, normalized_inputs: dict) -> list:
+    def get_outputs(self, normalized_inputs: dict) -> dict:
         """
         Inherits from `ModelBase`
 
@@ -177,13 +177,13 @@ def train(params, ds_train, ds_valid, ds_test):
         # Model instantiation. Note that the normalize_fn is now part of the
         # model. It is mandatory to instantiate the model inside the strategy
         # scope.
-        otbtf_model = FCNNModel(dataset_element_spec=ds_train.element_spec)
+        model = FCNNModel(dataset_element_spec=ds_train.element_spec)
 
         # Compile the model
         # Since Keras 3 it is mandatory to use a `dict` to explicitly name the
         # outputs over which the losses/metrics are computed, e.g.
         # `loss: {TARGET_NAME: "categorical_crossentropy"}`
-        otbtf_model.model.compile(
+        model.model.compile(
             loss={TARGET_NAME: keras.losses.CategoricalCrossentropy()},
             optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
             metrics={
@@ -195,14 +195,14 @@ def train(params, ds_train, ds_valid, ds_test):
         )
 
         # Summarize the model (in CLI)
-        otbtf_model.model.summary()
+        model.model.summary()
 
         # Train
-        otbtf_model.model.fit(ds_train, epochs=params.nb_epochs, validation_data=ds_valid)
+        model.model.fit(ds_train, epochs=params.nb_epochs, validation_data=ds_valid)
 
         # Evaluate against test data
         if ds_test is not None:
-            otbtf_model.model.evaluate(ds_test, batch_size=params.batch_size)
+            model.model.evaluate(ds_test, batch_size=params.batch_size)
 
         # Save trained model as SavedModel
-        otbtf_model.model.export(params.model_dir)
+        model.model.export(params.model_dir)
