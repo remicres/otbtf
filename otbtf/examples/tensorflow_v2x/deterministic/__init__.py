@@ -65,18 +65,19 @@ Let's consider a simple model that inputs two multispectral image (*x1* and
 The model is exported as a SavedModel named *scalar_product_savedmodel*
 
 ```python
-import tensorflow as tf
+import keras
 
 # Input
-x1 = tf.keras.Input(shape=[None, None, None], name="x1")  # [1, h, w, N]
-x2 = tf.keras.Input(shape=[None, None, None], name="x2")  # [1, h, w, N]
+x1 = keras.Input(shape=[None, None, None], name="x1")  # [1, h, w, N]
+x2 = keras.Input(shape=[None, None, None], name="x2")  # [1, h, w, N]
 
 # Compute scalar product
-y = tf.reduce_sum(tf.multiply(x1, x2), axis=-1)
+y = keras.ops.sum(keras.ops.multiply(x1, x2), axis=-1)
 
 # Create model
-model = tf.keras.Model(inputs={"x1": x1, "x2": x2}, outputs={"y": y})
-model.save("scalar_product_savedmodel")
+model = keras.Model(inputs={"x1": x1, "x2": x2}, outputs={"y": y})
+model.export("scalar_product_savedmodel")
+
 ```
 
 Run the code. The *scalar_product_savedmodel* file is created.

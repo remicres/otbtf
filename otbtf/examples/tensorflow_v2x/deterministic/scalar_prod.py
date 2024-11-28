@@ -24,7 +24,7 @@ x1 = keras.Input(shape=[None, None, None], name="x1")  # [1, h, w, N]
 x2 = keras.Input(shape=[None, None, None], name="x2")  # [1, h, w, N]
 
 # Compute scalar product
-y = keras.ops.reduce_sum(keras.ops.multiply(x1, x2), axis=-1)
+y = keras.ops.sum(keras.ops.multiply(x1, x2), axis=-1)
 
 # Create model
 model = keras.Model(inputs={"x1": x1, "x2": x2}, outputs={"y": y})
