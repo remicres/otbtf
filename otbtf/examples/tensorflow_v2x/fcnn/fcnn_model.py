@@ -28,9 +28,6 @@ INPUT_SIGNATURE = tf.TensorSpec(
 # Name of the output in the `FCNNModel` instance
 TARGET_NAME = "predictions"
 
-# Name (prefix) of the output node in the SavedModel
-OUTPUT_SOFTMAX_NAME = "predictions_softmax_tensor"
-
 
 class FCNNModel(ModelBase):
     """
@@ -106,40 +103,31 @@ class FCNNModel(ModelBase):
         out_tconv3 = _tconv(out_tconv2, 16, "tconv3") + out_conv1
         out_tconv4 = _tconv(out_tconv3, N_CLASSES, "classifier", None)
 
-        # Generally it is a good thing to name the final layers of the network
-        # (i.e. the layers of which outputs are returned from
-        # `MyModel.get_output()`). Indeed this enables to retrieve them for
-        # inference time, using their name. In case your forgot to name the
-        # last layers, it is still possible to look at the model outputs using
-        # the `saved_model_cli show --dir /path/to/your/savedmodel --all`
-        # command.
-        #
-        # Do not confuse **the name of the output layers** (i.e. the "name"
-        # property of the keras.layer that is used to generate an output
-        # tensor) and **the key of the output tensor**, in the dict returned
-        # from `MyModel.get_output()`. They are two identifiers with a
-        # different purpose:
-        #  - the output layer name is used only at inference time, to identify
-        #    the output tensor from which generate the output image,
-        #  - the output tensor key identifies the output tensors, mainly to
-        #    fit the targets to model outputs during training process, but it
-        #    can also be used to access the tensors as tf/keras objects, for
-        #    instance to display previews images in TensorBoard.
-        softmax_op = keras.layers.Softmax(name=OUTPUT_SOFTMAX_NAME)
+        softmax_op = keras.layers.Softmax()
         predictions = softmax_op(out_tconv4)
 
-        # note that we could also add additional outputs, for instance the
-        # argmax of the softmax:
+        # Model outputs are returned in a `dict`, where each key is an output
+        # name, and the value is the layer output. This naming have two
+        # functions:
+        #  - the output layer name is used at inference time, to identify
+        #    the output tensor from which generate the output image,
+        #  - the output layer name identifies the output tensors, to fit the
+        #    targets to model outputs, compute metrics, etc. during training
+        #    process. It can also be used to access the tensors as tf/keras
+        #    objects, for instance to display previews images in TensorBoard.
         #
-        # argmax_op = otbtf.layers.Argmax(name="labels")
-        # labels = argmax_op(predictions)
-        # return {TARGET_NAME: predictions, OUTPUT_ARGMAX_NAME: labels}
+        # Note that we could also add additional outputs, even outputs which
+        # are useless for the optimization process, for instance the argmax :
+        #   ```
+        #   argmax_op = otbtf.layers.Argmax()
+        #   labels = argmax_op(predictions)
+        #   return {TARGET_NAME: predictions, OUTPUT_ARGMAX_NAME: labels}
+        #   ```
         # The default extra outputs (i.e. output tensors with cropping in
         # physical domain) are append by `otbtf.ModelBase` for all returned
         # outputs of this function to be used at inference time (e.g.
-        # "labels_crop32", "labels_crop64", ...,
-        # "predictions_softmax_tensor_crop16", ..., etc).
-
+        # "labels_crop32", "labels_crop64", ..., "predictions__crop16", ...,
+        # etc).
         return {TARGET_NAME: predictions}
 
 
@@ -192,12 +180,11 @@ def train(params, ds_train, ds_valid, ds_test):
         otbtf_model = FCNNModel(dataset_element_spec=ds_train.element_spec)
 
         # Compile the model
-        # It is a good practice to use a `dict` to explicitly name the outputs
-        # over which the losses/metrics are computed.
-        # This ensures a better optimization control, and also avoids lots of
-        # useless outputs (e.g. metrics computed over extra outputs).
+        # Since Keras 3 it is mandatory to use a `dict` to explicitly name the
+        # outputs over which the losses/metrics are computed, e.g.
+        # `loss: {TARGET_NAME: "categorical_crossentropy"}`
         otbtf_model.model.compile(
-            loss=keras.losses.CategoricalCrossentropy(),
+            loss={TARGET_NAME: keras.losses.CategoricalCrossentropy()},
             optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
             metrics={
                 TARGET_NAME: [

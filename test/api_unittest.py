@@ -6,8 +6,10 @@ import pytest
 from otbtf.examples.tensorflow_v2x.fcnn import create_tfrecords
 from otbtf.examples.tensorflow_v2x.fcnn import train_from_patchesimages
 from otbtf.examples.tensorflow_v2x.fcnn import train_from_tfrecords
-from otbtf.examples.tensorflow_v2x.fcnn.fcnn_model import INPUT_NAME, \
-    OUTPUT_SOFTMAX_NAME
+from otbtf.examples.tensorflow_v2x.fcnn.fcnn_model import (
+    INPUT_NAME,
+    TARGET_NAME
+)
 from otbtf.model import cropped_tensor_name
 from test_utils import resolve_paths, files_exist, run_command_and_compare
 
@@ -50,7 +52,7 @@ class APITest(unittest.TestCase):
                 f"-source1.placeholder {INPUT_NAME} "
                 "-model.dir $TMPDIR/model_from_pimg "
                 "-model.fullyconv on "
-                f"-output.names {cropped_tensor_name(OUTPUT_SOFTMAX_NAME, 16)} "
+                f"-output.names {cropped_tensor_name(TARGET_NAME, 16)} "
                 "-output.efieldx 32 "
                 "-output.efieldy 32 "
                 "-out \"$TMPDIR/classif_model4_softmax.tif?&gdal:co:compress=deflate\" uint8",
@@ -67,7 +69,7 @@ class APITest(unittest.TestCase):
                 f"-source1.placeholder {INPUT_NAME} "
                 "-model.dir $TMPDIR/model_from_pimg "
                 "-model.fullyconv on "
-                f"-output.names {cropped_tensor_name(OUTPUT_SOFTMAX_NAME, 32)} "
+                f"-output.names {cropped_tensor_name(TARGET_NAME, 32)} "
                 "-output.efieldx 64 "
                 "-output.efieldy 64 "
                 "-out \"$TMPDIR/classif_model4_softmax.tif?&gdal:co:compress=deflate\" uint8",
@@ -127,7 +129,7 @@ class APITest(unittest.TestCase):
                 f"-source1.placeholder {INPUT_NAME} "
                 "-model.dir $TMPDIR/model_from_pimg "
                 "-model.fullyconv on "
-                f"-output.names {cropped_tensor_name(OUTPUT_SOFTMAX_NAME, 16)} "
+                f"-output.names {cropped_tensor_name(TARGET_NAME, 16)} "
                 "-output.efieldx 32 "
                 "-output.efieldy 32 "
                 "-out \"$TMPDIR/classif_model4_softmax.tif?&gdal:co:compress=deflate\" uint8",
@@ -147,7 +149,7 @@ class APITest(unittest.TestCase):
                 f"-source1.placeholder {INPUT_NAME} "
                 "-model.dir $TMPDIR/model_from_pimg "
                 "-model.fullyconv on "
-                f"-output.names {cropped_tensor_name(OUTPUT_SOFTMAX_NAME, 32)} "
+                f"-output.names {cropped_tensor_name(TARGET_NAME, 32)} "
                 "-output.efieldx 64 "
                 "-output.efieldy 64 "
                 "-out \"$TMPDIR/classif_model4_softmax.tif?&gdal:co:compress=deflate\" uint8",
