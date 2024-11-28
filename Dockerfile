@@ -190,6 +190,7 @@ RUN ! $DEV_IMAGE || pip install codespell flake8 pylint pytest pytest-cov pytest
 WORKDIR /home/otbuser
 
 # Test python imports
-RUN python -c "import tensorflow ; import keras"
+RUN python -c "import tensorflow, keras"
 RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
-RUN python -c "import otbtf ; import tricks"
+RUN python -c "import otbtf, tricks"
+RUN python -c "from osgeo import gdal"
