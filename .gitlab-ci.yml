@@ -45,6 +45,7 @@ default:
   services:
     - name: docker:27.3.1-dind
   before_script:
+    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker buildx create --name=container --driver=docker-container --use --bootstrap
   after_script:
@@ -265,7 +266,6 @@ deploy_cpu:
       --build-arg DEV_IMAGE=true
       .
     # push images on dockerhub
-    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
     - docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
     - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
     # latest = cpu image
@@ -297,7 +297,6 @@ deploy_gpu:
       --build-arg WITH_CUDA=true --build-arg DEV_IMAGE=true
       .
     # push gpu-* images on dockerhub
-    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
     - docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
     - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
     # latest-gpu = gpu image
