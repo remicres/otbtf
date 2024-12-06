@@ -8,7 +8,7 @@ workflow:
       when: never
     - if: $CI_COMMIT_REF_PROTECTED == "true"
     # Ignore pipeline for filthy commits
-    - if: $CI_COMMIT_MESSAGE =~ /^wip.*/i
+    - if: '$CI_COMMIT_MESSAGE =~ /^wip.*/i'
       when: never
   auto_cancel:
     on_new_commit: interruptible
