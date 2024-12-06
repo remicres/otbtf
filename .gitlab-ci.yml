@@ -1,12 +1,12 @@
 workflow:
   rules:
-    # Execute on tags, protected branches or merge requests
+    # Execute on tags and protected branches
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_REF_PROTECTED == "true"
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    # Ignore pipelines draft MRs
+    # Execute on MR except for drafts
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TITLE =~ /^(\[Draft\]|\(Draft\)|Draft:)/
       when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     # Avoid duplicated pipelines in MR context
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
