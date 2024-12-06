@@ -98,7 +98,7 @@ The rest of the code is identical.
 
 !!! Warning
 
-    Be careful when calling `mymodel.save()` to export the SavedModel. When 
+    Be careful when calling `mymodel.export()` to export the SavedModel. When 
     multiple nodes are used in parallel, this can lead to a corrupt save.
     One good practice is to defer the call only to the master worker (e.g. node
     0). You can identify the master worker using `otbtf.model._is_chief()`.

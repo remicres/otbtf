@@ -131,7 +131,7 @@ You may also need to split some multi-command layers in the Dockerfile.
 # Pull GPU image and create a new container with your home directory as volume 
 # (requires apt package nvidia-docker2 and CUDA>=11.0)
 docker create --gpus=all --volume $HOME:/home/otbuser/volume -it \
-  --name otbtf-gpu mdl4eo/otbtf:4.4.0-gpu
+  --name otbtf-gpu mdl4eo/otbtf:5.0.0-gpu
 
 # Run interactive
 docker start -i otbtf-gpu
@@ -147,7 +147,7 @@ docker exec otbtf-gpu \
 Enter a development ready docker image:
 
 ```bash
-docker run -it --gpus=all -it --name otbtf-gpu-dev mdl4eo/otbtf:4.4.0-gpu-dev
+docker run -it --gpus=all -it --name otbtf-gpu-dev mdl4eo/otbtf:5.0.0-gpu-dev
 # Then, from the container shell:
 cd /src/otb/otb/Modules/Remote
 git clone https://gitlab.irstea.fr/raffaele.gaetano/otbSelectiveHaralickTextures.git

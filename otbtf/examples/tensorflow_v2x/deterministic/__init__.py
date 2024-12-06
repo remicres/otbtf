@@ -29,11 +29,11 @@ import tensorflow as tf
 x = tf.keras.Input(shape=[None, None, None], name="x")  # [1, h, w, N]
 
 # Compute norm on the last axis
-y = tf.norm(x, axis=-1)
+y = tf.keras.ops.norm(x, axis=-1)
 
 # Create model
 model = tf.keras.Model(inputs={"x": x}, outputs={"y": y})
-model.save("l2_norm_savedmodel")
+model.export("l2_norm_savedmodel")
 ```
 
 Run the code. The *l2_norm_savedmodel* file is created.
