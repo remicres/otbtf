@@ -183,11 +183,11 @@ decloud:
   extends: .applications_test_base
   variables:
     DATASET_DECLOUD: https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download
+    DECLOUD_DATA_DIR: $CI_PROJECT_DIR/decloud_data
   script:
     - git clone https://forgemia.inra.fr/umr-tetis/decloud.git -b keras3
-    - pip install -r $PWD/decloud/docker/requirements.txt
+    - pip install -r $PWD/decloud/requirements.txt
     - wget -q $DATASET_DECLOUD -O file.zip && unzip file.zip
-    - export DECLOUD_DATA_DIR="$PWD/decloud_data"
     - pytest -v decloud/tests/train_from_tfrecords_unittest.py
 
 sr4rs:
