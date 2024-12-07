@@ -43,7 +43,6 @@ default:
   services:
     - name: docker:27.3.1-dind
   before_script:
-    #- echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker buildx create --name=container --driver=docker-container --use --bootstrap
   after_script:
@@ -241,6 +240,10 @@ nodata:
     DOCKERHUB_BASE: mdl4eo/otbtf
     CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
     DOCKERHUB_IMAGE_BASE: $DOCKERHUB_BASE:$OTBTF_VERSION
+  before_script:
+    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
+    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker buildx create --name=container --driver=docker-container --use --bootstrap
 
 deploy_cpu:
   stage: Ship
