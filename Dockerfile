@@ -3,7 +3,7 @@
 # Init base stage - used for intermediate build env and final image
 
 # Freeze ubuntu version to avoid surprise rebuild
-FROM ubuntu:jammy-20240911.1 AS base-stage
+FROM ubuntu:jammy-20250126 AS base-stage
 
 WORKDIR /tmp
 
