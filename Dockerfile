@@ -181,7 +181,7 @@ USER otbuser
 WORKDIR /src/otbtf
 COPY otbtf ./otbtf
 COPY tricks ./tricks
-COPY README.md setup.py .
+COPY README.md pyproject.toml .
 RUN pip install -e .
 
 # Install test packages for dev image
