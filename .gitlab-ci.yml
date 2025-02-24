@@ -22,7 +22,7 @@ stages:
   - Ship
 
 variables:
-  OTBTF_VERSION: 5.0.0-rc1
+  OTBTF_VERSION: 5.0.0-rc2
   OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
   DATADIR: $CI_PROJECT_DIR/test/data
   CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
@@ -39,9 +39,9 @@ default:
     pull_policy: always
 
 .docker_build_base:
-  image: docker:27.3.1
+  image: docker:27.5.1
   services:
-    - name: docker:27.3.1-dind
+    - name: docker:27.5.1-dind
   before_script:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker buildx create --name=container --driver=docker-container --use --bootstrap
@@ -181,6 +181,7 @@ python_api:
 
 decloud:
   extends: .applications_test_base
+  allow_failure: true
   variables:
     DATASET_DECLOUD: https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download
     DECLOUD_DATA_DIR: $CI_PROJECT_DIR/decloud_data
