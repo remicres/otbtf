@@ -166,18 +166,19 @@ python_api:
   needs: ["ctest", "python_api"]
   #when: manual
 
-# crc_book:
-#   extends: .applications_test_base
-#   variables:
-#     CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
-#   script:
-#     - mkdir -p $CRC_BOOK_TMP
-#     - TMPDIR=$CRC_BOOK_TMP python -m pytest -v --junitxml=report_tutorial.xml test/tutorial_unittest.py
-#   after_script:
-#     - cp -r $CRC_BOOK_TMP $CI_PROJECT_DIR/artifacts_crc_book
-#   artifacts:
-#     paths:
-#       - $CI_PROJECT_DIR/artifacts_crc_book
+crc_book:
+  extends: .applications_test_base
+  allow_failure: true
+  variables:
+    CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
+  script:
+    - mkdir -p $CRC_BOOK_TMP
+    - TMPDIR=$CRC_BOOK_TMP python -m pytest -v --junitxml=report_tutorial.xml test/tutorial_unittest.py
+  after_script:
+    - cp -r $CRC_BOOK_TMP $CI_PROJECT_DIR/artifacts_crc_book
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/artifacts_crc_book
 
 decloud:
   extends: .applications_test_base
