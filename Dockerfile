@@ -180,7 +180,6 @@ USER otbuser
 # Install OTBTF python module
 WORKDIR /src/otbtf
 COPY otbtf ./otbtf
-COPY tricks ./tricks
 COPY README.md pyproject.toml .
 RUN pip install -e .
 
@@ -192,5 +191,5 @@ WORKDIR /home/otbuser
 # Test python imports
 RUN python -c "import tensorflow, keras"
 RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
-RUN python -c "import otbtf, tricks"
+RUN python -c "import otbtf"
 RUN python -c "from osgeo import gdal"
