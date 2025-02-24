@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "otbtf"
+description = "OTBTF: Orfeo ToolBox meets TensorFlow"
+readme = "README.md"
+requires-python = ">=3.8"
+dynamic = ["version"]
+keywords = [
+    "remote sensing",
+    "otb",
+    "orfeotoolbox",
+    "orfeo toolbox",
+    "tensorflow",
+    "deep learning",
+    "machine learning"
+]
+authors = [
+    { name = "Remi Cresson", email = "remi.cresson@inrae.fr" },
+]
+urls = { "Homepage" = "https://github.com/remicres/otbtf" }
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent"
+]
+dependencies = [ "keras>=3" ]
+
+[tool.setuptools]
+packages = ["otbtf"]
+
+[tool.setuptools.dynamic]
+version = { attr = "otbtf.__version__" }

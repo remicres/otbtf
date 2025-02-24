@@ -19,7 +19,9 @@
 """
 OTBTF python module
 """
-import pkg_resources
+
+__version__ = "5.0.0-rc2"
+
 try:
     from otbtf.utils import read_as_np_arr, gdal_open  # noqa
     from otbtf.dataset import Buffer, PatchesReaderBase, PatchesImagesReader, \
@@ -33,4 +35,3 @@ except ImportError:
 from otbtf.tfrecords import TFRecords  # noqa
 from otbtf.model import ModelBase  # noqa
 from otbtf import layers, ops  # noqa
-__version__ = pkg_resources.require("otbtf")[0].version
