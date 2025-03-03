@@ -168,7 +168,7 @@ python_api:
 
 crc_book:
   extends: .applications_test_base
-  when: never
+  when: manual
   allow_failure: true
   variables:
     CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
@@ -183,7 +183,7 @@ crc_book:
 
 decloud:
   extends: .applications_test_base
-  when: never
+  when: manual
   allow_failure: true
   variables:
     DATASET_DECLOUD: https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download
