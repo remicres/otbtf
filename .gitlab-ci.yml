@@ -205,7 +205,7 @@ sr4rs:
     - wget -qO sr4rs_data.zip $DATASET_SR4RS
     - unzip -o sr4rs_data.zip
     - rm -rf sr4rs
-    - git clone https://github.com/remicres/sr4rs.git
+    - git clone https://github.com/LaTeleScop/sr4rs.git -b remove-tricks
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
     - python -m pytest -v --junitxml=report_sr4rs.xml test/sr4rs_unittest.py
 
