@@ -169,10 +169,6 @@ ENV PYTHONPATH="/opt/otbtf/lib/otb/python:/opt/otbtf/lib/python$PY/site-packages
 # Add a standard user - this won't prevent ownership issues with volumes if you're not UID 1000
 RUN useradd -s /bin/bash -m otbuser
 
-# Admin rights without password (not recommended, use `docker run -u root` instead)
-ARG SUDO=false
-RUN ! $SUDO || usermod -a -G sudo otbuser && echo "otbuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
 # Allow user to install packages in prefix /opt/otbtf and venv without being root
 COPY --from=otb-build --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
 COPY --from=otb-build --chown=otbuser:otbuser /src /src
@@ -193,4 +189,3 @@ WORKDIR /home/otbuser
 RUN python -c "import tensorflow, keras"
 RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
 RUN python -c "import otbtf"
-RUN python -c "from osgeo import gdal"
