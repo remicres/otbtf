@@ -3,7 +3,7 @@
 # Init base stage - used for intermediate build env and final image
 
 # Freeze ubuntu version to avoid surprise rebuild
-FROM ubuntu:jammy-20250126 AS base-stage
+FROM ubuntu:noble-20250127 AS base-stage
 
 WORKDIR /tmp
 
@@ -15,7 +15,7 @@ RUN apt-get update -y && apt-get upgrade -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Env required during build and for the final image
-ENV PY=3.10
+ENV PY=3.12
 ENV VIRTUAL_ENV=/opt/otbtf/venv
 ENV PATH="$VIRTUAL_ENV/bin:/opt/otbtf/bin:$PATH"
 ENV PYTHON_SITE_PACKAGES="$VIRTUAL_ENV/lib/python$PY/site-packages"
@@ -112,6 +112,7 @@ RUN cd otb \
  && echo "" > Modules/Core/ImageBase/test/CMakeLists.txt \
  && echo "" > Modules/Learning/DempsterShafer/test/CMakeLists.txt \
  && cd .. \
+ # <------------------------------------------
  && mkdir -p build /tmp/SuperBuild-downloads \
  && cd build \
  && cmake ../otb/SuperBuild \
