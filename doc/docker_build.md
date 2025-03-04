@@ -11,7 +11,7 @@ You can select target versions using `--build-arg`:
 ## Default build arguments
 
 ```bash
-# Limit CPU usage e.g. 0.75
+# Relative value to limit number of used CPU cores during build (e.g. 0.75)
 CPU_RATIO=1
 # Can be used to install a specific numpy version
 NUMPY="1.26.4"
@@ -34,8 +34,6 @@ BZL_OPTIONS=
 OTB=release-9.1
 # Keep OTB sources and build test
 DEV_IMAGE=false
-# Enable sudo without password for "otbuser"
-SUDO=false
 ```
 
 ## Bazel remote cache daemon
@@ -54,7 +52,7 @@ docker run --detach -u $UID:$GID -v $HOME/.cache/bazel-remote:/data \
   -p 9090:8080 buchgr/bazel-remote-cache --max_size=10
 ```
 
-Then just add ` --network='host'` to the docker build command, or connect
+Then just add `--network='host'` to the docker build command, or connect
  bazel to a remote server - see 'BZL_OPTIONS'.  
 The other way of docker is a virtual bridge, but you'll need to edit the IP
  address. Changing the BZL_OPTIONS will invalidate docker build cache.
@@ -118,6 +116,7 @@ cmake $OTB_GIT \
 ```
 
 ### Debug build
+
 If you fail to build, you can log into the last layer and check CMake logs.
  Run `docker images`, find the latest layer ID and run a tmp container
 (`docker run -it d60496d9612e bash`).
@@ -157,4 +156,5 @@ exit
 docker container ls
 ```
 
-Then you can user `docker commit` to save this container as a new image.
+Then you can user `docker commit` to save this container as a new image.  
+You could also use these commands in another Dockerfile to build `FROM` an OTBTF image.  

@@ -4,13 +4,13 @@ We recommend to use OTBTF from official docker images.
 
 Latest CPU-only docker image:
 
-```commandline
+```sh
 docker pull mdl4eo/otbtf:latest
 ```
 
 Latest GPU-ready docker image:
 
-```commandline
+```sh
 docker pull mdl4eo/otbtf:latest-gpu
 ```
 
@@ -18,19 +18,18 @@ Read more in the following sections.
 
 ## Latest images
 
-Here is the list of the latest OTBTF docker images hosted on 
-[dockerhub](https://hub.docker.com/u/mdl4eo).
-Since OTBTF >= 3.2.1 you can find the latest docker images on 
-[gitlab.irstea.fr](https://gitlab.irstea.fr/remi.cresson/otbtf/container_registry) for 
-versions <= 4.3.0 and [forgemia.inra.fr](https://forgemia.inra.fr/orfeo-toolbox/otbtf/container_registry/) since version 4.3.1.
+Here is the list of the latest OTBTF docker images hosted on
+ [dockerhub](https://hub.docker.com/u/mdl4eo).  
 
 | Name                                                                               | Os            | TF    | OTB   | Description            | Dev files | Compute capability |
 |------------------------------------------------------------------------------------| ------------- |-------|-------| ---------------------- | --------- | ------------------ |
-| **mdl4eo/otbtf:5.0.0-cpu**                                                         | Ubuntu Jammy  | r2.18 | 9.1.0 | CPU | no        | |
-| **mdl4eo/otbtf:5.0.0-cpu-dev**                                                     | Ubuntu Jammy  | r2.18 | 9.1.0 | CPU (dev) |  yes  | |
-| **mdl4eo/otbtf:5.0.0-gpu**                                                         | Ubuntu Jammy  | r2.18 | 9.1.0 | GPU | no        | sm_60,sm_70,sm_80,sm_89,compute_90 |
-| **mdl4eo/otbtf:5.0.0-gpu-dev**                                                     | Ubuntu Jammy  | r2.18 | 9.1.0 | GPU (dev) | yes   |  sm_60,sm_70,sm_80,sm_89,compute_90|
-[gitlab.irstea.fr](https://gitlab.irstea.fr/remi.cresson/otbtf/container_registry) 
+| **mdl4eo/otbtf:5.0.0-cpu**                                                         | Ubuntu Jammy  | 2.18 | 9.1.0 | CPU | no        | |
+| **mdl4eo/otbtf:5.0.0-cpu-dev**                                                     | Ubuntu Jammy  | 2.18 | 9.1.0 | CPU (dev) |  yes  | |
+| **mdl4eo/otbtf:5.0.0-gpu**                                                         | Ubuntu Jammy  | 2.18 | 9.1.0 | GPU | no        | sm_60,sm_70,sm_80,sm_89,compute_90 |
+| **mdl4eo/otbtf:5.0.0-gpu-dev**                                                     | Ubuntu Jammy  | 2.18 | 9.1.0 | GPU (dev) | yes   |  sm_60,sm_70,sm_80,sm_89,compute_90|
+
+Since OTBTF >= 3.2.1 you can find the latest docker images on
+ [gitlab.irstea.fr](https://gitlab.irstea.fr/remi.cresson/otbtf/container_registry)
 (before otbtf 4.3.0) and [forgemia](https://forgemia.inra.fr/orfeo-toolbox/otbtf/container_registry)
 (since otbtf 4.3.1).
 
@@ -43,7 +42,7 @@ The list of older releases is available [here](#older-images).
     Since r2.4, development-ready images have the source in `/src/` and are 
     tagged "...-dev".
 
-## GPU enabled docker 
+## GPU enabled docker
 
 In Linux, this is quite straightforward. Just follow the steps described in the
  [nvidia-docker documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
@@ -61,20 +60,20 @@ With Docker version including and after 19.03 :
 docker run --gpus=all -ti mdl4eo/otbtf:latest-gpu bash
 ```
 
-You can find some details on the **GPU docker image** and some **docker tips 
-and tricks** on 
-[this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/). 
-Be careful though, these infos might be a bit outdated...
+You can find some details on the **GPU docker image** and some **docker tips
+ and tricks** on
+[this blog](https://mdl4eo.irstea.fr/2019/10/15/otbtf-docker-image-with-gpu/).
+ Be careful though, these infos might be a bit outdated...
 
 ## Docker Installation
 
-This section is a very small insight on the installation of docker on Linux 
-and Windows.
+This section is a very small insight on the installation of docker on Linux
+ and Windows.
 
 ### Debian and Ubuntu
 
-See here how to install docker on Ubuntu 
-[here](https://docs.docker.com/engine/install/ubuntu/).
+See how to install docker on Ubuntu
+ [here](https://docs.docker.com/engine/install/ubuntu/).
 
 ### Windows 10
 
@@ -102,9 +101,9 @@ Troubleshooting:
 
 ## Build your own images
 
-If you want to use optimization flags, change GPUs compute capability, etc. 
-you can build your own docker image using the provided dockerfile. 
-See the [docker build documentation](docker_build.html).
+If you want to use optimization flags or change GPUs compute capability,
+ you can build your own docker image using the provided dockerfile.
+ See the [docker build documentation](docker_build.html).
 
 ## Older images
 
