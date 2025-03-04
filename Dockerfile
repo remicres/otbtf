@@ -178,10 +178,7 @@ USER otbuser
 WORKDIR /src/otbtf
 COPY otbtf ./otbtf
 COPY README.md pyproject.toml .
-RUN pip install -e .
-
-# Install test packages for dev image
-RUN ! $DEV_IMAGE || pip install codespell flake8 pylint pytest pytest-cov pytest-order
+RUN pip install -e ".$(! $DEV_IMAGE || echo '[dev]')"
 
 WORKDIR /home/otbuser
 

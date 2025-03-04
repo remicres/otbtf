@@ -15,11 +15,9 @@ keywords = [
     "orfeo toolbox",
     "tensorflow",
     "deep learning",
-    "machine learning"
+    "machine learning",
 ]
-authors = [
-    { name = "Remi Cresson", email = "remi.cresson@inrae.fr" },
-]
+authors = [{ name = "Remi Cresson", email = "remi.cresson@inrae.fr" }]
 urls = { "Homepage" = "https://github.com/remicres/otbtf" }
 classifiers = [
     "Programming Language :: Python :: 3.8",
@@ -28,9 +26,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: GIS",
     "Topic :: Scientific/Engineering :: Image Processing",
     "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent"
+    "Operating System :: OS Independent",
 ]
-dependencies = [ "keras>=3" ]
+dependencies = ["numpy<2", "keras>=3"]
+
+[project.optional-dependencies]
+dev = ["codespell", "flake8", "pylint", "pytest", "pytest-cov", "pytest-order"]
 
 [tool.setuptools]
 packages = ["otbtf"]
