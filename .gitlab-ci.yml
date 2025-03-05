@@ -241,7 +241,7 @@ nodata:
   script:
     - python -m pytest -v --junitxml=report_nodata.xml test/nodata_test.py
 
-.ship_base:
+.ship_gitlab:
   extends: .docker_build_base
   rules:
     - if: $CI_COMMIT_TAG
@@ -252,7 +252,7 @@ nodata:
 
 gitlab_deploy_cpu:
   stage: Ship
-  extends: .ship_base
+  extends: .ship_gitlab
   script:
     # cpu
     - >
@@ -268,7 +268,7 @@ gitlab_deploy_cpu:
 
 gitlab_deploy_gpu:
   stage: Ship
-  extends: .ship_base
+  extends: .ship_gitlab
   script:
     # gpu
     - >
