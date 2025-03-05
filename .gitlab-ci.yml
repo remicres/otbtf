@@ -298,13 +298,12 @@ gitlab_deploy_gpu:
 
 dockerhub_deploy_cpu:
   stage: Ship
-  extends: .ship_base
+  extends: .ship_dockerhub
   variables:
     DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE-cpu
     DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE-cpu-dev
     DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
   script:
-    # push images on dockerhub
     - docker pull $IMAGE_CPU
     - docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
     - docker pull $IMAGE_CPUDEV
@@ -314,13 +313,12 @@ dockerhub_deploy_cpu:
 
 dockerhub_deploy_gpu:
   stage: Ship
-  extends: .ship_base
+  extends: .ship_dockerhub
   variables:
     DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE-gpu
     DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
     DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
   script:
-    # push gpu-* images on dockerhub
     - docker pull $IMAGE_GPU
     - docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
     - docker pull $IMAGE_GPUDEV
