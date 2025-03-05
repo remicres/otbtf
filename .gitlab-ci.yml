@@ -243,6 +243,7 @@ nodata:
 
 .ship_gitlab:
   extends: .docker_build_base
+  retry: 2
   rules:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -288,6 +289,7 @@ gitlab_deploy_gpu:
 
 .ship_dockerhub:
   extends: .docker_build_base
+  retry: 2
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   variables:
