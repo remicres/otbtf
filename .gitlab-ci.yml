@@ -22,7 +22,7 @@ stages:
   - Ship
 
 variables:
-  OTBTF_VERSION: 5.0.0-rc2
+  OTBTF_VERSION: 5.0.0rc2
   OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
   DATADIR: $CI_PROJECT_DIR/test/data
   CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
@@ -30,6 +30,11 @@ variables:
   BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   BUILDX_BUILDER: container
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+  CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
+  IMAGE_CPU: $CI_REGISTRY_PUBIMG-cpu
+  IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG-cpu-dev
+  IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
+  IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
 
 default:
   tags: [ godzilla ]
@@ -238,26 +243,16 @@ nodata:
 
 .ship_base:
   extends: .docker_build_base
-  only:
-    - tags
-  variables:
-    DOCKERHUB_BASE: mdl4eo/otbtf
-    CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
-    DOCKERHUB_IMAGE_BASE: $DOCKERHUB_BASE:$OTBTF_VERSION
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   before_script:
-    - echo -n "$DOCKERHUB_TOKEN" | docker login -u mdl4eo --password-stdin
     - echo -n "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - docker buildx create --name=container --driver=docker-container --use --bootstrap
 
-deploy_cpu:
+gitlab_deploy_cpu:
   stage: Ship
   extends: .ship_base
-  variables:
-    IMAGE_CPU: $CI_REGISTRY_PUBIMG-cpu
-    IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG-cpu-dev
-    DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE-cpu
-    DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE-cpu-dev
-    DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
   script:
     # cpu
     - >
@@ -270,21 +265,10 @@ deploy_cpu:
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --build-arg DEV_IMAGE=true
       .
-    # push images on dockerhub
-    - docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
-    - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
-    # latest = cpu image
-    - docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
 
-deploy_gpu:
+gitlab_deploy_gpu:
   stage: Ship
   extends: .ship_base
-  variables:
-    IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
-    IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
-    DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE-gpu
-    DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
-    DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
   script:
     # gpu
     - >
@@ -301,8 +285,45 @@ deploy_gpu:
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --build-arg WITH_CUDA=true --build-arg DEV_IMAGE=true
       .
+
+.ship_dockerhub:
+  extends: .docker_build_base
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    DOCKERHUB_BASE: mdl4eo/otbtf
+    DOCKERHUB_IMAGE_BASE: $DOCKERHUB_BASE:$OTBTF_VERSION
+  before_script:
+    - echo -n "$DOCKERHUB_TOKEN" | docker login -u mdl4eo --password-stdin
+
+dockerhub_deploy_cpu:
+  stage: Ship
+  extends: .ship_base
+  variables:
+    DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE-cpu
+    DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE-cpu-dev
+    DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
+  script:
+    # push images on dockerhub
+    - docker pull $IMAGE_CPU
+    - docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
+    - docker pull $IMAGE_CPUDEV
+    - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
+    # latest = cpu image
+    - docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
+
+dockerhub_deploy_gpu:
+  stage: Ship
+  extends: .ship_base
+  variables:
+    DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE-gpu
+    DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
+    DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
+  script:
     # push gpu-* images on dockerhub
+    - docker pull $IMAGE_GPU
     - docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
+    - docker pull $IMAGE_GPUDEV
     - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
     # latest-gpu = gpu image
     - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
