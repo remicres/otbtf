@@ -20,7 +20,7 @@
 OTBTF python module
 """
 
-__version__ = "5.0.0-rc2"
+__version__ = "5.0.0rc2"
 
 try:
     from otbtf.utils import read_as_np_arr, gdal_open  # noqa
