@@ -172,15 +172,15 @@ RUN useradd -s /bin/bash -m otbuser
 # Allow user to install packages in prefix /opt/otbtf and venv without being root
 COPY --from=otb-build --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
 COPY --from=otb-build --chown=otbuser:otbuser /src /src
-USER otbuser
 
+USER otbuser
 WORKDIR /src/otbtf
-COPY .git ./.git
-COPY doc ./doc
-COPY LICENSE RELEASE_NOTES.txt .clang-format *.yml .
+COPY --chown=otbuser:otbuser .git ./.git
+COPY --chown=otbuser:otbuser doc ./doc
+COPY --chown=otbuser:otbuser LICENSE RELEASE_NOTES.txt .clang-format *.yml .
 # Install otbtf python module
-COPY otbtf ./otbtf
-COPY *.md pyproject.toml .
+COPY --chown=otbuser:otbuser otbtf ./otbtf
+COPY --chown=otbuser:otbuser *.md pyproject.toml .
 RUN pip install -e ".$(! $DEV_IMAGE || echo '[dev]')"
 
 WORKDIR /home/otbuser
