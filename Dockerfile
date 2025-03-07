@@ -174,14 +174,16 @@ COPY --from=otb-build --chown=otbuser:otbuser /opt/otbtf /opt/otbtf
 COPY --from=otb-build --chown=otbuser:otbuser /src /src
 USER otbuser
 
-# Install OTBTF python module
 WORKDIR /src/otbtf
+COPY .git ./.git
+COPY doc ./doc
+COPY LICENSE RELEASE_NOTES.txt .clang-format *.yml .
+# Install otbtf python module
 COPY otbtf ./otbtf
-COPY README.md pyproject.toml .
+COPY *.md pyproject.toml .
 RUN pip install -e ".$(! $DEV_IMAGE || echo '[dev]')"
 
 WORKDIR /home/otbuser
-
 # Test python imports
 RUN python -c "import tensorflow, keras"
 RUN python -c "import otbApplication as otb; otb.Registry.CreateApplication('ImageClassifierFromDeepFeatures')"
