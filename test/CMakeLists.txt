@@ -186,7 +186,7 @@ otb_test_application(NAME TensorflowModelServeCNN16x16PB
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${MODEL1_PB_OUT}
   ${TEMP}/${MODEL1_PB_OUT})
-set_tests_properties(TensorflowModelServeCNN16x16PB PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG}")
+set_tests_properties(TensorflowModelServeCNN16x16PB PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG")
 
 #----------- Model serving : 2-branch CNN (8x8, 32x32) Patch-Based ----------------
 otb_test_application(NAME apTvClTensorflowModelServeCNN8x8_32x32PB
@@ -229,7 +229,7 @@ otb_test_application(NAME apTvClTensorflowModelServeFCNN16x16PB
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${MODEL3_PB_OUT}
   ${TEMP}/${MODEL3_PB_OUT})
-set_tests_properties(apTvClTensorflowModelServeFCNN16x16PB PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG}")
+set_tests_properties(apTvClTensorflowModelServeFCNN16x16PB PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG")
 
 
 #----------- Model serving : 1-branch FCNN (16x16) Fully-conv ----------------
@@ -243,7 +243,7 @@ otb_test_application(NAME apTvClTensorflowModelServeFCNN16x16FC
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${MODEL3_FC_OUT}
   ${TEMP}/${MODEL3_FC_OUT})
-set_tests_properties(apTvClTensorflowModelServeFCNN16x16FC PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG}")
+set_tests_properties(apTvClTensorflowModelServeFCNN16x16FC PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG")
 
 #----------- Model serving : 1-branch FCNN (64x64)-->(32x32), Fully-conv ----------------
 set(ENV{OTB_TF_NSOURCES} 1)
@@ -257,7 +257,7 @@ otb_test_application(NAME apTvClTensorflowModelServeFCNN64x64to32x32
   VALID --compare-image ${EPSILON_6}
   ${DATADIR}/${MODEL4_FC_OUT}
   ${TEMP}/${MODEL4_FC_OUT})
-set_tests_properties(apTvClTensorflowModelServeFCNN64x64to32x32 PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG}")
+set_tests_properties(apTvClTensorflowModelServeFCNN64x64to32x32 PROPERTIES ENVIRONMENT "OTB_LOGGER_LEVEL=DEBUG")
 
 #----------- Test various output tensor shapes ----------------
 # We test the following output shapes on one monochannel image:
