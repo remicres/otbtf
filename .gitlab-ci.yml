@@ -22,7 +22,7 @@ stages:
   - Ship
 
 variables:
-  OTBTF_VERSION: 5.0.0rc2
+  OTBTF_VERSION: 5.0.0rc3
   OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
   DATADIR: $CI_PROJECT_DIR/test/data
   CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
@@ -246,7 +246,6 @@ nodata:
   retry: 2
   rules:
     - if: $CI_COMMIT_TAG
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   before_script:
     - echo -n "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - docker buildx create --name=container --driver=docker-container --use --bootstrap
@@ -291,7 +290,7 @@ gitlab_deploy_gpu:
   extends: .docker_build_base
   retry: 2
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED
   variables:
     DOCKERHUB_BASE: mdl4eo/otbtf
     DOCKERHUB_IMAGE_BASE: $DOCKERHUB_BASE:$OTBTF_VERSION
