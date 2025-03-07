@@ -310,7 +310,6 @@ dockerhub_deploy_cpu:
     - docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
     - docker pull $IMAGE_CPUDEV
     - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
-    # latest = cpu image
     - docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
 
 dockerhub_deploy_gpu:
@@ -325,5 +324,4 @@ dockerhub_deploy_gpu:
     - docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
     - docker pull $IMAGE_GPUDEV
     - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
-    # latest-gpu = gpu image
     - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
