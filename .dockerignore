@@ -1,7 +1,3 @@
-.git*
 Dockerfile
 **/__pycache__
 .readthedocs.yaml
-doc/*
-mkdocs.yml
-RELEASE_NOTES.txt
