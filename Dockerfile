@@ -176,9 +176,10 @@ COPY --from=otb-build --chown=otbuser:otbuser /src /src
 USER otbuser
 WORKDIR /src/otbtf
 COPY --chown=otbuser:otbuser .git ./.git
-COPY --chown=otbuser:otbuser doc ./doc
-COPY --chown=otbuser:otbuser LICENSE RELEASE_NOTES.txt .clang-format *.yml .
+COPY --chown=otbuser:otbuser .gitignore .gitattributes .
 # Install otbtf python module
+COPY --chown=otbuser:otbuser LICENSE RELEASE_NOTES.txt .clang-format *.yml .
+COPY --chown=otbuser:otbuser doc ./doc
 COPY --chown=otbuser:otbuser otbtf ./otbtf
 COPY --chown=otbuser:otbuser *.md pyproject.toml .
 RUN pip install -e ".$(! $DEV_IMAGE || echo '[dev]')"
