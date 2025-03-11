@@ -28,7 +28,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
-dependencies = ["numpy<2", "keras>=3"]
+dependencies = ["numpy<2", "keras>=3", "gdal", "tqdm"]
 
 [project.optional-dependencies]
 dev = ["codespell", "flake8", "pylint", "pytest", "pytest-cov", "pytest-order"]
