@@ -254,36 +254,34 @@ gitlab_deploy_cpu:
   stage: Ship
   extends: .ship_gitlab
   script:
-    # cpu
-    - >
-      docker buildx build --push -t $IMAGE_CPU
-      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
-      .
     # cpu-dev
     - >
       docker buildx build --push -t $IMAGE_CPUDEV
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --build-arg DEV_IMAGE=true
       .
+    # cpu
+    - >
+      docker buildx build --push -t $IMAGE_CPU
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
+      .
 
 gitlab_deploy_gpu:
   stage: Ship
   extends: .ship_gitlab
   script:
-    # gpu
-    - >
-      docker buildx build --push -t $IMAGE_GPU
-      --cache-from type=registry,ref=$CACHE_IMAGE_GPU
-      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
-      --cache-to type=registry,ref=$CACHE_IMAGE_GPU,mode=max
-      --build-arg WITH_CUDA=true
-      .
     # gpu-dev
     - >
       docker buildx build --push -t $IMAGE_GPUDEV
       --cache-from type=registry,ref=$CACHE_IMAGE_GPU
-      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
+      --cache-to type=registry,ref=$CACHE_IMAGE_GPU,mode=max
       --build-arg WITH_CUDA=true --build-arg DEV_IMAGE=true
+      .
+    # gpu
+    - >
+      docker buildx build --push -t $IMAGE_GPU
+      --cache-from type=registry,ref=$CACHE_IMAGE_GPU
+      --build-arg WITH_CUDA=true
       .
 
 .ship_dockerhub:
