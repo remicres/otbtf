@@ -43,13 +43,12 @@ RUN apt-get update -y && apt-get upgrade -y \
 
 ### Python venv and packages
 RUN virtualenv $VIRTUAL_ENV
-RUN pip install --no-cache-dir -U pip wheel
 # Numpy 2 support in TF is planned for 2.18, but isn't supported by most libraries for now
 ARG NUMPY="1.26.4"
-RUN pip install --no-cache-dir -U mock six future tqdm deprecated numpy==$NUMPY packaging requests
+RUN pip install --no-cache-dir -U pip wheel numpy==$NUMPY
  
 # TensorFlow build arguments
-ARG TF=v2.18.0
+ARG TF=v2.18.1
 ARG WITH_CUDA=false
 # Custom compute capabilities, else use default one from .bazelrc
 ARG CUDA_CC
