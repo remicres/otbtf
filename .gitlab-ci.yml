@@ -145,10 +145,10 @@ ctest:
     - cd $OTB_BUILD
     - ctest -L $OTB_TEST_UNITS --output-junit $CI_PROJECT_DIR/report_ctest.xml
   after_script:
-    - cp -r $OTB_BUILD/Testing/Temporary/* $CI_PROJECT_DIR/artifacts_ctest
+    - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/artifacts_ctest
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/artifacts_ctest
+      - $CI_PROJECT_DIR/artifacts_ctest/*
 
 python_api:
   stage: Test
@@ -163,7 +163,7 @@ python_api:
     - cp -r $API_TEST_TMP $CI_PROJECT_DIR/artifacts_test_api
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/artifacts_test_api
+      - $CI_PROJECT_DIR/artifacts_test_api/*
 
 .applications_test_base:
   stage: Applications Test
@@ -184,7 +184,7 @@ crc_book:
     - cp -r $CRC_BOOK_TMP $CI_PROJECT_DIR/artifacts_crc_book
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/artifacts_crc_book
+      - $CI_PROJECT_DIR/artifacts_crc_book/*
 
 decloud:
   extends: .applications_test_base
