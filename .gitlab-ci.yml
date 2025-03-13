@@ -128,9 +128,9 @@ docs:
     reports:
       junit: report_*.xml
     paths:
-      - $CI_PROJECT_DIR/artifacts_*/*
-    expire_in: 1 week
-    when: on_failure
+      - /tmp/artifacts_*/*
+    expire_in: 4 week
+    #when: on_failure
 
 ctest:
   stage: Test
@@ -147,7 +147,7 @@ ctest:
     - cd $OTB_BUILD
     - ctest -L $OTB_TEST_UNITS --output-junit $CI_PROJECT_DIR/report_ctest.xml
   after_script:
-    - cp -r $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/artifacts_ctest
+    - mv $OTB_BUILD/Testing/Temporary /tmp/artifacts_ctest
 
 python_api:
   stage: Test
@@ -159,7 +159,7 @@ python_api:
     - TMPDIR=$API_TEST_TMP python -m pytest -svv --junitxml=report_api.xml test/api_unittest.py
   after_script:
     - saved_model_cli show --dir $API_TEST_TMP/model_from_pimg --all
-    - cp -r $API_TEST_TMP $CI_PROJECT_DIR/artifacts_test_api
+    - mv $API_TEST_TMP /tmp/artifacts_test_api
 
 .applications_test_base:
   stage: Applications Test
@@ -177,7 +177,7 @@ crc_book:
     - mkdir -p $CRC_BOOK_TMP
     - TMPDIR=$CRC_BOOK_TMP python -m pytest -v --junitxml=report_tutorial.xml test/tutorial_unittest.py
   after_script:
-    - cp -r $CRC_BOOK_TMP $CI_PROJECT_DIR/artifacts_crc_book
+    - mv $CRC_BOOK_TMP $CI_PROJECT_DIR/artifacts_crc_book
 
 decloud:
   extends: .applications_test_base
