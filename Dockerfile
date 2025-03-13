@@ -16,9 +16,9 @@ RUN apt-get update -y && apt-get upgrade -y \
 
 # Env required during build and for the final image
 ENV PY=3.12
-ENV VIRTUAL_ENV=/opt/otbtf/venv
-ENV PATH="$VIRTUAL_ENV/bin:/opt/otbtf/bin:$PATH"
-ENV PYTHON_SITE_PACKAGES="$VIRTUAL_ENV/lib/python$PY/site-packages"
+ENV VENV=/opt/otbtf/venv
+ENV PATH="$VENV/bin:/opt/otbtf/bin:$PATH"
+ENV PYTHON_SITE_PACKAGES="$VENV/lib/python$PY/site-packages"
 ENV LD_LIBRARY_PATH=/opt/otbtf/lib
 # A smaller value may be used to limit bazel or to avoid OOM errors while building OTB
 ARG CPU_RATIO=1
@@ -42,7 +42,7 @@ RUN apt-get update -y && apt-get upgrade -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ### Python venv and packages
-RUN virtualenv $VIRTUAL_ENV
+RUN python3 -m venv $VENV
 # Numpy 2 support in TF is planned for 2.18, but isn't supported by most libraries for now
 ARG NUMPY="1.26.4"
 RUN pip install --no-cache-dir -U pip wheel numpy==$NUMPY
