@@ -129,8 +129,8 @@ docs:
       junit: report_*.xml
     paths:
       - artifacts_*/*
-    expire_in: 4 week
-    #when: on_failure
+    expire_in: 4 weeks
+    when: on_failure
 
 ctest:
   stage: Test
