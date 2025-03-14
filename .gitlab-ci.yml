@@ -246,7 +246,7 @@ nodata:
   script:
     - python -m pytest -v --junitxml=report_nodata.xml test/nodata_test.py
 
-.ship_gitlab:
+ship_gitlab:
   extends: .docker_build_base
   needs: ["ctest", "python_api"]
   retry: 2
@@ -255,44 +255,33 @@ nodata:
   before_script:
     - echo -n "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - docker buildx create --name=container --driver=docker-container --use --bootstrap
-
-gitlab_deploy_cpu:
-  stage: Ship
-  extends: .ship_gitlab
   script:
-    # cpu-dev
+    # CPU
     - >
       docker buildx build --push -t $IMAGE_CPUDEV
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       --build-arg DEV_IMAGE=true
       .
-    # cpu
     - >
       docker buildx build --push -t $IMAGE_CPU
       --cache-from type=registry,ref=$CACHE_IMAGE_CPU
       .
-
-gitlab_deploy_gpu:
-  stage: Ship
-  extends: .ship_gitlab
-  script:
-    # gpu-dev
+    # GPU
     - >
       docker buildx build --push -t $IMAGE_GPUDEV
       --cache-from type=registry,ref=$CACHE_IMAGE_GPU
       --cache-to type=registry,ref=$CACHE_IMAGE_GPU,mode=max
       --build-arg WITH_CUDA=true --build-arg DEV_IMAGE=true
       .
-    # gpu
     - >
       docker buildx build --push -t $IMAGE_GPU
       --cache-from type=registry,ref=$CACHE_IMAGE_GPU
       --build-arg WITH_CUDA=true
       .
 
-.ship_dockerhub:
+ship_dockerhub:
   extends: .docker_build_base
-  needs: ["gitlab_deploy_cpu", "gitlab_deploy_gpu"]
+  needs: ["ship_gitlab"]
   retry: 2
   rules:
     # Match release tag e.g. 5.0.0, skip for rc or any suffix
@@ -302,31 +291,16 @@ gitlab_deploy_gpu:
     DOCKERHUB_IMAGE_BASE: $DOCKERHUB_BASE:$OTBTF_VERSION
   before_script:
     - echo -n "$DOCKERHUB_TOKEN" | docker login -u mdl4eo --password-stdin
-
-dockerhub_deploy_cpu:
-  stage: Ship
-  extends: .ship_dockerhub
-  variables:
-    DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE-cpu
-    DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE-cpu-dev
-    DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
   script:
+    # CPU
     - docker pull $IMAGE_CPU
-    - docker tag $IMAGE_CPU $DOCKERHUB_CPU && docker push $DOCKERHUB_CPU
+    - docker tag $IMAGE_CPU $DOCKERHUB_IMAGE_BASE-cpu && docker push $DOCKERHUB_IMAGE_BASE-cpu
     - docker pull $IMAGE_CPUDEV
-    - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV && docker push $DOCKERHUB_CPUDEV
-    - docker tag $IMAGE_CPU $DOCKERHUB_LATEST && docker push $DOCKERHUB_LATEST
-
-dockerhub_deploy_gpu:
-  stage: Ship
-  extends: .ship_dockerhub
-  variables:
-    DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE-gpu
-    DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
-    DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
-  script:
+    - docker tag $IMAGE_CPUDEV $DOCKERHUB_IMAGE_BASE-cpu-dev && docker push $DOCKERHUB_IMAGE_BASE-cpu-dev
+    - docker tag $IMAGE_CPU $DOCKERHUB_BASE:latest && docker push $DOCKERHUB_BASE:latest
+    # GPU
     - docker pull $IMAGE_GPU
-    - docker tag $IMAGE_GPU $DOCKERHUB_GPU && docker push $DOCKERHUB_GPU
+    - docker tag $IMAGE_GPU $DOCKERHUB_IMAGE_BASE-gpu && docker push $DOCKERHUB_IMAGE_BASE-gpu
     - docker pull $IMAGE_GPUDEV
-    - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV && docker push $DOCKERHUB_GPUDEV
-    - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST && docker push $DOCKERHUB_GPULATEST
+    - docker tag $IMAGE_GPUDEV $DOCKERHUB_IMAGE_BASE-gpu-dev && docker push $DOCKERHUB_IMAGE_BASE-gpu-dev
+    - docker tag $IMAGE_GPU $DOCKERHUB_BASE:latest-gpu && docker push $DOCKERHUB_BASE:latest-gpu
