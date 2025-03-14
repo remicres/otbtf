@@ -139,6 +139,7 @@ COPY test/CMakeLists.txt test/*.cxx test/
 # Build remote modules (OTBTF, MLutils and Prefetch)
 WORKDIR /src/otb/otb/Modules/Remote
 RUN ln -s /src/otbtf otbtf
+ADD https://forgemia.inra.fr/orfeo-toolbox/otb-simpleextractiontools.git otb-simpleextractiontools
 ADD https://forgemia.inra.fr/orfeo-toolbox/otb-mlutils.git otb-mlutils
 ADD https://forgemia.inra.fr/orfeo-toolbox/otb-prefetch.git otb-prefetch
 
