@@ -3,8 +3,7 @@ This example shows how to use the otbtf python API to train a deep net from
 patches-images.
 """
 from otbtf import DatasetFromPatchesImages
-from otbtf.examples.tensorflow_v2x.fcnn import fcnn_model
-from otbtf.examples.tensorflow_v2x.fcnn import helper
+from otbtf.examples.fcnn import fcnn_model, helper
 
 parser = helper.base_parser()
 parser.add_argument(

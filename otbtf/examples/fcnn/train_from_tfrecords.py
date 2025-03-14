@@ -27,8 +27,7 @@ validation, and test datasets:
 import os
 
 from otbtf import TFRecords
-from otbtf.examples.tensorflow_v2x.fcnn import fcnn_model
-from otbtf.examples.tensorflow_v2x.fcnn import helper
+from otbtf.examples.fcnn import fcnn_model, helper
 
 parser = helper.base_parser()
 parser.add_argument(
