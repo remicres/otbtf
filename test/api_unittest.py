@@ -2,16 +2,15 @@
 import unittest
 
 import pytest
+from test_utils import files_exist, resolve_paths, run_command_and_compare
 
-from otbtf.examples.tensorflow_v2x.fcnn import create_tfrecords
-from otbtf.examples.tensorflow_v2x.fcnn import train_from_patchesimages
-from otbtf.examples.tensorflow_v2x.fcnn import train_from_tfrecords
-from otbtf.examples.tensorflow_v2x.fcnn.fcnn_model import (
-    INPUT_NAME,
-    TARGET_NAME
+from otbtf.examples.fcnn import (
+    create_tfrecords,
+    train_from_patchesimages,
+    train_from_tfrecords,
 )
+from otbtf.examples.fcnn.fcnn_model import INPUT_NAME, TARGET_NAME
 from otbtf.model import cropped_tensor_name
-from test_utils import resolve_paths, files_exist, run_command_and_compare
 
 INFERENCE_MAE_TOL = 10.0  # Dummy value: we don't really care of the mae value but rather the image size etc
 
