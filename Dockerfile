@@ -142,6 +142,7 @@ RUN ln -s /src/otbtf otbtf
 ADD https://forgemia.inra.fr/orfeo-toolbox/otb-simpleextractiontools.git otb-simpleextractiontools
 ADD https://forgemia.inra.fr/orfeo-toolbox/otb-mlutils.git otb-mlutils
 ADD https://forgemia.inra.fr/orfeo-toolbox/otb-prefetch.git otb-prefetch
+RUN touch otb-prefetch/test/CMakeLists.txt
 
 ARG DEV_IMAGE=false
 WORKDIR /src/otb/build/OTB/build
