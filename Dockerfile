@@ -136,14 +136,15 @@ COPY CMakeLists.txt otb-module.cmake ./
 RUN mkdir test
 COPY test/CMakeLists.txt test/*.cxx test/
 
-# Build OTBTF cpp
+# Build remote modules (OTBTF, MLutils and Prefetch)
+WORKDIR /src/otb/otb/Modules/Remote
+RUN ln -s /src/otbtf otbtf
+ADD https://forgemia.inra.fr/orfeo-toolbox/otb-mlutils.git otb-mlutils
+ADD https://forgemia.inra.fr/orfeo-toolbox/otb-prefetch.git otb-prefetch
+
 ARG DEV_IMAGE=false
-RUN cd /src/otb/otb/Modules/Remote \
- && ln -s /src/otbtf otbtf \
- && git clone https://forgemia.inra.fr/orfeo-toolbox/otb-mlutils.git \
- && git clone https://forgemia.inra.fr/orfeo-toolbox/otb-prefetch.git \
- && cd /src/otb/build/OTB/build \
- && cmake /src/otb/otb \
+WORKDIR /src/otb/build/OTB/build
+RUN cmake /src/otb/otb \
       -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
       -DOTB_WRAP_PYTHON=ON \
       -DPython_EXECUTABLE=$(which python) \
