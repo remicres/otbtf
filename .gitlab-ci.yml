@@ -164,11 +164,13 @@ python_api:
 
 .applications_test_base:
   stage: Applications Test
-  extends: .tests_base
   needs: ["ctest", "python_api"]
+  #when: manual
   only:
     - merge_requests
-  #when: manual
+  artifacts:
+    reports:
+      junit: report_*.xml
 
 crc_book:
   extends: .applications_test_base
@@ -183,7 +185,7 @@ crc_book:
     - mv $CRC_BOOK_TMP $CI_PROJECT_DIR/artifacts_crc_book
   artifacts:
     reports:
-      junit: tutorial_unittest.xml
+      junit: report_tutorial.xml
     paths:
       - artifacts_crc_book
     expire_in: 4 weeks
@@ -200,7 +202,7 @@ decloud:
     - git clone https://forgemia.inra.fr/umr-tetis/decloud.git -b keras3
     - pip install -r $PWD/decloud/requirements.txt
     - wget -q $DATASET_DECLOUD -O file.zip && unzip file.zip
-    - pytest -v decloud/tests/train_from_tfrecords_unittest.py
+    - pytest -v --junitxml=report_decloud.xml decloud/tests/train_from_tfrecords_unittest.py
 
 sr4rs:
   extends: .applications_test_base
@@ -215,7 +217,7 @@ sr4rs:
     - rm -rf sr4rs
     - git clone https://github.com/remicres/sr4rs.git
     - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
-    - python -m pytest -v --junitxml=report_sr4rs.xml test/sr4rs_unittest.py
+    - pytest -v --junitxml=report_sr4rs.xml test/sr4rs_unittest.py
 
 geos_enabled:
   extends: .applications_test_base
@@ -247,7 +249,7 @@ nodata:
 .ship_gitlab:
   extends: .docker_build_base
   needs: ["ctest", "python_api"]
-  retry: 3
+  retry: 2
   rules:
     - if: $CI_COMMIT_TAG
   before_script:
@@ -291,7 +293,7 @@ gitlab_deploy_gpu:
 .ship_dockerhub:
   extends: .docker_build_base
   needs: ["gitlab_deploy_cpu", "gitlab_deploy_gpu"]
-  retry: 3
+  retry: 2
   rules:
     # Match release tag e.g. 5.0.0, skip for rc or any suffix
     - if: $CI_COMMIT_TAG =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
