@@ -1,8 +1,5 @@
 workflow:
   rules:
-    # Ignore pipeline for filthy commits
-#    - if: $CI_COMMIT_MESSAGE =~ /^wip.*/i
-#      when: never
     # Execute for MR, but avoid duplicated due to branch triggers in MR
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
@@ -10,6 +7,9 @@ workflow:
     # Else execute on tags or default branch
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    # Ignore pipeline for filthy commits
+#    - if: $CI_COMMIT_MESSAGE =~ /^wip.*/i
+#      when: never
   auto_cancel:
     on_new_commit: interruptible
 
@@ -69,6 +69,7 @@ docker_image:
 
 .static_analysis_base:
   stage: Static Analysis
+  needs: ["docker_image"]
   allow_failure: true
   only:
     - merge_requests
@@ -123,6 +124,9 @@ docs:
 
 ctest:
   stage: Test
+  needs: ["docker_image"]
+  only:
+    - merge_requests
   variables:
     CTEST_OUTPUT_ON_FAILURE: 1
     OTB_TEST_UNITS: "Tensorflow|PanSharpening|Projection|Transform|IOGDAL"
@@ -145,6 +149,9 @@ ctest:
 
 python_api:
   stage: Test
+  needs: ["docker_image"]
+  only:
+    - merge_requests
   variables:
     API_TEST_TMP: /tmp/api_tests_tmp
   script:
