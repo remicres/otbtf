@@ -247,6 +247,7 @@ nodata:
     - python -m pytest -v --junitxml=report_nodata.xml test/nodata_test.py
 
 ship_gitlab:
+  stage: Ship
   extends: .docker_build_base
   needs: ["ctest", "python_api"]
   retry: 2
@@ -280,6 +281,7 @@ ship_gitlab:
       .
 
 ship_dockerhub:
+  stage: Ship
   extends: .docker_build_base
   needs: ["ship_gitlab"]
   retry: 2
