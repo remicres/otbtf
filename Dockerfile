@@ -138,14 +138,19 @@ COPY test/CMakeLists.txt test/*.cxx test/
 
 # Build OTBTF cpp
 ARG DEV_IMAGE=false
-RUN ln -s /src/otbtf /src/otb/otb/Modules/Remote/otbtf
-RUN cd /src/otb/build/OTB/build \
+RUN cd /src/otb/otb/Modules/Remote \
+ && ln -s /src/otbtf otbtf \
+ && git clone https://forgemia.inra.fr/orfeo-toolbox/otb-mlutils.git \
+ && git clone https://forgemia.inra.fr/orfeo-toolbox/otb-prefetch.git \
+ && cd /src/otb/build/OTB/build \
  && cmake /src/otb/otb \
       -DCMAKE_INSTALL_PREFIX=/opt/otbtf \
       -DOTB_WRAP_PYTHON=ON \
       -DPython_EXECUTABLE=$(which python) \
-      -DOTB_USE_TENSORFLOW=ON \
+      -DModule_MLUtils=ON \
+      -DModule_OTBPrefetch=ON \
       -DModule_OTBTensorflow=ON \
+      -DOTB_USE_TENSORFLOW=ON \
       -Dtensorflow_include_dir=/opt/otbtf/include/tf \
       -DTENSORFLOW_CC_LIB=$PYTHON_SITE_PACKAGES/tensorflow/libtensorflow_cc.so.2 \
       -DTENSORFLOW_FRAMEWORK_LIB=$PYTHON_SITE_PACKAGES/tensorflow/libtensorflow_framework.so.2 \
@@ -175,12 +180,12 @@ COPY --from=otb-build --chown=otbuser:otbuser /src /src
 USER otbuser
 WORKDIR /src/otbtf
 COPY --chown=otbuser:otbuser .git ./.git
-COPY --chown=otbuser:otbuser .gitignore .gitattributes .
+COPY --chown=otbuser:otbuser .gitignore .gitattributes ./
 # Install otbtf python module
-COPY --chown=otbuser:otbuser LICENSE RELEASE_NOTES.txt .clang-format *.yml .
+COPY --chown=otbuser:otbuser LICENSE RELEASE_NOTES.txt .clang-format *.yml ./
 COPY --chown=otbuser:otbuser doc ./doc
 COPY --chown=otbuser:otbuser otbtf ./otbtf
-COPY --chown=otbuser:otbuser *.md pyproject.toml .
+COPY --chown=otbuser:otbuser *.md pyproject.toml ./
 RUN pip install -e ".$(! $DEV_IMAGE || echo '[dev]')"
 
 WORKDIR /home/otbuser
