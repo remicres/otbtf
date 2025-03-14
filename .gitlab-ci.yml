@@ -123,7 +123,6 @@ docs:
 
 ctest:
   stage: Test
-  needs: ["docker_image"]
   variables:
     CTEST_OUTPUT_ON_FAILURE: 1
     OTB_TEST_UNITS: "Tensorflow|PanSharpening|Projection|Transform|IOGDAL"
