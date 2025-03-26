@@ -1,16 +1,18 @@
 """
 Implementation of a small U-Net like model
 """
+
 import logging
 
 import tensorflow as tf
+import keras
 
 from otbtf.model import ModelBase
 
 logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
+    format="%(asctime)s %(levelname)-8s %(message)s",
     level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S'
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 # Number of classes estimated by the model
@@ -19,12 +21,12 @@ N_CLASSES = 2
 # Name of the input in the `FCNNModel` instance, also name of the input node
 # in the SavedModel
 INPUT_NAME = "input_xs"
+INPUT_SIGNATURE = tf.TensorSpec(
+    shape=[None, None, None, 4], dtype=tf.float32, name=INPUT_NAME
+)
 
 # Name of the output in the `FCNNModel` instance
 TARGET_NAME = "predictions"
-
-# Name (prefix) of the output node in the SavedModel
-OUTPUT_SOFTMAX_NAME = "predictions_softmax_tensor"
 
 
 class FCNNModel(ModelBase):
@@ -51,7 +53,7 @@ class FCNNModel(ModelBase):
         Returns:
             dict of normalized inputs, ready to be used from `get_outputs()`
         """
-        return {INPUT_NAME: tf.cast(inputs[INPUT_NAME], tf.float32) * 0.0001}
+        return {INPUT_NAME: keras.ops.cast(inputs[INPUT_NAME], "float32") * 1e-4}
 
     def get_outputs(self, normalized_inputs: dict) -> dict:
         """
@@ -71,24 +73,24 @@ class FCNNModel(ModelBase):
         norm_inp = normalized_inputs[INPUT_NAME]
 
         def _conv(inp, depth, name):
-            conv_op = tf.keras.layers.Conv2D(
+            conv_op = keras.layers.Conv2D(
                 filters=depth,
                 kernel_size=3,
                 strides=2,
                 activation="relu",
                 padding="same",
-                name=name
+                name=name,
             )
             return conv_op(inp)
 
         def _tconv(inp, depth, name, activation="relu"):
-            tconv_op = tf.keras.layers.Conv2DTranspose(
+            tconv_op = keras.layers.Conv2DTranspose(
                 filters=depth,
                 kernel_size=3,
                 strides=2,
                 activation=activation,
                 padding="same",
-                name=name
+                name=name,
             )
             return tconv_op(inp)
 
@@ -101,40 +103,31 @@ class FCNNModel(ModelBase):
         out_tconv3 = _tconv(out_tconv2, 16, "tconv3") + out_conv1
         out_tconv4 = _tconv(out_tconv3, N_CLASSES, "classifier", None)
 
-        # Generally it is a good thing to name the final layers of the network
-        # (i.e. the layers of which outputs are returned from
-        # `MyModel.get_output()`). Indeed this enables to retrieve them for
-        # inference time, using their name. In case your forgot to name the
-        # last layers, it is still possible to look at the model outputs using
-        # the `saved_model_cli show --dir /path/to/your/savedmodel --all`
-        # command.
-        #
-        # Do not confuse **the name of the output layers** (i.e. the "name"
-        # property of the tf.keras.layer that is used to generate an output
-        # tensor) and **the key of the output tensor**, in the dict returned
-        # from `MyModel.get_output()`. They are two identifiers with a
-        # different purpose:
-        #  - the output layer name is used only at inference time, to identify
-        #    the output tensor from which generate the output image,
-        #  - the output tensor key identifies the output tensors, mainly to
-        #    fit the targets to model outputs during training process, but it
-        #    can also be used to access the tensors as tf/keras objects, for
-        #    instance to display previews images in TensorBoard.
-        softmax_op = tf.keras.layers.Softmax(name=OUTPUT_SOFTMAX_NAME)
+        softmax_op = keras.layers.Softmax()
         predictions = softmax_op(out_tconv4)
 
-        # note that we could also add additional outputs, for instance the
-        # argmax of the softmax:
+        # Model outputs are returned in a `dict`, where each key is an output
+        # name, and the value is the layer output. This naming have two
+        # functions:
+        #  - the output layer name is used at inference time, to identify
+        #    the output tensor from which generate the output image,
+        #  - the output layer name identifies the output tensors, to fit the
+        #    targets to model outputs, compute metrics, etc. during training
+        #    process. It can also be used to access the tensors as tf/keras
+        #    objects, for instance to display previews images in TensorBoard.
         #
-        # argmax_op = otbtf.layers.Argmax(name="labels")
-        # labels = argmax_op(predictions)
-        # return {TARGET_NAME: predictions, OUTPUT_ARGMAX_NAME: labels}
+        # Note that we could also add additional outputs, even outputs which
+        # are useless for the optimization process, for instance the argmax :
+        #   ```
+        #   argmax_op = otbtf.layers.Argmax()
+        #   labels = argmax_op(predictions)
+        #   return {TARGET_NAME: predictions, OUTPUT_ARGMAX_NAME: labels}
+        #   ```
         # The default extra outputs (i.e. output tensors with cropping in
         # physical domain) are append by `otbtf.ModelBase` for all returned
         # outputs of this function to be used at inference time (e.g.
-        # "labels_crop32", "labels_crop64", ...,
-        # "predictions_softmax_tensor_crop16", ..., etc).
-
+        # "labels_crop32", "labels_crop64", ..., "predictions__crop16", ...,
+        # etc).
         return {TARGET_NAME: predictions}
 
 
@@ -158,10 +151,12 @@ def dataset_preprocessing_fn(examples: dict):
     """
     return {
         INPUT_NAME: examples["input_xs_patches"],
-        TARGET_NAME: tf.one_hot(
-            tf.squeeze(tf.cast(examples["labels_patches"], tf.int32), axis=-1),
-            depth=N_CLASSES
-        )
+        TARGET_NAME: keras.ops.one_hot(
+            keras.ops.squeeze(
+                keras.ops.cast(examples["labels_patches"], tf.int32), axis=-1
+            ),
+            N_CLASSES,
+        ),
     }
 
 
@@ -185,23 +180,18 @@ def train(params, ds_train, ds_valid, ds_test):
         model = FCNNModel(dataset_element_spec=ds_train.element_spec)
 
         # Compile the model
-        # It is a good practice to use a `dict` to explicitly name the outputs
-        # over which the losses/metrics are computed.
-        # This ensures a better optimization control, and also avoids lots of
-        # useless outputs (e.g. metrics computed over extra outputs).
+        # Since Keras 3 it is mandatory to use a `dict` to explicitly name the
+        # outputs over which the losses/metrics are computed, e.g.
+        # `loss: {TARGET_NAME: "categorical_crossentropy"}`
         model.compile(
-            loss={
-                TARGET_NAME: tf.keras.losses.CategoricalCrossentropy()
-            },
-            optimizer=tf.keras.optimizers.Adam(
-                learning_rate=params.learning_rate
-            ),
+            loss={TARGET_NAME: keras.losses.CategoricalCrossentropy()},
+            optimizer=keras.optimizers.Adam(learning_rate=params.learning_rate),
             metrics={
                 TARGET_NAME: [
-                    tf.keras.metrics.Precision(class_id=1),
-                    tf.keras.metrics.Recall(class_id=1)
+                    keras.metrics.Precision(class_id=1),
+                    keras.metrics.Recall(class_id=1),
                 ]
-            }
+            },
         )
 
         # Summarize the model (in CLI)
@@ -215,4 +205,4 @@ def train(params, ds_train, ds_valid, ds_test):
             model.evaluate(ds_test, batch_size=params.batch_size)
 
         # Save trained model as SavedModel
-        model.save(params.model_dir)
+        model.export(params.model_dir)

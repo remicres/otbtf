@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # ==========================================================================
 #
 #   Copyright 2018-2019 IRSTEA
-#   Copyright 2020-2023 INRAE
+#   Copyright 2020-2025 INRAE
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -27,6 +26,7 @@ from typing import List, Dict, Any
 import abc
 import logging
 import tensorflow as tf
+import keras
 
 Tensor = Any
 TensorsDict = Dict[str, Tensor]
@@ -38,10 +38,10 @@ class ModelBase(abc.ABC):
     """
 
     def __init__(
-            self,
-            dataset_element_spec: tf.TensorSpec,
-            input_keys: List[str] = None,
-            inference_cropping: List[int] = None
+        self,
+        dataset_element_spec: tf.TensorSpec,
+        input_keys: List[str] = None,
+        inference_cropping: List[int] = None,
     ):
         """
         Model initializer, must be called **inside** the strategy.scope().
@@ -60,18 +60,14 @@ class ModelBase(abc.ABC):
         """
         # Retrieve dataset inputs shapes
         dataset_input_element_spec = dataset_element_spec[0]
-        logging.info(
-            "Dataset input element spec: %s", dataset_input_element_spec
-        )
+        logging.info("Dataset input element spec: %s", dataset_input_element_spec)
 
         if input_keys:
             self.dataset_input_keys = input_keys
             logging.info("Using input keys: %s", self.dataset_input_keys)
         else:
             self.dataset_input_keys = list(dataset_input_element_spec)
-            logging.info(
-                "Found dataset input keys: %s", self.dataset_input_keys
-            )
+            logging.info("Found dataset input keys: %s", self.dataset_input_keys)
 
         self.inputs_shapes = {
             key: dataset_input_element_spec[key].shape[1:]
@@ -116,7 +112,7 @@ class ModelBase(abc.ABC):
             if len(new_shape) > 2:
                 new_shape[0] = None
                 new_shape[1] = None
-            placeholder = tf.keras.Input(shape=new_shape, name=key)
+            placeholder = keras.Input(shape=new_shape, name=key)
             logging.info("New shape for input %s: %s", key, new_shape)
             model_inputs.update({key: placeholder})
         return model_inputs
@@ -158,10 +154,10 @@ class ModelBase(abc.ABC):
         return inputs
 
     def postprocess_outputs(
-            self,
-            outputs: TensorsDict,
-            inputs: TensorsDict = None,
-            normalized_inputs: TensorsDict = None
+        self,
+        outputs: TensorsDict,
+        inputs: TensorsDict = None,
+        normalized_inputs: TensorsDict = None,
     ) -> TensorsDict:
         """
         Post-process the model outputs.
@@ -185,21 +181,21 @@ class ModelBase(abc.ABC):
             for crop in self.inference_cropping:
                 extra_output_key = cropped_tensor_name(out_key, crop)
                 extra_output_name = cropped_tensor_name(
-                    out_tensor._keras_history.layer.name, crop
+                    out_tensor._keras_history.operation.name, crop
                 )
                 logging.info(
                     "Adding extra output for tensor %s with crop %s (%s)",
-                    out_key, crop, extra_output_name
+                    out_key,
+                    crop,
+                    extra_output_name,
                 )
                 cropped = out_tensor[:, crop:-crop, crop:-crop, :]
-                identity = tf.keras.layers.Activation(
-                    'linear', name=extra_output_name
-                )
+                identity = keras.layers.Identity(name=extra_output_name)
                 extra_outputs[extra_output_key] = identity(cropped)
 
         return extra_outputs
 
-    def create_network(self) -> tf.keras.Model:
+    def create_network(self) -> keras.Model:
         """
         This method returns the Keras model. This needs to be called
         **inside** the strategy.scope(). Can be reimplemented depending on the
@@ -214,27 +210,28 @@ class ModelBase(abc.ABC):
         logging.info("Model inputs: %s", inputs)
 
         # Normalize the inputs
-        normalized_inputs = self.normalize_inputs(inputs=inputs)
+        normalized_inputs = self.normalize_inputs(inputs)
         logging.info("Normalized model inputs: %s", normalized_inputs)
 
         # Build the model
-        outputs = self.get_outputs(normalized_inputs=normalized_inputs)
+        outputs = self.get_outputs(normalized_inputs)
         logging.info("Model outputs: %s", outputs)
 
         # Post-processing for inference
         postprocessed_outputs = self.postprocess_outputs(
-            outputs=outputs,
-            inputs=inputs,
-            normalized_inputs=normalized_inputs
+            outputs, inputs, normalized_inputs
         )
         outputs.update(postprocessed_outputs)
 
+        # Since Keras 3, outputs are named after the key in the returned
+        # dict of `get_outputs()`
+        outputs = {
+            key: keras.layers.Identity(name=key)(prediction)
+            for key, prediction in outputs.items()
+        }
+
         # Return the keras model
-        return tf.keras.Model(
-            inputs=inputs,
-            outputs=outputs,
-            name=self.__class__.__name__
-        )
+        return keras.Model(inputs=inputs, outputs=outputs, name=self.__class__.__name__)
 
     def summary(self, strategy=None):
         """
@@ -260,14 +257,13 @@ class ModelBase(abc.ABC):
             show_shapes: annotate with shapes values (True or False)
 
         """
-        assert self.model, "Plot() only works if create_network() has been " \
-                           "called beforehand"
+        assert self.model, (
+            "Plot() only works if create_network() has been " "called beforehand"
+        )
 
         # When multiworker strategy, only plot if the worker is chief
         if not strategy or _is_chief(strategy):
-            tf.keras.utils.plot_model(
-                self.model, output_path, show_shapes=show_shapes
-            )
+            keras.utils.plot_model(self.model, output_path, show_shapes=show_shapes)
 
 
 def _is_chief(strategy):
@@ -294,9 +290,11 @@ def _is_chief(strategy):
     if strategy.cluster_resolver:  # this means MultiWorkerMirroredStrategy
         task_type = strategy.cluster_resolver.task_type
         task_id = strategy.cluster_resolver.task_id
-        return (task_type == 'chief') \
-            or (task_type == 'worker' and task_id == 0) \
+        return (
+            (task_type == "chief")
+            or (task_type == "worker" and task_id == 0)
             or task_type is None
+        )
     # strategy with only one worker
     return True
 

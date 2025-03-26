@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import unittest
 
 import pytest
+from test_utils import files_exist, resolve_paths, run_command_and_compare
 
-from otbtf.examples.tensorflow_v2x.fcnn import create_tfrecords
-from otbtf.examples.tensorflow_v2x.fcnn import train_from_patchesimages
-from otbtf.examples.tensorflow_v2x.fcnn import train_from_tfrecords
-from otbtf.examples.tensorflow_v2x.fcnn.fcnn_model import INPUT_NAME, \
-    OUTPUT_SOFTMAX_NAME
+from otbtf.examples.fcnn import (
+    create_tfrecords,
+    train_from_patchesimages,
+    train_from_tfrecords,
+)
+from otbtf.examples.fcnn.fcnn_model import INPUT_NAME, TARGET_NAME
 from otbtf.model import cropped_tensor_name
-from test_utils import resolve_paths, files_exist, run_command_and_compare
 
 INFERENCE_MAE_TOL = 10.0  # Dummy value: we don't really care of the mae value but rather the image size etc
 
@@ -33,7 +33,7 @@ class APITest(unittest.TestCase):
         ])
         train_from_patchesimages.train(params=params)
         self.assertTrue(files_exist([
-            '$TMPDIR/model_from_pimg/keras_metadata.pb',
+            '$TMPDIR/model_from_pimg/fingerprint.pb',
             '$TMPDIR/model_from_pimg/saved_model.pb',
             '$TMPDIR/model_from_pimg/variables/variables.data-00000-of-00001',
             '$TMPDIR/model_from_pimg/variables/variables.index'
@@ -51,7 +51,7 @@ class APITest(unittest.TestCase):
                 f"-source1.placeholder {INPUT_NAME} "
                 "-model.dir $TMPDIR/model_from_pimg "
                 "-model.fullyconv on "
-                f"-output.names {cropped_tensor_name(OUTPUT_SOFTMAX_NAME, 16)} "
+                f"-output.names {cropped_tensor_name(TARGET_NAME, 16)} "
                 "-output.efieldx 32 "
                 "-output.efieldy 32 "
                 "-out \"$TMPDIR/classif_model4_softmax.tif?&gdal:co:compress=deflate\" uint8",
@@ -68,7 +68,7 @@ class APITest(unittest.TestCase):
                 f"-source1.placeholder {INPUT_NAME} "
                 "-model.dir $TMPDIR/model_from_pimg "
                 "-model.fullyconv on "
-                f"-output.names {cropped_tensor_name(OUTPUT_SOFTMAX_NAME, 32)} "
+                f"-output.names {cropped_tensor_name(TARGET_NAME, 32)} "
                 "-output.efieldx 64 "
                 "-output.efieldy 64 "
                 "-out \"$TMPDIR/classif_model4_softmax.tif?&gdal:co:compress=deflate\" uint8",
@@ -110,7 +110,7 @@ class APITest(unittest.TestCase):
         ])
         train_from_tfrecords.train(params=params)
         self.assertTrue(files_exist([
-            '$TMPDIR/model_from_tfrecs/keras_metadata.pb',
+            '$TMPDIR/model_from_tfrecs/fingerprint.pb',
             '$TMPDIR/model_from_tfrecs/saved_model.pb',
             '$TMPDIR/model_from_tfrecs/variables/variables.data-00000-of-00001',
             '$TMPDIR/model_from_tfrecs/variables/variables.index'
@@ -128,7 +128,7 @@ class APITest(unittest.TestCase):
                 f"-source1.placeholder {INPUT_NAME} "
                 "-model.dir $TMPDIR/model_from_pimg "
                 "-model.fullyconv on "
-                f"-output.names {cropped_tensor_name(OUTPUT_SOFTMAX_NAME, 16)} "
+                f"-output.names {cropped_tensor_name(TARGET_NAME, 16)} "
                 "-output.efieldx 32 "
                 "-output.efieldy 32 "
                 "-out \"$TMPDIR/classif_model4_softmax.tif?&gdal:co:compress=deflate\" uint8",
@@ -148,7 +148,7 @@ class APITest(unittest.TestCase):
                 f"-source1.placeholder {INPUT_NAME} "
                 "-model.dir $TMPDIR/model_from_pimg "
                 "-model.fullyconv on "
-                f"-output.names {cropped_tensor_name(OUTPUT_SOFTMAX_NAME, 32)} "
+                f"-output.names {cropped_tensor_name(TARGET_NAME, 32)} "
                 "-output.efieldx 64 "
                 "-output.efieldy 64 "
                 "-out \"$TMPDIR/classif_model4_softmax.tif?&gdal:co:compress=deflate\" uint8",

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import pytest
 import unittest
+
 import rasterio
 import rasterio.features
 import rasterio.warp
@@ -30,7 +29,7 @@ class NumpyTest(unittest.TestCase):
 
     def test_import_all(self):
         import otbApplication
-        self.assertTrue(otbApplication.Registry_GetAvailableApplications())
+        self.assertTrue(otbApplication.Registry.GetAvailableApplications())
         import tensorflow
         self.assertTrue(tensorflow.__version__)
         from osgeo import gdal

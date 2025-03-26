@@ -84,7 +84,7 @@ specific field of the input vector data.
 Typically, the *class* field can be used to generate a dataset suitable for a
 model that performs pixel wise classification.
 
-![Schema](https://gitlab.irstea.fr/remi.cresson/otbtf/-/raw/develop/doc/images/patches_extraction.png)
+![Schema](https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/raw/develop/doc/images/patches_extraction.png)
 
 The application description can be displayed using:
 

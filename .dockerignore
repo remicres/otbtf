@@ -1,2 +1,3 @@
-.git
-python/__pycache__
+Dockerfile
+**/__pycache__
+.readthedocs.yaml

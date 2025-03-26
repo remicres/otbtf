@@ -1,6 +1,7 @@
-import otbApplication
 import os
 from pathlib import Path
+
+import otbApplication
 
 
 def get_nb_of_channels(raster):
