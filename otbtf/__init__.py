@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # ==========================================================================
 #
 #   Copyright 2018-2019 IRSTEA
-#   Copyright 2020-2023 INRAE
+#   Copyright 2020-2025 INRAE
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,7 +19,9 @@
 """
 OTBTF python module
 """
-import pkg_resources
+
+__version__ = "5.0.0rc4"
+
 try:
     from otbtf.utils import read_as_np_arr, gdal_open  # noqa
     from otbtf.dataset import Buffer, PatchesReaderBase, PatchesImagesReader, \
@@ -34,4 +35,3 @@ except ImportError:
 from otbtf.tfrecords import TFRecords  # noqa
 from otbtf.model import ModelBase  # noqa
 from otbtf import layers, ops  # noqa
-__version__ = pkg_resources.require("otbtf")[0].version

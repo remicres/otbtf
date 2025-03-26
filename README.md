@@ -18,7 +18,7 @@
 
 OTBTF is a remote module of the [Orfeo ToolBox](https://www.orfeo-toolbox.org). 
 It provides a generic, multi-purpose deep learning framework, targeting remote 
-sensing images processing. It contains a set of new process objects for OTB 
+sensing images processing. It contains a set of process objects for OTB 
 that internally invoke [Tensorflow](https://www.tensorflow.org/), and new OTB 
 applications to perform deep learning with real-world remote sensing images. 
 Applications can be used to build OTB pipelines from Python or C++ APIs. OTBTF 
@@ -27,15 +27,16 @@ remote sensing imagery, easy to train in distributed environments.
 
 ## Documentation
 
-The documentation is available on [otbtf.readthedocs.io](https://otbtf.readthedocs.io).
+The [documentation](https://otbtf.readthedocs.io) is available on *readthedocs* 
+as well as a [comprehensive tutorial](https://otb-keras-tutorial.readthedocs.io).
 
 ## Use
 
 You can use our latest GPU enabled docker images.
 
 ```bash
-docker run --runtime=nvidia -ti mdl4eo/otbtf:latest-gpu otbcli_PatchesExtraction
-docker run --runtime=nvidia -ti mdl4eo/otbtf:latest-gpu python -c "import otbtf"
+docker run --gpus=all -ti mdl4eo/otbtf:latest-gpu otbcli_PatchesExtraction
+docker run --gpus=all -ti mdl4eo/otbtf:latest-gpu python -c "import otbtf"
 ```
 
 You can also build OTBTF from sources (see the documentation)

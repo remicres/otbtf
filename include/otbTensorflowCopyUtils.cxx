@@ -1,7 +1,7 @@
 /*=========================================================================
 
      Copyright (c) 2018-2019 IRSTEA
-     Copyright (c) 2020-2021 INRAE
+     Copyright (c) 2020-2025 INRAE
 
 
      This software is distributed WITHOUT ANY WARRANTY; without even
@@ -77,7 +77,7 @@ PopulateTensorFromBufferedVectorImage(const typename TImage::Pointer bufferedima
 //
 // Recopy an VectorImage region into a 4D-shaped tensorflow::Tensor ({-1, sz_y, sz_x, sz_bands})
 //
-template <class TImage, class TValueType = typename TImage::InternalPixelType>
+template <class TImage, class TValueType>
 void
 RecopyImageRegionToTensor(const typename TImage::Pointer      inputPtr,
                           const typename TImage::RegionType & region,

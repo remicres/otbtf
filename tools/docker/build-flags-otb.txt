@@ -1,8 +1,0 @@
--DOTB_BUILD_FeaturesExtraction=ON
--DOTB_BUILD_Hyperspectral=ON
--DOTB_BUILD_Learning=ON
--DOTB_BUILD_Miscellaneous=ON
--DOTB_BUILD_RemoteModules=ON
--DOTB_BUILD_SAR=ON
--DOTB_BUILD_Segmentation=ON
--DOTB_BUILD_StereoProcessing=ON

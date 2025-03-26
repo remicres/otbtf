@@ -1,34 +1,24 @@
 # Docker troubleshooting
 
-You can find plenty of help on the web about docker. 
-This section only provides the basics for newcomers that are eager to use 
-OTBTF!
+You can find plenty of help on the web about docker.
+This section only provides the basics for newcomers
+ that are eager to use OTBTF!
 This section is largely inspired from the 
-[moringa docker help](https://gitlab.irstea.fr/raffaele.gaetano/moringa/blob/develop/docker/README.md). 
-Big thanks to the authors.
+[moringa docker help](https://gitlab.irstea.fr/raffaele.gaetano/moringa/blob/develop/docker/README.md).
+ Big thanks to the authors.
 
 ## Common errors
 
-### Manifest unknown
-
-```
-Error response from daemon: 
-manifest for nvidia/cuda:11.0-cudnn8-devel-ubuntu20.04 not found: 
-manifest unknown: manifest unknown
-```
-
-This means that the docker image is missing from dockerhub.
-
 ### failed call to cuInit
 
-```
+```raw
 failed call to cuInit: 
 UNKNOWN ERROR (303) / no NVIDIA GPU device is present: 
 /dev/nvidia0 does not exist
 ```
 
-Nvidia driver is missing or disabled, make sure to add 
-` --gpus=all` to your docker run or create command
+Nvidia driver is missing or disabled, make sure to add
+ ` --gpus=all` to your docker run or create command
 
 ## Useful diagnostic commands
 
@@ -87,7 +77,7 @@ docker create --interactive --tty --volume /home/$USER:/home/otbuser/ \
 !!! warning
 
     Beware of ownership issues, see 
-    [this section](#fix-volume-ownership-sissues).
+    [this section](#fix-volume-ownership-issues).
 
 ### Interactive session
 

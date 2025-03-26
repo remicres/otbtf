@@ -315,11 +315,23 @@ dataset
 
 ```python
     model.compile(
-        loss=tf.keras.losses.CategoricalCrossentropy(),
+        loss={TARGET_NAME: tf.keras.losses.CategoricalCrossentropy()},
         optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-        metrics=[tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
+        metrics={
+            TARGET_NAME: [
+                tf.keras.metrics.Precision(), 
+                tf.keras.metrics.Recall()
+            ]
+        }
     )
 ```
+
+!!! Note
+
+    The losses and metrics must always be provided using a dict, to specify 
+    which output to use. This is mandatory since Keras 3, since OTBTF generates 
+    a bunch of extra outputs that are not used during optimization, but needed 
+    in the inference step.
 
 We can then train our model using Keras:
 

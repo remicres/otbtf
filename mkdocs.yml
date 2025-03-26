@@ -47,6 +47,7 @@ nav:
 - Tensorflow v1:
   - Tricks (deprecated): deprecated.md
   - Models examples: reference/otbtf/examples/tensorflow_v1x/__init__.md
+- Alternatives: alternatives.md
 
 # Customization
 extra:

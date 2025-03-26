@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from otbtf import DatasetFromPatchesImages
-from otbtf.examples.tensorflow_v2x.fcnn import helper
+from otbtf.examples.fcnn import helper
 
 parser = argparse.ArgumentParser(
     description="Converts patches-images into TFRecords"

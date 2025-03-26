@@ -1,3 +1,18 @@
+Version 4.4.0 (?? ??? ????)
+----------------------------------------------------------------
+* Bump OTB version to 9.1.0
+* Bump TensorFlow version to 2.18.0
+* Move python pip install to virtualenv /opt/otbtf/venv
+* Lock numpy version < 2.0
+* Upgrade TF build workflow to latest specs:
+  - Drop Docker build argument BASE_IMG (ubuntu jammy is used for every build)
+  - Use official bazel configs (targets --config=release_{cpu,gpu}) for wheels
+  - Compile with LLVM Clang 18, use "HERMETIC_CUDA" 12.5
+  - Use default compute capabilities from .bazelrc (sm_60,sm_70,sm_80,sm_89,compute_90)
+  - Add Docker build arguments WITH_CUDA=false, WITH_MKL=false, WITH_XLA=true
+  - TODO: update python code for Keras 3
+* TODO: move packaging spec to pyproject.toml
+
 Version 4.3.1 (02 jan 2024)
 ----------------------------------------------------------------
 * Fix a bug with PROJ due to OTB 9 packaging

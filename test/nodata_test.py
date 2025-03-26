@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import otbApplication
-import pytest
-import tensorflow as tf
+import keras
 import unittest
 
-import otbtf
 from test_utils import resolve_paths, compare
 
 
@@ -28,10 +25,10 @@ class NodataInferenceTest(unittest.TestCase):
         sm_dir = resolve_paths("$TMPDIR/l2_norm_savedmodel")
 
         # Create model
-        x = tf.keras.Input(shape=[None, None, None], name="x")
-        y = tf.norm(x, axis=-1)
-        model = tf.keras.Model(inputs={"x": x}, outputs={"y": y})
-        model.save(sm_dir)
+        x = keras.Input(shape=[None, None, None], name="x")
+        y = keras.ops.norm(x, axis=-1)
+        model = keras.Model(inputs={"x": x}, outputs={"y": y})
+        model.export(sm_dir)
 
         # Input image: f(x, y) = x * y if x > y else 0
         bmx = otbApplication.Registry.CreateApplication("BandMathX")

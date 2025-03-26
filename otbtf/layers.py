@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # ==========================================================================
 #
 #   Copyright 2018-2019 IRSTEA
-#   Copyright 2020-2023 INRAE
+#   Copyright 2020-2025 INRAE
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -23,27 +22,30 @@ tree/master/otbtf/layers.py){ .md-button }
 
 The utils module provides some useful keras layers to build deep nets.
 """
+
 from typing import List, Tuple, Any
 import tensorflow as tf
+import keras
 
 
 Tensor = Any
 Scalars = List[float] | Tuple[float]
 
 
-class DilatedMask(tf.keras.layers.Layer):
-    """Layer to dilate a binary mask."""
-    def __init__(self, nodata_value: float, radius: int, name: str = None):
+@keras.saving.register_keras_serializable()
+class DilatedMask(keras.layers.Layer):
+    """Layer to dilate a binary mask (Experimental)."""
+
+    def __init__(self, *args, nodata_value: float, radius: int, **kwargs):
         """
         Params:
             nodata_value: the no-data value of the binary mask
             radius: dilatation radius
-            name: layer name
 
         """
         self.nodata_value = nodata_value
         self.radius = radius
-        super().__init__(name=name)
+        super().__init__(*args, **kwargs)
 
     def call(self, inp: Tensor):
         """
@@ -52,7 +54,7 @@ class DilatedMask(tf.keras.layers.Layer):
 
         """
         # Compute a binary mask from the input
-        nodata_mask = tf.cast(tf.math.equal(inp, self.nodata_value), tf.uint8)
+        nodata_mask = keras.ops.cast(tf.math.equal(inp, self.nodata_value), "uint8")
 
         se_size = 1 + 2 * self.radius
         # Create a morphological kernel suitable for binary dilatation, see
@@ -65,24 +67,30 @@ class DilatedMask(tf.keras.layers.Layer):
             padding="SAME",
             data_format="NHWC",
             dilations=[1, 1, 1, 1],
-            name="dilatation_conv2d"
+            name="dilatation_conv2d",
         )
-        return tf.cast(conv2d_out, tf.uint8)
+        return keras.ops.cast(conv2d_out, "uint8")
+
+    def get_config(self):
+        base_config = super().get_config()
+        config = {"nodata_value": self.nodata_value, "radius": self.radius}
+        return {**base_config, **config}
 
 
-class ApplyMask(tf.keras.layers.Layer):
-    """Layer to apply a binary mask to one input."""
-    def __init__(self, out_nodata: float, name: str = None):
+@keras.saving.register_keras_serializable()
+class ApplyMask(keras.layers.Layer):
+    """Layer to apply a binary mask to one input (Experimental)."""
+
+    def __init__(self, *args, out_nodata: float, **kwargs):
         """
         Params:
             out_nodata: output no-data value, set when the mask is 1
-            name: layer name
 
         """
-        super().__init__(name=name)
+        super().__init__(*args, **kwargs)
         self.out_nodata = out_nodata
 
-    def call(self, inputs: Tuple[Tensor] | List[Tensor]):
+    def call(self, inputs: Tuple[Tensor, Tensor] | List[Tensor]):
         """
         Params:
             inputs: (mask, input). list or tuple of size 2. First element is
@@ -94,25 +102,26 @@ class ApplyMask(tf.keras.layers.Layer):
         mask, inp = inputs
         return tf.where(mask == 1, float(self.out_nodata), inp)
 
+    def get_config(self):
+        base_config = super().get_config()
+        config = {
+            "out_nodata": self.out_nodata,
+        }
+        return {**base_config, **config}
 
-class ScalarsTile(tf.keras.layers.Layer):
+
+@keras.saving.register_keras_serializable()
+class ScalarsTile(keras.layers.Layer):
     """
-    Layer to duplicate some scalars in a whole array.
+    Layer to duplicate some scalars in a whole array (Experimental).
     Simple example with only one scalar = 0.152:
         output [[0.152, 0.152, 0.152],
                 [0.152, 0.152, 0.152],
                 [0.152, 0.152, 0.152]]
 
     """
-    def __init__(self, name: str = None):
-        """
-        Params:
-            name: layer name
 
-        """
-        super().__init__(name=name)
-
-    def call(self, inputs: List[Tensor | Scalars] | Tuple[Tensor | Scalars]):
+    def call(self, inputs: List[Tensor | Scalars] | Tuple[Tensor | Scalars, Tensor | Scalars]):
         """
         Params:
             inputs: [reference, scalar inputs]. Reference is the tensor whose
@@ -127,7 +136,8 @@ class ScalarsTile(tf.keras.layers.Layer):
         return tf.tile(inp, [1, tf.shape(ref)[1], tf.shape(ref)[2], 1])
 
 
-class Argmax(tf.keras.layers.Layer):
+@keras.saving.register_keras_serializable()
+class Argmax(keras.layers.Layer):
     """
     Layer to compute the argmax of a tensor.
 
@@ -136,14 +146,14 @@ class Argmax(tf.keras.layers.Layer):
     Useful to transform a softmax into a "categorical" map for instance.
 
     """
-    def __init__(self, name: str = None, expand_last_dim: bool = True):
+
+    def __init__(self, *args, expand_last_dim: bool = True, **kwargs):
         """
         Params:
-            name: layer name
             expand_last_dim: expand the last dimension when True
 
         """
-        super().__init__(name=name)
+        super().__init__(*args, **kwargs)
         self.expand_last_dim = expand_last_dim
 
     def call(self, inputs):
@@ -164,8 +174,16 @@ class Argmax(tf.keras.layers.Layer):
             return tf.expand_dims(argmax, axis=-1)
         return argmax
 
+    def get_config(self):
+        base_config = super().get_config()
+        config = {
+            "expand_last_dim": self.expand_last_dim,
+        }
+        return {**base_config, **config}
 
-class Max(tf.keras.layers.Layer):
+
+@keras.saving.register_keras_serializable()
+class Max(keras.layers.Layer):
     """
     Layer to compute the max of a tensor.
 
@@ -173,13 +191,6 @@ class Max(tf.keras.layers.Layer):
     Useful to transform a softmax into a "confidence" map for instance
 
     """
-    def __init__(self, name=None):
-        """
-        Params:
-            name: layer name
-
-        """
-        super().__init__(name=name)
 
     def call(self, inputs):
         """

@@ -36,3 +36,12 @@ training, etc. is done using the so-called `tensorflow.Strategy`
 !!! Note
 
     Read our [tutorial](api_tutorial.html) to know more on working with Keras!
+
+## Major changes between Keras 2 and 3
+
+- Use keras functions on keras objects, instead of tf ones
+- Most operations in `tf` namespace have moved to `keras.ops`
+- Function `model.save()` should be replaced by `model.export()`
+- Target layers for metrics must be explicitly named
+
+Read further instructions in the official [keras docs](https://keras.io/guides/migrating_to_keras_3/).

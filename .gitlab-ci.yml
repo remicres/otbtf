@@ -1,322 +1,308 @@
-variables:
-  OTBTF_VERSION: 4.3.1
-  OTB_BUILD: /src/otb/build/OTB/build  # Local OTB build directory
-  OTBTF_SRC: /src/otbtf  # Local OTBTF source directory
-  OTB_TEST_DIR: $OTB_BUILD/Testing/Temporary  # OTB testing directory
-  ARTIFACT_TEST_DIR: $CI_PROJECT_DIR/testing
-  CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
-  API_TEST_TMP: /tmp/api_tests_tmp
-  DATADIR: $CI_PROJECT_DIR/test/data
-  DOCKER_BUILDKIT: 1
-  DOCKER_DRIVER: overlay2
-  CACHE_IMAGE_BASE: $CI_REGISTRY_IMAGE:otbtf-base
-  CACHE_IMAGE_BUILDER: $CI_REGISTRY_IMAGE:builder
-  BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-  DEV_IMAGE: $CI_REGISTRY_IMAGE:cpu-basic-dev-testing
-  CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
-  DOCKERHUB_BASE: mdl4eo/otbtf
-  DOCKERHUB_IMAGE_BASE: ${DOCKERHUB_BASE}:${OTBTF_VERSION}
-  CPU_BASE_IMG: ubuntu:22.04
-  GPU_BASE_IMG: nvidia/cuda:12.0.1-cudnn8-devel-ubuntu22.04
-
-image: $BRANCH_IMAGE
-
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_REF_NAME =~ /master/ # Execute jobs in merge request context, or commit in master branch
-    
+    # Execute for MR, but avoid duplicated due to branch triggers in MR
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Else execute on tags or default branch
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    # Ignore pipeline for filthy commits
+#    - if: $CI_COMMIT_MESSAGE =~ /^wip.*/i
+#      when: never
+  auto_cancel:
+    on_new_commit: interruptible
+
 stages:
   - Build
   - Static Analysis
   - Documentation
   - Test
   - Applications Test
-  - Update dev image
   - Ship
 
+variables:
+  OTBTF_VERSION: 5.0.0rc4
+  OTBTF_SRC: /src/otbtf  # OTBTF source directory path in image
+  DATADIR: $CI_PROJECT_DIR/test/data
+  CACHE_IMAGE_CPU: $CI_REGISTRY_IMAGE:build-cache-cpu
+  CACHE_IMAGE_GPU: $CI_REGISTRY_IMAGE:build-cache-gpu
+  BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  BUILDX_BUILDER: container
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+  CI_REGISTRY_PUBIMG: $CI_REGISTRY_IMAGE:$OTBTF_VERSION
+  IMAGE_CPU: $CI_REGISTRY_PUBIMG-cpu
+  IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG-cpu-dev
+  IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
+  IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
+
+default:
+  tags: [ godzilla ]
+  interruptible: true
+  image:
+    name: $BRANCH_IMAGE
+    pull_policy: always
+
 .docker_build_base:
-  allow_failure: false
-  tags: [godzilla]
-  image: docker:latest
+  image: docker:27.5.1
   services:
-    - name: docker:dind
+    - name: docker:27.5.1-dind
   before_script:
-    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-  timeout: 10 hours
+    - echo -n "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker buildx create --name=container --driver=docker-container --use --bootstrap
+  after_script:
+    - docker buildx rm --keep-state container
 
-
-docker image:
-  extends: .docker_build_base
+docker_image:
   stage: Build
-  except:
+  only:
+    - merge_requests
     - develop
+  extends: .docker_build_base
   script:
     - >
-      docker build
-      --target otbtf-base
-      --cache-from $CACHE_IMAGE_BASE
-      --tag $CACHE_IMAGE_BASE
-      --build-arg BASE_IMG=$CPU_BASE_IMG
-      --build-arg BUILDKIT_INLINE_CACHE=1
+      docker buildx build --push -t $BRANCH_IMAGE
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
+      --cache-to type=registry,ref=$CACHE_IMAGE_CPU,mode=max
+      --build-arg DEV_IMAGE=true
       "."
-    - docker push $CACHE_IMAGE_BASE
-    - >
-      docker build
-      --target builder
-      --cache-from $CACHE_IMAGE_BASE
-      --cache-from $CACHE_IMAGE_BUILDER
-      --tag $CACHE_IMAGE_BUILDER
-      --build-arg KEEP_SRC_OTB="true"
-      --build-arg BZL_CONFIGS=""
-      --build-arg BASE_IMG=$CPU_BASE_IMG
-      --build-arg BUILDKIT_INLINE_CACHE=1
-      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=$BAZELCACHE"
-      --build-arg OTBTESTS="true"
-      "."
-    - docker push $CACHE_IMAGE_BUILDER
-    - >
-      docker build
-      --cache-from $CACHE_IMAGE_BASE
-      --cache-from $CACHE_IMAGE_BUILDER
-      --cache-from $BRANCH_IMAGE
-      --cache-from $DEV_IMAGE
-      --tag $BRANCH_IMAGE
-      --build-arg KEEP_SRC_OTB="true"
-      --build-arg BZL_CONFIGS=""
-      --build-arg BASE_IMG=$CPU_BASE_IMG
-      --build-arg BUILDKIT_INLINE_CACHE=1
-      --build-arg BZL_OPTIONS="--verbose_failures --remote_cache=$BAZELCACHE"
-      --build-arg OTBTESTS="true"
-      "."
-    - docker push $BRANCH_IMAGE
 
 .static_analysis_base:
   stage: Static Analysis
+  needs: ["docker_image"]
   allow_failure: true
+  only:
+    - merge_requests
 
 flake8:
   extends: .static_analysis_base
   script:
-    - sudo pip install flake8
     - flake8 $OTBTF_SRC/otbtf --exclude=tensorflow_v1x
 
 pylint:
   extends: .static_analysis_base
   script:
-    - sudo pip install pylint
     - pylint $OTBTF_SRC/otbtf --ignore=tensorflow_v1x
 
 codespell:
+  rules:
   extends: .static_analysis_base
   script:
-    - sudo pip install codespell
-    - codespell otbtf
-    - codespell doc
+    - codespell otbtf doc README.md
 
 cppcheck:
   extends: .static_analysis_base
   script:
-    - sudo apt update && sudo apt install cppcheck -y
     - cd $OTBTF_SRC/ && cppcheck --enable=all --error-exitcode=1 -I include/ --suppress=missingInclude --suppress=unusedFunction .
 
-.doc_base:
+docs:
   stage: Documentation
+  tags: [ stable ]
+  needs: []
+  image: python:3.10-slim
+  variables:
+    PTH: public_test
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_REF_NAME == /master/
+      variables:
+        PTH: public
+    - changes:
+      - doc/**/*
+      - "*.{md,txt}"
+      - mkdocs.yml
+      - .readthedocs.yaml
   before_script:
     - pip install -r doc/doc_requirements.txt
+  script:
+    - mkdocs build --site-dir $PTH
   artifacts:
     paths:
       - public
       - public_test
 
-pages_test:
-  extends: .doc_base
-  except:
-    - master
-  script:
-    - mkdocs build --site-dir public_test
-
-pages:
-  extends: .doc_base
+ctest:
+  stage: Test
+  needs: ["docker_image"]
   only:
-    - master
+    - merge_requests
+  variables:
+    CTEST_OUTPUT_ON_FAILURE: 1
+    OTB_TEST_UNITS: "Tensorflow|PanSharpening|Projection|Transform|IOGDAL"
+    OTB_BUILD: /src/otb/build/OTB/build
   script:
-    - mkdocs build --site-dir public
+    - cd /src/otb/otb && git lfs pull
+    - ln -s $CI_PROJECT_DIR/test/data $OTBTF_SRC/test/data
+    - ln -s $CI_PROJECT_DIR/test/models $OTBTF_SRC/test/models
+    - cd $OTB_BUILD
+    - ctest -L $OTB_TEST_UNITS --output-junit $CI_PROJECT_DIR/report_ctest.xml
+  after_script:
+    - mv $OTB_BUILD/Testing/Temporary $CI_PROJECT_DIR/artifacts_ctest
   artifacts:
+    reports:
+      junit: report_ctest.xml
     paths:
-      - public
-
-.tests_base:
-  tags: [godzilla]
-  artifacts:
-    paths:
-      - $ARTIFACT_TEST_DIR/*.*
-    expire_in: 1 week
+      - artifacts_ctest
+    expire_in: 4 weeks
     when: on_failure
 
-ctest:
-  extends: .tests_base
+python_api:
   stage: Test
+  needs: ["docker_image"]
+  only:
+    - merge_requests
+  variables:
+    API_TEST_TMP: /tmp/api_tests_tmp
   script:
-    - sudo apt update && sudo apt install -y git-lfs 
-    - cd /src/otb/otb && sudo git lfs fetch --all && sudo git lfs pull
-    - cd $OTB_BUILD/
-    - sudo ctest -L OTBTensorflow
-    - sudo ctest -L OTBPanSharpening
-    - sudo ctest -L OTBProjection
-    - sudo ctest -L OTBTransform
-    - sudo ctest -L OTBIOGDAL
+    - mkdir $API_TEST_TMP
+    - TMPDIR=$API_TEST_TMP python -m pytest -svv --junitxml=report_python_api.xml test/api_unittest.py
   after_script:
-    - cp -r $OTB_TEST_DIR $ARTIFACT_TEST_DIR
+    - saved_model_cli show --dir $API_TEST_TMP/model_from_pimg --all
+    - mv $API_TEST_TMP $CI_PROJECT_DIR/artifacts_test_api
+  artifacts:
+    reports:
+      junit: report_python_api.xml
+    paths:
+      - artifacts_python_api
+    expire_in: 4 weeks
+    when: on_failure
 
 .applications_test_base:
-  extends: .tests_base
   stage: Applications Test
-  before_script:
-    - pip install pytest pytest-cov pytest-order
-    - mkdir -p $ARTIFACT_TEST_DIR
-    - cd $CI_PROJECT_DIR
+  needs: ["ctest", "python_api"]
+  only:
+    - merge_requests
+  artifacts:
+    reports:
+      junit: report_*.xml
 
 crc_book:
   extends: .applications_test_base
+  when: manual
+  allow_failure: true
+  variables:
+    CRC_BOOK_TMP: /tmp/crc_book_tests_tmp
   script:
     - mkdir -p $CRC_BOOK_TMP
-    - TMPDIR=$CRC_BOOK_TMP python -m pytest --junitxml=$CI_PROJECT_DIR/report_tutorial.xml $OTBTF_SRC/test/tutorial_unittest.py
+    - TMPDIR=$CRC_BOOK_TMP python -m pytest -v --junitxml=report_tutorial.xml test/tutorial_unittest.py
   after_script:
-    - cp $CRC_BOOK_TMP/*.* $ARTIFACT_TEST_DIR/
-    
-sr4rs:
-  extends: .applications_test_base
-  script:
-    - wget -O sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-      https://nextcloud.inrae.fr/s/EZL2JN7SZyDK8Cf/download/sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-    - unzip -o sr4rs_sentinel2_bands4328_france2020_savedmodel.zip
-    - wget -O sr4rs_data.zip https://nextcloud.inrae.fr/s/kDms9JrRMQE2Q5z/download
-    - unzip -o sr4rs_data.zip
-    - rm -rf sr4rs
-    - git clone https://github.com/remicres/sr4rs.git
-    - export PYTHONPATH=$PYTHONPATH:$PWD/sr4rs
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_sr4rs.xml $OTBTF_SRC/test/sr4rs_unittest.py
+    - mv $CRC_BOOK_TMP $CI_PROJECT_DIR/artifacts_crc_book
+  artifacts:
+    reports:
+      junit: report_tutorial.xml
+    paths:
+      - artifacts_crc_book
+    expire_in: 4 weeks
+    when: on_failure
 
 decloud:
   extends: .applications_test_base
+  when: manual
+  allow_failure: true
+  variables:
+    DATASET_DECLOUD: https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download
+    DECLOUD_DATA_DIR: $CI_PROJECT_DIR/decloud_data
   script:
-    - git clone https://github.com/CNES/decloud.git
-    - pip install -r $PWD/decloud/docker/requirements.txt
-    - wget https://nextcloud.inrae.fr/s/aNTWLcH28zNomqk/download -O file.zip && unzip file.zip
-    - export DECLOUD_DATA_DIR="$PWD/decloud_data"
-    - pytest decloud/tests/train_from_tfrecords_unittest.py
+    - git clone https://forgemia.inra.fr/umr-tetis/decloud.git -b keras3
+    - pip install -r $PWD/decloud/requirements.txt
+    - wget -q $DATASET_DECLOUD -O file.zip && unzip file.zip
+    - pytest -v --junitxml=report_decloud.xml decloud/tests/train_from_tfrecords_unittest.py
 
-otbtf_api:
+sr4rs:
   extends: .applications_test_base
   script:
-    - mkdir $API_TEST_TMP
-    - TMPDIR=$API_TEST_TMP python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_api.xml $OTBTF_SRC/test/api_unittest.py
-  after_script:
-    - cp $API_TEST_TMP/*.* $ARTIFACT_TEST_DIR/
+    - sh test/sr4rs_test.sh
 
 geos_enabled:
   extends: .applications_test_base
   script:
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_geos_enabled.xml $OTBTF_SRC/test/geos_test.py
+    - python -m pytest -v --junitxml=report_geos_enabled.xml test/geos_test.py
 
 planetary_computer:
   extends: .applications_test_base
   script:
     - pip install pystac_client planetary_computer
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_pc_enabled.xml $OTBTF_SRC/test/pc_test.py
-
-imports:
-  extends: .applications_test_base
-  script:
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_imports.xml $OTBTF_SRC/test/imports_test.py
+    - python -m pytest -v --junitxml=report_pc_enabled.xml test/pc_test.py
 
 numpy_gdal_otb:
   extends: .applications_test_base
   script:
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_numpy.xml $OTBTF_SRC/test/numpy_test.py
+    - python -m pytest -v --junitxml=report_numpy.xml test/numpy_test.py
 
 rio:
   extends: .applications_test_base
   script:
-    - sudo pip install rasterio
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_rio.xml $OTBTF_SRC/test/rio_test.py
+    - pip install rasterio --no-binary rasterio
+    - python -m pytest -v --junitxml=report_rio.xml test/rio_test.py
 
 nodata:
   extends: .applications_test_base
   script:
-    - python -m pytest --junitxml=$ARTIFACT_TEST_DIR/report_nodata.xml $OTBTF_SRC/test/nodata_test.py
+    - python -m pytest -v --junitxml=report_nodata.xml test/nodata_test.py
 
-deploy_cpu-dev-testing:
-  stage: Update dev image
-  extends: .docker_build_base
-  except:
-    - master
+otbtf_keras3_tutorial:
+  extends: .applications_test_base
   script:
-    - docker pull $BRANCH_IMAGE
-    - docker tag $BRANCH_IMAGE $DEV_IMAGE
-    - docker push $DEV_IMAGE
+    - sh test/otbtf_keras_tutorial_test.sh
 
-.ship base:
-  extends: .docker_build_base
+
+ship_gitlab:
   stage: Ship
-  only:
-    - master
-
-deploy_cpu:
-  extends: .ship base
-  variables:
-    IMAGE_CPU: $CI_REGISTRY_PUBIMG-cpu
-    IMAGE_CPUDEV: $CI_REGISTRY_PUBIMG-cpu-dev
-    DOCKERHUB_CPU: $DOCKERHUB_IMAGE_BASE-cpu
-    DOCKERHUB_CPUDEV: $DOCKERHUB_IMAGE_BASE-cpu-dev
-    DOCKERHUB_LATEST: $DOCKERHUB_BASE:latest
+  extends: .docker_build_base
+  retry: 2
+  rules:
+    - if: $CI_COMMIT_TAG
+  before_script:
+    - echo -n "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker buildx create --name=container --driver=docker-container --use --bootstrap
   script:
-    # cpu
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_CPU --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg BZL_CONFIGS="" .
-    - docker push $IMAGE_CPU
-    # cpu-dev
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_CPUDEV --build-arg BASE_IMG=$CPU_BASE_IMG --build-arg BZL_CONFIGS="" --build-arg KEEP_SRC_OTB=true .
-    - docker push $IMAGE_CPUDEV
-    # push images on dockerhub
-    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
-    - docker tag $IMAGE_CPU $DOCKERHUB_CPU
-    - docker push $DOCKERHUB_CPU
-    - docker tag $IMAGE_CPUDEV $DOCKERHUB_CPUDEV
-    - docker push $DOCKERHUB_CPUDEV
-    # latest = cpu image
-    - docker tag $IMAGE_CPU $DOCKERHUB_LATEST
-    - docker push $DOCKERHUB_LATEST
+    # CPU
+    - >
+      docker buildx build --push -t $IMAGE_CPUDEV
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
+      --build-arg DEV_IMAGE=true
+      .
+    - >
+      docker buildx build --push -t $IMAGE_CPU
+      --cache-from type=registry,ref=$CACHE_IMAGE_CPU
+      .
+    # GPU
+    - >
+      docker buildx build --push -t $IMAGE_GPUDEV
+      --cache-from type=registry,ref=$CACHE_IMAGE_GPU
+      --cache-to type=registry,ref=$CACHE_IMAGE_GPU,mode=max
+      --build-arg WITH_CUDA=true --build-arg DEV_IMAGE=true
+      .
+    - >
+      docker buildx build --push -t $IMAGE_GPU
+      --cache-from type=registry,ref=$CACHE_IMAGE_GPU
+      --build-arg WITH_CUDA=true
+      .
 
-deploy_gpu:
-  extends: .ship base
+ship_dockerhub:
+  stage: Ship
+  extends: .docker_build_base
+  needs: ["ship_gitlab"]
+  retry: 2
+  rules:
+    # Match release tag e.g. 5.0.0, skip for rc or any suffix
+    - if: $CI_COMMIT_TAG =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
   variables:
-    IMAGE_GPU: $CI_REGISTRY_PUBIMG-gpu
-    IMAGE_GPUDEV: $CI_REGISTRY_PUBIMG-gpu-dev
-    IMAGE_GPUOPT: $CI_REGISTRY_PUBIMG-gpu-opt
-    IMAGE_GPUOPTDEV: $CI_REGISTRY_PUBIMG-gpu-opt-dev
-    DOCKERHUB_GPU: $DOCKERHUB_IMAGE_BASE-gpu
-    DOCKERHUB_GPUDEV: $DOCKERHUB_IMAGE_BASE-gpu-dev
-    DOCKERHUB_GPULATEST: $DOCKERHUB_BASE:latest-gpu
+    DOCKERHUB_BASE: mdl4eo/otbtf
+    DOCKERHUB_IMAGE_BASE: $DOCKERHUB_BASE:$OTBTF_VERSION
+  before_script:
+    - echo -n "$DOCKERHUB_TOKEN" | docker login -u mdl4eo --password-stdin
   script:
-    # gpu-opt
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUOPT --build-arg BASE_IMG=$GPU_BASE_IMG .
-    - docker push $IMAGE_GPUOPT
-    # gpu-opt-dev
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUOPTDEV --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
-    - docker push $IMAGE_GPUOPTDEV
-    # gpu-basic
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPU --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg BZL_CONFIGS="" .
-    - docker push $IMAGE_GPU
-    # gpu-basic-dev
-    - docker build --build-arg BZL_OPTIONS="--remote_cache=$BAZELCACHE" --tag $IMAGE_GPUDEV --build-arg BZL_CONFIGS="" --build-arg BASE_IMG=$GPU_BASE_IMG --build-arg KEEP_SRC_OTB=true .
-    - docker push $IMAGE_GPUDEV
-    # push gpu-basic* images on dockerhub
-    - echo -n $DOCKERHUB_TOKEN | docker login -u mdl4eo --password-stdin
-    - docker tag $IMAGE_GPU $DOCKERHUB_GPU
-    - docker push $DOCKERHUB_GPU
-    - docker tag $IMAGE_GPUDEV $DOCKERHUB_GPUDEV
-    - docker push $DOCKERHUB_GPUDEV
-    # latest-gpu = gpu image
-    - docker tag $IMAGE_GPU $DOCKERHUB_GPULATEST
-    - docker push $DOCKERHUB_GPULATEST
-
+    # CPU
+    - docker pull $IMAGE_CPU
+    - docker tag $IMAGE_CPU $DOCKERHUB_IMAGE_BASE-cpu && docker push $DOCKERHUB_IMAGE_BASE-cpu
+    - docker pull $IMAGE_CPUDEV
+    - docker tag $IMAGE_CPUDEV $DOCKERHUB_IMAGE_BASE-cpu-dev && docker push $DOCKERHUB_IMAGE_BASE-cpu-dev
+    - docker tag $IMAGE_CPU $DOCKERHUB_BASE:latest && docker push $DOCKERHUB_BASE:latest
+    # GPU
+    - docker pull $IMAGE_GPU
+    - docker tag $IMAGE_GPU $DOCKERHUB_IMAGE_BASE-gpu && docker push $DOCKERHUB_IMAGE_BASE-gpu
+    - docker pull $IMAGE_GPUDEV
+    - docker tag $IMAGE_GPUDEV $DOCKERHUB_IMAGE_BASE-gpu-dev && docker push $DOCKERHUB_IMAGE_BASE-gpu-dev
+    - docker tag $IMAGE_GPU $DOCKERHUB_BASE:latest-gpu && docker push $DOCKERHUB_BASE:latest-gpu

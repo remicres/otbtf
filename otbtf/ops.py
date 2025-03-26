@@ -2,7 +2,7 @@
 # ==========================================================================
 #
 #   Copyright 2018-2019 IRSTEA
-#   Copyright 2020-2023 INRAE
+#   Copyright 2020-2025 INRAE
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ The utils module provides some useful Tensorflow ad keras operators to build
 and train deep nets.
 """
 from typing import List, Tuple, Any
-import tensorflow as tf
+import keras
 
 
 Tensor = Any
@@ -44,5 +44,7 @@ def one_hot(labels: Tensor, nb_classes: int):
         one-hot encoded vector (shape [x, y, nb_classes])
 
     """
-    labels_xy = tf.squeeze(tf.cast(labels, tf.int32), axis=-1)  # shape [x, y]
-    return tf.one_hot(labels_xy, depth=nb_classes)  # shape [x, y, nb_classes]
+    # shape [x, y]
+    labels_xy = keras.ops.squeeze(keras.ops.cast(labels, "int32"), axis=-1)
+    # shape [x, y, nb_classes]
+    return keras.ops.one_hot(labels_xy, nb_classes)
