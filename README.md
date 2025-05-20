@@ -6,8 +6,8 @@
 <a href="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/releases">
 <img src="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/badges/release.svg">
 </a>
-<a href="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/commits/master">
-<img src="https://forgemia.inra.fr/orfeo-toolbox/otbtf/badges/master/pipeline.svg">
+<a href="https://forgemia.inra.fr/orfeo-toolbox/otbtf/-/commits/develop">
+<img src="https://forgemia.inra.fr/orfeo-toolbox/otbtf/badges/develop/pipeline.svg">
 </a>
 <img src='https://readthedocs.org/projects/otbtf/badge/?version=latest' alt='Documentation Status' />
 <a href="LICENSE">
